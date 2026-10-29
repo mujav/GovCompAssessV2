@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { AdminProvider, useAdmin } from "@/lib/admin/store";
 import { cx } from "./ui";
 
 // Several modules share a screen in the prototype; only the `primary` entry highlights.
@@ -36,7 +37,55 @@ const NAV: { heading: string; items: { href: string; label: string; primary?: bo
   },
 ];
 
+function PendingBadge() {
+  const { state } = useAdmin();
+  const n = state.changeRequests.filter((c) => c.status === "awaiting").length;
+  if (!n) return null;
+  return <span className="rounded-full bg-orange px-[7px] py-px text-[11px] font-semibold text-white">{n}</span>;
+}
+
+/** Demo persona switcher: lets one person play author and approver (four-eyes). */
+function ActingAs() {
+  const { state, user, setUser, reset } = useAdmin();
+  return (
+    <div className="mt-auto flex flex-col gap-2 rounded-[10px] border border-admin-line p-2.5">
+      <label className="flex flex-col gap-1 text-[11px] tracking-[0.08em] text-admin-muted">
+        ACTING AS (DEMO)
+        <select
+          value={user.id}
+          onChange={(e) => setUser(e.target.value)}
+          className="h-10 rounded-lg border border-admin-line bg-admin-active px-2 text-[13px] tracking-normal text-white"
+        >
+          {state.users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name} · {u.role}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="text-xs leading-4 text-admin-muted">{user.canApprove ? "Can approve configuration changes" : "Can draft and submit, not approve"}</div>
+      <button
+        type="button"
+        onClick={() => {
+          if (window.confirm("Reset all Admin Studio demo data to the starting state?")) reset();
+        }}
+        className="h-9 cursor-pointer rounded-lg border border-admin-line bg-transparent text-xs text-admin-text hover:text-white"
+      >
+        Reset demo data
+      </button>
+    </div>
+  );
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
+  return (
+    <AdminProvider>
+      <AdminFrame>{children}</AdminFrame>
+    </AdminProvider>
+  );
+}
+
+function AdminFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (
     <div className="flex min-h-screen flex-wrap bg-canvas text-ink">
@@ -68,16 +117,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   href={it.href}
                   aria-current={active ? "page" : undefined}
                   className={cx(
-                    "flex min-h-10 items-center rounded-lg px-2.5 text-sm no-underline",
+                    "flex min-h-10 items-center justify-between rounded-lg px-2.5 text-sm no-underline",
                     active ? "bg-admin-active font-semibold text-white hover:text-white" : "text-admin-text hover:bg-[#252c40] hover:text-white",
                   )}
                 >
                   {it.label}
+                  {it.href === "/admin/history" && it.primary && <PendingBadge />}
                 </Link>
               );
             })}
           </div>
         ))}
+        <ActingAs />
       </nav>
       <div className="flex min-w-0 flex-[999_1_560px] flex-col">{children}</div>
     </div>
