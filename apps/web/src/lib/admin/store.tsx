@@ -9,7 +9,7 @@ import { impactFor } from "./impact";
 import { createSeed } from "./seed";
 import type { AdminState, ChangeRequest, ConfigKind, FrameworkVersion, Versioned } from "./types";
 
-const STORAGE_KEY = "ci-admin-studio-v2";
+export const STORAGE_KEY = "ci-admin-studio-v2";
 
 type Action = { type: "replace"; state: AdminState } | { type: "mutate"; fn: (s: AdminState) => void };
 
