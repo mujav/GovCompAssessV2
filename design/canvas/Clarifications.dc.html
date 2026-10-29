@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Regulator clarifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
+<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
+<a href="Requirements.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Requirements</a>
+<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
+<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
+<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
+<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
+<a href="Clarifications.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Clarifications</a>
+<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
+<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
+<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Clarifications</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Regulator clarifications</h1></div>
+<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">New clarification</button>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<section aria-label="Clarification register" style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{list}}" as="c" hint-placeholder-count="5">
+<button type="button" onClick="{{c.pick}}" style="text-align: left; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: {{c.border}}; color: #14211C">
+<span style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600">{{c.id}}</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: {{c.sBg}}; color: {{c.sFg}}">{{c.status}}</span></span>
+<span style="font-size: 14px; line-height: 20px; font-weight: 600">{{c.q}}</span>
+<span style="font-size: 12px; color: #56625C">{{c.meta}}</span>
+</button>
+</sc-for>
+</section>
+
+<section aria-label="Clarification detail" style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
+<div style="padding: 18px 20px; border-bottom: 1px solid #EEF0EE; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">CL-014</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #E8ECF3; color: #3E4B63">ANSWERED · NOT YET APPLIED</span></div>
+<h2 style="margin: 0; font-size: 18px; line-height: 26px">Does an implementation sample from the previous cycle satisfy integration requirements if the systems are unchanged?</h2>
+<div style="font-size: 12px; color: #56625C">Raised by Faisal K. (IT Operations) · submitted to DGA 11 Oct via portal inquiry · response 24 Oct</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0; border-bottom: 1px solid #EEF0EE">
+<div style="padding: 16px 20px; border-right: 1px solid #EEF0EE; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #56625C">AUTHORITY RESPONSE · VERBATIM</div>
+<div lang="ar" dir="rtl" style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px">يجب أن يكون النموذج التطبيقي من الدورة الحالية، ولا يُقبل نموذج الدورة السابقة حتى في حال عدم تغيّر الأنظمة.</div>
+<div style="font-size: 12px; color: #56625C">Source: DGA portal response #R-5521 · attachment kept</div>
+</div>
+<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #0E5A45">FINAL INTERPRETATION · APPROVED</div>
+<div style="font-size: 14px; line-height: 22px">Implementation samples must be dated within the current cycle. Prior-cycle samples are not acceptable even for unchanged systems.</div>
+<div style="font-size: 12px; color: #56625C">Recorded by Noura A. · approved by Compliance Lead · 25 Oct</div>
+</div>
+</div>
+<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h3 style="margin: 0; font-size: 15px">Affected assessments · 6</h3><span style="font-size: 12px; color: #56625C">Found by matching the "implementation sample" evidence rule</span></div>
+<div style="overflow-x: auto">
+<div role="table" aria-label="Affected assessments" style="min-width: 620px; font-size: 13px">
+<div role="row" style="display: grid; grid-template-columns: 0.8fr 2fr 1fr 1.3fr; gap: 10px; padding: 8px 0; color: #56625C; font-size: 12px; font-weight: 600; border-bottom: 1px solid #DCE2DE">
+<span role="columnheader">Requirement</span><span role="columnheader">Why affected</span><span role="columnheader">Acceptance now</span><span role="columnheader">On apply</span>
+</div>
+<sc-for list="{{affected}}" as="a" hint-placeholder-count="6">
+<div role="row" style="display: grid; grid-template-columns: 0.8fr 2fr 1fr 1.3fr; gap: 10px; padding: 8px 0; align-items: center; border-bottom: 1px solid #EEF0EE">
+<span role="cell"><a href="Requirement-Detail.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600">{{a.code}}</a></span>
+<span role="cell" style="line-height: 18px">{{a.why}}</span>
+<span role="cell" style="font-size: 12px">{{a.acc}}</span>
+<span role="cell" style="font-size: 12px; font-weight: 600; color: {{a.color}}">{{a.effect}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="padding: 14px 20px; border-top: 1px solid #EEF0EE; background: #FAFBFA; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center">
+<span style="font-size: 12px; color: #56625C; flex: 1 1 280px; line-height: 18px">Applying reopens 4 accepted assessments and creates update requests for their owners. Historical results keep their original configuration version.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<a href="Admin-Frameworks.dc.html" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD3CE; color: #14211C; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center">Propose guidance change</a>
+<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Preview and apply</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    const S = { ans: ['Answered', '#E8ECF3', '#3E4B63'], sub: ['Awaiting DGA', '#FBEFD9', '#8A4B00'], draft: ['Draft', '#ECEEEC', '#33403A'], done: ['Applied', '#E3F1EA', '#11603F'] };
+    const raw = [
+      ['CL-014', 'ans', 'Is a prior-cycle sample acceptable for unchanged integrations?', '6 affected · answered 24 Oct'],
+      ['CL-015', 'sub', 'Can a staging-environment transaction count as a sample?', '2 affected · submitted 20 Oct · 8 days'],
+      ['CL-016', 'draft', 'Does the shared-services hosting arrangement make 5.7.1 not applicable?', '1 affected · AI-drafted question'],
+      ['CL-012', 'done', 'Which approval level is required for the data policy?', '3 affected · applied 02 Oct'],
+      ['CL-011', 'done', 'Reporting period for quarterly committee minutes', '4 affected · applied 21 Sep']
+    ];
+    const list = raw.map((x, i) => ({ id: x[0], status: S[x[1]][0], sBg: S[x[1]][1], sFg: S[x[1]][2], q: x[2], meta: x[3], border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i }) }));
+    const af = (code, why, acc, effect, reopen) => ({ code, why, acc, effect, color: reopen ? '#A3261B' : '#33403A' });
+    return {
+      list,
+      affected: [
+        af('5.11.2-2', 'Sample EV-1988 dated Mar 2025', 'Pending L1', 'Add finding to review', false),
+        af('5.11.1-1', 'Accepted with 2025 sample EV-1430', 'Accepted', 'Reopen · request update', true),
+        af('5.3.1-1', 'Repository screenshot from 2025', 'Pending L2', 'Add finding to review', false),
+        af('3.2.4-1', 'KPI sample covers 2025 only', 'Accepted', 'Reopen · request update', true),
+        af('6.1.2-2', 'Portal transaction sample from 2025', 'Accepted', 'Reopen · request update', true),
+        af('6.2.1-3', 'Feedback sample, mixed periods', 'Accepted', 'Reopen · request update', true)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Acceptance workflow designer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Admin Studio" style="flex: 1 1 240px; background: #1A1F2E; color: #E3E6EF; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #B4580A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">AS</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Admin Studio</div><div style="font-size: 12px; color: #A9B0C4">Demo Entity · Sandbox</div></div></div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 13px; border: 1px solid #2E3548">← Back to workspace</a>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">FRAMEWORK PACKAGE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Framework Builder</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Requirement schema</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Criteria &amp; evidence rules</a>
+<a href="Admin-Scoring.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Scoring &amp; maturity</a>
+<a href="Admin-Acceptance.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; background: #343C55; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Workflow &amp; acceptance</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">OPERATIONS</div>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Actions &amp; automation</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Metrics &amp; dashboards</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Reports &amp; notifications</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">PLATFORM</div>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Organization &amp; roles</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">AI configuration</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Terminology &amp; localization</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Configuration history</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Admin Studio / Acceptance policies</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Acceptance workflow designer</h1></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">New policy</button>
+<a href="Admin-History.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Submit for approval</a>
+</div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<section aria-label="Policies" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px">
+<sc-for list="{{policies}}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{p.pick}}" style="text-align: left; font: inherit; cursor: pointer; background: #FFFFFF; border: {{p.border}}; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; color: #14211C">
+<span style="display: flex; justify-content: space-between; gap: 8px"><b style="font-size: 13px; font-family: 'IBM Plex Mono', monospace">{{p.id}}</b><span style="font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: {{p.sBg}}; color: {{p.sFg}}">{{p.status}}</span></span>
+<span style="font-size: 13px; font-weight: 600">{{p.name}}</span>
+<span style="font-size: 12px; color: #56625C">{{p.scope}}</span>
+</button>
+</sc-for>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 999 1 600px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 17px">AP-QIYAS-CRIT · v2 draft</h2><span style="font-size: 12px; color: #56625C">Scope: Qiyas 2026 · risk band = critical · 23 requirements</span></div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
+<div style="flex: 0 0 auto; display: flex; align-items: center; padding: 10px 14px; border-radius: 10px; background: #EEEDFB; color: #3F37A8; font-size: 13px; font-weight: 600">AI assessment<br>recommendation only</div>
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="3">
+<div style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 2px solid {{s.border}}; border-radius: 12px; background: #FFFFFF">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #0E5A45">STAGE {{s.n}}</span><span style="font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid #CBD3CE; color: #33403A">{{s.mode}}</span></div>
+<b style="font-size: 14px; line-height: 20px">{{s.name}}</b>
+<div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 3px 8px; font-size: 12px; line-height: 17px">
+<span style="color: #56625C">Reviewers</span><span>{{s.who}}</span>
+<span style="color: #56625C">Approvals</span><span>{{s.min}}</span>
+<span style="color: #56625C">On reject</span><span>{{s.reject}}</span>
+<span style="color: #56625C">SLA</span><span>{{s.sla}}</span>
+<span style="color: #56625C">Independent</span><span>{{s.indep}}</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 4px">
+<sc-for list="{{s.rights}}" as="r" hint-placeholder-count="3"><span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #F1F4F2; color: #33403A">{{r}}</span></sc-for>
+</div>
+</div>
+</sc-for>
+<button type="button" style="flex: 0 0 auto; min-width: 120px; border: 1px dashed #7D8C85; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #33403A">+ Add stage</button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-size: 13px">
+<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
+<legend style="font-weight: 600; padding: 0 4px">Override governance</legend>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Rationale and reason code required</label>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Material override adds senior approval</label>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" style="width: 18px; height: 18px; accent-color: #0E5A45">Allow bulk approval (off for critical)</label>
+</fieldset>
+<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
+<legend style="font-weight: 600; padding: 0 4px">Reopen when</legend>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">New or replaced evidence</label>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Authority clarification applied</label>
+<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Material configuration change</label>
+</fieldset>
+<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
+<legend style="font-weight: 600; padding: 0 4px">Finalization</legend>
+<div style="line-height: 20px">Result becomes official, scored and submittable when <b>stage 3 approves</b> and no blocking rejection exists.</div>
+<div style="line-height: 20px; color: #56625C">Delegation allowed for absence; delegate identity is recorded.</div>
+</fieldset>
+</div>
+</section>
+
+<aside style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 2px solid #3F6FB5; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #2F5893">SIMULATE</div>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600">Sample record<select style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #FFFFFF"><option>5.11.2-2 · AI Non-compliant · reviewer overrides to Partial</option><option>1.1.1-1 · AI Compliant · no override</option></select></label>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19px">
+<li style="padding: 8px 10px; border-radius: 8px; background: #EEEDFB; color: #3F37A8">AI Assessed → routed to stage 1 (critical band)</li>
+<li style="padding: 8px 10px; border-radius: 8px; background: #F7F8F6">Stage 1: SME A approves · SME B overrides to Partial</li>
+<li style="padding: 8px 10px; border-radius: 8px; background: #FBEFD9; color: #6B3F05">Override is material → Override Pending Approval</li>
+<li style="padding: 8px 10px; border-radius: 8px; background: #F7F8F6">Stage 2: Control owner approves override</li>
+<li style="padding: 8px 10px; border-radius: 8px; background: #E3F1EA; color: #11603F">Stage 3: Compliance Lead → Accepted (Partial)</li>
+</ol>
+<div style="font-size: 12px; line-height: 18px; color: #56625C">Checks passed: no person fills two stages · AI never satisfies a human stage · SLA chain totals 9 working days.</div>
+</aside>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 1 }; }
+  renderVals() {
+    const S = { pub: ['PUBLISHED', '#E3F1EA', '#11603F'], draft: ['DRAFT', '#FBEFD9', '#8A4B00'] };
+    const raw = [
+      ['AP-QIYAS-STD v2', 'pub', 'Standard entity', 'Qiyas 2026 · default'],
+      ['AP-QIYAS-CRIT v2', 'draft', 'Critical requirements', 'Qiyas 2026 · risk = critical'],
+      ['AP-LOW-SAMPLED v1', 'pub', 'Low risk, 10% sampled QA', 'Qiyas 2026 · risk = low'],
+      ['AP-NCA-SEQ v1', 'pub', 'Two sequential reviewers', 'NCA ECC 2024 · default']
+    ];
+    const policies = raw.map((x, i) => ({ id: x[0], status: S[x[1]][0], sBg: S[x[1]][1], sFg: S[x[1]][2], name: x[2], scope: x[3], border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i }) }));
+    return {
+      policies,
+      stages: [
+        { n: 1, mode: 'Parallel', name: 'Two domain SMEs', who: 'Pool: Qiyas SMEs', min: '2 of 2', reject: 'Return to evidence owner', sla: '3 working days', indep: 'Not owner or submitter', rights: ['Approve', 'Override', 'Return', 'Clarify'], border: '#0E5A45' },
+        { n: 2, mode: 'Single', name: 'Control owner', who: 'Role: control owner', min: '1', reject: 'Back to stage 1', sla: '3 working days', indep: 'Not a stage 1 reviewer', rights: ['Approve', 'Reject', 'Escalate'], border: '#0E5A45' },
+        { n: 3, mode: 'Final', name: 'Compliance Lead', who: 'Named: Huda S.', min: '1', reject: 'Rejected Final', sla: '3 working days', indep: 'Not stages 1–2', rights: ['Accept', 'Reject final', 'Return'], border: '#0A3F31' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

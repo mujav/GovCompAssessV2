@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Requirements register</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
+<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
+<a href="Requirements.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Requirements</a>
+<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
+<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
+<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
+<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
+<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
+<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
+<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
+<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Requirements</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Requirements register</h1></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Export</button>
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C" lang="ar">العربية</button>
+<div style="width: 44px; height: 44px; border-radius: 50%; background: #DCEDE5; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px" title="Noura A. · Assessment Manager">NA</div>
+</div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div role="tablist" aria-label="Saved views" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #DCE2DE">
+<button type="button" role="tab" aria-selected="true" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid #0E5A45; background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #0E5A45">All <span style="color: #56625C; font-weight: 500">350</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">At risk <span style="color: #56625C">27</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Awaiting acceptance <span style="color: #56625C">76</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">New or changed vs 2025 <span style="color: #56625C">41</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Unassigned <span style="color: #A3261B; font-weight: 600">5</span></button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<label style="display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter by code or text</span><input type="search" placeholder="Code or text, Arabic or English" style="height: 40px; width: 260px; max-width: 100%; box-sizing: border-box; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 14px; background: #FFFFFF"></label>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Domain ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Department ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #0E5A45; border-radius: 999px; background: #E2EFE9; font: inherit; font-size: 13px; cursor: pointer; color: #0E5A45; font-weight: 600">Compliance: any ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Work status ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Acceptance stage ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Evidence health ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Due ▾</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: 12px; color: #33403A; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 10px; padding: 10px 14px">
+<b>Two independent dimensions</b>
+<span><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; background: #E3F1EA; color: #11603F; font-weight: 600">Filled pill</span> = compliance status (official once accepted)</span>
+<span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border-radius: 6px; border: 1px solid #CBD3CE"><span style="width: 6px; height: 6px; border-radius: 50%; background: #3F6FB5"></span>Outlined tag</span></span> = work status</span>
+<span><span style="color: #3F37A8; font-weight: 600">AI · Partial 0.78</span> = recommendation not yet accepted</span>
+</div>
+
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+<div role="region" aria-label="Bulk actions" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; background: #0F1F1A; color: #FFFFFF; border-radius: 10px; padding: 8px 8px 8px 16px">
+<span style="font-size: 14px"><b>{{selCount}} selected</b> · actions open as a preview before anything is sent</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<a href="Action-Center.dc.html" style="height: 40px; padding: 0 12px; border-radius: 8px; background: #24493D; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Request evidence</a>
+<a href="Action-Center.dc.html" style="height: 40px; padding: 0 12px; border-radius: 8px; background: #24493D; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Send reminder</a>
+<button type="button" style="height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: #24493D; color: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer">Assign owner</button>
+<button type="button" disabled="disabled" title="Bulk approval is disabled for high-risk items by policy" style="height: 40px; padding: 0 12px; border: 1px dashed #5E7A6F; border-radius: 8px; background: transparent; color: #9FB3AA; font: inherit; font-size: 13px">Bulk approve · blocked by policy</button>
+</div>
+</div>
+</sc-if>
+
+<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 12px; overflow-x: auto">
+<div role="table" aria-label="Requirements" style="min-width: 1180px; font-size: 13px">
+<div role="row" style="display: grid; grid-template-columns: 44px 0.8fr 2.6fr 1.4fr 1.3fr 1.3fr 1.1fr 0.6fr 0.6fr; gap: 12px; align-items: center; padding: 10px 12px; color: #56625C; font-size: 12px; font-weight: 600; border-bottom: 1px solid #DCE2DE; background: #F7F8F6">
+<span role="columnheader"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Select</span></span><span role="columnheader">Code</span><span role="columnheader">Requirement</span><span role="columnheader">Owner</span><span role="columnheader">Compliance</span><span role="columnheader">Work status</span><span role="columnheader">Acceptance</span><span role="columnheader">Evidence</span><span role="columnheader">Due</span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+<div role="row" style="display: grid; grid-template-columns: 44px 0.8fr 2.6fr 1.4fr 1.3fr 1.3fr 1.1fr 0.6fr 0.6fr; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #EEF0EE; background: {{r.rowBg}}">
+<span role="cell"><input type="checkbox" checked="{{r.sel}}" onChange="{{r.toggle}}" aria-label="Select {{r.code}}" style="width: 20px; height: 20px; margin: 12px; accent-color: #0E5A45"></span>
+<span role="cell"><a href="Requirement-Detail.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">{{r.code}}</a></span>
+<span role="cell" style="line-height: 18px">{{r.title}}<br><span style="font-size: 12px; color: #56625C">{{r.domain}} · weight {{r.weight}}</span></span>
+<span role="cell" style="line-height: 18px; color: {{r.ownerColor}}">{{r.dept}}<br><span style="font-size: 12px; color: #56625C">{{r.spoc}}</span></span>
+<span role="cell" style="line-height: 20px"><span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{r.cBg}}; color: {{r.cFg}}">{{r.comp}}</span><br><span style="font-size: 12px; color: #3F37A8; font-weight: 600">{{r.ai}}</span></span>
+<span role="cell"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; font-size: 12px; border: 1px solid #CBD3CE; color: #33403A"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{r.dot}}"></span>{{r.work}}</span><br><span style="font-size: 11px; color: #56625C">{{r.workNote}}</span></span>
+<span role="cell" style="font-size: 12px; color: #33403A">{{r.acc}}</span>
+<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{r.evColor}}">{{r.ev}}</span>
+<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{r.due}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: #56625C">
+<span>Showing 1–12 of 350 · sorted by score impact, then due date</span>
+<div style="display: flex; gap: 6px">
+<button type="button" style="height: 40px; min-width: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Previous</button>
+<button type="button" aria-current="page" style="height: 40px; min-width: 40px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 13px; cursor: pointer; color: #FFFFFF">1</button>
+<button type="button" style="height: 40px; min-width: 40px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">2</button>
+<button type="button" style="height: 40px; min-width: 40px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">3</button>
+<button type="button" style="height: 40px; min-width: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Next</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: { 0: true, 1: true, 3: true } }; }
+  renderVals() {
+    const C = {
+      comp: ['#E3F1EA', '#11603F', 'Compliant'], part: ['#FBEFD9', '#8A4B00', 'Partial'], non: ['#FBE4E1', '#A3261B', 'Non-compliant'],
+      nas: ['#ECEEEC', '#4A5550', 'Not assessed'], na: ['#E8ECF3', '#3E4B63', 'Not applicable']
+    };
+    const D = { none: '#A3261B', update: '#C27B12', prog: '#3F6FB5', returned: '#C27B12', review: '#3F37A8', ready: '#2E8B6A', sub: '#0E5A45', obs: '#A3261B', closed: '#7D8C85', start: '#B9C2BD', evsub: '#3F6FB5' };
+    const raw = [
+      ['5.11.2-2', 'Integrated systems demonstrate end-to-end data exchange', 'Technology & integration', 'High', 'IT Operations', 'Faisal K.', 'nas', 'AI · Non-compliant 0.82', 'No update', 'none', '12 days silent', 'Pending L1', '1/4', '04 Nov'],
+      ['3.4.1-1', 'Published catalogue of digital services', 'Digital services', 'High', 'Digital Transformation', 'Reem S.', 'part', '', 'Update required', 'update', 'Wrong period', 'Accepted', '2/3', '03 Nov'],
+      ['2.2.3-4', 'Data governance committee meets quarterly', 'Data & analytics', 'Med', 'Strategy & Performance', 'Omar H.', 'nas', 'AI · Partial 0.64 · low conf.', 'In progress', 'prog', '', 'AI only', '2/4', '05 Nov'],
+      ['4.1.2-1', 'Approved digital capability plan', 'Human capital', 'High', 'Human Capital', 'Lama T.', 'non', '', 'Returned for correction', 'returned', 'Loop 3', 'Returned', '0/2', '01 Nov'],
+      ['6.2.1-3', 'Beneficiary feedback closes the loop', 'Beneficiary experience', 'Med', 'Customer Experience', 'Hind M.', 'part', 'AI · Compliant 0.91', 'Under review', 'review', '', 'Override pending', '3/3', '06 Nov'],
+      ['3.2.4-1', 'Service-level KPIs published', 'Digital services', 'Med', 'Digital Transformation', 'Reem S.', 'comp', '', 'Update required', 'update', 'Compliant in 2025, needs 2026 data', 'Reopened', '1/2', '08 Nov'],
+      ['1.1.1-1', 'Digital transformation strategy approved', 'Strategy & governance', 'High', 'Strategy & Performance', 'Omar H.', 'comp', '', 'Ready for submission', 'ready', '', 'Accepted', '2/2', '—'],
+      ['1.3.2-2', 'Digital governance committee charter', 'Strategy & governance', 'Med', 'Legal & Governance', 'Sara N.', 'comp', '', 'Submitted', 'sub', '', 'Accepted', '1/1', '—'],
+      ['5.3.1-1', 'Enterprise architecture repository maintained', 'Technology & integration', 'Med', 'IT Operations', 'Faisal K.', 'part', 'AI · Partial 0.88', 'Evidence submitted', 'evsub', '', 'Pending L2', '2/3', '07 Nov'],
+      ['2.1.1-1', 'Data management policy approved and published', 'Data & analytics', 'High', 'Strategy & Performance', 'Omar H.', 'comp', '', 'DGA observation received', 'obs', 'OBS-2025-17', 'Reopened', '2/2', '09 Nov'],
+      ['5.7.1-2', 'Shared-services hosting arrangement', 'Technology & integration', 'Low', 'IT Operations', 'Faisal K.', 'na', '', 'Closed', 'closed', 'N/A approved', 'Accepted', '—', '—'],
+      ['4.3.1-1', 'Digital skills training completion tracked', 'Human capital', 'Med', 'Unassigned', 'Ownership SLA breached', 'nas', '', 'Not started', 'start', '', '—', '0/2', '10 Nov']
+    ];
+    const sel = this.state.sel;
+    const rows = raw.map((x, i) => ({
+      code: x[0], title: x[1], domain: x[2], weight: x[3], dept: x[4], spoc: x[5], ownerColor: x[4] === 'Unassigned' ? '#A3261B' : '#14211C',
+      comp: C[x[6]][2], cBg: C[x[6]][0], cFg: C[x[6]][1], ai: x[7], work: x[8], dot: D[x[9]], workNote: x[10], acc: x[11], ev: x[12],
+      evColor: x[12].startsWith('0/') ? '#A3261B' : '#14211C', due: x[13], sel: !!sel[i], rowBg: sel[i] ? '#F2F8F5' : '#FFFFFF',
+      toggle: () => this.setState({ sel: Object.assign({}, sel, { [i]: !sel[i] }) })
+    }));
+    const selCount = Object.values(sel).filter(Boolean).length;
+    return { rows, selCount, hasSel: selCount > 0 };
+  }
+}
+</script>
+</body>
+</html>

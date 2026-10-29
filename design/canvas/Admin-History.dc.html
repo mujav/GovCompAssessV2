@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Configuration history and approval</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Admin Studio" style="flex: 1 1 240px; background: #1A1F2E; color: #E3E6EF; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #B4580A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">AS</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Admin Studio</div><div style="font-size: 12px; color: #A9B0C4">Demo Entity · Sandbox</div></div></div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 13px; border: 1px solid #2E3548">← Back to workspace</a>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">FRAMEWORK PACKAGE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Framework Builder</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Requirement schema</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Criteria &amp; evidence rules</a>
+<a href="Admin-Scoring.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Scoring &amp; maturity</a>
+<a href="Admin-Acceptance.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Workflow &amp; acceptance</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">OPERATIONS</div>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Actions &amp; automation</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Metrics &amp; dashboards</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Reports &amp; notifications</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">PLATFORM</div>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Organization &amp; roles</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">AI configuration</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Terminology &amp; localization</a>
+<a href="Admin-History.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; background: #343C55; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Configuration history</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Admin Studio / Configuration history</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Configuration history &amp; approval</h1></div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #56625C">Signed in as <b style="color: #14211C">Huda S. · Compliance Lead</b></div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<section aria-label="Change requests" style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{crs}}" as="c" hint-placeholder-count="5">
+<button type="button" onClick="{{c.pick}}" style="text-align: left; font: inherit; cursor: pointer; background: #FFFFFF; border: {{c.border}}; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; color: #14211C">
+<span style="display: flex; justify-content: space-between; gap: 8px"><b style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{c.id}}</b><span style="font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: {{c.sBg}}; color: {{c.sFg}}">{{c.status}}</span></span>
+<span style="font-size: 13px; font-weight: 600; line-height: 18px">{{c.title}}</span>
+<span style="font-size: 12px; color: #56625C">{{c.meta}}</span>
+</button>
+</sc-for>
+</section>
+
+<section style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
+<div style="padding: 16px 20px; border-bottom: 1px solid #EEF0EE; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<div><h2 style="margin: 0; font-size: 17px">CR-041 · Scoring scheme QY-2026 v3 → v4</h2><div style="font-size: 12px; color: #56625C">Author Majed F. (Framework Admin) · submitted 27 Oct 16:20 · validated in sandbox</div></div>
+<div role="group" aria-label="Environment promotion" style="display: flex; gap: 4px; align-items: center; font-size: 12px">
+<span style="padding: 4px 8px; border-radius: 6px; background: #E3F1EA; color: #11603F; font-weight: 600">dev ✓</span><span aria-hidden="true">→</span>
+<span style="padding: 4px 8px; border-radius: 6px; background: #E3F1EA; color: #11603F; font-weight: 600">test ✓</span><span aria-hidden="true">→</span>
+<span style="padding: 4px 8px; border-radius: 6px; border: 1px solid #CBD3CE">prod · on approval</span>
+</div>
+</div>
+<div role="table" aria-label="Changes between versions" style="font-size: 13px">
+<div role="row" style="display: grid; grid-template-columns: 1.2fr 1.2fr 1.2fr; gap: 0; color: #56625C; font-size: 12px; font-weight: 600; background: #F7F8F6; border-bottom: 1px solid #DCE2DE">
+<span role="columnheader" style="padding: 10px 16px">Setting</span><span role="columnheader" style="padding: 10px 16px">v3 · live</span><span role="columnheader" style="padding: 10px 16px">v4 · proposed</span>
+</div>
+<sc-for list="{{diff}}" as="d" hint-placeholder-count="4">
+<div role="row" style="display: grid; grid-template-columns: 1.2fr 1.2fr 1.2fr; gap: 0; border-bottom: 1px solid #EEF0EE">
+<span role="cell" style="padding: 10px 16px; font-weight: 600">{{d.k}}</span>
+<span role="cell" style="padding: 10px 16px; background: {{d.oldBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 18px">{{d.old}}</span>
+<span role="cell" style="padding: 10px 16px; background: {{d.newBg}}; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 18px">{{d.new}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start">
+<div style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
+<h3 style="margin: 0; font-size: 15px">Impact analysis</h3>
+<div><b>14</b> requirements change result · <b>2</b> domains</div>
+<div>Readiness <span style="font-family: 'IBM Plex Mono', monospace">72.4% → 70.9%</span></div>
+<div><b>9</b> accepted assessments keep v3 until re-accepted</div>
+<div>Dependencies: 3 dashboards, 1 report template, ESC-02 (uses "critical")</div>
+</div>
+<div style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 2px solid #0E5A45; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 15px">Your approval</h3>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 19px">
+<div style="color: #11603F">✓ You are not the author (four-eyes)</div>
+<div style="color: #11603F">✓ You hold "approve scoring change"</div>
+<div style="color: #8A4B00">! Author holds override rights on 9 affected requirements. Approving will suspend those rights for this cycle.</div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600">Comment (required)<textarea rows="3" style="border: 1px solid #CBD3CE; border-radius: 8px; padding: 10px; font: inherit; font-size: 14px; font-weight: 400; resize: vertical">Aligned with DGA scoring note 2026-03; effective from Cycle 2.</textarea></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600">Effective from<input type="text" value="Qiyas 2026 · Cycle 2 · 01 Dec 2026" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #A3261B">Reject</button>
+<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Approve and publish v4</button>
+</div>
+</div>
+</div>
+
+<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 15px">Audit trail · immutable</h3>
+<sc-for list="{{audit}}" as="a" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 130px 160px minmax(0, 1fr); gap: 10px; font-size: 12px; line-height: 18px; padding: 6px 0; border-top: 1px solid #EEF0EE">
+<span style="font-family: 'IBM Plex Mono', monospace; color: #56625C">{{a.t}}</span><span><b>{{a.who}}</b></span><span>{{a.e}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    const S = { wait: ['AWAITING YOU', '#FBEFD9', '#8A4B00'], val: ['VALIDATING', '#E8ECF3', '#3E4B63'], pub: ['PUBLISHED', '#E3F1EA', '#11603F'], rej: ['REJECTED', '#FBE4E1', '#A3261B'] };
+    const raw = [
+      ['CR-041', 'wait', 'Scoring scheme QY-2026 v3 → v4', 'Majed F. · 27 Oct · material'],
+      ['CR-040', 'wait', 'Acceptance policy AP-QIYAS-CRIT v2', 'Majed F. · 27 Oct · material'],
+      ['CR-039', 'val', 'Rule ESC-02 v3 adds priority condition', 'Noura A. · 28 Oct'],
+      ['CR-038', 'pub', 'Arabic labels for hierarchy levels', 'Sara N. · 21 Oct · cosmetic'],
+      ['CR-036', 'rej', 'Allow bulk approval for medium risk', 'Noura A. · 14 Oct · rejected by Huda S.']
+    ];
+    const crs = raw.map((x, i) => ({ id: x[0], status: S[x[1]][0], sBg: S[x[1]][1], sFg: S[x[1]][2], title: x[2], meta: x[3], border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i }) }));
+    const d = (k, o, n, changed) => ({ k, old: o, new: n, oldBg: changed ? '#FDF1EF' : '#FFFFFF', newBg: changed ? '#EEF7F2' : '#FFFFFF' });
+    return {
+      crs,
+      diff: [
+        d('Blocking rule SR-03', 'mandatory fail → cap at Partial', 'mandatory fail → cap at Non-compliant', true),
+        d('Weight · standard 5.11', '1.0', '1.5', true),
+        d('Weight · standard 4.1', '1.0', '1.5', true),
+        d('N/A treatment', 'exclude from denominator', 'exclude from denominator', false),
+        d('Thresholds', 'green ≥ 85 · amber ≥ 60', 'green ≥ 85 · amber ≥ 60', false),
+        d('Override second approval', 'Δ ≥ 0.5 pts', 'Δ ≥ 0.5 pts', false)
+      ],
+      audit: [
+        { t: '28 Oct 09:12', who: 'System', e: 'Impact analysis recalculated on live data: 14 requirements, 2 domains.' },
+        { t: '27 Oct 16:20', who: 'Majed F.', e: 'Submitted CR-041 for approval (validation passed, 0 errors).' },
+        { t: '27 Oct 15:58', who: 'System', e: 'Sandbox test ran v4 against 350 requirements; results stored as snapshot SNP-77.' },
+        { t: '27 Oct 11:04', who: 'Majed F.', e: 'Draft v4 created from published v3.' },
+        { t: '02 Sep 08:30', who: 'Huda S.', e: 'Approved and published v3 (CR-022), effective Cycle 1.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

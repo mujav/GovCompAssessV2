@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Action Center</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
+<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
+<a href="Requirements.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Requirements</a>
+<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
+<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
+<a href="Action-Center.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
+<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
+<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
+<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
+<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
+<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Action Center</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Action Center</h1></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Log interaction</button>
+<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">New action ▾</button>
+</div>
+</header>
+
+<main style="padding: 20px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div role="tablist" aria-label="Action views" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #DCE2DE">
+<button type="button" role="tab" aria-selected="true" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid #0E5A45; background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #0E5A45">Recommended <span style="color: #56625C; font-weight: 500">9</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Awaiting my approval <span style="color: #56625C">4</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Open <span style="color: #56625C">141</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Overdue <span style="color: #A3261B; font-weight: 600">23</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Sent &amp; interactions</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section aria-label="Recommended actions" style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{actions}}" as="a" hint-placeholder-count="7">
+<button type="button" onClick="{{a.pick}}" style="text-align: left; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: {{a.border}}; color: #14211C">
+<span style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 6px; background: {{a.tBg}}; color: {{a.tFg}}">{{a.type}}</span>
+<span style="font-size: 11px; padding: 2px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A">{{a.trigger}}</span>
+<span style="font-size: 11px; color: #56625C; margin-left: auto">{{a.due}}</span>
+</span>
+<span style="font-size: 14px; line-height: 20px; font-weight: 600">{{a.title}}</span>
+<span style="font-size: 12px; line-height: 18px; color: #56625C">{{a.meta}}</span>
+</button>
+</sc-for>
+</section>
+
+<section aria-label="Draft preview" style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column">
+<div style="padding: 16px 20px; border-bottom: 1px solid #EEF0EE; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 6px; background: #FBE4E1; color: #A3261B">ESCALATE</span><span style="font-size: 12px; color: #3F37A8; font-weight: 600">Drafted by AI · needs your approval</span></div>
+<h2 style="margin: 0; font-size: 18px; line-height: 26px">Escalation pack · Human Capital overdue remediation</h2>
+<div style="font-size: 12px; color: #56625C">Rule ESC-02 matched 7 actions: overdue, no update, 2 reminders each · ACT-118, ACT-121, ACT-124 +4</div>
+</div>
+<div role="group" aria-label="Draft language" style="display: flex; border: 1px solid #CBD3CE; border-radius: 8px; overflow: hidden">
+<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 40px; padding: 0 14px; border: 0; font: inherit; font-size: 13px; cursor: pointer; background: {{enBg}}; color: {{enFg}}">English</button>
+<button type="button" onClick="{{toAr}}" aria-pressed="{{isAr}}" lang="ar" style="height: 40px; padding: 0 14px; border: 0; font: inherit; font-size: 13px; cursor: pointer; background: {{arBg}}; color: {{arFg}}">العربية</button>
+</div>
+</div>
+
+<div style="padding: 16px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 13px; border-bottom: 1px solid #EEF0EE">
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">To<input type="text" value="Executive Director, Human Capital" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Copy<input type="text" value="Assessment Manager · Department SPOC" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Decision requested by<input type="text" value="03 Nov 2026" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
+</div>
+
+<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{isEn}}" hint-placeholder-val="{{ true }}">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Message<textarea rows="9" style="border: 1px solid #CBD3CE; border-radius: 8px; padding: 12px; font: inherit; font-size: 14px; line-height: 22px; font-weight: 400; resize: vertical">Seven Qiyas remediation actions owned by Human Capital are overdue by an average of 12 days, with no update after two reminders.
+
+Together they affect 4 requirements in the Human capital domain (projected impact −3.1 points) and two of them block submission on 20 Nov.
+
+Decision requested: nominate an accountable owner for ACT-118 and ACT-121 and confirm revised dates by 03 Nov, or approve converting 4.1.2 into a funded initiative.</textarea></label>
+</sc-if>
+<sc-if value="{{isAr}}" hint-placeholder-val="{{ false }}">
+<label lang="ar" dir="rtl" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans Arabic', sans-serif">نص الرسالة<textarea rows="9" dir="rtl" style="border: 1px solid #CBD3CE; border-radius: 8px; padding: 12px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px; font-weight: 400; resize: vertical">تأخرت سبعة إجراءات تصحيحية لمؤشر قياس تابعة لإدارة رأس المال البشري بمتوسط ١٢ يومًا دون أي تحديث بعد تذكيرين.
+
+تؤثر هذه الإجراءات على ٤ متطلبات في محور رأس المال البشري (أثر متوقع −٣٫١ نقطة)، ويعيق اثنان منها التسليم في ٢٠ نوفمبر.
+
+القرار المطلوب: تسمية مسؤول للإجراءين ACT-118 و ACT-121 وتأكيد المواعيد المعدّلة قبل ٣ نوفمبر.</textarea></label>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 6px; background: #F7F8F6; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 20px">
+<b>Attached pack (generated from records)</b>
+<span>• Action history: created 18 Sep, reminders 14 Oct and 25 Oct, no response logged</span>
+<span>• Impact: 4 requirements, −3.1 pts, 2 submission blockers (calculation v3, 09:40)</span>
+<span>• Interaction log: 2 meetings, 1 attended</span>
+</div>
+</div>
+
+<div style="margin-top: auto; padding: 14px 20px; border-top: 1px solid #EEF0EE; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; background: #FAFBFA">
+<span style="font-size: 12px; color: #56625C; line-height: 18px; flex: 1 1 260px">You can approve: Assessment Manager holds "approve escalation". Nothing is sent until you confirm; the send is logged as an interaction.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Dismiss with reason</button>
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Schedule review instead</button>
+<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Approve and send</button>
+</div>
+</div>
+</section>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px">Start an action</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{catalog}}" as="c" hint-placeholder-count="12">
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">{{c}}</button>
+</sc-for>
+</div>
+<div style="font-size: 12px; color: #56625C">Catalog, required fields and approval rules come from Admin Studio › Action Catalog. Buttons you cannot use are hidden by role.</div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0, lang: 'en' }; }
+  renderVals() {
+    const T = {
+      esc: ['ESCALATE', '#FBE4E1', '#A3261B'], req: ['REQUEST EVIDENCE', '#E2EFE9', '#0E5A45'], upd: ['REQUEST UPDATE', '#FBEFD9', '#8A4B00'],
+      ret: ['RETURN', '#FBEFD9', '#8A4B00'], rem: ['REMINDER', '#ECEEEC', '#33403A'], cla: ['CLARIFICATION', '#E8ECF3', '#3E4B63'], ini: ['INITIATIVE', '#EEEDFB', '#3F37A8']
+    };
+    const raw = [
+      ['esc', 'Rule ESC-02', 'Due now', 'Escalate Human Capital: 7 overdue actions', '4 requirements · −3.1 pts · 2 reminders each'],
+      ['req', 'AI briefing', 'Due 04 Nov', 'Request integration samples for 5.11.2-2', 'IT Operations · Faisal K. · 3 missing items pre-filled'],
+      ['ret', 'Validation failed', 'Today', 'Return 4 files for correction', 'Wrong period ×2, missing signature, unreadable scan · bulk preview'],
+      ['upd', 'DGA clarification CL-014', 'Due 08 Nov', 'Request current-cycle samples for 4 accepted items', 'Will reopen acceptance on response'],
+      ['rem', 'Rule REM-01', 'Due 03 Nov', 'Remind Strategy & Performance (2.2.3-4)', 'Reminder 1 of 2 · committee minutes'],
+      ['cla', 'Reviewer', 'Draft', 'Ask DGA whether a staging sample is acceptable', 'Affects 5.11.2-2, 5.11.1-1'],
+      ['ini', 'Gap analysis', 'Proposal', 'Convert 4.1.2 into a digital skills initiative', 'Structural gap · 3 requirements · sponsor needed']
+    ];
+    const actions = raw.map((x, i) => ({
+      type: T[x[0]][0], tBg: T[x[0]][1], tFg: T[x[0]][2], trigger: x[1], due: x[2], title: x[3], meta: x[4],
+      border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i })
+    }));
+    const en = this.state.lang === 'en';
+    return {
+      actions, isEn: en, isAr: !en,
+      enBg: en ? '#0E5A45' : '#FFFFFF', enFg: en ? '#FFFFFF' : '#14211C', arBg: en ? '#FFFFFF' : '#0E5A45', arFg: en ? '#14211C' : '#FFFFFF',
+      toEn: () => this.setState({ lang: 'en' }), toAr: () => this.setState({ lang: 'ar' }),
+      catalog: ['Request evidence', 'Request update', 'Return for correction', 'Send reminder', 'Assign remediation', 'Escalate', 'Request clarification', 'Schedule review', 'Create initiative', 'Close action', 'Prepare submission', 'Executive update']
+    };
+  }
+}
+</script>
+</body>
+</html>
