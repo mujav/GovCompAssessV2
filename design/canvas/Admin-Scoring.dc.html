@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scoring and maturity designer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Admin Studio" style="flex: 1 1 240px; background: #1A1F2E; color: #E3E6EF; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #B4580A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">AS</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Admin Studio</div><div style="font-size: 12px; color: #A9B0C4">Demo Entity · Sandbox</div></div></div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 13px; border: 1px solid #2E3548">← Back to workspace</a>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">FRAMEWORK PACKAGE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Framework Builder</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Requirement schema</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Criteria &amp; evidence rules</a>
+<a href="Admin-Scoring.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; background: #343C55; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Scoring &amp; maturity</a>
+<a href="Admin-Acceptance.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Workflow &amp; acceptance</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">OPERATIONS</div>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Actions &amp; automation</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Metrics &amp; dashboards</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Reports &amp; notifications</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">PLATFORM</div>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Organization &amp; roles</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">AI configuration</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Terminology &amp; localization</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Configuration history</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Admin Studio / Qiyas 2026 v1.3 / Scoring</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Scoring &amp; maturity designer</h1></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #FBEFD9; color: #8A4B00">Draft QY-2026 v4 · from v3</span>
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Validate</button>
+<a href="Admin-History.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Submit for four-eyes approval</a>
+</div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px">1 · Scale</h2>
+<div role="radiogroup" aria-label="Scoring method" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px">
+<sc-for list="{{methods}}" as="m" hint-placeholder-count="4">
+<button type="button" role="radio" aria-checked="{{m.on}}" onClick="{{m.pick}}" style="text-align: left; font: inherit; cursor: pointer; padding: 12px; border-radius: 10px; border: {{m.border}}; background: {{m.bg}}; color: #14211C; display: flex; flex-direction: column; gap: 4px; min-height: 44px"><b style="font-size: 14px">{{m.label}}</b><span style="font-size: 12px; color: #56625C; line-height: 16px">{{m.desc}}</span></button>
+</sc-for>
+</div>
+<div role="table" aria-label="Status values" style="font-size: 13px">
+<div role="row" style="display: grid; grid-template-columns: 1.4fr 1.4fr 0.8fr 1.2fr; gap: 10px; padding: 8px 0; color: #56625C; font-size: 12px; font-weight: 600; border-bottom: 1px solid #DCE2DE"><span role="columnheader">Status (EN)</span><span role="columnheader">Status (AR)</span><span role="columnheader">Points</span><span role="columnheader">Counts in denominator</span></div>
+<sc-for list="{{statuses}}" as="s" hint-placeholder-count="5">
+<div role="row" style="display: grid; grid-template-columns: 1.4fr 1.4fr 0.8fr 1.2fr; gap: 10px; padding: 8px 0; align-items: center; border-bottom: 1px solid #EEF0EE">
+<span role="cell"><span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{s.bg}}; color: {{s.fg}}">{{s.en}}</span></span>
+<span role="cell" lang="ar" dir="rtl" style="text-align: left">{{s.ar}}</span>
+<span role="cell"><input type="text" value="{{s.pts}}" aria-label="Points for {{s.en}}" style="width: 72px; height: 40px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"></span>
+<span role="cell" style="font-size: 12px">{{s.den}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px">2 · Roll-up formula</h2>
+<div style="font-size: 12px; color: #56625C">Built from approved blocks. Free-text or executable formulas are not allowed.</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px; background: #F7F8F6; border-radius: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px">
+<span style="padding: 6px 10px; border-radius: 6px; background: #E2EFE9; color: #0E5A45; font-weight: 600">Σ</span>
+<span style="padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE">requirement.points</span><span>×</span>
+<span style="padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE">requirement.weight</span>
+<span style="padding: 6px 10px; border-radius: 6px; background: #E2EFE9; color: #0E5A45; font-weight: 600">÷ Σ</span>
+<span style="padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE">applicable.weight</span><span>×</span>
+<span style="padding: 6px 10px; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE">100</span>
+<button type="button" style="height: 36px; padding: 0 10px; border: 1px dashed #7D8C85; border-radius: 6px; background: #FFFFFF; font: inherit; font-size: 12px; cursor: pointer; color: #33403A">+ block</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px">
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Level roll-up<select style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #FFFFFF"><option>Weighted average</option><option>Sum of points</option><option>Minimum maturity</option><option>Threshold table</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Rounding<select style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #FFFFFF"><option>1 decimal, half up</option><option>2 decimals</option><option>Whole number</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Weights by<select style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #FFFFFF"><option>Requirement (high 1.5 · med 1.0 · low 0.5)</option><option>Criterion</option><option>Domain</option></select></label>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px">3 · Rules</h2>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px; border: 1px solid #DCE2DE; border-radius: 10px"><span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #FBE4E1; color: #A3261B">BLOCKING · SR-03</span>If a <b>mandatory criterion</b> is <b>Not satisfied</b>, cap the requirement at <b>Non-compliant</b>.<span style="margin-left: auto; font-size: 12px; color: #8A4B00; font-weight: 600">changed in v4: was "cap at Partial"</span></div>
+<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center">
+<legend style="font-weight: 600; padding: 0 4px">Not applicable treatment</legend>
+<sc-for list="{{naOpts}}" as="o" hint-placeholder-count="3">
+<label style="display: flex; gap: 8px; align-items: center; min-height: 40px"><input type="radio" name="na" checked="{{o.on}}" onChange="{{o.pick}}" style="width: 18px; height: 18px; accent-color: #0E5A45">{{o.label}}</label>
+</sc-for>
+</fieldset>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px">
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 12px">Green from<input type="text" value="85.0" style="height: 40px; border: 2px solid #2E8B6A; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 12px">Amber from<input type="text" value="60.0" style="height: 40px; border: 2px solid #D08A1C; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 12px">Target score<input type="text" value="85.0" style="height: 40px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"></label>
+</div>
+<div style="padding: 12px; border: 1px solid #DCE2DE; border-radius: 10px; line-height: 20px"><b>Human override:</b> SME, Assessment Manager · reason code required · second approval when requirement points change by 0.5 or more</div>
+</div>
+</section>
+</div>
+
+<aside style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #FFFFFF; border: 2px solid #3F6FB5; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #2F5893">PREVIEW AGAINST LIVE DATA · READ-ONLY</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<div style="background: #F7F8F6; border-radius: 10px; padding: 10px"><div style="font-size: 12px; color: #56625C">v3 (live)</div><div style="font-size: 24px; font-weight: 700">72.4%</div></div>
+<div style="background: #EEF3FA; border-radius: 10px; padding: 10px"><div style="font-size: 12px; color: #2F5893">v4 (draft)</div><div style="font-size: 24px; font-weight: 700">70.9%</div></div>
+</div>
+<div style="font-size: 13px; line-height: 20px"><b>14 requirements</b> change result, in <b>2 domains</b>.</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-family: 'IBM Plex Mono', monospace">
+<div style="display: flex; justify-content: space-between"><span>Technology &amp; integration</span><span>61.3 → 58.9</span></div>
+<div style="display: flex; justify-content: space-between"><span>Human capital</span><span>58.1 → 55.7</span></div>
+<div style="display: flex; justify-content: space-between; color: #56625C"><span>Other 4 domains</span><span>no change</span></div>
+</div>
+<div style="font-size: 12px; line-height: 18px; color: #56625C; border-top: 1px solid #EEF0EE; padding-top: 10px">Accepted 2026 results keep v3 until re-accepted under v4. 2025 history is never recalculated.</div>
+<button type="button" style="height: 40px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">See the 14 requirements</button>
+</section>
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
+<h2 style="margin: 0; font-size: 15px">Validation</h2>
+<div style="color: #11603F">✓ Every status maps to points</div>
+<div style="color: #11603F">✓ Thresholds ordered and non-overlapping</div>
+<div style="color: #11603F">✓ Formula uses approved blocks only</div>
+<div style="color: #8A4B00">! Changes official results: four-eyes approval required</div>
+<div style="color: #8A4B00">! Author Majed F. holds override rights on 9 affected requirements</div>
+</section>
+</aside>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { m: 1, na: 0 }; }
+  renderVals() {
+    const ms = [['Binary', 'Met / not met'], ['Three-level', 'Compliant, partial, non-compliant'], ['Maturity 0–5', 'Level per control, minimum or average'], ['Weighted points', 'Custom point scale']];
+    const methods = ms.map((x, i) => { const on = this.state.m === i; return { label: x[0], desc: x[1], on, border: on ? '2px solid #0E5A45' : '1px solid #DCE2DE', bg: on ? '#F2F8F5' : '#FFFFFF', pick: () => this.setState({ m: i }) }; });
+    const nas = ['Exclude from denominator', 'Redistribute weight within standard', 'Authority-defined treatment'];
+    const naOpts = nas.map((label, i) => ({ label, on: this.state.na === i, pick: () => this.setState({ na: i }) }));
+    return {
+      methods, naOpts,
+      statuses: [
+        { en: 'Compliant', ar: 'ممتثل', pts: '1.0', den: 'Yes', bg: '#E3F1EA', fg: '#11603F' },
+        { en: 'Partially compliant', ar: 'ممتثل جزئيًا', pts: '0.5', den: 'Yes', bg: '#FBEFD9', fg: '#8A4B00' },
+        { en: 'Non-compliant', ar: 'غير ممتثل', pts: '0.0', den: 'Yes', bg: '#FBE4E1', fg: '#A3261B' },
+        { en: 'Not assessed', ar: 'لم يُقيَّم', pts: '0.0', den: 'Yes, flagged', bg: '#ECEEEC', fg: '#4A5550' },
+        { en: 'Not applicable', ar: 'لا ينطبق', pts: '—', den: 'Per N/A rule', bg: '#E8ECF3', fg: '#3E4B63' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

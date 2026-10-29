@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Requirement detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
+<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
+<a href="Requirements.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Requirements</a>
+<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
+<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
+<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
+<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
+<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
+<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
+<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
+<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-direction: column; gap: 12px; padding: 16px 32px 0; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 520px">
+<div style="font-size: 13px; color: #56625C"><a href="Requirements.dc.html">Requirements</a> / Technology &amp; integration / 5.11.2</div>
+<h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700"><span style="font-family: 'IBM Plex Mono', monospace">5.11.2-2</span> · Integrated systems demonstrate end-to-end data exchange</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px">
+<span style="padding: 2px 8px; border-radius: 999px; font-weight: 600; background: #ECEEEC; color: #4A5550">Not assessed (official)</span>
+<span style="padding: 2px 8px; border-radius: 999px; font-weight: 600; background: #EEEDFB; color: #3F37A8">AI · Non-compliant · 0.82</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A"><span style="width: 6px; height: 6px; border-radius: 50%; background: #A3261B"></span>No update · 12 days</span>
+<span style="padding: 1px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A">Pending Review L1</span>
+<span style="color: #56625C">Weight high · score impact <b style="color: #14211C">+2.4 pts</b> · due 04 Nov</span>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Request clarification</button>
+<a href="Action-Center.dc.html" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #0E5A45; color: #0E5A45; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center">Request evidence</a>
+<a href="Review-Workspace.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center">Open in review</a>
+</div>
+</div>
+<div role="tablist" aria-label="Requirement sections" style="display: flex; flex-wrap: wrap; gap: 4px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.bar}}; background: transparent; font: inherit; font-size: 14px; font-weight: {{t.weight}}; cursor: pointer; color: {{t.color}}">{{t.label}}</button>
+</sc-for>
+</div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 16px">Official requirement</h2><span style="font-size: 12px; color: #56625C">Qiyas 2026 · framework version 1.2 · published, immutable · <a href="#">source p. 87</a></span></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
+<div style="font-size: 14px; line-height: 22px"><div style="font-size: 11px; letter-spacing: 0.08em; color: #56625C; font-weight: 600; margin-bottom: 4px">ENGLISH</div>The entity demonstrates that its core systems are integrated and exchange data end to end, supported by a complete implementation sample for each required integration.</div>
+<div lang="ar" dir="rtl" style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px"><div style="font-size: 11px; color: #56625C; font-weight: 600; margin-bottom: 4px">العربية</div>تُثبت الجهة تكامل أنظمتها الأساسية وتبادل البيانات بينها بشكل متكامل، مع تقديم نموذج تطبيقي كامل لكل تكامل مطلوب.</div>
+</div>
+<div style="font-size: 13px; line-height: 20px; color: #33403A; background: #F7F8F6; border-radius: 8px; padding: 10px 12px"><b>Implementation requirement:</b> provide the integration inventory and at least one end-to-end sample (source, target, interface and transaction) per listed integration, from the current cycle.</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 18px">Criteria assessment</h2><span style="font-size: 12px; color: #56625C">3 criteria · SME-approved decomposition v1 · AI run MR-88213 · prompt assess-v1.4</span></div>
+<sc-for list="{{criteria}}" as="c" hint-placeholder-count="3">
+<article style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; padding: 16px 20px; border-bottom: 1px solid #EEF0EE">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; color: #56625C"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #14211C">{{c.id}}</span> · {{c.mand}}</div>
+<div style="font-size: 15px; line-height: 22px; font-weight: 600">{{c.text}}</div>
+<div style="font-size: 12px; line-height: 18px; color: #56625C">Expected: {{c.expect}} · Fails if: {{c.fail}}</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end">
+<span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: {{c.sBg}}; color: {{c.sFg}}">AI · {{c.status}}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #33403A">confidence <span style="width: 80px; height: 6px; border-radius: 3px; background: #EEF0EE; display: block; overflow: hidden"><span style="display: block; height: 6px; width: {{c.confW}}; background: #3F37A8"></span></span><b style="font-family: 'IBM Plex Mono', monospace">{{c.conf}}</b></span>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0">
+<div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid #EEF0EE">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #3F37A8">AI RATIONALE</div>
+<div style="font-size: 13px; line-height: 20px">{{c.why}}</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{c.cites}}" as="q" hint-placeholder-count="2"><a href="Evidence.dc.html" style="font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 6px; background: #F3F2FD; color: #3F37A8; text-decoration: none">{{q}}</a></sc-for>
+</div>
+</div>
+<div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: {{c.gapColor}}">{{c.gapHead}}</div>
+<div style="font-size: 13px; line-height: 20px">{{c.gap}}</div>
+<div style="font-size: 12px; color: #56625C">Human decision: <b style="color: #14211C">{{c.human}}</b></div>
+</div>
+</div>
+</article>
+</sc-for>
+</section>
+
+<section style="background: #F1F4F2; border: 1px dashed #7D8C85; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 15px">Deterministic roll-up preview</h2><span style="font-size: 12px; color: #44524B; font-family: 'IBM Plex Mono', monospace">scoring scheme QY-2026 v3 · rule SR-03</span></div>
+<div style="font-size: 13px; line-height: 20px; color: #33403A">If accepted as recommended: mandatory criterion C1 not satisfied → <b>blocking rule caps the requirement at Non-compliant</b>. Requirement score 0 / 1.5 → Technology &amp; integration domain 61.3% → 58.9%. Calculated by the rule engine, never by AI; not reportable until accepted.</div>
+</section>
+</div>
+
+<aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px">Acceptance chain</h2>
+<div style="font-size: 12px; color: #56625C">Policy AP-QIYAS-STD v2 · sequential</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 18px">
+<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 22px; border-radius: 50%; background: #3F37A8; color: #FFFFFF; font-size: 12px; display: flex; align-items: center; justify-content: center">✓</span><span><b>AI assessed</b><br><span style="color: #56625C">27 Oct, 18:12 · recommendation only</span></span></li>
+<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #0E5A45; background: #E2EFE9"></span><span><b>L1 · Domain SME</b><br><span style="color: #56625C">Dr. Khalid R. · due 02 Nov · pending</span></span></li>
+<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #CBD3CE"></span><span><b>L2 · Assessment Manager</b><br><span style="color: #56625C">Noura A.</span></span></li>
+<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #CBD3CE"></span><span><b>Final acceptance</b><br><span style="color: #56625C">Compliance Lead</span></span></li>
+</ol>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
+<h2 style="margin: 0; font-size: 15px">Ownership</h2>
+<div style="display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px">
+<span style="color: #56625C">Department</span><span>IT Operations</span>
+<span style="color: #56625C">SPOC</span><span>Faisal K.</span>
+<span style="color: #56625C">Contributing</span><span>Digital Transformation</span>
+<span style="color: #56625C">Reviewer</span><span>Dr. Khalid R. (SME)</span>
+<span style="color: #56625C">Evidence SLA</span><span style="color: #A3261B; font-weight: 600">Breached 2 days ago</span>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px">Linked evidence</h2>
+<sc-for list="{{evidence}}" as="e" hint-placeholder-count="4">
+<a href="Evidence.dc.html" style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; text-decoration: none; color: #14211C; font-size: 13px; line-height: 18px; padding: 8px 0; border-top: 1px solid #EEF0EE">
+<span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #56625C">{{e.id}}</span><br>{{e.name}}</span>
+<span style="flex: 0 0 auto; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: {{e.bg}}; color: {{e.fg}}">{{e.state}}</span>
+</a>
+</sc-for>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
+<h2 style="margin: 0; font-size: 15px">Prior cycle · 2025</h2>
+<div><span style="padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #FBEFD9; color: #8A4B00">Partial</span> <span style="color: #56625C">score 0.75 / 1.5</span></div>
+<blockquote style="margin: 0; padding: 10px 12px; border-radius: 8px; background: #F7F8F6; color: #33403A; font-size: 13px">"The sample covers one integration only. Provide end-to-end evidence for all integrations listed in the inventory." <br><span style="font-size: 12px; color: #56625C">DGA observation OBS-2025-31, received verbatim</span></blockquote>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 15px">History</h2>
+<sc-for list="{{history}}" as="h" hint-placeholder-count="4">
+<div style="font-size: 12px; line-height: 18px; border-left: 2px solid #DCE2DE; padding-left: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #56625C">{{h.t}}</span><br>{{h.e}}</div>
+</sc-for>
+<a href="Admin-History.dc.html" style="font-size: 13px">Full audit trail</a>
+</section>
+</aside>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 1 }; }
+  renderVals() {
+    const labels = ['Overview', 'Criteria (3)', 'Evidence (4)', 'Observations & actions (2)', 'Clarifications (1)', 'History & audit'];
+    const tabs = labels.map((label, i) => {
+      const on = this.state.tab === i;
+      return { label, on, bar: on ? '#0E5A45' : 'transparent', color: on ? '#0E5A45' : '#33403A', weight: on ? 600 : 400, pick: () => this.setState({ tab: i }) };
+    });
+    const S = { not: ['#FBE4E1', '#A3261B', 'Not satisfied'], sat: ['#E3F1EA', '#11603F', 'Satisfied'], part: ['#FBEFD9', '#8A4B00', 'Partially satisfied'] };
+    const cr = (id, mand, text, expect, fail, s, conf, why, cites, gapHead, gap, gapColor, human) => ({
+      id, mand, text, expect, fail, status: S[s][2], sBg: S[s][0], sFg: S[s][1], conf: conf.toFixed(2), confW: Math.round(conf * 100) + '%', why, cites, gapHead, gap, gapColor, human
+    });
+    return {
+      tabs,
+      criteria: [
+        cr('5.11.2-2-C1', 'Mandatory', 'A complete sample demonstrates every required integration end to end', 'source, target, interface, transaction or screenshot per integration', 'only one partial integration, or no end-to-end sample', 'not', 0.86,
+          'The sample shows the HR ↔ Government Service Bus exchange only. No transaction evidence was found for the other three integrations in the inventory.', ['EV-1988 · p.4 §2.1', 'EV-1988 · p.6 fig.3'], 'MISSING EVIDENCE', 'Transaction logs or screenshots for ERP ↔ CRM, ERP ↔ Document Management and CRM ↔ Portal.', '#A3261B', 'awaiting L1'),
+        cr('5.11.2-2-C2', 'Mandatory', 'The integration inventory names source, target and interface for each system', 'inventory table with all three fields', 'any listed integration missing a field', 'sat', 0.91,
+          'Table 1 lists four integrations with source, target and interface type; all fields are populated.', ['EV-1988 · p.2–3 table 1'], 'NOTHING MISSING', 'Criterion fully supported by the cited table.', '#11603F', 'awaiting L1'),
+        cr('5.11.2-2-C3', 'Mandatory', 'Evidence is current-cycle and formally approved', 'dated within the 2026 reporting period, signed approval page', 'outdated, unsigned or superseded version', 'part', 0.74,
+          'The approval page is signed, but the inventory is dated March 2025. A second document lists five integrations, contradicting the four in the inventory.', ['EV-1988 · p.1', 'EV-2012 · p.3 ⚠ contradiction'], 'CONTRADICTION FLAGGED', 'Inventory (4 integrations) and architecture report (5) disagree. Confirm which is current before accepting.', '#8A4B00', 'awaiting L1')
+      ],
+      evidence: [
+        { id: 'EV-1988', name: 'Integration inventory and sample, v2.pdf', state: 'Outdated period', bg: '#FBEFD9', fg: '#8A4B00' },
+        { id: 'EV-2012', name: 'Enterprise architecture report 2026.docx', state: 'Contradiction', bg: '#FBE4E1', fg: '#A3261B' },
+        { id: 'EV-1430', name: 'GSB integration screenshot (2025)', state: 'Superseded', bg: '#ECEEEC', fg: '#4A5550' },
+        { id: 'EV-1702', name: 'Integration policy, approved.pdf', state: 'Valid · reused ×3', bg: '#E3F1EA', fg: '#11603F' }
+      ],
+      history: [
+        { t: '27 Oct 18:12', e: 'AI assessment run MR-88213 completed: 3 criteria, schema valid, 4 citations resolved.' },
+        { t: '25 Oct 10:03', e: 'Reminder 2 sent to Faisal K. (approved by Noura A.).' },
+        { t: '18 Oct 09:30', e: 'Evidence request ACT-102 created from DGA observation OBS-2025-31.' },
+        { t: '01 Oct 08:00', e: 'Cycle opened; requirement mapped from 2025 5.11.2-2 (unchanged wording).' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

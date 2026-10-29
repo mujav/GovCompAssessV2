@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Design tokens from the Compliance Intelligence canvas */
+@theme {
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-arabic: var(--font-plex-arabic), var(--font-plex-sans), sans-serif;
+
+  --color-ink: #14211c;
+  --color-ink-2: #33403a;
+  --color-muted: #56625c;
+  --color-line: #dce2de;
+  --color-line-soft: #eef0ee;
+  --color-field: #cbd3ce;
+  --color-canvas: #f4f6f4;
+  --color-surface-2: #f7f8f6;
+
+  --color-brand: #0e5a45;
+  --color-brand-strong: #0a3f31;
+  --color-brand-soft: #e2efe9;
+  --color-brand-tint: #f2f8f5;
+  --color-mint: #2e8b6a;
+
+  --color-nav: #0f1f1a;
+  --color-nav-2: #18302a;
+  --color-nav-active: #24493d;
+  --color-nav-text: #d5e0db;
+  --color-nav-muted: #9fb3aa;
+
+  --color-admin: #1a1f2e;
+  --color-admin-active: #343c55;
+  --color-admin-line: #2e3548;
+  --color-admin-text: #c9cedc;
+  --color-admin-muted: #a9b0c4;
+
+  --color-ai: #3f37a8;
+  --color-ai-soft: #eeedfb;
+  --color-ai-tint: #f3f2fd;
+  --color-ai-line: #cfcbf2;
+  --color-ai-ink: #33305e;
+
+  --color-good: #11603f;
+  --color-good-soft: #e3f1ea;
+  --color-warn: #8a4b00;
+  --color-warn-soft: #fbefd9;
+  --color-warn-line: #edd6aa;
+  --color-bad: #a3261b;
+  --color-bad-soft: #fbe4e1;
+  --color-bad-line: #ebc4be;
+  --color-neutral-soft: #eceeec;
+  --color-neutral-fg: #4a5550;
+  --color-na-soft: #e8ecf3;
+  --color-na-fg: #3e4b63;
+  --color-orange: #b4580a;
+
+  --color-chart-comp: #2e8b6a;
+  --color-chart-part: #d08a1c;
+  --color-chart-non: #c4412f;
+  --color-chart-nas: #b9c2bd;
+  --color-chart-na: #8796b0;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  a {
+    color: var(--color-brand);
+  }
+  a:hover {
+    color: var(--color-brand-strong);
+  }
+
+  [lang="ar"],
+  [dir="rtl"] {
+    font-family: var(--font-arabic);
+  }
+}

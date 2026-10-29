@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Human acceptance state machine</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 1764px; height: 860px; background: #F7F8F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C; overflow: hidden">
+
+<svg width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 280px; top: 436px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #7D8C85; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-1" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#7D8C85" stroke="none" style="stroke: none; fill: #7D8C85; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-1)"></path></svg>
+<svg width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 592px; top: 436px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #0E5A45; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-2" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#0E5A45" stroke="none" style="stroke: none; fill: #0E5A45; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-2)"></path></svg>
+<svg width="95" height="8" viewBox="0 0 95 8" preserveAspectRatio="none" style="position: absolute; left: 904px; top: 436px; width: 95px; height: 8px; overflow: visible; fill: none; stroke: #0E5A45; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-3" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#0E5A45" stroke="none" style="stroke: none; fill: #0E5A45; fill: context-stroke"/></marker></defs><path d="M 0 4 L 91 4" marker-end="url(#dc-arrow-head-filled-3)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 444px; top: 480px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #B4580A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-4" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B4580A" stroke="none" style="stroke: none; fill: #B4580A; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 115" marker-end="url(#dc-arrow-head-filled-4)"></path></svg>
+<svg width="8" height="60" viewBox="0 0 8 60" preserveAspectRatio="none" style="position: absolute; left: 516px; top: 480px; width: 8px; height: 60px; overflow: visible; fill: none; stroke: #3F37A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 4 0 L 4 60"></path></svg>
+<svg width="240" height="8" viewBox="0 0 240 8" preserveAspectRatio="none" style="position: absolute; left: 520px; top: 536px; width: 240px; height: 8px; overflow: visible; fill: none; stroke: #3F37A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><path d="M 0 4 L 240 4"></path></svg>
+<svg width="8" height="59" viewBox="0 0 8 59" preserveAspectRatio="none" style="position: absolute; left: 756px; top: 540px; width: 8px; height: 59px; overflow: visible; fill: none; stroke: #3F37A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-5" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3F37A8" stroke="none" style="stroke: none; fill: #3F37A8; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 55" marker-end="url(#dc-arrow-head-filled-5)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 828px; top: 481px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #3F37A8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-6" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#3F37A8" stroke="none" style="stroke: none; fill: #3F37A8; fill: context-stroke"/></marker></defs><path d="M 4 119 L 4 4" marker-end="url(#dc-arrow-head-filled-6)"></path></svg>
+<svg width="204" height="8" viewBox="0 0 204 8" preserveAspectRatio="none" style="position: absolute; left: 172px; top: 636px; width: 204px; height: 8px; overflow: visible; fill: none; stroke: #B4580A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6"><path d="M 0 4 L 204 4"></path></svg>
+<svg width="8" height="159" viewBox="0 0 8 159" preserveAspectRatio="none" style="position: absolute; left: 168px; top: 481px; width: 8px; height: 159px; overflow: visible; fill: none; stroke: #B4580A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6"><defs><marker id="dc-arrow-head-filled-7" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B4580A" stroke="none" style="stroke: none; fill: #B4580A; fill: context-stroke"/></marker></defs><path d="M 4 159 L 4 4" marker-end="url(#dc-arrow-head-filled-7)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 480px; top: 281px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #A3261B; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-8" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#A3261B" stroke="none" style="stroke: none; fill: #A3261B; fill: context-stroke"/></marker></defs><path d="M 4 119 L 4 4" marker-end="url(#dc-arrow-head-filled-8)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 792px; top: 281px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #A3261B; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round"><defs><marker id="dc-arrow-head-filled-9" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#A3261B" stroke="none" style="stroke: none; fill: #A3261B; fill: context-stroke"/></marker></defs><path d="M 4 119 L 4 4" marker-end="url(#dc-arrow-head-filled-9)"></path></svg>
+<svg width="8" height="119" viewBox="0 0 8 119" preserveAspectRatio="none" style="position: absolute; left: 1104px; top: 480px; width: 8px; height: 119px; overflow: visible; fill: none; stroke: #B4580A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 6"><defs><marker id="dc-arrow-head-filled-10" orient="auto" markerWidth="5" markerHeight="5" refX="2" refY="2" overflow="visible"><path d="M0 0 L4 2 L0 4 Z" fill="#B4580A" stroke="none" style="stroke: none; fill: #B4580A; fill: context-stroke"/></marker></defs><path d="M 4 0 L 4 115" marker-end="url(#dc-arrow-head-filled-10)"></path></svg>
+
+<div style="position: absolute; left: 64px; top: 400px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #EEEDFB; border: 1px solid #B9B4EE; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>AI Assessed</b><br><span style="font-size: 12px; line-height: 16px; color: #4A4F6B">Recommendation only, no human decision</span></span></div>
+<div style="position: absolute; left: 376px; top: 400px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FFFFFF; border: 2px solid #0E5A45; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Pending Review L1</b><br><span style="font-size: 12px; line-height: 16px; color: #56625C">Reviewer, assessor or SME</span></span></div>
+<div style="position: absolute; left: 688px; top: 400px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FFFFFF; border: 2px solid #0E5A45; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Pending Review L2 … Ln</b><br><span style="font-size: 12px; line-height: 16px; color: #56625C">Sequential, parallel or quorum</span></span></div>
+<div style="position: absolute; left: 1000px; top: 400px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #0E5A45; color: #FFFFFF; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Accepted</b><br><span style="font-size: 12px; line-height: 16px; color: #CFE8DC">Official · scored · submittable</span></span></div>
+<div style="position: absolute; left: 376px; top: 200px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FBE4E1; border: 1px solid #E8B4AD; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Rejected L1</b><br><span style="font-size: 12px; line-height: 16px; color: #6E2A22">Then block, return or escalate, per policy</span></span></div>
+<div style="position: absolute; left: 688px; top: 200px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FBE4E1; border: 1px solid #E8B4AD; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Rejected Final</b><br><span style="font-size: 12px; line-height: 16px; color: #6E2A22">Final authority rejects the conclusion</span></span></div>
+<div style="position: absolute; left: 376px; top: 600px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FBEFD9; border: 1px solid #E8C98F; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Returned for Evidence</b><br><span style="font-size: 12px; line-height: 16px; color: #6B3F05">Reason kept, owner notified</span></span></div>
+<div style="position: absolute; left: 688px; top: 600px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FFFFFF; border: 1px solid #B9B4EE; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Override Pending Approval</b><br><span style="font-size: 12px; line-height: 16px; color: #4A4F6B">AI and human status kept side by side</span></span></div>
+<div style="position: absolute; left: 1000px; top: 600px; width: 216px; height: 80px; box-sizing: border-box; padding: 8px 12px; display: flex; align-items: center; justify-content: center; text-align: center; background: #FFFFFF; border: 1px dashed #B4580A; border-radius: 10px; font-size: 15px; line-height: 18px"><span><b>Reopened</b><br><span style="font-size: 12px; line-height: 16px; color: #6B3F05">Re-enters Pending Review L1</span></span></div>
+
+<div style="position: absolute; left: 64px; top: 64px; font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em">Human acceptance state machine</div>
+<div style="position: absolute; left: 64px; top: 112px; width: 1600px; font-size: 16px; line-height: 24px; color: #56625C">AI recommends, humans decide. The number of levels, routing and the final authority come from the versioned AcceptancePolicy, never from code. Every decision is an immutable event.</div>
+<div style="position: absolute; left: 612px; top: 412px; width: 64px; text-align: center; font-size: 13px; line-height: 16px; color: #0E5A45; font-weight: 500">approve</div>
+<div style="position: absolute; left: 928px; top: 412px; width: 48px; text-align: center; font-size: 13px; line-height: 16px; color: #0E5A45; font-weight: 500">final</div>
+<div style="position: absolute; left: 456px; top: 532px; width: 52px; text-align: center; font-size: 13px; line-height: 16px; color: #8A4B00; font-weight: 500">return</div>
+<div style="position: absolute; left: 608px; top: 512px; width: 64px; text-align: center; font-size: 13px; line-height: 16px; color: #3F37A8; font-weight: 500">override</div>
+<div style="position: absolute; left: 844px; top: 532px; width: 116px; text-align: center; font-size: 13px; line-height: 16px; color: #3F37A8; font-weight: 500">higher approval</div>
+<div style="position: absolute; left: 226px; top: 652px; width: 96px; text-align: center; font-size: 13px; line-height: 16px; color: #8A4B00; font-weight: 500">new evidence</div>
+<div style="position: absolute; left: 496px; top: 332px; width: 48px; text-align: center; font-size: 13px; line-height: 16px; color: #A3261B; font-weight: 500">reject</div>
+<div style="position: absolute; left: 808px; top: 332px; width: 48px; text-align: center; font-size: 13px; line-height: 16px; color: #A3261B; font-weight: 500">reject</div>
+<div style="position: absolute; left: 1120px; top: 532px; width: 120px; text-align: center; font-size: 13px; line-height: 16px; color: #8A4B00; font-weight: 500">material change</div>
+
+<div style="position: absolute; left: 64px; top: 744px; width: 1180px; font-size: 13px; line-height: 20px; color: #44524B">Material change = new or replaced evidence, a changed criterion status, applicability or validity, or a regulator clarification. Cosmetic metadata edits do not reset approvals unless configured. Accepted results keep the policy version they were accepted under.</div>
+
+<div style="position: absolute; left: 1312px; top: 200px; width: 388px; display: flex; flex-direction: column; gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #0E5A45">CONFIGURED PATTERNS</div>
+<div style="font-size: 13px; line-height: 19px; display: flex; flex-direction: column; gap: 8px">
+<div><b>Lean pilot</b><br><span style="color: #56625C">AI → Qiyas SME → Final</span></div>
+<div><b>Standard entity</b><br><span style="color: #56625C">AI → Requirement reviewer → Assessment manager → Final</span></div>
+<div><b>High assurance</b><br><span style="color: #56625C">AI → Domain SME → Independent QA → Compliance lead</span></div>
+<div><b>Critical requirement</b><br><span style="color: #56625C">AI → SME 1 + SME 2 in parallel → Control owner</span></div>
+<div><b>Low risk, sampled</b><br><span style="color: #56625C">AI → Reviewer → Final; 10% sampled for QA</span></div>
+<div><b>AI–human disagreement</b><br><span style="color: #56625C">Mandatory rationale → senior reviewer resolves</span></div>
+</div>
+</div>
+<div style="background: #0F1F1A; color: #E4ECE8; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #8FD3B5">NON-NEGOTIABLE</div>
+<div>AI can never satisfy a human stage.</div>
+<div>One person cannot fill two independent stages.</div>
+<div>Bulk approval is off for high-risk or low-confidence items.</div>
+<div>Nothing is scored or submitted until the policy evaluates complete.</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1764,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

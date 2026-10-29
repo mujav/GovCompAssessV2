@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rule and automation studio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+
+<nav aria-label="Admin Studio" style="flex: 1 1 240px; background: #1A1F2E; color: #E3E6EF; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #B4580A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">AS</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Admin Studio</div><div style="font-size: 12px; color: #A9B0C4">Demo Entity · Sandbox</div></div></div>
+<a href="Command-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 13px; border: 1px solid #2E3548">← Back to workspace</a>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">FRAMEWORK PACKAGE</div>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Framework Builder</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Requirement schema</a>
+<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Criteria &amp; evidence rules</a>
+<a href="Admin-Scoring.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Scoring &amp; maturity</a>
+<a href="Admin-Acceptance.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Workflow &amp; acceptance</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">OPERATIONS</div>
+<a href="Admin-Automation.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; background: #343C55; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Actions &amp; automation</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Metrics &amp; dashboards</a>
+<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Reports &amp; notifications</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">PLATFORM</div>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Organization &amp; roles</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">AI configuration</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Terminology &amp; localization</a>
+<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Configuration history</a>
+</div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Admin Studio / Rules &amp; automation</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Rule &amp; automation studio</h1></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">New rule</button>
+<a href="Admin-History.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Submit ESC-02 v3</a>
+</div>
+</header>
+
+<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<section aria-label="Rules" style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="6">
+<button type="button" onClick="{{r.pick}}" style="width: 100%; text-align: left; font: inherit; cursor: pointer; border: 0; border-bottom: 1px solid #EEF0EE; border-left: 3px solid {{r.mark}}; background: {{r.bg}}; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; color: #14211C">
+<span style="display: flex; justify-content: space-between; gap: 8px"><b style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{r.id}}</b><span style="font-size: 11px; color: {{r.stColor}}; font-weight: 600">{{r.status}}</span></span>
+<span style="font-size: 13px; font-weight: 600">{{r.name}}</span>
+<span style="font-size: 12px; color: #56625C">{{r.meta}}</span>
+</button>
+</sc-for>
+</section>
+
+<section style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 17px">ESC-02 · Recommend escalation for silent overdue items</h2><span style="font-size: 12px; color: #8A4B00; font-weight: 600">v3 draft · v2 live</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #56625C">WHEN</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px">
+<select aria-label="Trigger" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; background: #FFFFFF"><option>Daily schedule</option><option>Status changed</option><option>Due date approaching</option><option>SLA breached</option><option>Clarification received</option></select>
+<span>at</span>
+<input type="text" value="07:00" aria-label="Time" style="width: 80px; height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font-family: 'IBM Plex Mono', monospace; font-size: 14px">
+<span style="color: #56625C">Asia/Riyadh · working days (Sun–Thu)</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #56625C">IF ALL OF</div>
+<sc-for list="{{conds}}" as="c" hint-placeholder-count="4">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px; border: 1px solid #DCE2DE; border-radius: 10px; background: #F7F8F6; font-size: 13px">
+<span style="height: 36px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE; font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{c.field}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">{{c.op}}</span>
+<span style="height: 36px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 6px; background: #FFFFFF; border: 1px solid #CBD3CE">{{c.value}}</span>
+<span style="font-size: 12px; color: #8A4B00; font-weight: 600">{{c.note}}</span>
+</div>
+</sc-for>
+<button type="button" style="align-self: flex-start; height: 36px; padding: 0 10px; border: 1px dashed #7D8C85; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 12px; cursor: pointer; color: #33403A">+ Condition</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #56625C">THEN</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px">
+<div style="padding: 10px 12px; border-radius: 10px; border: 1px solid #DCE2DE">Create <b>escalation recommendation</b> with history pack → assign to <b>Assessment Manager</b></div>
+<div style="padding: 10px 12px; border-radius: 10px; border: 1px solid #DCE2DE">Flag requirement <span style="color: #A3261B; font-weight: 600">red</span> on dashboards</div>
+<div style="padding: 10px 12px; border-radius: 10px; border: 1px solid #DCE2DE">In-app alert to department SPOC</div>
+<div style="padding: 10px 12px; border-radius: 10px; background: #0F1F1A; color: #E4ECE8; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span><b>Locked:</b> external communication requires authorized approval</span><span style="color: #8FD3B5; font-size: 12px">platform guardrail · cannot be turned off</span></div>
+</div>
+</div>
+</div>
+
+<div style="background: #FFFFFF; border: 2px solid #3F6FB5; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center"><div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #2F5893">TEST AGAINST SAMPLE RECORDS</div><button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #3F6FB5; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #2F5893">Run test on today's data</button></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px">
+<span style="padding: 6px 10px; border-radius: 8px; background: #FBE4E1; color: #A3261B"><b>7</b> would match</span>
+<span style="padding: 6px 10px; border-radius: 8px; background: #F7F8F6"><b>3</b> near misses (1 reminder)</span>
+<span style="padding: 6px 10px; border-radius: 8px; background: #F7F8F6">v2 matched <b>5</b>; v3 adds the "critical" condition</span>
+</div>
+<div role="table" aria-label="Test results" style="font-size: 12px">
+<div role="row" style="display: grid; grid-template-columns: 0.8fr 1.6fr 1fr 0.8fr 0.8fr; gap: 8px; padding: 6px 0; color: #56625C; font-weight: 600; border-bottom: 1px solid #DCE2DE"><span role="columnheader">Action</span><span role="columnheader">Requirement</span><span role="columnheader">Department</span><span role="columnheader">Overdue</span><span role="columnheader">Reminders</span></div>
+<sc-for list="{{hits}}" as="h" hint-placeholder-count="4">
+<div role="row" style="display: grid; grid-template-columns: 0.8fr 1.6fr 1fr 0.8fr 0.8fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #EEF0EE; font-family: 'IBM Plex Mono', monospace"><span role="cell">{{h.a}}</span><span role="cell" style="font-family: 'IBM Plex Sans', sans-serif">{{h.r}}</span><span role="cell" style="font-family: 'IBM Plex Sans', sans-serif">{{h.d}}</span><span role="cell">{{h.o}}</span><span role="cell">{{h.n}}</span></div>
+</sc-for>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 1 }; }
+  renderVals() {
+    const raw = [
+      ['REM-01', 'Reminder cadence', 'Due in 3 days, then every 4 days · max 2', 'Live v4', '#11603F'],
+      ['ESC-02', 'Escalate silent overdue items', 'Daily · recommends, never sends', 'Draft v3', '#8A4B00'],
+      ['EXP-01', 'Evidence expiry watch', 'Valid-to date within 30 days', 'Live v2', '#11603F'],
+      ['OWN-01', 'Ownership SLA', 'Unassigned after 5 working days', 'Live v1', '#11603F'],
+      ['RTE-01', 'Route reviews by domain', 'Domain → SME pool', 'Live v3', '#11603F'],
+      ['CLA-01', 'Clarification impact', 'On response → flag affected items', 'Live v1', '#11603F']
+    ];
+    const rules = raw.map((x, i) => { const on = this.state.sel === i; return { id: x[0], name: x[1], meta: x[2], status: x[3], stColor: x[4], bg: on ? '#F2F8F5' : '#FFFFFF', mark: on ? '#0E5A45' : 'transparent', pick: () => this.setState({ sel: i }) }; });
+    return {
+      rules,
+      conds: [
+        { field: 'work_status', op: '=', value: 'No update', note: '' },
+        { field: 'due_date', op: '<', value: 'today', note: '' },
+        { field: 'reminders_sent', op: '≥', value: '2', note: '' },
+        { field: 'priority', op: 'in', value: 'High, Critical', note: 'new in v3' }
+      ],
+      hits: [
+        { a: 'ACT-118', r: '4.1.2-1 Approved digital capability plan', d: 'Human Capital', o: '19 d', n: '2' },
+        { a: 'ACT-121', r: '4.3.1-1 Digital skills training tracked', d: 'Human Capital', o: '14 d', n: '2' },
+        { a: 'ACT-124', r: '4.2.2-1 Succession plan for digital roles', d: 'Human Capital', o: '11 d', n: '3' },
+        { a: 'ACT-102', r: '5.11.2-2 End-to-end integration samples', d: 'IT Operations', o: '12 d', n: '2' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

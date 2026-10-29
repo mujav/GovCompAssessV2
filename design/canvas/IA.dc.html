@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Information architecture</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="width: 1600px; height: 1100px; box-sizing: border-box; padding: 64px; background: #F7F8F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em">Information architecture</h1>
+<p style="margin: 0; font-size: 16px; line-height: 24px; color: #56625C; max-width: 1100px">One shell for every framework. Work happens in the Workspace, decisions are read in Insights, and the framework itself (Qiyas, NCA ECC, SDAIA, ISO) is a package configured in Admin Studio.</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: #33403A">
+<span style="font-weight: 600; margin-right: 4px">On every screen</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">Framework / cycle switcher</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">English / العربية with RTL</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">Shared filters: framework · domain · department · owner · status · due · cycle</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">Saved views per role</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">Audit trail on every record</span>
+<span style="padding: 6px 10px; border-radius: 999px; background: #FFFFFF; border: 1px solid #DCE2DE">Role-filtered actions</span>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; flex-grow: 1">
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #0E5A45">WORKSPACE · OPERATE</div>
+<h2 style="margin: 0; font-size: 20px; line-height: 28px">Do the work</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px">
+<li><a href="Command-Center.dc.html"><b>Command Center</b></a><br><span style="color: #56625C">Cockpit + AI briefing</span></li>
+<li><a href="Requirements.dc.html"><b>Requirements register</b></a><br><span style="color: #56625C">Compliance and work status, side by side</span></li>
+<li><a href="Requirement-Detail.dc.html"><b>Requirement detail</b></a><br><span style="color: #56625C">Criteria, evidence, decisions, history</span></li>
+<li><a href="Evidence.dc.html"><b>Evidence workspace</b></a><br><span style="color: #56625C">Upload, extract, validate, reuse</span></li>
+<li><a href="Review-Workspace.dc.html"><b>Reviews &amp; acceptance</b></a><br><span style="color: #56625C">Queues by level, side-by-side review</span></li>
+<li><a href="Action-Center.dc.html"><b>Action Center</b></a><br><span style="color: #56625C">Requests, reminders, escalations</span></li>
+<li><a href="Remediation.dc.html"><b>Remediation &amp; initiatives</b></a><br><span style="color: #56625C">Gaps, matrix, projects</span></li>
+<li><a href="Clarifications.dc.html"><b>Clarifications</b></a><br><span style="color: #56625C">Regulator Q&amp;A and impact</span></li>
+<li><a href="Submission.dc.html"><b>Submission Control Tower</b></a><br><span style="color: #56625C">Blockers, QA, pack, portal</span></li>
+</ul>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #3F37A8">INSIGHTS · DECIDE</div>
+<h2 style="margin: 0; font-size: 20px; line-height: 28px">Read the position</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px">
+<li><b>Executive cockpit</b><br><span style="color: #56625C">Readiness, blockers, trend vs target</span></li>
+<li><a href="Departments.dc.html"><b>Department performance</b></a><br><span style="color: #56625C">Portfolio, execution, engagement</span></li>
+<li><b>Evidence readiness</b><br><span style="color: #56625C">Expected vs received vs valid</span></li>
+<li><b>Gap &amp; remediation</b><br><span style="color: #56625C">Impact × effort matrix</span></li>
+<li><b>Engagement &amp; responsiveness</b><br><span style="color: #56625C">No-update items, reminders, loops</span></li>
+<li><b>Acceptance metrics</b><br><span style="color: #56625C">Pending by level, AI–human agreement</span></li>
+<li><a href="Comparisons.dc.html"><b>Framework comparison</b></a><br><span style="color: #56625C">Shared controls, reusable evidence</span></li>
+<li><a href="Comparisons.dc.html"><b>Cycle comparison</b></a><br><span style="color: #56625C">2025 → 2026 changes and movement</span></li>
+<li><b>Reports</b><br><span style="color: #56625C">Exec update, evidence index, submission pack</span></li>
+</ul>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #8A4B00">ADMIN STUDIO · CONFIGURE</div>
+<h2 style="margin: 0; font-size: 20px; line-height: 28px">Shape the platform</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 6px; font-size: 14px; line-height: 20px">
+<li><a href="Admin-Frameworks.dc.html"><b>Framework Builder</b></a> · hierarchy, import</li>
+<li>Requirement schema · custom fields</li>
+<li>Criterion &amp; evidence designer</li>
+<li><a href="Admin-Scoring.dc.html"><b>Scoring &amp; maturity</b></a></li>
+<li>Workflow designer · states</li>
+<li><a href="Admin-Acceptance.dc.html"><b>Acceptance workflow</b></a></li>
+<li>Action catalog</li>
+<li><a href="Admin-Automation.dc.html"><b>Rule &amp; automation studio</b></a></li>
+<li>Metric designer · dashboard builder</li>
+<li>Report &amp; notification templates</li>
+<li>Roles, permissions, separation of duties</li>
+<li>Organization setup · SLAs · calendar</li>
+<li>AI configuration · prompts · thresholds</li>
+<li>Integrations · terminology · localization</li>
+<li>Package manager · dev → test → prod</li>
+<li><a href="Admin-History.dc.html"><b>Configuration history</b></a></li>
+</ul>
+</section>
+
+<section style="background: #0F1F1A; color: #E4ECE8; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #8FD3B5">PERSONAS · WHERE THEY LAND</div>
+<h2 style="margin: 0; font-size: 20px; line-height: 28px; color: #FFFFFF">Role-based entry</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 20px">
+<li><b style="color: #FFFFFF">Executive</b><br><span style="color: #B5C6BE">Command Center, executive view</span></li>
+<li><b style="color: #FFFFFF">Assessment Manager</b><br><span style="color: #B5C6BE">Command Center, Action Center, Submission</span></li>
+<li><b style="color: #FFFFFF">Department SPOC</b><br><span style="color: #B5C6BE">My requirements, often in Arabic</span></li>
+<li><b style="color: #FFFFFF">Reviewer / SME / QA</b><br><span style="color: #B5C6BE">Review queue: assigned to me</span></li>
+<li><b style="color: #FFFFFF">Final approver</b><br><span style="color: #B5C6BE">Final acceptance pending</span></li>
+<li><b style="color: #FFFFFF">Framework, AI, Security admins</b><br><span style="color: #B5C6BE">Admin Studio modules they own</span></li>
+<li><b style="color: #FFFFFF">Auditor</b><br><span style="color: #B5C6BE">Read-only history and evidence trail</span></li>
+</ul>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
