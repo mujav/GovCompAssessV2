@@ -2,6 +2,7 @@
 
 import { compareSchemes } from "@/lib/engine/scoring";
 import { testRule } from "@/lib/engine/rules";
+import { diffRequirements, requirementSummary } from "./diff";
 import { DEMO_TODAY, SAMPLE_ACTIONS, SAMPLE_REQUIREMENTS } from "./sample-data";
 import type { AcceptancePolicy, AutomationRule, ConfigKind, FrameworkVersion, ScoringScheme } from "./types";
 
@@ -34,9 +35,14 @@ export function impactFor(kind: ConfigKind, before: unknown, after: unknown): st
       return [`Matches on today's data: ${nb} → ${na}`, "Recommends only; external communication still needs approval"];
     }
     case "framework": {
+      const b = before as FrameworkVersion | undefined;
       const a = after as FrameworkVersion;
+      const reqs = a.requirements?.length
+        ? [b ? `Requirements vs live: ${requirementSummary(diffRequirements(b.requirements, a.requirements))}` : `First version: ${a.requirements.length} requirement nodes`]
+        : [];
       return [
         `${a.levels.length} hierarchy levels: ${a.levels.map((l) => l.en).join(" › ")}`,
+        ...reqs,
         a.importJob ? `${a.importJob.valid} requirements import · ${a.importJob.changed}` : "No requirements import attached",
         "Versions in use by a cycle stay locked; the new version applies from its effective date",
       ];

@@ -2,6 +2,7 @@
 
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
+import { QIYAS_V12_REQUIREMENTS } from "./qiyas-base";
 import type {
   AcceptancePolicy,
   AdminState,
@@ -26,6 +27,7 @@ const qiyasLive: FrameworkVersion = {
   effective: "01 Jan 2026",
   scoringNote: "Compliant / partial / non · weighted",
   levels: QIYAS_LEVELS,
+  requirements: QIYAS_V12_REQUIREMENTS,
 };
 
 const qiyasDraft: FrameworkVersion = {

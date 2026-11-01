@@ -4,18 +4,14 @@ import { useState } from "react";
 import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-ui";
 import { PageHeader } from "@/components/workspace-shell";
 import { Button, TabBar } from "@/components/ui";
-import { stamp, useAdmin, working } from "@/lib/admin/store";
-import type { FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
-
-const ASSESSED: Record<LevelAssessment, string> = {
-  rollup: "Roll-up only",
-  accepted: "Accepted here",
-  ai_reviewer: "AI + reviewer",
-};
+import { requirementCounts } from "@/lib/admin/diff";
+import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
+import type { FrameworkPackage, FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
+import { readFiles } from "@/lib/import/read-files";
+import { ASSESSED, ImportReview, RequirementTree, UploadZone, inputCls, type ImportSession } from "./import-flow";
 
 const TABS = [{ label: "Hierarchy" }, { label: "Requirements import" }, { label: "Custom fields" }, { label: "Terminology" }];
 const LV_COLS = "44px 1.3fr 1.3fr 1fr 1.1fr 92px";
-const inputCls = "box-border h-10 w-full rounded-lg border border-field px-2.5 disabled:bg-surface-2 disabled:text-ink-2";
 
 function frameworkChecks(v: FrameworkVersion): CheckItem[] {
   const labelsOk = v.levels.every((l) => l.en.trim() && l.ar.trim());
@@ -23,12 +19,22 @@ function frameworkChecks(v: FrameworkVersion): CheckItem[] {
   const patternsOk = patterns.every(Boolean) && new Set(patterns).size === patterns.length;
   const acceptedOk = v.levels.some((l) => l.assessed === "accepted");
   const importOk = !v.importJob || (v.importJob.errors === 0 && v.importJob.warnings.length === 0);
+  const reqs = v.requirements ?? [];
+  const placedOk = reqs.every((r) => v.levels.some((l) => l.id === r.level));
+  const uniqueOk = new Set(reqs.map((r) => r.code)).size === reqs.length;
+  const reqChecks: CheckItem[] = reqs.length
+    ? [
+        { ok: placedOk, text: placedOk ? `${reqs.length} requirement nodes sit on defined levels` : "Some requirements sit on a removed level: re-import or restore the level" },
+        { ok: uniqueOk, text: uniqueOk ? "Requirement codes are unique" : "Requirement codes must be unique" },
+      ]
+    : [];
   return [
     { ok: v.levels.length > 0, text: v.levels.length ? `${v.levels.length} hierarchy levels` : "Add at least one hierarchy level" },
     { ok: labelsOk, text: labelsOk ? "Every level has English and Arabic labels" : "Every level needs English and Arabic labels" },
     { ok: patternsOk, text: patternsOk ? "Code patterns are unique" : "Code patterns must be filled in and unique" },
     { ok: acceptedOk, text: acceptedOk ? "One level is where results are accepted" : "Mark one level as \"Accepted here\"" },
     { ok: importOk, text: importOk ? "Requirements import has no open warnings" : "Resolve import warnings before submitting" },
+    ...reqChecks,
   ];
 }
 
@@ -36,6 +42,9 @@ export default function FrameworkBuilderPage() {
   const { state, update, editDraft, user } = useAdmin();
   const [sel, setSel] = useState("fw-qiyas");
   const [tab, setTab] = useState(0);
+  const [session, setSession] = useState<ImportSession | null>(null);
+  const [reading, setReading] = useState(false);
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const pkg = state.frameworks.find((f) => f.id === sel) ?? state.frameworks[0];
   const { value: fw, locked } = working(pkg);
@@ -73,18 +82,73 @@ export default function FrameworkBuilderPage() {
     setTab(0);
   };
 
+  const startImport = async (files: File[], target: ImportTarget) => {
+    setReading(true);
+    setNotice(null);
+    try {
+      const read = await readFiles(files);
+      if (!read.docs.length) {
+        setNotice({ ok: false, text: read.files.map((f) => `${f.name}: ${f.error ?? "no readable content"}`).join(" · ") });
+        return;
+      }
+      setSession({ ...read, target });
+    } catch (e) {
+      setNotice({ ok: false, text: e instanceof Error ? e.message : "The files could not be read." });
+    } finally {
+      setReading(false);
+    }
+  };
+
+  if (session)
+    return (
+      <>
+        <PageHeader crumb="Admin Studio / Framework package / Import" title="Import framework from file" />
+        <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
+          <ImportReview
+            session={session}
+            onCancel={() => setSession(null)}
+            onAccepted={(id, text) => {
+              setSession(null);
+              setSel(id);
+              setTab(1);
+              setNotice({ ok: true, text });
+            }}
+          />
+        </main>
+      </>
+    );
+
   return (
     <>
       <PageHeader
         crumb="Admin Studio / Framework package"
         title="Framework Builder"
         actions={
-          <Button variant="primary" className="px-4" onClick={newFramework}>
-            New framework
-          </Button>
+          <>
+            <Button onClick={() => setTab(-1)}>Import from file</Button>
+            <Button variant="primary" className="px-4" onClick={newFramework}>
+              New framework
+            </Button>
+          </>
         }
       />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
+        {notice && (
+          <div role="status" className={notice.ok ? "rounded-lg bg-good-soft px-3 py-2 text-[13px] text-good" : "rounded-lg bg-bad-soft px-3 py-2 text-[13px] text-bad"}>
+            {notice.text}
+          </div>
+        )}
+        {tab === -1 && (
+          <section aria-label="Import a new framework" className="flex flex-col gap-3 rounded-[14px] border border-line bg-white px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="m-0 text-base font-semibold">New framework or index from a file</h2>
+              <Button size="md" onClick={() => setTab(0)}>
+                Close
+              </Button>
+            </div>
+            <UploadZone busy={reading} onFiles={(files) => startImport(files, { kind: "new", name: "", authority: "", version: "" })} note="You can switch to “new version of an existing framework” during review." />
+          </section>
+        )}
         <section aria-label="Frameworks" className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-3">
           {state.frameworks.map((f) => {
             const w = f.draft ?? f.live!;
@@ -111,6 +175,7 @@ export default function FrameworkBuilderPage() {
                   {f.usedByCycles ? ` · used by ${f.usedByCycles} cycle` : ""}
                 </span>
                 <span className="font-mono text-xs text-ink-2">{w.levels.map((l) => l.en).join(" › ")}</span>
+                {!!w.requirements?.length && <span className="text-xs text-muted">{w.requirements.length} requirement nodes</span>}
               </button>
             );
           })}
@@ -144,10 +209,10 @@ export default function FrameworkBuilderPage() {
               </div>
               <DraftBar kind="framework" id={pkg.id} checks={checks} />
             </div>
-            <TabBar label="Framework sections" tabs={TABS} active={tab} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
+            <TabBar label="Framework sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
             <div className="flex flex-col gap-2.5 px-5 py-4">
               <LockNote kind="framework" id={pkg.id} />
-              {tab === 0 && (
+              {tab <= 0 && (
                 <>
                   <div className="text-[13px] text-muted">
                     Hierarchy levels are names, not code. Another framework can use pillar / objective / control / sub-control with the same engine.
@@ -225,7 +290,7 @@ export default function FrameworkBuilderPage() {
                   </button>
                 </>
               )}
-              {tab === 1 && <ImportPanel fw={fw} locked={locked} edit={edit} />}
+              {tab === 1 && <ImportPanel pkg={pkg} fw={fw} busy={reading} onFiles={(files) => startImport(files, { kind: "version", id: pkg.id })} />}
               {tab > 1 && <div className="py-6 text-[13px] text-muted">{TABS[tab].label} is not built in this prototype yet.</div>}
             </div>
           </section>
@@ -258,102 +323,52 @@ function IconButton({ label, disabled, onClick, children }: { label: string; dis
   );
 }
 
-const MAPPING: [string, string][] = [
-  ["Requirement code", "official_code"],
-  ["Domain", "level 1"],
-  ["Official text (AR)", "official_text.ar"],
-  ["Official text (EN)", "official_text.en"],
-  ["Implementation req.", "guidance"],
-  ["Weight", "weight"],
-  ["Applicability", "applicability_rule"],
-];
-
-function ImportPanel({ fw, locked, edit }: { fw: FrameworkVersion; locked: boolean; edit: (fn: (d: FrameworkVersion) => void) => void }) {
+function ImportPanel({ pkg, fw, busy, onFiles }: { pkg: FrameworkPackage; fw: FrameworkVersion; busy: boolean; onFiles: (files: File[]) => void }) {
   const job = fw.importJob;
-  if (!job)
-    return (
-      <div className="flex flex-col items-start gap-2 py-2 text-[13px] text-muted">
-        No requirements file attached to this version.
-        <Button
-          size="md"
-          disabled={locked}
-          onClick={() =>
-            edit(
-              (d) =>
-                void (d.importJob = {
-                  file: "requirements-master.xlsx",
-                  tab: "03_Requirements",
-                  rows: 120,
-                  uploadedBy: "You",
-                  hash: "a91c…3f07",
-                  valid: 119,
-                  warnings: [{ row: 42, field: "weight", message: "Weight missing for row 42" }],
-                  changed: "120 new",
-                  errors: 0,
-                }),
-            )
-          }
-        >
-          Attach sample requirements file
-        </Button>
-      </div>
-    );
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-[13px] leading-5">
-        <b>{job.file}</b> · tab {job.tab} · {job.rows} rows
-        <br />
-        <span className="text-muted">
-          Uploaded by {job.uploadedBy} · SHA-256 {job.hash}
-        </span>
-      </div>
-      <div className="text-xs font-semibold text-muted">Column mapping</div>
-      <div className="grid grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)] items-center gap-1.5 text-xs">
-        {MAPPING.map(([from, to]) => (
-          <MapRow key={from} from={from} to={to === "level 1" ? `level 1 · ${fw.levels[0]?.en ?? "—"}` : to} />
-        ))}
-      </div>
-      <div className="flex flex-col gap-1.5 text-[13px]">
-        <ResultRow label="Valid rows" value={String(job.valid)} bg="#E3F1EA" fg="#11603F" />
-        <ResultRow label="Warnings" value={String(job.warnings.length)} bg={job.warnings.length ? "#FBEFD9" : "#F7F8F6"} fg={job.warnings.length ? "#8A4B00" : "#33403A"} />
-        <ResultRow label="Changed vs live" value={job.changed} bg="#F7F8F6" fg="#33403A" />
-        <ResultRow label="Errors" value={String(job.errors)} bg="#F7F8F6" fg="#33403A" />
-      </div>
-      {job.warnings.length > 0 && (
+      {job ? (
         <>
-          <ul className="m-0 flex list-none flex-col gap-1 p-0 text-xs text-warn">
-            {job.warnings.map((w) => (
-              <li key={w.row}>
-                Row {w.row}: {w.message}
-              </li>
-            ))}
-          </ul>
-          <Button
-            className="self-start"
-            disabled={locked}
-            onClick={() =>
-              edit((d) => {
-                if (!d.importJob) return;
-                d.importJob.valid += d.importJob.warnings.length;
-                d.importJob.warnings = [];
-              })
-            }
-          >
-            Apply default weight (medium) to {job.warnings.length} row{job.warnings.length > 1 ? "s" : ""}
-          </Button>
+          <div className="rounded-[10px] border border-line bg-surface-2 px-3 py-2.5 text-[13px] leading-5">
+            <b>{job.file}</b> · {job.tab} · {job.rows} rows
+            <br />
+            <span className="text-muted">
+              Uploaded by {job.uploadedBy} · SHA-256 {job.hash}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5 text-[13px]">
+            <ResultRow label="Valid rows" value={String(job.valid)} bg="#E3F1EA" fg="#11603F" />
+            <ResultRow label="Warnings" value={String(job.warnings.length)} bg={job.warnings.length ? "#FBEFD9" : "#F7F8F6"} fg={job.warnings.length ? "#8A4B00" : "#33403A"} />
+            <ResultRow label="Changed vs live" value={job.changed} bg="#F7F8F6" fg="#33403A" />
+            <ResultRow label="Errors" value={String(job.errors)} bg="#F7F8F6" fg="#33403A" />
+          </div>
+          {job.warnings.length > 0 && (
+            <ul className="m-0 flex list-none flex-col gap-1 p-0 text-xs text-warn">
+              {job.warnings.map((w) => (
+                <li key={`${w.row}-${w.field}`}>
+                  Row {w.row}: {w.message}
+                </li>
+              ))}
+            </ul>
+          )}
+          {job.warnings.length > 0 && <div className="text-xs text-muted">Re-import the corrected file to clear these warnings; the review step fixes them before accepting.</div>}
+        </>
+      ) : (
+        <div className="text-[13px] text-muted">No requirements file attached to this version.</div>
+      )}
+      {!!fw.requirements?.length && (
+        <>
+          <div className="text-xs text-muted">{requirementCounts(fw)}</div>
+          <RequirementTree key={`${pkg.id}-${fw.version}`} requirements={fw.requirements} levels={fw.levels} />
         </>
       )}
+      <UploadZone
+        busy={busy}
+        onFiles={onFiles}
+        disabled={pkg.pendingCr ? `Read-only while ${pkg.pendingCr} awaits approval.` : undefined}
+        note={pkg.draft ? `Accepting replaces the levels and requirements of draft v${pkg.draft.version}.` : pkg.live ? `Accepting creates a new draft from v${pkg.live.version}.` : undefined}
+      />
     </div>
-  );
-}
-
-function MapRow({ from, to }: { from: string; to: string }) {
-  return (
-    <>
-      <span className="font-mono">{from}</span>
-      <span aria-hidden="true">→</span>
-      <span>{to}</span>
-    </>
   );
 }
 

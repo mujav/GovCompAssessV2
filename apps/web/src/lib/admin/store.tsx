@@ -7,7 +7,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
 import { createSeed } from "./seed";
-import type { AdminState, ChangeRequest, ConfigKind, FrameworkVersion, Versioned } from "./types";
+import type { AdminState, ChangeRequest, ConfigKind, FrameworkRequirement, FrameworkVersion, HierarchyLevel, ImportJob, Versioned } from "./types";
 
 export const STORAGE_KEY = "ci-admin-studio-v2";
 
@@ -70,6 +70,17 @@ function displayName(kind: ConfigKind, id: string, v: unknown) {
 
 export type Result = { ok: true; id?: string } | { ok: false; error: string };
 
+/** Where an accepted file import goes: a new version of an existing package, or a new package. */
+export type ImportTarget =
+  | { kind: "version"; id: string }
+  | { kind: "new"; name: string; authority: string; version: string };
+
+export interface ImportPayload {
+  levels: HierarchyLevel[];
+  requirements: FrameworkRequirement[];
+  importJob: ImportJob;
+}
+
 interface AdminApi {
   state: AdminState;
   hydrated: boolean;
@@ -84,6 +95,8 @@ interface AdminApi {
   submit: (kind: ConfigKind, id: string) => Result;
   decide: (crId: string, decision: "approve" | "reject", comment: string, effectiveFrom?: string) => Result;
   log: (text: string) => void;
+  /** Writes a reviewed file import into a framework draft (creating the draft or package if needed). */
+  importFramework: (target: ImportTarget, payload: ImportPayload) => Result;
   /** Generic mutation for create/rename operations. */
   update: (fn: (s: AdminState) => void) => void;
 }
@@ -157,6 +170,42 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           if (!v?.draft || v.pendingCr) return;
           fn(v.draft as never);
         }),
+      importFramework: (target, payload) => {
+        const n = payload.requirements.length;
+        if (target.kind === "new") {
+          if (!target.name.trim()) return { ok: false, error: "Give the new framework a name." };
+          if (state.frameworks.some((f) => (f.draft ?? f.live)?.name.trim().toLowerCase() === target.name.trim().toLowerCase()))
+            return { ok: false, error: `A framework named "${target.name.trim()}" already exists. Import it as a new version instead.` };
+          const id = `fw-${state.seq + 1}`;
+          mutate((s) => {
+            s.seq += 1;
+            const draft: FrameworkVersion = {
+              name: target.name.trim(),
+              version: target.version.trim() || "1.0",
+              authority: target.authority.trim() || "Internal",
+              effective: "—",
+              scoringNote: "Not configured",
+              ...structuredClone(payload),
+            };
+            s.frameworks.push({ id, usedByCycles: 0, draft });
+            pushAudit(s, who(s), `Created framework draft "${draft.name}" v${draft.version} from ${payload.importJob.file} (${n} requirement nodes).`);
+          });
+          return { ok: true, id };
+        }
+        const v = state.frameworks.find((f) => f.id === target.id);
+        if (!v) return { ok: false, error: "Framework not found." };
+        if (v.pendingCr) return { ok: false, error: `The draft is waiting on ${v.pendingCr}. Decide it before importing again.` };
+        mutate((s) => {
+          const f = s.frameworks.find((x) => x.id === target.id)!;
+          if (!f.draft) {
+            f.draft = bump("framework", f.live) as FrameworkVersion;
+            pushAudit(s, who(s), `Draft ${f.draft.name} v${f.draft.version} created from published v${f.live?.version}.`);
+          }
+          Object.assign(f.draft, structuredClone(payload));
+          pushAudit(s, who(s), `Imported ${n} requirement nodes from ${payload.importJob.file} into draft ${f.draft.name} v${f.draft.version} (${payload.importJob.changed}).`);
+        });
+        return { ok: true, id: target.id };
+      },
       submit: (kind, id) => {
         const v = slot(state, kind, id);
         if (!v?.draft) return { ok: false, error: "There is no draft to submit." };

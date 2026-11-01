@@ -46,6 +46,22 @@ export interface ImportJob {
   errors: number;
 }
 
+/** One node of the framework tree (any level), as published with the version. */
+export interface FrameworkRequirement {
+  code: string;
+  /** HierarchyLevel.id this node sits at. */
+  level: string;
+  /** Code of the parent node; absent for top-level nodes. */
+  parent?: string;
+  title: string;
+  text?: string;
+  /** "high" | "med" | "low" or a numeric weight as written in the source. */
+  weight?: string;
+  evidence?: string;
+  /** Where the node came from, e.g. "qiyas.xlsx · 03_Requirements · row 14". */
+  source?: string;
+}
+
 export interface FrameworkVersion {
   name: string;
   version: string;
@@ -54,6 +70,7 @@ export interface FrameworkVersion {
   scoringNote: string;
   levels: HierarchyLevel[];
   importJob?: ImportJob;
+  requirements?: FrameworkRequirement[];
 }
 
 export interface FrameworkPackage extends Versioned<FrameworkVersion> {

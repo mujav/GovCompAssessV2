@@ -6,6 +6,7 @@ import type {
   AutomationRule,
   ConfigKind,
   DiffRow,
+  FrameworkRequirement,
   FrameworkVersion,
   ScoringScheme,
 } from "./types";
@@ -26,7 +27,68 @@ export function describeFramework(v?: FrameworkVersion) {
     "Arabic labels": v ? v.levels.map((l) => l.ar).join(" › ") : "—",
     "Code patterns": v ? v.levels.map((l) => l.pattern).join(" · ") : "—",
     "Requirements import": v?.importJob ? `${v.importJob.file} · ${v.importJob.valid} valid · ${v.importJob.warnings.length} warnings` : "—",
+    Requirements: v?.requirements?.length ? requirementCounts(v) : "—",
   };
+}
+
+/** "3 Axis · 9 Standard · 17 Requirement" for a version's requirement tree. */
+export function requirementCounts(v: FrameworkVersion) {
+  const reqs = v.requirements ?? [];
+  const parts = v.levels.map((l) => `${reqs.filter((r) => r.level === l.id).length} ${l.en}`);
+  const unplaced = reqs.filter((r) => !v.levels.some((l) => l.id === r.level)).length;
+  return [...parts, ...(unplaced ? [`${unplaced} without a level`] : [])].join(" · ");
+}
+
+export interface RequirementDiff {
+  added: FrameworkRequirement[];
+  changed: { before: FrameworkRequirement; after: FrameworkRequirement; fields: string[] }[];
+  removed: FrameworkRequirement[];
+}
+
+const REQ_FIELDS = ["title", "text", "weight", "evidence", "parent"] as const;
+
+/** Requirement-level comparison by code. */
+export function diffRequirements(before: FrameworkRequirement[] = [], after: FrameworkRequirement[] = []): RequirementDiff {
+  const old = new Map(before.map((r) => [r.code, r]));
+  const now = new Set(after.map((r) => r.code));
+  const changed: RequirementDiff["changed"] = [];
+  for (const r of after) {
+    const b = old.get(r.code);
+    if (!b) continue;
+    const fields = REQ_FIELDS.filter((f) => (b[f] ?? "") !== (r[f] ?? ""));
+    if (fields.length) changed.push({ before: b, after: r, fields });
+  }
+  return { added: after.filter((r) => !old.has(r.code)), changed, removed: before.filter((r) => !now.has(r.code)) };
+}
+
+export function requirementSummary(d: RequirementDiff) {
+  const parts = [d.added.length && `${d.added.length} new`, d.changed.length && `${d.changed.length} changed`, d.removed.length && `${d.removed.length} removed`].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "no requirement changes";
+}
+
+function describeRequirement(r: FrameworkRequirement, fields: readonly string[] = ["title", "weight"]) {
+  const parts = [r.title || "(untitled)"];
+  if (r.weight) parts.push(`weight ${r.weight}`);
+  for (const f of fields) {
+    if (f === "text" && r.text) parts.push(`text: ${r.text}`);
+    if (f === "evidence" && r.evidence) parts.push(`evidence: ${r.evidence}`);
+    if (f === "parent") parts.push(`under ${r.parent ?? "top level"}`);
+  }
+  return parts.join(" · ");
+}
+
+const MAX_REQUIREMENT_ROWS = 60;
+
+function requirementRows(before?: FrameworkVersion, after?: FrameworkVersion): DiffRow[] {
+  const d = diffRequirements(before?.requirements, after?.requirements);
+  const rows: DiffRow[] = [
+    ...d.added.map((r) => ({ label: `+ ${r.code}`, before: "—", after: describeRequirement(r), changed: true })),
+    ...d.changed.map((c) => ({ label: `~ ${c.after.code}`, before: describeRequirement(c.before, c.fields), after: describeRequirement(c.after, c.fields), changed: true })),
+    ...d.removed.map((r) => ({ label: `− ${r.code}`, before: describeRequirement(r), after: "—", changed: true })),
+  ];
+  if (rows.length <= MAX_REQUIREMENT_ROWS) return rows;
+  const rest = rows.length - MAX_REQUIREMENT_ROWS;
+  return [...rows.slice(0, MAX_REQUIREMENT_ROWS), { label: "More requirement changes", before: "", after: `${rest} more not shown`, changed: true }];
 }
 
 export function describeScoring(s?: ScoringScheme) {
@@ -81,5 +143,7 @@ export function diffConfig(kind: ConfigKind, before: unknown, after: unknown): D
   const a = describe(before);
   const b = describe(after);
   const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])];
-  return rows(keys.map((k) => [k, a[k] ?? "—", b[k] ?? "—"]));
+  const out = rows(keys.map((k) => [k, a[k] ?? "—", b[k] ?? "—"]));
+  if (kind === "framework") out.push(...requirementRows(before as FrameworkVersion | undefined, after as FrameworkVersion | undefined));
+  return out;
 }

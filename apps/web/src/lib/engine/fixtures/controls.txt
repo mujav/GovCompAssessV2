@@ -1,0 +1,12 @@
+CONTROL CATALOGUE
+
+Domain ECC 1: Governance
+ECC 1-1 Strategy
+ECC 1-1-1 A cybersecurity strategy is approved. Weight: High
+ECC 1-1-2 The strategy is reviewed every year — weight: Medium
+Evidence: review minutes
+Domain ECC 2: Defence
+ECC 2-1 Access control
+ECC 2-1-1
+Multi-factor authentication is enforced for privileged access [Medium]
+ECC 2-1-2 Access rights are reviewed quarterly (Weight: Low)
