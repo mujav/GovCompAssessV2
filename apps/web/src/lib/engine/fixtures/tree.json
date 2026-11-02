@@ -1,0 +1,18 @@
+{
+  "name": "Service Quality Index",
+  "authority": "Ministry",
+  "version": "2.0",
+  "domains": [
+    {
+      "title": "Access",
+      "standards": [
+        { "title": "Opening hours are published", "weight": "Medium" },
+        { "title": "Services work on mobile", "weight": "High", "evidence": ["Screenshots", "Analytics"] }
+      ]
+    },
+    {
+      "title": "Responsiveness",
+      "standards": [{ "title": "Complaints are answered within 5 days" }]
+    }
+  ]
+}

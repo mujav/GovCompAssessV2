@@ -1,0 +1,69 @@
+{
+  "framework": "AI Ethics Readiness Index",
+  "authority": "Internal",
+  "version": "1.0",
+  "levels": [
+    {
+      "en": "Principle",
+      "ar": "المبدأ"
+    },
+    {
+      "en": "Practice",
+      "ar": "الممارسة"
+    }
+  ],
+  "principles": [
+    {
+      "code": "AIE-1",
+      "title": "Fairness",
+      "practices": [
+        {
+          "code": "AIE-1.1",
+          "title": "Bias testing before deployment",
+          "weight": "high",
+          "evidence": [
+            "Bias test report"
+          ]
+        },
+        {
+          "code": "AIE-1.2",
+          "title": "Representative training data documented",
+          "weight": "med",
+          "evidence": [
+            "Datasheet"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "AIE-2",
+      "title": "Transparency",
+      "practices": [
+        {
+          "code": "AIE-2.1",
+          "title": "Users are told when they interact with an AI system",
+          "weight": "high"
+        },
+        {
+          "code": "AIE-2.2",
+          "title": "Model cards published for production models",
+          "weight": "low",
+          "evidence": [
+            "Model card"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "AIE-3",
+      "title": "Accountability",
+      "practices": [
+        {
+          "code": "AIE-3.1",
+          "title": "A named owner signs off each AI use case",
+          "weight": "med"
+        }
+      ]
+    }
+  ]
+}

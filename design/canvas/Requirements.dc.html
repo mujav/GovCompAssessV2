@@ -8,156 +8,143 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
-<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<nav aria-label="Primary" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Compliance</b><br><span style="font-size: 12px; color: #5E6B65">Intelligence Platform</span></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 12px; background: #F5F7F6; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: left">Qiyas 2026 · Cycle 1<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="3">
 <div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
-<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
-<a href="Requirements.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Requirements</a>
-<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
-<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
-<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
-<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
-<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
-<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
-<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
-<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
-</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
-</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DDEFE6; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">NA</span><span style="font-size: 13px; line-height: 17px"><b>Noura A.</b><br><span style="color: #5E6B65">Assessment Manager</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Requirements</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Requirements register</h1></div>
-<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Export</button>
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C" lang="ar">العربية</button>
-<div style="width: 44px; height: 44px; border-radius: 50%; background: #DCEDE5; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px" title="Noura A. · Assessment Manager">NA</div>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 440px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search requirements, evidence, people" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<button type="button" lang="ar" aria-label="العربية" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; color: #101C17">ع</button>
+<button type="button" aria-label="Notifications, 6 new" style="position: relative; width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: #C2410C; border: 2px solid #FFFFFF"></span></button>
 </header>
 
-<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
 
-<div role="tablist" aria-label="Saved views" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #DCE2DE">
-<button type="button" role="tab" aria-selected="true" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid #0E5A45; background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #0E5A45">All <span style="color: #56625C; font-weight: 500">350</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">At risk <span style="color: #56625C">27</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Awaiting acceptance <span style="color: #56625C">76</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">New or changed vs 2025 <span style="color: #56625C">41</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Unassigned <span style="color: #A3261B; font-weight: 600">5</span></button>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Requirements <span style="font-weight: 500; color: #5E6B65">350</span></h1>
+<div style="display: flex; gap: 8px">
+<button type="button" aria-label="Export" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg></button>
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; color: #101C17">Saved views ▾</button>
+</div>
+</div>
+
+<div role="tablist" aria-label="Views" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.bd}}; background: {{t.bg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: {{t.fg}}">{{t.label}}<span style="font-size: 12px; font-weight: 600; color: {{t.nFg}}">{{t.n}}</span></button>
+</sc-for>
 </div>
 
 <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
-<label style="display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter by code or text</span><input type="search" placeholder="Code or text, Arabic or English" style="height: 40px; width: 260px; max-width: 100%; box-sizing: border-box; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 14px; background: #FFFFFF"></label>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Domain ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Department ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #0E5A45; border-radius: 999px; background: #E2EFE9; font: inherit; font-size: 13px; cursor: pointer; color: #0E5A45; font-weight: 600">Compliance: any ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Work status ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Acceptance stage ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Evidence health ▾</button>
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 999px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Due ▾</button>
+<label style="flex: 0 1 300px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #FFFFFF; border: 1px solid #E6EBE8; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter</span><input type="search" placeholder="Code or keyword" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Domain ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Department ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Status ▾</button>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Due ▾</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #0E5A45"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"></path></svg>More filters</button>
 </div>
 
-<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: 12px; color: #33403A; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 10px; padding: 10px 14px">
-<b>Two independent dimensions</b>
-<span><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; background: #E3F1EA; color: #11603F; font-weight: 600">Filled pill</span> = compliance status (official once accepted)</span>
-<span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border-radius: 6px; border: 1px solid #CBD3CE"><span style="width: 6px; height: 6px; border-radius: 50%; background: #3F6FB5"></span>Outlined tag</span></span> = work status</span>
-<span><span style="color: #3F37A8; font-weight: 600">AI · Partial 0.78</span> = recommendation not yet accepted</span>
-</div>
-
-<sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
-<div role="region" aria-label="Bulk actions" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; background: #0F1F1A; color: #FFFFFF; border-radius: 10px; padding: 8px 8px 8px 16px">
-<span style="font-size: 14px"><b>{{selCount}} selected</b> · actions open as a preview before anything is sent</span>
-<div style="display: flex; flex-wrap: wrap; gap: 6px">
-<a href="Action-Center.dc.html" style="height: 40px; padding: 0 12px; border-radius: 8px; background: #24493D; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Request evidence</a>
-<a href="Action-Center.dc.html" style="height: 40px; padding: 0 12px; border-radius: 8px; background: #24493D; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Send reminder</a>
-<button type="button" style="height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: #24493D; color: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer">Assign owner</button>
-<button type="button" disabled="disabled" title="Bulk approval is disabled for high-risk items by policy" style="height: 40px; padding: 0 12px; border: 1px dashed #5E7A6F; border-radius: 8px; background: transparent; color: #9FB3AA; font: inherit; font-size: 13px">Bulk approve · blocked by policy</button>
-</div>
-</div>
-</sc-if>
-
-<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 12px; overflow-x: auto">
-<div role="table" aria-label="Requirements" style="min-width: 1180px; font-size: 13px">
-<div role="row" style="display: grid; grid-template-columns: 44px 0.8fr 2.6fr 1.4fr 1.3fr 1.3fr 1.1fr 0.6fr 0.6fr; gap: 12px; align-items: center; padding: 10px 12px; color: #56625C; font-size: 12px; font-weight: 600; border-bottom: 1px solid #DCE2DE; background: #F7F8F6">
-<span role="columnheader"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Select</span></span><span role="columnheader">Code</span><span role="columnheader">Requirement</span><span role="columnheader">Owner</span><span role="columnheader">Compliance</span><span role="columnheader">Work status</span><span role="columnheader">Acceptance</span><span role="columnheader">Evidence</span><span role="columnheader">Due</span>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="overflow-x: auto">
+<div role="table" aria-label="Requirements" style="min-width: 1080px; font-size: 14px">
+<div role="row" style="display: grid; grid-template-columns: 48px 2.8fr 1.5fr 1.2fr 1.2fr 0.9fr 0.7fr 0.6fr; gap: 12px; align-items: center; padding: 12px 16px; color: #5E6B65; font-size: 12px; font-weight: 600; border-bottom: 1px solid #E6EBE8">
+<span role="columnheader"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Select</span></span>
+<span role="columnheader">Requirement</span><span role="columnheader">Owner</span>
+<span role="columnheader" title="Official once a human accepts it. A violet AI badge shows a recommendation still in review.">Compliance ⓘ</span>
+<span role="columnheader" title="Where the work stands, tracked separately from compliance.">Work ⓘ</span>
+<span role="columnheader" title="AI → L1 → L2 → Final">Acceptance ⓘ</span>
+<span role="columnheader">Evidence</span><span role="columnheader">Due</span>
 </div>
 <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
-<div role="row" style="display: grid; grid-template-columns: 44px 0.8fr 2.6fr 1.4fr 1.3fr 1.3fr 1.1fr 0.6fr 0.6fr; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #EEF0EE; background: {{r.rowBg}}">
-<span role="cell"><input type="checkbox" checked="{{r.sel}}" onChange="{{r.toggle}}" aria-label="Select {{r.code}}" style="width: 20px; height: 20px; margin: 12px; accent-color: #0E5A45"></span>
-<span role="cell"><a href="Requirement-Detail.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">{{r.code}}</a></span>
-<span role="cell" style="line-height: 18px">{{r.title}}<br><span style="font-size: 12px; color: #56625C">{{r.domain}} · weight {{r.weight}}</span></span>
-<span role="cell" style="line-height: 18px; color: {{r.ownerColor}}">{{r.dept}}<br><span style="font-size: 12px; color: #56625C">{{r.spoc}}</span></span>
-<span role="cell" style="line-height: 20px"><span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{r.cBg}}; color: {{r.cFg}}">{{r.comp}}</span><br><span style="font-size: 12px; color: #3F37A8; font-weight: 600">{{r.ai}}</span></span>
-<span role="cell"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; font-size: 12px; border: 1px solid #CBD3CE; color: #33403A"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{r.dot}}"></span>{{r.work}}</span><br><span style="font-size: 11px; color: #56625C">{{r.workNote}}</span></span>
-<span role="cell" style="font-size: 12px; color: #33403A">{{r.acc}}</span>
-<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{r.evColor}}">{{r.ev}}</span>
-<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{r.due}}</span>
+<div role="row" style="display: grid; grid-template-columns: 48px 2.8fr 1.5fr 1.2fr 1.2fr 0.9fr 0.7fr 0.6fr; gap: 12px; align-items: center; padding: 6px 16px; border-bottom: 1px solid #EEF1EF; background: {{r.rowBg}}">
+<span role="cell"><input type="checkbox" checked="{{r.sel}}" onChange="{{r.toggle}}" aria-label="Select {{r.code}}" style="width: 18px; height: 18px; margin: 13px; accent-color: #0E5A45"></span>
+<span role="cell" style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><a href="Requirement-Detail.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; text-decoration: none">{{r.code}}</a><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span></span>
+<span role="cell" style="display: flex; align-items: center; gap: 8px; min-width: 0"><span style="flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: {{r.avBg}}; color: {{r.avFg}}; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{r.av}}</span><span style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{r.ownerInk}}">{{r.dept}}</span></span>
+<span role="cell" style="display: flex; align-items: center; gap: 6px"><span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{r.cBg}}; color: {{r.cFg}}">{{r.comp}}</span><sc-if value="{{r.hasAi}}" hint-placeholder-val="{{ false }}"><span title="{{r.ai}}" style="display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 6px; background: #EEEDFD; color: #4F46E5; font-size: 11px; font-weight: 700"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>AI</span></sc-if></span>
+<span role="cell" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #33413B; min-width: 0"><span style="flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: {{r.dot}}"></span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.work}}</span></span>
+<span role="cell" title="{{r.acc}}" style="display: flex; gap: 4px" aria-label="{{r.acc}}"><sc-for list="{{r.steps}}" as="s" hint-placeholder-count="4"><span style="width: 18px; height: 6px; border-radius: 3px; background: {{s}}"></span></sc-for></span>
+<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: {{r.evInk}}">{{r.ev}}</span>
+<span role="cell" style="font-size: 13px; font-weight: 600; color: {{r.dueInk}}">{{r.due}}</span>
 </div>
 </sc-for>
 </div>
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; font-size: 13px; color: #5E6B65; flex-wrap: wrap">
+<span>1–12 of 350</span>
+<div style="display: flex; gap: 6px"><button type="button" aria-label="Previous page" style="width: 36px; height: 36px; border: 1px solid #E6EBE8; border-radius: 8px; background: #FFFFFF; cursor: pointer; color: #101C17">‹</button><button type="button" aria-label="Next page" style="width: 36px; height: 36px; border: 1px solid #E6EBE8; border-radius: 8px; background: #FFFFFF; cursor: pointer; color: #101C17">›</button></div>
+</div>
+</section>
 
-<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: #56625C">
-<span>Showing 1–12 of 350 · sorted by score impact, then due date</span>
-<div style="display: flex; gap: 6px">
-<button type="button" style="height: 40px; min-width: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Previous</button>
-<button type="button" aria-current="page" style="height: 40px; min-width: 40px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 13px; cursor: pointer; color: #FFFFFF">1</button>
-<button type="button" style="height: 40px; min-width: 40px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">2</button>
-<button type="button" style="height: 40px; min-width: 40px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">3</button>
-<button type="button" style="height: 40px; min-width: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">Next</button>
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+<div role="region" aria-label="Bulk actions" style="position: sticky; bottom: 16px; align-self: center; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #101C17; color: #FFFFFF; border-radius: 16px; padding: 8px 8px 8px 18px; box-shadow: 0 8px 24px rgba(16,28,23,0.18)">
+<b style="font-size: 14px; margin-right: 8px">{{selCount}} selected</b>
+<a href="Action-Center.dc.html" style="height: 38px; padding: 0 14px; border-radius: 10px; background: #FFFFFF; color: #101C17; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center">Request evidence</a>
+<a href="Action-Center.dc.html" style="height: 38px; padding: 0 14px; border-radius: 10px; background: #2A3833; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Remind</a>
+<button type="button" style="height: 38px; padding: 0 14px; border: 0; border-radius: 10px; background: #2A3833; color: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer">Assign</button>
+<button type="button" onClick="{{clear}}" aria-label="Clear selection" style="width: 38px; height: 38px; border: 0; border-radius: 10px; background: transparent; color: #FFFFFF; font: inherit; font-size: 18px; cursor: pointer">×</button>
 </div>
-</div>
+</sc-if>
 </main>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { sel: { 0: true, 1: true, 3: true } }; }
+  constructor(props) { super(props); this.state = { tab: 0, sel: { 0: true, 1: true, 3: true } }; }
   renderVals() {
-    const C = {
-      comp: ['#E3F1EA', '#11603F', 'Compliant'], part: ['#FBEFD9', '#8A4B00', 'Partial'], non: ['#FBE4E1', '#A3261B', 'Non-compliant'],
-      nas: ['#ECEEEC', '#4A5550', 'Not assessed'], na: ['#E8ECF3', '#3E4B63', 'Not applicable']
-    };
-    const D = { none: '#A3261B', update: '#C27B12', prog: '#3F6FB5', returned: '#C27B12', review: '#3F37A8', ready: '#2E8B6A', sub: '#0E5A45', obs: '#A3261B', closed: '#7D8C85', start: '#B9C2BD', evsub: '#3F6FB5' };
+    const ACTIVE = 'Requirements';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#E7F3ED' : 'transparent', fg: on ? '#0E5A45' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge, badgeBg: bb }; }) }));
+    const T = [['All', 350], ['At risk', 27], ['Awaiting acceptance', 76], ['Changed vs 2025', 41], ['Unassigned', 5]];
+    const tabs = T.map(([label, n], i) => { const on = this.state.tab === i; return { label, n, on, bg: on ? '#101C17' : '#FFFFFF', fg: on ? '#FFFFFF' : '#101C17', bd: on ? '#101C17' : '#E6EBE8', nFg: on ? '#C9D1CD' : '#5E6B65', pick: () => this.setState({ tab: i }) }; });
+    const C = { comp: ['#E7F3ED', '#0E5A45', 'Compliant'], part: ['#FFF4DF', '#8A4B00', 'Partial'], non: ['#FDECEA', '#B42318', 'Non-compliant'], nas: ['#EEF1EF', '#47534D', 'Not assessed'], na: ['#EDF0F5', '#3E4B63', 'N/A'] };
+    const D = { none: '#D9442E', update: '#E0A100', prog: '#2F6FB0', returned: '#E0A100', review: '#4F46E5', ready: '#1F9D6E', sub: '#0E5A45', obs: '#D9442E', closed: '#94A3B8', start: '#C9D1CD' };
+    const AV = { FK: ['#E0ECF8', '#1E4E8C'], RS: ['#E6E4FB', '#3F37A8'], OH: ['#DDEFE6', '#0E5A45'], LT: ['#FDE9D9', '#9A3412'], HM: ['#E6E4FB', '#3F37A8'], SN: ['#F3E8F7', '#7A2E8C'], '?': ['#FDECEA', '#B42318'] };
+    const G = '#1F9D6E', V = '#4F46E5', A = '#E0A100', E = '#E6EBE8';
+    const ST = { 'AI only': [V, E, E, E], 'Pending L1': [V, A, E, E], 'Pending L2': [V, G, A, E], 'Override': [V, A, A, E], 'Accepted': [G, G, G, G], 'Returned': [V, A, E, E], 'Reopened': [A, E, E, E], '—': [E, E, E, E] };
     const raw = [
-      ['5.11.2-2', 'Integrated systems demonstrate end-to-end data exchange', 'Technology & integration', 'High', 'IT Operations', 'Faisal K.', 'nas', 'AI · Non-compliant 0.82', 'No update', 'none', '12 days silent', 'Pending L1', '1/4', '04 Nov'],
-      ['3.4.1-1', 'Published catalogue of digital services', 'Digital services', 'High', 'Digital Transformation', 'Reem S.', 'part', '', 'Update required', 'update', 'Wrong period', 'Accepted', '2/3', '03 Nov'],
-      ['2.2.3-4', 'Data governance committee meets quarterly', 'Data & analytics', 'Med', 'Strategy & Performance', 'Omar H.', 'nas', 'AI · Partial 0.64 · low conf.', 'In progress', 'prog', '', 'AI only', '2/4', '05 Nov'],
-      ['4.1.2-1', 'Approved digital capability plan', 'Human capital', 'High', 'Human Capital', 'Lama T.', 'non', '', 'Returned for correction', 'returned', 'Loop 3', 'Returned', '0/2', '01 Nov'],
-      ['6.2.1-3', 'Beneficiary feedback closes the loop', 'Beneficiary experience', 'Med', 'Customer Experience', 'Hind M.', 'part', 'AI · Compliant 0.91', 'Under review', 'review', '', 'Override pending', '3/3', '06 Nov'],
-      ['3.2.4-1', 'Service-level KPIs published', 'Digital services', 'Med', 'Digital Transformation', 'Reem S.', 'comp', '', 'Update required', 'update', 'Compliant in 2025, needs 2026 data', 'Reopened', '1/2', '08 Nov'],
-      ['1.1.1-1', 'Digital transformation strategy approved', 'Strategy & governance', 'High', 'Strategy & Performance', 'Omar H.', 'comp', '', 'Ready for submission', 'ready', '', 'Accepted', '2/2', '—'],
-      ['1.3.2-2', 'Digital governance committee charter', 'Strategy & governance', 'Med', 'Legal & Governance', 'Sara N.', 'comp', '', 'Submitted', 'sub', '', 'Accepted', '1/1', '—'],
-      ['5.3.1-1', 'Enterprise architecture repository maintained', 'Technology & integration', 'Med', 'IT Operations', 'Faisal K.', 'part', 'AI · Partial 0.88', 'Evidence submitted', 'evsub', '', 'Pending L2', '2/3', '07 Nov'],
-      ['2.1.1-1', 'Data management policy approved and published', 'Data & analytics', 'High', 'Strategy & Performance', 'Omar H.', 'comp', '', 'DGA observation received', 'obs', 'OBS-2025-17', 'Reopened', '2/2', '09 Nov'],
-      ['5.7.1-2', 'Shared-services hosting arrangement', 'Technology & integration', 'Low', 'IT Operations', 'Faisal K.', 'na', '', 'Closed', 'closed', 'N/A approved', 'Accepted', '—', '—'],
-      ['4.3.1-1', 'Digital skills training completion tracked', 'Human capital', 'Med', 'Unassigned', 'Ownership SLA breached', 'nas', '', 'Not started', 'start', '', '—', '0/2', '10 Nov']
+      ['5.11.2-2', 'End-to-end system integration', 'IT Operations', 'FK', 'nas', 'AI: Non-compliant · 86%', 'No update', 'none', 'Pending L1', '1/4', '4 Nov', 1],
+      ['3.4.1-1', 'Digital services catalogue', 'Digital Transformation', 'RS', 'part', '', 'Update needed', 'update', 'Accepted', '2/3', '3 Nov', 1],
+      ['2.2.3-4', 'Data governance committee', 'Strategy & Performance', 'OH', 'nas', 'AI: Partial · 64% (low)', 'In progress', 'prog', 'AI only', '2/4', '5 Nov', 0],
+      ['4.1.2-1', 'Digital capability plan', 'Human Capital', 'LT', 'non', '', 'Returned', 'returned', 'Returned', '0/2', '1 Nov', 1],
+      ['6.2.1-3', 'Beneficiary feedback loop', 'Customer Experience', 'HM', 'part', 'AI: Compliant · 91%', 'In review', 'review', 'Override', '3/3', '6 Nov', 0],
+      ['3.2.4-1', 'Service-level KPIs published', 'Digital Transformation', 'RS', 'comp', '', 'Update needed', 'update', 'Reopened', '1/2', '8 Nov', 0],
+      ['1.1.1-1', 'Digital strategy approved', 'Strategy & Performance', 'OH', 'comp', '', 'Ready', 'ready', 'Accepted', '2/2', '—', 0],
+      ['1.3.2-2', 'Governance committee charter', 'Legal & Governance', 'SN', 'comp', '', 'Submitted', 'sub', 'Accepted', '1/1', '—', 0],
+      ['5.3.1-1', 'Architecture repository', 'IT Operations', 'FK', 'part', 'AI: Partial · 88%', 'Evidence in', 'prog', 'Pending L2', '2/3', '7 Nov', 0],
+      ['2.1.1-1', 'Data management policy', 'Strategy & Performance', 'OH', 'comp', '', 'DGA observation', 'obs', 'Reopened', '2/2', '9 Nov', 0],
+      ['5.7.1-2', 'Shared-services hosting', 'IT Operations', 'FK', 'na', '', 'Closed', 'closed', 'Accepted', '—', '—', 0],
+      ['4.3.1-1', 'Digital skills training', 'Unassigned', '?', 'nas', '', 'Not started', 'start', '—', '0/2', '10 Nov', 0]
     ];
     const sel = this.state.sel;
     const rows = raw.map((x, i) => ({
-      code: x[0], title: x[1], domain: x[2], weight: x[3], dept: x[4], spoc: x[5], ownerColor: x[4] === 'Unassigned' ? '#A3261B' : '#14211C',
-      comp: C[x[6]][2], cBg: C[x[6]][0], cFg: C[x[6]][1], ai: x[7], work: x[8], dot: D[x[9]], workNote: x[10], acc: x[11], ev: x[12],
-      evColor: x[12].startsWith('0/') ? '#A3261B' : '#14211C', due: x[13], sel: !!sel[i], rowBg: sel[i] ? '#F2F8F5' : '#FFFFFF',
-      toggle: () => this.setState({ sel: Object.assign({}, sel, { [i]: !sel[i] }) })
+      code: x[0], title: x[1], dept: x[2], av: x[3], avBg: AV[x[3]][0], avFg: AV[x[3]][1], ownerInk: x[2] === 'Unassigned' ? '#B42318' : '#101C17',
+      comp: C[x[4]][2], cBg: C[x[4]][0], cFg: C[x[4]][1], ai: x[5], hasAi: !!x[5], work: x[6], dot: D[x[7]], acc: x[8], steps: ST[x[8]],
+      ev: x[9], evInk: x[9].startsWith('0/') ? '#B42318' : '#101C17', due: x[10], dueInk: x[11] ? '#B42318' : '#33413B',
+      sel: !!sel[i], rowBg: sel[i] ? '#F2F8F5' : '#FFFFFF', toggle: () => this.setState({ sel: Object.assign({}, sel, { [i]: !sel[i] }) })
     }));
     const selCount = Object.values(sel).filter(Boolean).length;
-    return { rows, selCount, hasSel: selCount > 0 };
+    return { navGroups, tabs, rows, selCount, hasSel: selCount > 0, clear: () => this.setState({ sel: {} }) };
   }
 }
 </script>

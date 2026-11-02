@@ -8,167 +8,146 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
-<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<nav aria-label="Primary" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Compliance</b><br><span style="font-size: 12px; color: #5E6B65">Intelligence Platform</span></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 12px; background: #F5F7F6; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: left">Qiyas 2026 · Cycle 1<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="3">
 <div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
-<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
-<a href="Requirements.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Requirements</a>
-<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
-<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
-<a href="Action-Center.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
-<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
-<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
-<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
-<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
-<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
-</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
-</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DDEFE6; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">NA</span><span style="font-size: 13px; line-height: 17px"><b>Noura A.</b><br><span style="color: #5E6B65">Assessment Manager</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Action Center</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Action Center</h1></div>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Log interaction</button>
-<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">New action ▾</button>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 440px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search requirements, evidence, people" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<button type="button" lang="ar" aria-label="العربية" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; color: #101C17">ع</button>
+<button type="button" aria-label="Notifications, 6 new" style="position: relative; width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: #C2410C; border: 2px solid #FFFFFF"></span></button>
 </header>
 
-<main style="padding: 20px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
 
-<div role="tablist" aria-label="Action views" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #DCE2DE">
-<button type="button" role="tab" aria-selected="true" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid #0E5A45; background: transparent; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #0E5A45">Recommended <span style="color: #56625C; font-weight: 500">9</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Awaiting my approval <span style="color: #56625C">4</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Open <span style="color: #56625C">141</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Overdue <span style="color: #A3261B; font-weight: 600">23</span></button>
-<button type="button" role="tab" aria-selected="false" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #33403A">Sent &amp; interactions</button>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Actions</h1>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New action</button>
+</div>
+
+<div role="tablist" aria-label="Views" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.bd}}; background: {{t.bg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: {{t.fg}}">{{t.label}}<span style="font-size: 12px; color: {{t.nFg}}">{{t.n}}</span></button>
+</sc-for>
 </div>
 
 <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
-<section aria-label="Recommended actions" style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<section aria-label="Recommended actions" style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
 <sc-for list="{{actions}}" as="a" hint-placeholder-count="7">
-<button type="button" onClick="{{a.pick}}" style="text-align: left; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px; background: #FFFFFF; border: {{a.border}}; color: #14211C">
-<span style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
-<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 6px; background: {{a.tBg}}; color: {{a.tFg}}">{{a.type}}</span>
-<span style="font-size: 11px; padding: 2px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A">{{a.trigger}}</span>
-<span style="font-size: 11px; color: #56625C; margin-left: auto">{{a.due}}</span>
-</span>
-<span style="font-size: 14px; line-height: 20px; font-weight: 600">{{a.title}}</span>
-<span style="font-size: 12px; line-height: 18px; color: #56625C">{{a.meta}}</span>
+<button type="button" onClick="{{a.pick}}" aria-pressed="{{a.on}}" style="text-align: left; font: inherit; cursor: pointer; display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 16px; background: #FFFFFF; border: 2px solid {{a.bd}}; color: #101C17">
+<span style="flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px; background: {{a.tBg}}; color: {{a.tFg}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{a.icon}}"></path></svg></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600; line-height: 20px">{{a.title}}</span><span style="display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px"><span style="color: {{a.tFg}}; font-weight: 600">{{a.type}}</span><span style="color: #5E6B65">· {{a.trigger}}</span></span></span>
+<span style="flex: 0 0 auto; font-size: 12px; font-weight: 600; color: {{a.dueInk}}">{{a.due}}</span>
 </button>
 </sc-for>
 </section>
 
-<section aria-label="Draft preview" style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column">
-<div style="padding: 16px 20px; border-bottom: 1px solid #EEF0EE; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
-<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
-<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 6px; background: #FBE4E1; color: #A3261B">ESCALATE</span><span style="font-size: 12px; color: #3F37A8; font-weight: 600">Drafted by AI · needs your approval</span></div>
-<h2 style="margin: 0; font-size: 18px; line-height: 26px">Escalation pack · Human Capital overdue remediation</h2>
-<div style="font-size: 12px; color: #56625C">Rule ESC-02 matched 7 actions: overdue, no update, 2 reminders each · ACT-118, ACT-121, ACT-124 +4</div>
+<section aria-label="Draft" style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column">
+<div style="padding: 20px 22px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
+<span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #FDECEA; color: #B42318">Escalation</span><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #4F46E5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>AI draft</span></span>
+<h2 style="margin: 0; font-size: 20px; line-height: 28px">Human Capital · 7 overdue actions</h2>
 </div>
-<div role="group" aria-label="Draft language" style="display: flex; border: 1px solid #CBD3CE; border-radius: 8px; overflow: hidden">
-<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 40px; padding: 0 14px; border: 0; font: inherit; font-size: 13px; cursor: pointer; background: {{enBg}}; color: {{enFg}}">English</button>
-<button type="button" onClick="{{toAr}}" aria-pressed="{{isAr}}" lang="ar" style="height: 40px; padding: 0 14px; border: 0; font: inherit; font-size: 13px; cursor: pointer; background: {{arBg}}; color: {{arFg}}">العربية</button>
+<div role="group" aria-label="Language" style="display: flex; padding: 3px; border-radius: 10px; background: #F5F7F6">
+<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: {{enBg}}; color: #101C17">EN</button>
+<button type="button" onClick="{{toAr}}" aria-pressed="{{isAr}}" lang="ar" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: {{arBg}}; color: #101C17">عربي</button>
 </div>
-</div>
-
-<div style="padding: 16px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 13px; border-bottom: 1px solid #EEF0EE">
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">To<input type="text" value="Executive Director, Human Capital" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Copy<input type="text" value="Assessment Manager · Department SPOC" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
-<label style="display: flex; flex-direction: column; gap: 4px; font-weight: 600">Decision requested by<input type="text" value="03 Nov 2026" style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400"></label>
 </div>
 
-<div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="padding: 0 22px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div style="padding: 12px; border-radius: 14px; background: #FDECEA"><b style="font-size: 20px; color: #B42318">−3.1</b><br><span style="font-size: 12px; color: #6E2A22">pts at stake</span></div>
+<div style="padding: 12px; border-radius: 14px; background: #F5F7F6"><b style="font-size: 20px">12 d</b><br><span style="font-size: 12px; color: #5E6B65">avg overdue</span></div>
+<div style="padding: 12px; border-radius: 14px; background: #F5F7F6"><b style="font-size: 20px">2</b><br><span style="font-size: 12px; color: #5E6B65">reminders sent</span></div>
+</div>
+
+<div style="padding: 0 22px 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px">
+<span style="color: #5E6B65; width: 32px">To</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 4px; border-radius: 999px; background: #F5F7F6"><span style="width: 24px; height: 24px; border-radius: 50%; background: #FDE9D9; color: #9A3412; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">ED</span>Exec. Director, HC</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 4px; border-radius: 999px; background: #F5F7F6"><span style="width: 24px; height: 24px; border-radius: 50%; background: #FDE9D9; color: #9A3412; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">LT</span>Lama T.</span>
+<button type="button" aria-label="Add recipient" style="width: 32px; height: 32px; border: 1px dashed #A9B6AF; border-radius: 50%; background: #FFFFFF; cursor: pointer; color: #47534D">+</button>
+</div>
+
+<div style="padding: 0 22px 18px">
 <sc-if value="{{isEn}}" hint-placeholder-val="{{ true }}">
-<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Message<textarea rows="9" style="border: 1px solid #CBD3CE; border-radius: 8px; padding: 12px; font: inherit; font-size: 14px; line-height: 22px; font-weight: 400; resize: vertical">Seven Qiyas remediation actions owned by Human Capital are overdue by an average of 12 days, with no update after two reminders.
+<label style="display: block"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message</span><textarea rows="6" style="width: 100%; box-sizing: border-box; border: 1px solid #E6EBE8; border-radius: 14px; padding: 14px; font: inherit; font-size: 14px; line-height: 22px; resize: vertical">Seven remediation actions are 12 days overdue with no update after two reminders. They put 3.1 points at risk and block submission on 20 Nov.
 
-Together they affect 4 requirements in the Human capital domain (projected impact −3.1 points) and two of them block submission on 20 Nov.
-
-Decision requested: nominate an accountable owner for ACT-118 and ACT-121 and confirm revised dates by 03 Nov, or approve converting 4.1.2 into a funded initiative.</textarea></label>
+Please name an owner for ACT-118 and ACT-121 and confirm new dates by 3 Nov.</textarea></label>
 </sc-if>
 <sc-if value="{{isAr}}" hint-placeholder-val="{{ false }}">
-<label lang="ar" dir="rtl" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; font-family: 'IBM Plex Sans Arabic', sans-serif">نص الرسالة<textarea rows="9" dir="rtl" style="border: 1px solid #CBD3CE; border-radius: 8px; padding: 12px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px; font-weight: 400; resize: vertical">تأخرت سبعة إجراءات تصحيحية لمؤشر قياس تابعة لإدارة رأس المال البشري بمتوسط ١٢ يومًا دون أي تحديث بعد تذكيرين.
+<label style="display: block" lang="ar" dir="rtl"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">نص الرسالة</span><textarea rows="6" dir="rtl" style="width: 100%; box-sizing: border-box; border: 1px solid #E6EBE8; border-radius: 14px; padding: 14px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px; resize: vertical">سبعة إجراءات تصحيحية متأخرة 12 يومًا دون تحديث بعد تذكيرين، وتعرّض 3.1 نقطة للخطر وتعيق التسليم في 20 نوفمبر.
 
-تؤثر هذه الإجراءات على ٤ متطلبات في محور رأس المال البشري (أثر متوقع −٣٫١ نقطة)، ويعيق اثنان منها التسليم في ٢٠ نوفمبر.
-
-القرار المطلوب: تسمية مسؤول للإجراءين ACT-118 و ACT-121 وتأكيد المواعيد المعدّلة قبل ٣ نوفمبر.</textarea></label>
+نرجو تسمية مسؤول للإجراءين ACT-118 و ACT-121 وتأكيد المواعيد قبل 3 نوفمبر.</textarea></label>
 </sc-if>
-<div style="display: flex; flex-direction: column; gap: 6px; background: #F7F8F6; border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 20px">
-<b>Attached pack (generated from records)</b>
-<span>• Action history: created 18 Sep, reminders 14 Oct and 25 Oct, no response logged</span>
-<span>• Impact: 4 requirements, −3.1 pts, 2 submission blockers (calculation v3, 09:40)</span>
-<span>• Interaction log: 2 meetings, 1 attended</span>
-</div>
 </div>
 
-<div style="margin-top: auto; padding: 14px 20px; border-top: 1px solid #EEF0EE; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; background: #FAFBFA">
-<span style="font-size: 12px; color: #56625C; line-height: 18px; flex: 1 1 260px">You can approve: Assessment Manager holds "approve escalation". Nothing is sent until you confirm; the send is logged as an interaction.</span>
+<div style="padding: 0 22px 18px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+<span style="font-size: 12px; font-weight: 600; color: #5E6B65; margin-right: 4px">Attached</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #F5F7F6; font-size: 12px; font-weight: 500"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4"></path></svg>History</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #F5F7F6; font-size: 12px; font-weight: 500"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>Score impact</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #F5F7F6; font-size: 12px; font-weight: 500"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>7 actions</span>
+</div>
+
+<div style="margin-top: auto; padding: 14px 22px; border-top: 1px solid #EEF1EF; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<span title="Nothing is sent until you approve. The send is logged as an interaction." style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #0E5A45"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Needs your approval</span>
 <div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Dismiss with reason</button>
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Schedule review instead</button>
-<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Approve and send</button>
+<button type="button" style="height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; font: inherit; font-size: 14px; cursor: pointer; color: #47534D">Dismiss</button>
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #101C17">Schedule review</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"></path></svg>Approve &amp; send</button>
 </div>
 </div>
 </section>
 </div>
-
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-size: 15px">Start an action</h2>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<sc-for list="{{catalog}}" as="c" hint-placeholder-count="12">
-<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #14211C">{{c}}</button>
-</sc-for>
-</div>
-<div style="font-size: 12px; color: #56625C">Catalog, required fields and approval rules come from Admin Studio › Action Catalog. Buttons you cannot use are hidden by role.</div>
-</section>
 </main>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { sel: 0, lang: 'en' }; }
+  constructor(props) { super(props); this.state = { tab: 0, sel: 0, lang: 'en' }; }
   renderVals() {
+    const ACTIVE = 'Action-Center';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#E7F3ED' : 'transparent', fg: on ? '#0E5A45' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge, badgeBg: bb }; }) }));
+    const tabs = [['Suggested', 9], ['To approve', 4], ['Open', 141], ['Overdue', 23], ['Sent', '']].map(([label, n], i) => { const on = this.state.tab === i; return { label, n, on, bg: on ? '#101C17' : '#FFFFFF', fg: on ? '#FFFFFF' : '#101C17', bd: on ? '#101C17' : '#E6EBE8', nFg: on ? '#C9D1CD' : (i === 3 ? '#B42318' : '#5E6B65'), pick: () => this.setState({ tab: i }) }; });
     const T = {
-      esc: ['ESCALATE', '#FBE4E1', '#A3261B'], req: ['REQUEST EVIDENCE', '#E2EFE9', '#0E5A45'], upd: ['REQUEST UPDATE', '#FBEFD9', '#8A4B00'],
-      ret: ['RETURN', '#FBEFD9', '#8A4B00'], rem: ['REMINDER', '#ECEEEC', '#33403A'], cla: ['CLARIFICATION', '#E8ECF3', '#3E4B63'], ini: ['INITIATIVE', '#EEEDFB', '#3F37A8']
+      esc: ['Escalate', '#FDECEA', '#B42318', 'M12 19V5M5 12l7-7 7 7'], req: ['Request evidence', '#E7F3ED', '#0E5A45', 'M14 3H6v18h12V7zM14 3v4h4'],
+      ret: ['Return', '#FFF4DF', '#8A4B00', 'M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-1'], upd: ['Request update', '#FFF4DF', '#8A4B00', 'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5'],
+      rem: ['Reminder', '#EEF1EF', '#47534D', 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0'], cla: ['Clarification', '#E0ECF8', '#1E4E8C', 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'],
+      ini: ['Initiative', '#EEEDFD', '#4F46E5', 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z']
     };
     const raw = [
-      ['esc', 'Rule ESC-02', 'Due now', 'Escalate Human Capital: 7 overdue actions', '4 requirements · −3.1 pts · 2 reminders each'],
-      ['req', 'AI briefing', 'Due 04 Nov', 'Request integration samples for 5.11.2-2', 'IT Operations · Faisal K. · 3 missing items pre-filled'],
-      ['ret', 'Validation failed', 'Today', 'Return 4 files for correction', 'Wrong period ×2, missing signature, unreadable scan · bulk preview'],
-      ['upd', 'DGA clarification CL-014', 'Due 08 Nov', 'Request current-cycle samples for 4 accepted items', 'Will reopen acceptance on response'],
-      ['rem', 'Rule REM-01', 'Due 03 Nov', 'Remind Strategy & Performance (2.2.3-4)', 'Reminder 1 of 2 · committee minutes'],
-      ['cla', 'Reviewer', 'Draft', 'Ask DGA whether a staging sample is acceptable', 'Affects 5.11.2-2, 5.11.1-1'],
-      ['ini', 'Gap analysis', 'Proposal', 'Convert 4.1.2 into a digital skills initiative', 'Structural gap · 3 requirements · sponsor needed']
+      ['esc', 'Rule ESC-02', 'Now', 'Human Capital · 7 overdue', 1],
+      ['req', 'AI briefing', '4 Nov', 'Integration samples · 5.11.2-2', 0],
+      ['ret', 'Validation', 'Today', 'Return 4 failed files', 1],
+      ['upd', 'CL-014', '8 Nov', 'Current-cycle samples · 4 items', 0],
+      ['rem', 'Rule REM-01', '3 Nov', 'Committee minutes · 2.2.3-4', 0],
+      ['cla', 'Reviewer', 'Draft', 'Is a staging sample valid?', 0],
+      ['ini', 'Gap analysis', 'Proposal', 'Digital skills initiative', 0]
     ];
-    const actions = raw.map((x, i) => ({
-      type: T[x[0]][0], tBg: T[x[0]][1], tFg: T[x[0]][2], trigger: x[1], due: x[2], title: x[3], meta: x[4],
-      border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i })
-    }));
+    const actions = raw.map((x, i) => { const on = this.state.sel === i; return { type: T[x[0]][0], tBg: T[x[0]][1], tFg: T[x[0]][2], icon: T[x[0]][3], trigger: x[1], due: x[2], title: x[3], dueInk: x[4] ? '#B42318' : '#5E6B65', on, bd: on ? '#0E5A45' : '#E6EBE8', pick: () => this.setState({ sel: i }) }; });
     const en = this.state.lang === 'en';
-    return {
-      actions, isEn: en, isAr: !en,
-      enBg: en ? '#0E5A45' : '#FFFFFF', enFg: en ? '#FFFFFF' : '#14211C', arBg: en ? '#FFFFFF' : '#0E5A45', arFg: en ? '#14211C' : '#FFFFFF',
-      toEn: () => this.setState({ lang: 'en' }), toAr: () => this.setState({ lang: 'ar' }),
-      catalog: ['Request evidence', 'Request update', 'Return for correction', 'Send reminder', 'Assign remediation', 'Escalate', 'Request clarification', 'Schedule review', 'Create initiative', 'Close action', 'Prepare submission', 'Executive update']
-    };
+    return { navGroups, tabs, actions, isEn: en, isAr: !en, enBg: en ? '#FFFFFF' : 'transparent', arBg: en ? 'transparent' : '#FFFFFF', toEn: () => this.setState({ lang: 'en' }), toAr: () => this.setState({ lang: 'ar' }) };
   }
 }
 </script>

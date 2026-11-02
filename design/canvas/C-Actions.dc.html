@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My work</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1E4E8C}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #8DB4E2;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
+<nav aria-label="Consultant portal" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E3E8EF; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #1E4E8C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">DA</span><span style="line-height: 17px"><b style="font-size: 14px">Consultant portal</b><br><span style="font-size: 12px; color: #5E6B65">Demo Advisory Co.</span></span></div>
+<a href="Workspace-Chooser.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border: 1px solid #C8DAEE; border-radius: 12px; background: #F3F7FC; text-decoration: none; color: #101C17"><span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">DE</span><span style="flex: 1 1 auto; min-width: 0; line-height: 16px"><b style="font-size: 13px">Demo Entity</b><br><span style="font-size: 12px; color: #5E6B65">Qiyas 2026</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg></a>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E3E8EF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">SR</span><span style="font-size: 13px; line-height: 17px"><b>Sami R.</b><br><span style="color: #5E6B65">Engagement Lead</span></span></div>
+</nav>
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 420px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search in Demo Entity" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #EAF1FA; color: #1E4E8C; font-size: 12px; font-weight: 700">Managed service</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #F5F7F6; color: #33413B; font-size: 12px; font-weight: 600">ENG-0142 · 214 d left</span>
+<a href="Workspace-Chooser.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; color: #101C17">Switch entity</a>
+</header>
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">My work</h1>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #101C17">Remind all overdue</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #1E4E8C; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New request</button>
+</div>
+</div>
+
+<div role="tablist" aria-label="Hand-offs" style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid {{t.bd}}; background: {{t.bg}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: {{t.fg}}">{{t.l}}<span style="font-size: 12px; padding: 1px 8px; border-radius: 999px; background: {{t.cBg}}">{{t.n}}</span></button></sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 999 1 600px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div role="table" aria-label="{{tabName}}" style="font-size: 14px">
+<div role="row" style="display: grid; grid-template-columns: minmax(220px, 2.2fr) minmax(140px, 1.2fr) 100px 120px 150px; gap: 12px; padding: 12px 22px; background: #F7F9F8; font-size: 12px; font-weight: 600; color: #5E6B65">
+<span role="columnheader">Requirement</span><span role="columnheader">With</span><span role="columnheader">Since</span><span role="columnheader">Status</span><span role="columnheader"></span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+<div role="row" style="display: grid; grid-template-columns: minmax(220px, 2.2fr) minmax(140px, 1.2fr) 100px 120px 150px; gap: 12px; align-items: center; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span role="cell" style="line-height: 19px"><b>{{r.t}}</b><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5E6B65">{{r.code}}</span></span>
+<span role="cell" style="display: flex; align-items: center; gap: 8px"><span style="flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">{{r.av}}</span><span style="line-height: 17px; font-size: 13px">{{r.who}}<br><span style="color: #5E6B65">{{r.role}}</span></span></span>
+<span role="cell" style="font-size: 13px; color: #5E6B65">{{r.sent}}</span>
+<span role="cell"><span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: {{r.sBg}}; color: {{r.sFg}}">{{r.st}}</span></span>
+<span role="cell" style="display: flex; gap: 6px; justify-content: flex-end"><a href="C-Requirement-Detail.dc.html" style="height: 32px; padding: 0 10px; border: 1px solid #E6EBE8; border-radius: 8px; background: #FFFFFF; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; color: #101C17">{{r.a1}}</a><sc-if value="{{r.esc}}" hint-placeholder-val="{{ false }}"><button type="button" style="height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: #FDECEA; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; color: #B42318">Escalate</button></sc-if></span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">Reminders</h2></div>
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span style="flex: 1 1 auto; font-size: 14px; font-weight: 500">{{r.label}}</span>
+<button type="button" role="switch" aria-checked="{{r.on}}" aria-label="{{r.label}}" onClick="{{r.toggle}}" style="flex: 0 0 auto; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{r.track}}; cursor: pointer; padding: 3px; display: flex; justify-content: {{r.justify}}"><span style="width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.2)"></span></button>
+</div>
+</sc-for>
+</section>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 16px">Escalation path</h2>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{path}}" as="p" hint-placeholder-count="3"><li style="display: flex; align-items: center; gap: 10px; font-size: 13px"><span style="flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: #F5F7F6; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{p.n}}</span><span style="flex: 1 1 auto"><b>{{p.l}}</b></span><span style="color: #5E6B65">{{p.when}}</span></li></sc-for>
+</ol>
+</section>
+</aside>
+</div>
+
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 0, r: { 0: true, 1: true, 2: false } }; }
+  renderVals() {
+    const CA = 'C-Actions';
+    const CP = { grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', plus: 'M12 5v14M5 12h14', home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', ent: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', eng: 'M4 7h16v13H4zM9 7V4h6v3', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const CN = [['PORTFOLIO', [['All entities', 'grid', 'Partner-Cockpit'], ['Add entity', 'plus', 'Partner-Onboarding']]], ['DEMO ENTITY', [['Overview', 'home', 'C-Overview'], ['Requirements', 'req', 'C-Requirements'], ['My work', 'act', 'C-Actions', '23', '#1E4E8C'], ['Evidence library', 'ev', 'C-Evidence'], ['Clarifications', 'cla', 'C-Clarifications'], ['Submission', 'sub', 'C-Submission']]], ['INSIGHTS', [['Departments', 'dep', 'C-Departments'], ['Comparisons', 'cmp', 'C-Comparisons'], ['Entity 360', 'ent', 'Partner-Entity360']]], ['ENGAGEMENT', [['Engagement', 'eng', 'Partner-Engagement'], ['Entity settings', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = CN.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === CA; return { label, d: CP[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#EAF1FA' : 'transparent', fg: on ? '#1E4E8C' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge: badge || '', badgeBg: bb || '#1E4E8C' }; }) }));
+    const S = { todo: ['To review', '#EAF1FA', '#1E4E8C'], open: ['Opened', '#EAF1FA', '#1E4E8C'], late: ['Overdue', '#FDECEA', '#B42318'], new: ['Not opened', '#F5F7F6', '#47534D'], done: ['Answered', '#E7F3ED', '#0E5A45'], acc: ['Accepted', '#E7F3ED', '#0E5A45'], ret: ['Returned', '#FDECEA', '#B42318'], wait: ['Reviewing', '#FFF4DF', '#8A4B00'] };
+    const r = (t, code, av, who, role, sent, st, a1) => ({ t, code, av, who, role, sent, st: S[st][0], sBg: S[st][1], sFg: S[st][2], a1, esc: st === 'late' });
+    const T = [
+      ['Reviews', 14, [
+        r('End-to-end system integration', '5.11.2-2', 'AI', 'AI check', 'Not ready · 86%', 'Today', 'todo', 'Review'),
+        r('Data management policy', '2.1.1-1', 'AI', 'AI check', 'Ready · 91%', 'Today', 'todo', 'Review'),
+        r('Architecture repository', '5.3.1-1', 'FK', 'Faisal K.', 'New evidence', 'Yesterday', 'todo', 'Review'),
+        r('Data catalogue published', '3.4.1-1', 'RS', 'Rana S.', 'New evidence', '2 d ago', 'todo', 'Review')
+      ]],
+      ['To SPOCs', 31, [
+        r('Integration transaction samples', '5.11.2-2', 'FK', 'Faisal K.', 'Integration Office', '5 d ago', 'late', 'Remind'),
+        r('Training records 2026', '4.1.2-1', 'HB', 'Hessa B.', 'Human Capital', '14 d ago', 'late', 'Remind'),
+        r('Data catalogue export', '3.4.1-1', 'KA', 'Khalid A.', 'IT & Digital', '6 d ago', 'open', 'Remind'),
+        r('Signed digital strategy', '1.1.1-1', 'MS', 'Maha S.', 'Strategy', '2 d ago', 'new', 'Remind'),
+        r('Budget allocation memo', '1.3.2-2', 'YA', 'Yousef A.', 'Finance', '1 d ago', 'done', 'Open'),
+        r('Service catalogue update', '2.2.3-4', 'KA', 'Khalid A.', 'IT & Digital', '3 d ago', 'open', 'Remind')
+      ]],
+      ['To client', 23, [
+        r('Batch 6 · 12 requirements', 'BATCH-06', 'NA', 'Noura A.', 'Index owner', '3 d ago', 'wait', 'Remind'),
+        r('Batch 5 · 11 requirements', 'BATCH-05', 'NA', 'Noura A.', 'Index owner', '8 d ago', 'acc', 'Open'),
+        r('Integration overrides', '5.11.2-2', 'NA', 'Noura A.', 'Index owner', '1 d ago', 'ret', 'Fix'),
+        r('Clarification CL-014 impact', 'CL-014', 'HS', 'Huda S.', 'Final approver', '2 d ago', 'wait', 'Remind')
+      ]],
+      ['Escalations', 3, [
+        r('Human Capital · 9 overdue', 'ESC-02', 'HD', 'Hamad D.', 'Exec. Director, HC', '1 d ago', 'open', 'Open'),
+        r('Integration Office · 5 overdue', 'ESC-03', 'NA', 'Noura A.', 'Index owner', 'Today', 'new', 'Open'),
+        r('IT & Digital · catalogue', 'ESC-01', 'KA', 'Khalid A.', 'IT & Digital', '9 d ago', 'done', 'Open')
+      ]]
+    ];
+    const tab = this.state.tab;
+    const tabs = T.map(([l, n], i) => { const on = tab === i; return { l, n, on, bg: on ? '#1E4E8C' : '#FFFFFF', fg: on ? '#FFFFFF' : '#33413B', bd: on ? '#1E4E8C' : '#E6EBE8', cBg: on ? '#3A6FB8' : '#F5F7F6', pick: () => this.setState({ tab: i }) }; });
+    const rs = ['Auto-remind every 3 days', 'Escalate after 2 reminders', 'Weekly summary to index owner'];
+    const rules = rs.map((label, i) => { const on = !!this.state.r[i]; return { label, on, track: on ? '#1E4E8C' : '#C9D1CD', justify: on ? 'flex-end' : 'flex-start', toggle: () => this.setState({ r: Object.assign({}, this.state.r, { [i]: !on }) }) }; });
+    return {
+      navGroups, tabs, rules, tabName: T[tab][0], rows: T[tab][2],
+      path: [{ n: 1, l: 'SPOC', when: 'Day 0' }, { n: 2, l: 'Department head', when: 'After 2 reminders' }, { n: 3, l: 'Index owner', when: 'After 10 days' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

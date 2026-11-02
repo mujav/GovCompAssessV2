@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Regulator clarifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
+
+<nav aria-label="Consultant portal" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E3E8EF; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #1E4E8C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">DA</span><span style="line-height: 17px"><b style="font-size: 14px">Consultant portal</b><br><span style="font-size: 12px; color: #5E6B65">Demo Advisory Co.</span></span></div>
+<a href="Workspace-Chooser.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border: 1px solid #C8DAEE; border-radius: 12px; background: #F3F7FC; text-decoration: none; color: #101C17"><span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">DE</span><span style="flex: 1 1 auto; min-width: 0; line-height: 16px"><b style="font-size: 13px">Demo Entity</b><br><span style="font-size: 12px; color: #5E6B65">Qiyas 2026</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg></a>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E3E8EF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">SR</span><span style="font-size: 13px; line-height: 17px"><b>Sami R.</b><br><span style="color: #5E6B65">Engagement Lead</span></span></div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 420px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search in Demo Entity" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #EAF1FA; color: #1E4E8C; font-size: 12px; font-weight: 700">Managed service</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #F5F7F6; color: #33413B; font-size: 12px; font-weight: 600">ENG-0142 · 214 d left</span>
+<a href="Workspace-Chooser.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; color: #101C17">Switch entity</a>
+</header>
+
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Clarifications</h1>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ask the DGA</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section aria-label="Register" style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{list}}" as="c" hint-placeholder-count="5">
+<button type="button" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="text-align: left; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 16px; background: #FFFFFF; border: 2px solid {{c.bd}}; color: #101C17">
+<span style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #5E6B65">{{c.id}}</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: {{c.sFg}}"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{c.sDot}}"></span>{{c.status}}</span></span>
+<span style="font-size: 14px; line-height: 20px; font-weight: 600">{{c.q}}</span>
+<span style="font-size: 12px; color: #5E6B65">{{c.n}} affected · {{c.when}}</span>
+</button>
+</sc-for>
+</section>
+
+<section aria-label="Detail" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #F5F7F6">CL-014</span><span style="font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: #E0ECF8; color: #1E4E8C">Answered · not applied</span></span>
+<h2 style="margin: 0; font-size: 22px; line-height: 30px; letter-spacing: -0.01em">Is a prior-cycle sample valid for unchanged integrations?</h2>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #5E6B65"><span style="width: 26px; height: 26px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">FK</span>Asked 11 Oct · answered 24 Oct</span>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; justify-content: space-between; align-items: center"><b style="font-size: 13px; color: #1E4E8C">DGA said</b><a href="#" style="font-size: 12px; text-decoration: none">Original ↗</a></span>
+<p lang="ar" dir="rtl" style="margin: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 17px; line-height: 30px">يجب أن يكون النموذج التطبيقي من الدورة الحالية، ولا يُقبل نموذج الدورة السابقة.</p>
+</div>
+<div style="background: #F2F8F5; border: 1px solid #CFE6DA; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; justify-content: space-between; align-items: center"><b style="font-size: 13px; color: #0E5A45">Our interpretation</b><span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #0E5A45"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Approved</span></span>
+<p style="margin: 0; font-size: 17px; line-height: 26px; font-weight: 500">Samples must be dated in the current cycle, even for unchanged systems.</p>
+</div>
+</div>
+
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px"><h3 style="margin: 0; font-size: 16px">Impact · 6 requirements</h3><span style="display: flex; gap: 12px; font-size: 12px; color: #5E6B65"><span style="display: inline-flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #D9442E"></span>Reopens</span><span style="display: inline-flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #4F46E5"></span>Flags review</span></span></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px">
+<sc-for list="{{affected}}" as="a" hint-placeholder-count="6">
+<a href="C-Requirement-Detail.dc.html" title="{{a.why}}" style="display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 14px; border: 1px solid #E6EBE8; text-decoration: none; color: #101C17; box-shadow: inset 3px 0 0 {{a.dot}}">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">{{a.code}}</span>
+<span style="font-size: 12px; color: #5E6B65">{{a.acc}}</span>
+<span style="font-size: 12px; font-weight: 600; color: {{a.ink}}">{{a.effect}}</span>
+</a>
+</sc-for>
+</div>
+</div>
+
+<div style="position: sticky; bottom: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; background: #101C17; color: #FFFFFF; border-radius: 16px; padding: 10px 10px 10px 18px">
+<span style="font-size: 14px"><b>4 reopen</b> · 4 update requests</span>
+<div style="display: flex; gap: 8px">
+<a href="Admin-Frameworks.dc.html" style="height: 40px; padding: 0 14px; border-radius: 10px; background: #2A3833; color: #FFFFFF; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center">Update guidance</a>
+<button type="button" style="height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #101C17">Preview &amp; apply</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    const ACTIVE = 'Clarifications';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const CA = 'C-Clarifications';
+    const CP = { grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', plus: 'M12 5v14M5 12h14', home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', ent: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', eng: 'M4 7h16v13H4zM9 7V4h6v3', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const CN = [['PORTFOLIO', [['All entities', 'grid', 'Partner-Cockpit'], ['Add entity', 'plus', 'Partner-Onboarding']]], ['DEMO ENTITY', [['Overview', 'home', 'C-Overview'], ['Requirements', 'req', 'C-Requirements'], ['My work', 'act', 'C-Actions', '23', '#1E4E8C'], ['Evidence library', 'ev', 'C-Evidence'], ['Clarifications', 'cla', 'C-Clarifications'], ['Submission', 'sub', 'C-Submission']]], ['INSIGHTS', [['Departments', 'dep', 'C-Departments'], ['Comparisons', 'cmp', 'C-Comparisons'], ['Entity 360', 'ent', 'Partner-Entity360']]], ['ENGAGEMENT', [['Engagement', 'eng', 'Partner-Engagement'], ['Entity settings', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = CN.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === CA; return { label, d: CP[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#EAF1FA' : 'transparent', fg: on ? '#1E4E8C' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge: badge || '', badgeBg: bb || '#1E4E8C' }; }) }));
+    const S = { ans: ['Answered', '#1E4E8C', '#2F6FB0'], sub: ['Awaiting DGA', '#8A4B00', '#E0A100'], draft: ['Draft', '#47534D', '#C9D1CD'], done: ['Applied', '#0E5A45', '#1F9D6E'] };
+    const raw = [['CL-014', 'ans', 'Prior-cycle sample for unchanged systems?', 6, '24 Oct'], ['CL-015', 'sub', 'Does a staging transaction count?', 2, '8 days waiting'], ['CL-016', 'draft', 'Is 5.7.1 not applicable for shared hosting?', 1, 'AI draft'], ['CL-012', 'done', 'Approval level for the data policy', 3, '2 Oct'], ['CL-011', 'done', 'Period for quarterly minutes', 4, '21 Sep']];
+    const list = raw.map((x, i) => { const on = this.state.sel === i; return { id: x[0], status: S[x[1]][0], sFg: S[x[1]][1], sDot: S[x[1]][2], q: x[2], n: x[3], when: x[4], on, bd: on ? '#0E5A45' : '#E6EBE8', pick: () => this.setState({ sel: i }) }; });
+    const af = (code, acc, reopen, why) => ({ code, acc, why, effect: reopen ? 'Reopens' : 'Flags review', dot: reopen ? '#D9442E' : '#4F46E5', ink: reopen ? '#B42318' : '#4F46E5' });
+    return {
+      navGroups, list,
+      affected: [af('5.11.2-2', 'In review', false, 'Sample dated Mar 2025'), af('5.11.1-1', 'Accepted', true, 'Accepted with a 2025 sample'), af('5.3.1-1', 'In review', false, '2025 screenshot'), af('3.2.4-1', 'Accepted', true, 'KPI sample covers 2025'), af('6.1.2-2', 'Accepted', true, 'Portal sample from 2025'), af('6.2.1-3', 'Accepted', true, 'Mixed periods')]
+    };
+  }
+}
+</script>
+</body>
+</html>

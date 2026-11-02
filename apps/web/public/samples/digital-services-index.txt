@@ -1,0 +1,15 @@
+DIGITAL SERVICES MATURITY INDEX
+
+Section 1: Service design
+1.1 Services are designed around life events
+1.1.1 Life events are mapped to services across entities [High]
+1.1.2 Each life event has a journey owner [Medium]
+1.2 User research
+1.2.1 Usability testing runs before each major release [Medium]
+Evidence: test plans; findings log
+
+Section 2: Service delivery
+2.1 Channels
+2.1.1 Services are available on mobile without loss of function [High]
+2.1.2 Assisted channels exist for users who cannot use digital channels
+2.2.1 Service status is visible to the user at each step [Low]

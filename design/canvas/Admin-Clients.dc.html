@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Clients and domains</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #F3B48C;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
+
+<nav aria-label="Admin Studio" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #C2410C; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Admin Studio</b><br><a href="Workspace-Chooser.dc.html" style="font-size: 12px; color: #5E6B65; text-decoration: none">← Workspace</a></span></div>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="3">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span></a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #FDE9D9; color: #9A3412; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">MF</span><span style="font-size: 13px; line-height: 17px"><b>Majed F.</b><br><span style="color: #5E6B65">Platform Admin</span></span></div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 440px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search clients or domains" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; background: #FFF6F0; color: #9A3412; font-size: 12px; font-weight: 700">Platform · all clients</span>
+</header>
+
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Clients &amp; domains</h1>
+<div style="display: flex; gap: 8px">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; color: #101C17">Import CSV</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add client</button>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E6EBE8"><span style="width: 40px; height: 40px; border-radius: 12px; background: {{k.bg}}; color: {{k.fg}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{k.icon}}"></path></svg></span><span><b style="font-size: 22px; color: {{k.vInk}}">{{k.v}}</b><br><span style="font-size: 13px; color: #5E6B65">{{k.l}}</span></span></div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div role="table" aria-label="Clients" style="font-size: 14px">
+<div role="row" style="display: grid; grid-template-columns: minmax(200px, 2fr) minmax(170px, 1.6fr) 120px 130px; gap: 12px; padding: 12px 20px; background: #F7F9F8; font-size: 12px; font-weight: 600; color: #5E6B65">
+<span role="columnheader">Client</span><span role="columnheader">Email domains</span><span role="columnheader">Sign-in</span><span role="columnheader">Plan</span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+<div role="row" style="display: grid; grid-template-columns: minmax(200px, 2fr) minmax(170px, 1.6fr) 120px 130px; gap: 12px; align-items: center; padding: 12px 20px; border-top: 1px solid #EEF1EF; background: {{r.bg}}; box-shadow: inset 3px 0 0 {{r.edge}}">
+<span role="cell"><button type="button" onClick="{{r.pick}}" aria-pressed="{{r.on}}" style="display: flex; align-items: center; gap: 12px; border: 0; padding: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; color: #101C17"><span style="flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; background: {{r.lBg}}; color: {{r.lFg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{r.ini}}</span><span style="line-height: 18px"><b>{{r.name}}</b><br><span style="font-size: 12px; color: #5E6B65">{{r.type}}</span></span></button></span>
+<span role="cell" style="display: flex; flex-wrap: wrap; gap: 4px"><sc-for list="{{r.domains}}" as="d" hint-placeholder-count="1"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 3px 8px; border-radius: 6px; background: #F5F7F6">{{d}}</span></sc-for></span>
+<span role="cell" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: {{r.sFg}}"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{r.sDot}}"></span>{{r.sso}}</span>
+<span role="cell"><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: {{r.pBg}}; color: {{r.pFg}}">{{r.plan}}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<aside aria-label="{{c.name}}" style="flex: 1 1 380px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 14px; padding: 20px 22px; border-bottom: 1px solid #EEF1EF">
+<span style="flex: 0 0 auto; width: 48px; height: 48px; border-radius: 14px; background: {{c.lBg}}; color: {{c.lFg}}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">{{c.ini}}</span>
+<span style="flex: 1 1 auto; min-width: 0; line-height: 21px"><b style="font-size: 18px">{{c.name}}</b><br><span lang="ar" dir="rtl" style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 14px; color: #5E6B65">{{c.ar}}</span></span>
+<button type="button" style="height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Edit</button>
+</div>
+
+<div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #EEF1EF">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #5E6B65">COMPANY</span>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 13px">
+<sc-for list="{{c.facts}}" as="f" hint-placeholder-count="6"><span><span style="font-size: 12px; color: #5E6B65">{{f.k}}</span><br><b>{{f.v}}</b></span></sc-for>
+</div>
+</div>
+
+<div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #EEF1EF">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #5E6B65">EMAIL DOMAINS</span><button type="button" style="height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: #F5F7F6; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; color: #0E5A45">+ Add domain</button></div>
+<sc-for list="{{c.domainRows}}" as="d" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border-radius: 10px; background: #F7F9F8"><span style="flex: 1 1 auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{d.d}}</span><span style="font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: {{d.bg}}; color: {{d.fg}}">{{d.s}}</span></div>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #33413B"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>Sign-in opens <b>{{c.route}}</b></div>
+</div>
+
+<div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #EEF1EF">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #5E6B65">MICROSOFT SIGN-IN</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {{c.sFg}}"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{c.sDot}}"></span>{{c.sso}}</span></div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 13px">
+<span><span style="font-size: 12px; color: #5E6B65">Tenant ID</span><br><b style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">{{c.tenant}}</b></span>
+<span><span style="font-size: 12px; color: #5E6B65">User sync</span><br><b>{{c.sync}}</b></span>
+</div>
+<div style="display: flex; gap: 8px"><button type="button" style="height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Test sign-in</button><button type="button" style="height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">Sync now</button></div>
+</div>
+
+<div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #EEF1EF">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #5E6B65">ACCESS</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{c.fw}}" as="w" hint-placeholder-count="3"><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #F5F7F6">{{w}}</span></sc-for></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #5E6B65">Seats</span><b>{{c.seats}}</b></span><span style="display: block; height: 6px; border-radius: 3px; background: #EEF1EF"><span style="display: block; height: 6px; width: {{c.seatPct}}; border-radius: 3px; background: #4F46E5"></span></span></div>
+<span style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: #5E6B65">Term</span><b>{{c.term}}</b></span>
+<span style="display: flex; align-items: center; justify-content: space-between; font-size: 13px"><span style="color: #5E6B65">Consultants</span><span style="display: flex"><sc-for list="{{c.team}}" as="t" hint-placeholder-count="3"><span style="width: 28px; height: 28px; margin-left: -6px; border-radius: 50%; border: 2px solid #FFFFFF; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">{{t}}</span></sc-for></span></span>
+</div>
+
+<div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #5E6B65">ENTITY ADMINS</span><button type="button" style="height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: #F5F7F6; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; color: #0E5A45">+ Add admin</button></div>
+<sc-for list="{{c.admins}}" as="a" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DDEFE6; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{a.av}}</span><span style="flex: 1 1 auto; line-height: 17px"><b>{{a.n}}</b><br><span dir="ltr" style="color: #5E6B65">{{a.e}}</span></span></div>
+</sc-for>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { sel: 0 }; }
+  renderVals() {
+    const ACTIVE = 'Clients & domains';
+    const P = { org: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', lic: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4', team: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', cmp: 'M18 20V10M12 20V4M6 20v-6', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', ai: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', hist: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2', mail: 'M4 4h16v16H4zM4 4l8 8 8-8', warn: 'M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01' };
+    const N = [['CLIENTS', [['Clients & domains', 'org', 'Admin-Clients'], ['Licenses', 'lic', 'Admin-Clients'], ['Consultant team', 'team', 'Admin-Clients']]], ['FRAMEWORK', [['Frameworks', 'grid', 'Admin-Frameworks'], ['Scoring', 'cmp', 'Admin-Scoring'], ['Acceptance', 'rev', 'Admin-Acceptance']]], ['OPERATIONS', [['Rules', 'act', 'Admin-Automation']]], ['PLATFORM', [['Roles & access', 'dep', 'Admin-History'], ['AI settings', 'ai', 'Admin-History'], ['History', 'hist', 'Admin-History']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f]) => { const on = label === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#FFF1E8' : 'transparent', fg: on ? '#9A3412' : '#33413B', fw: on ? 600 : 500 }; }) }));
+    const PL = { man: ['Managed', '#EAF1FA', '#1E4E8C'], lic: ['Licensed', '#EEEDFD', '#4F46E5'], adv: ['Licensed + advisory', '#E7F3ED', '#0E5A45'] };
+    const SS = { ok: ['Connected', '#0E5A45', '#1F9D6E'], pend: ['Setup pending', '#8A4B00', '#E0A100'], off: ['Not connected', '#B42318', '#D9442E'] };
+    const C = [
+      { ini: 'DE', lBg: '#E7F3ED', lFg: '#0E5A45', name: 'Demo Entity', ar: 'الجهة التجريبية', type: 'Authority', domains: ['entity.example.gov.sa'], sso: 'ok', plan: 'adv', facts: [['Legal name', 'Demo Entity Authority'], ['Type', 'Government authority'], ['Registry no.', '700-112-4401'], ['City', 'Riyadh'], ['Employees', '1,240']], domainRows: [['entity.example.gov.sa', 'Verified', 'ok'], ['de.example.sa', 'Verified', 'ok']], route: 'Demo Entity workspace', tenant: '7c1e…a94f', sync: 'Daily · 42 users', fw: ['Qiyas 2026', 'NCA ECC', 'ISO 27001'], seats: '42 of 50', seatPct: '84%', term: 'Jan 2026 – Dec 2027', team: ['SR', 'MK', 'YT'], admins: [['NA', 'Noura A.', 'noura@entity.example.gov.sa'], ['HS', 'Huda S.', 'huda@entity.example.gov.sa']] },
+      { ini: 'DM', lBg: '#E0ECF8', lFg: '#1E4E8C', name: 'Demo Ministry of Services', ar: 'وزارة الخدمات التجريبية', type: 'Ministry', domains: ['services.example.gov.sa'], sso: 'ok', plan: 'man', facts: [['Legal name', 'Demo Ministry of Services'], ['Type', 'Ministry'], ['Registry no.', '700-100-0021'], ['City', 'Riyadh'], ['Employees', '8,900']], domainRows: [['services.example.gov.sa', 'Verified', 'ok']], route: 'Demo Ministry workspace', tenant: '1b9d…02c7', sync: 'Daily · 18 users', fw: ['Qiyas 2026', 'NCA ECC'], seats: '18 of 25', seatPct: '72%', term: 'Mar 2026 – Feb 2027', team: ['LA', 'MK'], admins: [['FA', 'Faisal A.', 'faisal@services.example.gov.sa']] },
+      { ini: 'DC', lBg: '#FDE9D9', lFg: '#9A3412', name: 'Demo Commission', ar: 'الهيئة التجريبية', type: 'Commission', domains: ['commission.example.gov.sa'], sso: 'ok', plan: 'man', facts: [['Legal name', 'Demo Commission'], ['Type', 'Commission'], ['Registry no.', '700-131-7720'], ['City', 'Jeddah'], ['Employees', '640']], domainRows: [['commission.example.gov.sa', 'Verified', 'ok']], route: 'Demo Commission workspace', tenant: '44af…9e10', sync: 'Daily · 11 users', fw: ['Qiyas 2026'], seats: '11 of 15', seatPct: '73%', term: 'Jan 2026 – Dec 2026', team: ['MK'], admins: [['RA', 'Reem A.', 'reem@commission.example.gov.sa']] },
+      { ini: 'DH', lBg: '#EEEDFD', lFg: '#4F46E5', name: 'Demo Health Cluster', ar: 'التجمع الصحي التجريبي', type: 'Health cluster', domains: ['health.example.sa'], sso: 'ok', plan: 'lic', facts: [['Legal name', 'Demo Health Cluster'], ['Type', 'Health cluster'], ['Registry no.', '700-150-3388'], ['City', 'Dammam'], ['Employees', '5,300']], domainRows: [['health.example.sa', 'Verified', 'ok']], route: 'Demo Health Cluster workspace', tenant: '9e02…b5d3', sync: 'Hourly · 27 users', fw: ['NDMO', 'NCA ECC'], seats: '27 of 30', seatPct: '90%', term: 'Jun 2026 – May 2027', team: [], admins: [['OK', 'Omar K.', 'omar@health.example.sa']] },
+      { ini: 'SF', lBg: '#FFF4DF', lFg: '#8A4B00', name: 'Demo Skills Fund', ar: 'صندوق المهارات التجريبي', type: 'Fund', domains: ['skillsfund.example.sa'], sso: 'pend', plan: 'man', facts: [['Legal name', 'Demo Skills Fund'], ['Type', 'Fund'], ['Registry no.', '700-162-9054'], ['City', 'Riyadh'], ['Employees', '310']], domainRows: [['skillsfund.example.sa', 'DNS check pending', 'pend']], route: 'Demo Skills Fund workspace', tenant: 'Awaiting client IT', sync: '—', fw: ['Qiyas 2026'], seats: '0 of 10', seatPct: '0%', term: 'Starts Dec 2026', team: ['SR'], admins: [['NH', 'Nawaf H.', 'nawaf@skillsfund.example.sa']] },
+      { ini: 'DT', lBg: '#F5F7F6', lFg: '#47534D', name: 'Demo Transport Agency', ar: 'هيئة النقل التجريبية', type: 'Agency', domains: ['transport.example.gov.sa'], sso: 'off', plan: 'lic', facts: [['Legal name', 'Demo Transport Agency'], ['Type', 'Agency'], ['Registry no.', '700-171-1200'], ['City', 'Riyadh'], ['Employees', '920']], domainRows: [['transport.example.gov.sa', 'Not verified', 'off']], route: 'Demo Transport workspace', tenant: '—', sync: '—', fw: ['Qiyas 2026'], seats: '0 of 20', seatPct: '0%', term: 'Draft contract', team: [], admins: [] }
+    ];
+    const DS = { ok: ['#E7F3ED', '#0E5A45'], pend: ['#FFF4DF', '#8A4B00'], off: ['#FDECEA', '#B42318'] };
+    const sel = this.state.sel;
+    const rows = C.map((x, i) => { const on = sel === i; return { ini: x.ini, lBg: x.lBg, lFg: x.lFg, name: x.name, type: x.type, domains: x.domains, sso: SS[x.sso][0], sFg: SS[x.sso][1], sDot: SS[x.sso][2], plan: PL[x.plan][0], pBg: PL[x.plan][1], pFg: PL[x.plan][2], on, bg: on ? '#FFF8F3' : '#FFFFFF', edge: on ? '#C2410C' : 'transparent', pick: () => this.setState({ sel: i }) }; });
+    const x = C[sel];
+    const c = Object.assign({}, x, { facts: x.facts.map(([k, v]) => ({ k, v })), domainRows: x.domainRows.map(([d, s, k]) => ({ d, s, bg: DS[k][0], fg: DS[k][1] })), sso: SS[x.sso][0], sFg: SS[x.sso][1], sDot: SS[x.sso][2], admins: x.admins.map(([av, n, e]) => ({ av, n, e })) });
+    return {
+      navGroups, rows, c,
+      kpis: [
+        { v: '14', l: 'Clients', icon: P.org, bg: '#E7F3ED', fg: '#0E5A45', vInk: '#101C17' },
+        { v: '21', l: 'Email domains', icon: P.mail, bg: '#EAF1FA', fg: '#1E4E8C', vInk: '#101C17' },
+        { v: '12', l: 'Microsoft connected', icon: P.lic, bg: '#EEEDFD', fg: '#4F46E5', vInk: '#101C17' },
+        { v: '2', l: 'Setup pending', icon: P.warn, bg: '#FFF4DF', fg: '#8A4B00', vInk: '#8A4B00' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

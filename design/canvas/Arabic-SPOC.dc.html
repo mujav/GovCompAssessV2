@@ -8,107 +8,73 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=IBM+Plex+Sans:wght@500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div dir="rtl" lang="ar" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; color: #14211C">
+<div dir="rtl" lang="ar" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="القائمة الرئيسية" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">ذ</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">منصة ذكاء الامتثال</div><div style="font-size: 12px; color: #9FB3AA">الجهة التجريبية · بيئة تجريبية</div></div></div>
-<button type="button" style="border: 0; text-align: right; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #9FB3AA">الإطار · الدورة</span><span style="font-size: 14px; font-weight: 600">قياس 2026 · الدورة الأولى ▾</span></button>
+<nav aria-label="القائمة الرئيسية" style="flex: 1 1 232px; background: #FFFFFF; border-left: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 20px"><b style="font-size: 15px">ذكاء الامتثال</b><br><span style="font-size: 12px; color: #5E6B65">الجهة التجريبية</span></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 12px; background: #F5F7F6; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: right">قياس 2026 · الدورة الأولى<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
 <div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 12px; color: #9FB3AA; padding: 4px 10px">مساحة العمل</div>
-<a href="Arabic-SPOC.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">متطلباتي<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">12</span></a>
-<a href="Evidence.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">الأدلة</a>
-<a href="Action-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">الطلبات والتذكيرات</a>
-<a href="Remediation.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">الإجراءات التصحيحية</a>
-<a href="Clarifications.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">الاستيضاحات</a>
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="6">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 15px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: #C2410C; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 12px; color: #9FB3AA; padding: 4px 10px">التحليلات</div>
-<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">أداء إدارتي</a>
-</div>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 34px; height: 34px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700">ف</span><span style="font-size: 13px; line-height: 19px"><b>فيصل ك.</b><br><span style="color: #5E6B65">منسق العمليات التقنية</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">إدارة العمليات التقنية · منسق الإدارة: فيصل ك.</div><h1 style="margin: 0; font-size: 26px; line-height: 36px; font-weight: 700">متطلباتي</h1></div>
-<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
-<a href="Requirements.dc.html" lang="en" dir="ltr" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; color: #14211C; text-decoration: none; display: inline-flex; align-items: center">English</a>
-<div style="width: 44px; height: 44px; border-radius: 50%; background: #DCEDE5; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px">ف</div>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 440px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">بحث</span><input type="search" placeholder="ابحث عن متطلب أو دليل" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<a href="Requirements.dc.html" lang="en" dir="ltr" aria-label="English" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; font-weight: 600; color: #101C17; text-decoration: none; display: flex; align-items: center; justify-content: center">EN</a>
+<button type="button" aria-label="الإشعارات" style="position: relative; width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 8px; left: 9px; width: 8px; height: 8px; border-radius: 50%; background: #C2410C; border: 2px solid #FFFFFF"></span></button>
 </header>
 
-<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1280px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1280px; box-sizing: border-box; width: 100%">
 
-<section aria-label="ملخص" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
-<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 12px; padding: 14px 16px"><div style="font-size: 13px; color: #56625C">مسندة إلى إدارتي</div><div style="font-size: 26px; font-weight: 700">58</div></div>
-<div style="background: #FFFFFF; border: 1px solid #EDD6AA; border-radius: 12px; padding: 14px 16px"><div style="font-size: 13px; color: #56625C">بحاجة إلى أدلة</div><div style="font-size: 26px; font-weight: 700; color: #8A4B00">12</div></div>
-<div style="background: #FFFFFF; border: 1px solid #EDD6AA; border-radius: 12px; padding: 14px 16px"><div style="font-size: 13px; color: #56625C">معادة للتصحيح</div><div style="font-size: 26px; font-weight: 700; color: #8A4B00">4</div></div>
-<div style="background: #FFFFFF; border: 1px solid #EBC4BE; border-radius: 12px; padding: 14px 16px"><div style="font-size: 13px; color: #56625C">متأخرة</div><div style="font-size: 26px; font-weight: 700; color: #A3261B">6</div></div>
-<div style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 12px; padding: 14px 16px"><div style="font-size: 13px; color: #56625C">قيد المراجعة</div><div style="font-size: 26px; font-weight: 700">9</div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+<section style="flex: 1 1 320px; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; align-items: center; gap: 20px">
+<div role="img" aria-label="جاهزية الإدارة 62 بالمئة" style="flex: 0 0 auto; width: 112px; height: 112px; border-radius: 50%; background: conic-gradient(#E0A100 0 62%, #EEF1EF 62% 100%); display: flex; align-items: center; justify-content: center"><span style="width: 88px; height: 88px; border-radius: 50%; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><b style="font-size: 24px">62%</b></span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 15px; color: #5E6B65">مرحبًا فيصل</span><h1 style="margin: 0; font-size: 26px; line-height: 36px; font-weight: 700">متطلباتي</h1><span style="font-size: 14px; color: #5E6B65">العمليات التقنية · 56 متطلبًا</span></div>
 </section>
+<section style="flex: 999 1 480px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 50%; background: {{s.dot}}"></span><b style="font-size: 28px; line-height: 30px; color: {{s.ink}}">{{s.n}}</b><span style="font-size: 14px; color: #5E6B65">{{s.l}}</span></div>
+</sc-for>
+</section>
+</div>
 
-<h2 style="margin: 8px 0 0; font-size: 18px">ما المطلوب منك الآن</h2>
+<h2 style="margin: 8px 0 0; font-size: 19px">المطلوب الآن</h2>
 
-<article style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
-<div style="padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #EEF0EE">
-<div style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 380px; min-width: 0">
-<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E2EFE9; color: #0E5A45">طلب أدلة</span><span dir="ltr" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">5.11.2-2</span></div>
-<h3 style="margin: 0; font-size: 17px; line-height: 28px">الأنظمة المتكاملة تُظهر تبادل البيانات من طرف إلى طرف</h3>
+<sc-for list="{{tasks}}" as="t" hint-placeholder-count="2">
+<article style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 20px 22px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center; box-shadow: inset -4px 0 0 {{t.bar}}">
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><span style="font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: {{t.tBg}}; color: {{t.tFg}}">{{t.type}}</span><span dir="ltr" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: #5E6B65">{{t.code}}</span><span style="font-size: 13px; font-weight: 700; color: {{t.dueInk}}">{{t.due}}</span></span>
+<h3 style="margin: 0; font-size: 18px; line-height: 28px">{{t.title}}</h3>
+<span style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{t.needs}}" as="n" hint-placeholder-count="3"><span style="font-size: 13px; padding: 5px 12px; border-radius: 999px; background: #F5F7F6">{{n}}</span></sc-for></span>
 </div>
-<div style="text-align: left; font-size: 13px; line-height: 20px"><span style="color: #A3261B; font-weight: 700">الموعد 4 نوفمبر · بعد 7 أيام</span><br><span style="color: #56625C">التذكير 2 من 2</span></div>
-</div>
-<div style="padding: 16px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; font-size: 14px; line-height: 24px">
-<div><div style="font-size: 12px; font-weight: 600; color: #56625C; margin-bottom: 4px">الأدلة المطلوبة بالتحديد</div>
-<ul style="margin: 0; padding-right: 18px; padding-left: 0">
-<li>نموذج معاملة (سجل أو لقطة شاشة) لتكامل <span dir="ltr">ERP ↔ CRM</span></li>
-<li>نموذج معاملة لتكامل <span dir="ltr">ERP</span> مع نظام إدارة الوثائق</li>
-<li>نموذج معاملة لتكامل <span dir="ltr">CRM</span> مع البوابة الإلكترونية</li>
-</ul></div>
-<div><div style="font-size: 12px; font-weight: 600; color: #56625C; margin-bottom: 4px">شروط القبول</div>
-<ul style="margin: 0; padding-right: 18px; padding-left: 0">
-<li>مؤرخة ضمن دورة 2026 (استيضاح <span dir="ltr">CL-014</span>)</li>
-<li>تُظهر النظام المصدر والهدف والواجهة</li>
-<li>معتمدة من مدير الإدارة</li>
-</ul></div>
-</div>
-<div style="padding: 14px 20px; border-top: 1px solid #EEF0EE; background: #FAFBFA; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center">
-<span style="font-size: 12px; color: #56625C">صاغ الذكاء الاصطناعي هذا الطلب واعتمدته نورة أ. قبل الإرسال</span>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">طلب تمديد</button>
-<a href="Clarifications.dc.html" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #CBD3CE; color: #14211C; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center">طلب استيضاح</a>
-<a href="Evidence.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">رفع الأدلة</a>
-</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #101C17">{{t.secondary}}</button>
+<a href="Evidence.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 12px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg>{{t.primary}}</a>
 </div>
 </article>
+</sc-for>
 
-<article style="background: #FFFFFF; border: 1px solid #EDD6AA; border-radius: 14px; padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center">
-<div style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 380px; min-width: 0">
-<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center"><span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #FBEFD9; color: #8A4B00">معاد للتصحيح · 2 من 3</span><span dir="ltr" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">5.3.1-1</span></div>
-<h3 style="margin: 0; font-size: 16px; line-height: 26px">تحديث مستودع البنية المؤسسية</h3>
-<div style="font-size: 14px; line-height: 24px; color: #33403A"><b>سبب الإعادة من المراجِع:</b> لقطة الشاشة مؤرخة 2025 ولا تُظهر تاريخ آخر تحديث للمستودع.</div>
-</div>
-<a href="Evidence.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">رفع نسخة محدّثة</a>
-</article>
-
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; padding: 14px 16px; border-bottom: 1px solid #DCE2DE"><h2 style="margin: 0; font-size: 16px">جميع متطلبات الإدارة</h2><span style="font-size: 12px; color: #56625C">حالة الامتثال وحالة العمل منفصلتان</span></div>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 22px"><h2 style="margin: 0; font-size: 17px">كل المتطلبات</h2><button type="button" style="height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #101C17">تصفية ▾</button></div>
 <div style="overflow-x: auto">
-<div role="table" aria-label="متطلبات الإدارة" style="min-width: 760px; font-size: 14px">
-<div role="row" style="display: grid; grid-template-columns: 0.8fr 2.6fr 1.2fr 1.3fr 0.8fr; gap: 12px; padding: 10px 16px; color: #56625C; font-size: 12px; font-weight: 600; background: #F7F8F6; border-bottom: 1px solid #DCE2DE">
-<span role="columnheader">الرمز</span><span role="columnheader">المتطلب</span><span role="columnheader">حالة الامتثال</span><span role="columnheader">حالة العمل</span><span role="columnheader">الموعد</span>
-</div>
+<div role="table" aria-label="متطلبات الإدارة" style="min-width: 680px; font-size: 14px">
 <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
-<div role="row" style="display: grid; grid-template-columns: 0.8fr 2.6fr 1.2fr 1.3fr 0.8fr; gap: 12px; padding: 10px 16px; align-items: center; border-bottom: 1px solid #EEF0EE">
-<span role="cell" dir="ltr" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; text-align: right">{{r.code}}</span>
-<span role="cell" style="line-height: 22px">{{r.title}}</span>
-<span role="cell"><span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{r.cBg}}; color: {{r.cFg}}">{{r.comp}}</span></span>
-<span role="cell"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; font-size: 12px; border: 1px solid #CBD3CE; color: #33403A"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{r.dot}}"></span>{{r.work}}</span></span>
-<span role="cell" style="font-size: 13px; color: {{r.dueColor}}">{{r.due}}</span>
+<div role="row" style="display: grid; grid-template-columns: 2.6fr 1.2fr 1.3fr 0.8fr; gap: 14px; align-items: center; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span role="cell" style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span dir="ltr" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #5E6B65; text-align: right">{{r.code}}</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span></span>
+<span role="cell"><span style="padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: {{r.cBg}}; color: {{r.cFg}}">{{r.comp}}</span></span>
+<span role="cell" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{r.dot}}"></span>{{r.work}}</span>
+<span role="cell" style="font-size: 13px; font-weight: 600; color: {{r.dueInk}}">{{r.due}}</span>
 </div>
 </sc-for>
 </div>
@@ -118,19 +84,27 @@ a{color:#0E5A45}a:hover{color:#0A3F31}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
 class Component extends DCLogic {
   renderVals() {
-    const C = { comp: ['#E3F1EA', '#11603F', 'ممتثل'], part: ['#FBEFD9', '#8A4B00', 'ممتثل جزئيًا'], non: ['#FBE4E1', '#A3261B', 'غير ممتثل'], nas: ['#ECEEEC', '#4A5550', 'لم يُقيَّم'], na: ['#E8ECF3', '#3E4B63', 'لا ينطبق'] };
-    const r = (code, title, c, work, dot, due, late) => ({ code, title, comp: C[c][2], cBg: C[c][0], cFg: C[c][1], work, dot, due, dueColor: late ? '#A3261B' : '#14211C' });
+    const P = { req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', dep: 'M18 20V10M12 20V4M6 20v-6' };
+    const nav = [['متطلباتي', 'req', 'Arabic-SPOC', '12'], ['الأدلة', 'ev', 'Evidence'], ['الطلبات والتذكيرات', 'act', 'Action-Center'], ['الإجراءات التصحيحية', 'rem', 'Remediation'], ['الاستيضاحات', 'cla', 'Clarifications'], ['أداء إدارتي', 'dep', 'Departments']].map(([label, k, f, badge], i) => { const on = i === 0; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#E7F3ED' : 'transparent', fg: on ? '#0E5A45' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge }; });
+    const C = { comp: ['#E7F3ED', '#0E5A45', 'ممتثل'], part: ['#FFF4DF', '#8A4B00', 'جزئي'], non: ['#FDECEA', '#B42318', 'غير ممتثل'], nas: ['#EEF1EF', '#47534D', 'لم يُقيَّم'], na: ['#EDF0F5', '#3E4B63', 'لا ينطبق'] };
+    const r = (code, title, c, work, dot, due, late) => ({ code, title, comp: C[c][2], cBg: C[c][0], cFg: C[c][1], work, dot, due, dueInk: late ? '#B42318' : '#33413B' });
     return {
+      nav,
+      stats: [{ n: 12, l: 'بحاجة إلى أدلة', dot: '#E0A100', ink: '#8A4B00' }, { n: 4, l: 'معادة للتصحيح', dot: '#E0A100', ink: '#8A4B00' }, { n: 6, l: 'متأخرة', dot: '#D9442E', ink: '#B42318' }, { n: 9, l: 'قيد المراجعة', dot: '#4F46E5', ink: '#101C17' }],
+      tasks: [
+        { type: 'طلب أدلة', tBg: '#E7F3ED', tFg: '#0E5A45', code: '5.11.2-2', due: 'خلال 7 أيام', dueInk: '#B42318', bar: '#D9442E', title: 'نماذج معاملات لثلاثة تكاملات', needs: ['ERP ↔ CRM', 'ERP ↔ الوثائق', 'CRM ↔ البوابة', 'مؤرخة 2026', 'معتمدة'], secondary: 'طلب استيضاح', primary: 'رفع الأدلة' },
+        { type: 'معاد للتصحيح · 2 من 3', tBg: '#FFF4DF', tFg: '#8A4B00', code: '5.3.1-1', due: '7 نوفمبر', dueInk: '#33413B', bar: '#E0A100', title: 'تحديث مستودع البنية المؤسسية', needs: ['تاريخ 2026', 'آخر تحديث ظاهر'], secondary: 'عرض الملاحظة', primary: 'رفع نسخة محدّثة' }
+      ],
       rows: [
-        r('5.11.2-2', 'الأنظمة المتكاملة تُظهر تبادل البيانات من طرف إلى طرف', 'nas', 'لا يوجد تحديث', '#A3261B', '4 نوفمبر', true),
-        r('5.3.1-1', 'تحديث مستودع البنية المؤسسية', 'part', 'معاد للتصحيح', '#C27B12', '7 نوفمبر', false),
-        r('5.11.1-1', 'سجل التكاملات محدّث ومعتمد', 'comp', 'بحاجة إلى تحديث', '#C27B12', '8 نوفمبر', false),
-        r('5.2.4-1', 'خطة استمرارية الأعمال للأنظمة الحرجة', 'part', 'تم تقديم الأدلة', '#3F6FB5', '10 نوفمبر', false),
-        r('5.6.2-3', 'مؤشرات توافر الخدمات الرقمية منشورة', 'comp', 'جاهز للتسليم', '#2E8B6A', '—', false),
-        r('5.7.1-2', 'ترتيبات الاستضافة ضمن الخدمات المشتركة', 'na', 'مغلق', '#7D8C85', '—', false)
+        r('5.11.2-2', 'تكامل الأنظمة من طرف إلى طرف', 'nas', 'لا يوجد تحديث', '#D9442E', '4 نوفمبر', true),
+        r('5.3.1-1', 'مستودع البنية المؤسسية', 'part', 'معاد للتصحيح', '#E0A100', '7 نوفمبر', false),
+        r('5.11.1-1', 'سجل التكاملات محدّث', 'comp', 'بحاجة إلى تحديث', '#E0A100', '8 نوفمبر', false),
+        r('5.2.4-1', 'استمرارية الأعمال للأنظمة الحرجة', 'part', 'تم تقديم الأدلة', '#2F6FB0', '10 نوفمبر', false),
+        r('5.6.2-3', 'مؤشرات توافر الخدمات الرقمية', 'comp', 'جاهز للتسليم', '#1F9D6E', '—', false),
+        r('5.7.1-2', 'الاستضافة ضمن الخدمات المشتركة', 'na', 'مغلق', '#94A3B8', '—', false)
       ]
     };
   }

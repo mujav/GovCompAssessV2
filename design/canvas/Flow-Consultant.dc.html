@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Consultant journey</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 2400px; height: 1000px; box-sizing: border-box; padding: 64px; background: #F7F8F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em">Consultant journey · sign-in to submission</h1>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E6EBE8; font-size: 13px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 3px; background: #1E4E8C"></span>Consultant</span>
+<span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E6EBE8; font-size: 13px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 3px; background: #0E5A45"></span>Client touchpoint</span>
+<span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E6EBE8; font-size: 13px; font-weight: 600"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">09</span>Screen on this page</span>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 120px repeat(8, minmax(0, 1fr)); grid-template-rows: auto 1fr auto; gap: 14px 18px; flex: 1 1 auto">
+<span></span>
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="8">
+<div style="display: flex; align-items: center; gap: 10px"><span style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: #101C17; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700">{{s.n}}</span><b style="font-size: 17px">{{s.title}}</b></div>
+</sc-for>
+
+<span style="align-self: start; padding-top: 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #1E4E8C">CONSULTANT</span>
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="8">
+<div style="position: relative; display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: 18px; background: #FFFFFF; border: 2px solid #C8DAEE">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{s.screens}}" as="c" hint-placeholder-count="2"><a href="{{c.href}}" style="display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 10px; border-radius: 10px; background: #EAF1FA; text-decoration: none; color: #1E4E8C; font-size: 13px; font-weight: 600"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{c.code}}</span>{{c.l}}</a></sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{s.does}}" as="d" hint-placeholder-count="3"><span style="display: flex; gap: 8px; font-size: 14px; line-height: 19px"><span style="flex: 0 0 auto; width: 6px; height: 6px; margin-top: 7px; border-radius: 50%; background: #1E4E8C"></span>{{d}}</span></sc-for>
+</div>
+<sc-if value="{{s.arrow}}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7D8C85" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; top: 50%; right: -21px; margin-top: -11px"><path d="M9 6l6 6-6 6"></path></svg></sc-if>
+</div>
+</sc-for>
+
+<span style="align-self: start; padding-top: 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: #0E5A45">CLIENT</span>
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="8">
+<div style="display: flex; flex-direction: column; gap: 6px; min-height: 120px; padding: 16px; border-radius: 18px; background: {{s.cBg}}; border: 1px {{s.cBorder}} {{s.cBd}}">
+<sc-for list="{{s.client}}" as="d" hint-placeholder-count="2"><span style="display: flex; gap: 8px; font-size: 14px; line-height: 19px; color: #0A3F31"><span style="flex: 0 0 auto; width: 6px; height: 6px; margin-top: 7px; border-radius: 50%; background: #0E5A45"></span>{{d}}</span></sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2400,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sc = (code, l, f) => ({ code, l, href: f + '.dc.html' });
+    const st = (n, title, screens, does, client) => ({ n, title, screens, does, client, arrow: n < 8, cBg: client.length ? '#E7F3ED' : 'transparent', cBd: client.length ? '#CFE6DA' : '#C9D1CD', cBorder: client.length ? 'solid' : 'dashed' });
+    return {
+      stages: [
+        st(1, 'Sign in', [sc('01', 'Sign in', 'Login'), sc('02', 'Choose entity', 'Workspace-Chooser')], ['Company SSO', 'Pick an entity'], []),
+        st(2, 'Add entity', [sc('03', 'Portfolio', 'Partner-Cockpit'), sc('04', 'Add entity', 'Partner-Onboarding')], ['Profile and stakeholders', 'Framework history'], ['IT connects Microsoft', 'Admin activates']),
+        st(3, 'Engagement', [sc('05', 'Entity 360', 'Partner-Entity360'), sc('06', 'Engagement', 'Partner-Engagement')], ['Scope and team', 'Who does what'], ['Signs engagement']),
+        st(4, 'Prepare', [sc('07', 'Overview', 'C-Overview'), sc('08', 'Requirements', 'C-Requirements'), sc('09', 'Requirement · Requirement tab', 'C-Requirement-Detail'), sc('11', 'Evidence library', 'C-Evidence')], ['Draft responses', 'Link evidence', 'Run AI check'], ['SPOCs upload evidence']),
+        st(5, 'Chase', [sc('10', 'My work · To SPOCs', 'C-Actions'), sc('09', 'Requirement · Hand-offs tab', 'C-Requirement-Detail')], ['Remind', 'Escalate'], ['SPOCs respond']),
+        st(6, 'L1 review', [sc('10', 'My work · Reviews', 'C-Actions'), sc('09', 'Requirement · Review tab', 'C-Requirement-Detail'), sc('12', 'Clarifications', 'C-Clarifications')], ['Decide per requirement', 'Apply DGA answers', 'Plan fixes'], []),
+        st(7, 'Client acceptance', [sc('10', 'My work · To client', 'C-Actions'), sc('16', 'Comparisons', 'C-Comparisons')], ['Send batches', 'Fix returns'], ['Index owner accepts or returns']),
+        st(8, 'Submit', [sc('13', 'Submission pack', 'C-Submission'), sc('14', 'Submitted', 'C-Submitted')], ['Build pack', 'Request sign-off', 'Record receipt'], ['Final approver signs', 'Uploads to DGA portal'])
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

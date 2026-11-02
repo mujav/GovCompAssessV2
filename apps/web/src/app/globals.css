@@ -6,58 +6,78 @@
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
   --font-arabic: var(--font-plex-arabic), var(--font-plex-sans), sans-serif;
 
-  --color-ink: #14211c;
-  --color-ink-2: #33403a;
-  --color-muted: #56625c;
-  --color-line: #dce2de;
-  --color-line-soft: #eef0ee;
-  --color-field: #cbd3ce;
-  --color-canvas: #f4f6f4;
-  --color-surface-2: #f7f8f6;
+  --color-ink: #101c17;
+  --color-ink-2: #33413b;
+  --color-muted: #5e6b65;
+  --color-line: #e6ebe8;
+  --color-line-soft: #eef1ef;
+  --color-field: #c9d1cd;
+  --color-canvas: #f5f7f6;
+  --color-surface-2: #f7f9f8;
 
-  --color-brand: #0e5a45;
-  --color-brand-strong: #0a3f31;
-  --color-brand-soft: #e2efe9;
-  --color-brand-tint: #f2f8f5;
+  --color-brand: #1e4e8c;
+  --color-brand-strong: #163c6e;
+  --color-brand-soft: #eaf1fa;
+  --color-brand-tint: #f3f7fc;
   --color-mint: #2e8b6a;
+  /* Product mark (Compliance Intelligence) stays green. */
+  --color-mark: #0e5a45;
 
-  --color-nav: #0f1f1a;
-  --color-nav-2: #18302a;
-  --color-nav-active: #24493d;
-  --color-nav-text: #d5e0db;
-  --color-nav-muted: #9fb3aa;
 
-  --color-admin: #1a1f2e;
-  --color-admin-active: #343c55;
-  --color-admin-line: #2e3548;
-  --color-admin-text: #c9cedc;
-  --color-admin-muted: #a9b0c4;
-
-  --color-ai: #3f37a8;
-  --color-ai-soft: #eeedfb;
+  --color-ai: #4f46e5;
+  --color-ai-soft: #eeedfd;
   --color-ai-tint: #f3f2fd;
   --color-ai-line: #cfcbf2;
   --color-ai-ink: #33305e;
 
-  --color-good: #11603f;
-  --color-good-soft: #e3f1ea;
+  --color-good: #0e5a45;
+  --color-good-soft: #e7f3ed;
   --color-warn: #8a4b00;
-  --color-warn-soft: #fbefd9;
+  --color-warn-soft: #fff4df;
   --color-warn-line: #edd6aa;
-  --color-bad: #a3261b;
-  --color-bad-soft: #fbe4e1;
+  --color-bad: #b42318;
+  --color-bad-soft: #fdecea;
   --color-bad-line: #ebc4be;
   --color-neutral-soft: #eceeec;
   --color-neutral-fg: #4a5550;
   --color-na-soft: #e8ecf3;
   --color-na-fg: #3e4b63;
-  --color-orange: #b4580a;
+  --color-orange: #c2410c;
 
   --color-chart-comp: #2e8b6a;
   --color-chart-part: #d08a1c;
   --color-chart-non: #c4412f;
   --color-chart-nas: #b9c2bd;
   --color-chart-na: #8796b0;
+
+  /* Consultant journey: consultant blue over a light neutral set. The base tokens above
+     carry the same values so studio screens built on components/ui match. */
+  --color-cx: #1e4e8c;
+  --color-cx-strong: #163c6e;
+  --color-cx-mid: #3a6fb8;
+  --color-cx-soft: #eaf1fa;
+  --color-cx-tint: #f3f7fc;
+  --color-cx-line: #c8daee;
+  --color-cx-deep: #0f1f36;
+  --color-cx-ring: #8db4e2;
+  --color-j-ink: #101c17;
+  --color-j-ink-2: #33413b;
+  --color-j-ink-3: #47534d;
+  --color-j-muted: #5e6b65;
+  --color-j-line: #e6ebe8;
+  --color-j-line-soft: #eef1ef;
+  --color-j-field: #c9d1cd;
+  --color-j-canvas: #f5f7f6;
+  --color-j-chip: #f7f9f8;
+  --color-j-ok: #1f9d6e;
+  --color-j-ok-soft: #e7f3ed;
+  --color-j-warn: #e0a100;
+  --color-j-warn-soft: #fff4df;
+  --color-j-bad: #b42318;
+  --color-j-bad-mark: #d9442e;
+  --color-j-bad-soft: #fdecea;
+  --color-j-ai: #4f46e5;
+  --color-j-ai-soft: #eeedfd;
 }
 
 @layer base {

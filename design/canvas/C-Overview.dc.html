@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Entity overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1E4E8C}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #8DB4E2;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
+<nav aria-label="Consultant portal" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E3E8EF; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #1E4E8C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">DA</span><span style="line-height: 17px"><b style="font-size: 14px">Consultant portal</b><br><span style="font-size: 12px; color: #5E6B65">Demo Advisory Co.</span></span></div>
+<a href="Workspace-Chooser.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border: 1px solid #C8DAEE; border-radius: 12px; background: #F3F7FC; text-decoration: none; color: #101C17"><span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">DE</span><span style="flex: 1 1 auto; min-width: 0; line-height: 16px"><b style="font-size: 13px">Demo Entity</b><br><span style="font-size: 12px; color: #5E6B65">Qiyas 2026</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg></a>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E3E8EF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">SR</span><span style="font-size: 13px; line-height: 17px"><b>Sami R.</b><br><span style="color: #5E6B65">Engagement Lead</span></span></div>
+</nav>
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 420px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search in Demo Entity" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #EAF1FA; color: #1E4E8C; font-size: 12px; font-weight: 700">Managed service</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #F5F7F6; color: #33413B; font-size: 12px; font-weight: 600">ENG-0142 · 214 d left</span>
+<a href="Workspace-Chooser.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; color: #101C17">Switch entity</a>
+</header>
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; flex-wrap: wrap; gap: 6px"><span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #E7F3ED; color: #0E5A45">Qiyas 2026</span><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #F5F7F6; color: #33413B">Self-assessment</span><span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #FDECEA; color: #B42318">Portal closes 20 Nov · 19 d</span></span>
+<h1 style="margin: 0; font-size: 30px; line-height: 38px; font-weight: 700; letter-spacing: -0.02em">Demo Entity</h1>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #101C17">Client update</button>
+<a href="C-Submission.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 10px; background: #1E4E8C; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600">Submission pack</a>
+</div>
+</div>
+
+<section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px">
+<div style="display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 18px; background: #0F1F36; color: #E4ECF6">
+<span style="flex: 0 0 auto; width: 76px; height: 76px; border-radius: 50%; background: conic-gradient(#5FBF93 0 259deg, #24487A 259deg 360deg); display: flex; align-items: center; justify-content: center"><span style="width: 60px; height: 60px; border-radius: 50%; background: #0F1F36; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: #FFFFFF">72%</span></span>
+<span style="line-height: 20px"><b style="font-size: 15px; color: #FFFFFF">Completion</b><br><span style="font-size: 13px; color: #9CC0EE">+6.8 vs 2025</span></span>
+</div>
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+<a href="{{s.href}}" style="display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 18px; background: #FFFFFF; border: 1px solid #E6EBE8; text-decoration: none; color: #101C17">
+<span style="font-size: 13px; color: #5E6B65">{{s.l}}</span>
+<span><b style="font-size: 26px">{{s.v}}</b> <span style="font-size: 13px; color: #5E6B65">/ 350</span></span>
+<span style="display: block; height: 6px; border-radius: 3px; background: #EEF1EF"><span style="display: block; height: 6px; width: {{s.pct}}; border-radius: 3px; background: {{s.bar}}"></span></span>
+</a>
+</sc-for>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 16px">Work pipeline</h2><a href="C-Requirements.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">All requirements →</a></div>
+<div role="img" aria-label="Requirements by stage" style="display: flex; height: 18px; border-radius: 9px; overflow: hidden; gap: 2px">
+<sc-for list="{{pipe}}" as="p" hint-placeholder-count="6"><span style="flex: {{p.n}} 1 0; background: {{p.c}}"></span></sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px">
+<sc-for list="{{pipe}}" as="p" hint-placeholder-count="6">
+<a href="{{p.href}}" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #F7F9F8; text-decoration: none; color: #101C17"><span style="flex: 0 0 auto; width: 10px; height: 10px; border-radius: 3px; background: {{p.c}}"></span><span style="flex: 1 1 auto; font-size: 13px">{{p.l}}</span><b style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{p.n}}</b></a>
+</sc-for>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">My queue</h2><span style="font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: #EAF1FA; color: #1E4E8C">{{queueCount}}</span></div>
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span style="flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; background: {{q.bg}}; color: {{q.fg}}; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{q.icon}}"></path></svg></span>
+<span style="flex: 1 1 auto; min-width: 0; line-height: 19px"><b style="font-size: 14px">{{q.t}}</b><br><span style="font-size: 12px; color: #5E6B65"><span style="font-family: 'IBM Plex Mono', monospace">{{q.code}}</span> · {{q.kind}}</span></span>
+<span style="flex: 0 0 auto; font-size: 12px; font-weight: 600; color: {{q.dueInk}}">{{q.due}}</span>
+<a href="{{q.href}}" style="flex: 0 0 auto; height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid #C8DAEE; background: #FFFFFF; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center">{{q.cta}}</a>
+</div>
+</sc-for>
+</section>
+
+<section style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">Waiting on SPOCs</h2><a href="C-Actions.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">Hand-offs →</a></div>
+<sc-for list="{{spocs}}" as="p" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span style="flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">{{p.av}}</span>
+<span style="flex: 1 1 auto; min-width: 0; line-height: 18px"><b style="font-size: 14px">{{p.dept}}</b><br><span style="font-size: 12px; color: #5E6B65">{{p.who}} · {{p.open}} open</span></span>
+<span style="flex: 0 0 auto; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: {{p.bg}}; color: {{p.fg}}">{{p.age}}</span>
+<button type="button" style="flex: 0 0 auto; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: #F5F7F6; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; color: #1E4E8C">Remind</button>
+</div>
+</sc-for>
+</section>
+</div>
+
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const CA = 'C-Overview';
+    const CP = { grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', plus: 'M12 5v14M5 12h14', home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', ent: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', eng: 'M4 7h16v13H4zM9 7V4h6v3', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const CN = [['PORTFOLIO', [['All entities', 'grid', 'Partner-Cockpit'], ['Add entity', 'plus', 'Partner-Onboarding']]], ['DEMO ENTITY', [['Overview', 'home', 'C-Overview'], ['Requirements', 'req', 'C-Requirements'], ['My work', 'act', 'C-Actions', '23', '#1E4E8C'], ['Evidence library', 'ev', 'C-Evidence'], ['Clarifications', 'cla', 'C-Clarifications'], ['Submission', 'sub', 'C-Submission']]], ['INSIGHTS', [['Departments', 'dep', 'C-Departments'], ['Comparisons', 'cmp', 'C-Comparisons'], ['Entity 360', 'ent', 'Partner-Entity360']]], ['ENGAGEMENT', [['Engagement', 'eng', 'Partner-Engagement'], ['Entity settings', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = CN.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === CA; return { label, d: CP[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#EAF1FA' : 'transparent', fg: on ? '#1E4E8C' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge: badge || '', badgeBg: bb || '#1E4E8C' }; }) }));
+    const I = { draft: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', ev: 'M14 3H6v18h12V7zM14 3v4h4', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', send: 'M22 2L11 13M22 2l-7 20-4-9-9-4z' };
+    const K = { draft: ['#F5F7F6', '#33413B', 'Draft response'], rev: ['#EAF1FA', '#1E4E8C', 'L1 review'], ev: ['#FFF4DF', '#8A4B00', 'Evidence check'], cla: ['#EEEDFD', '#4F46E5', 'Clarification'], send: ['#E7F3ED', '#0E5A45', 'Send to client'] };
+    const q = (k, t, code, due, late, cta, href) => ({ t, code, kind: K[k][2], bg: K[k][0], fg: K[k][1], icon: I[k], due, dueInk: late ? '#B42318' : '#5E6B65', cta, href: href + '.dc.html' });
+    const queue = [
+      q('rev', 'Integration samples cover all systems', '5.11.2-2', 'Today', true, 'Review', 'C-Requirement-Detail'),
+      q('ev', '4 files failed validation', 'EV-2041', 'Today', true, 'Check', 'C-Evidence'),
+      q('draft', 'Digital skills plan narrative', '4.1.2-1', 'Tomorrow', false, 'Draft', 'C-Requirement-Detail'),
+      q('cla', 'Apply DGA answer to 6 items', 'CL-014', '2 d', false, 'Apply', 'C-Clarifications'),
+      q('send', '12 requirements ready for client', 'Batch 7', '2 d', false, 'Send', 'C-Actions'),
+      q('rev', 'Data catalogue published', '3.4.1-1', '3 d', false, 'Review', 'C-Requirement-Detail')
+    ];
+    const sp = (av, dept, who, open, age, k) => ({ av, dept, who, open, age, bg: { late: '#FDECEA', warn: '#FFF4DF', ok: '#E7F3ED' }[k], fg: { late: '#B42318', warn: '#8A4B00', ok: '#0E5A45' }[k] });
+    const P = (l, n, c, href) => ({ l, n, c, href: href + '.dc.html' });
+    return {
+      navGroups, queue, queueCount: '18 tasks',
+      stats: [
+        { l: 'Prepared', v: '248', pct: '71%', bar: '#1E4E8C', href: 'C-Requirements.dc.html' },
+        { l: 'L1 reviewed', v: '201', pct: '57%', bar: '#3A6FB8', href: 'C-Requirement-Detail.dc.html' },
+        { l: 'Client accepted', v: '178', pct: '51%', bar: '#1F9D6E', href: 'C-Actions.dc.html' },
+        { l: 'Evidence valid', v: '316', pct: '90%', bar: '#5FBF93', href: 'C-Evidence.dc.html' }
+      ],
+      pipe: [P('Not started', 34, '#D5DCD8', 'C-Requirements'), P('Drafting', 41, '#9AA6A0', 'C-Requirements'), P('Waiting on SPOC', 31, '#E0A100', 'C-Actions'), P('L1 review', 14, '#3A6FB8', 'C-Requirement-Detail'), P('With client', 23, '#7E8FD9', 'C-Actions'), P('Accepted', 178, '#1F9D6E', 'C-Submission'), P('Returned', 29, '#D9442E', 'C-Requirements')],
+      spocs: [sp('HB', 'Human Capital', 'Hessa B.', 9, '14 d', 'late'), sp('KA', 'IT & Digital', 'Khalid A.', 8, '6 d', 'warn'), sp('FK', 'Integration Office', 'Faisal K.', 5, '5 d', 'warn'), sp('MS', 'Strategy', 'Maha S.', 6, '2 d', 'ok'), sp('YA', 'Finance', 'Yousef A.', 3, '1 d', 'ok')]
+    };
+  }
+}
+</script>
+</body>
+</html>
