@@ -9,7 +9,7 @@ import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceReco
 import { evidenceKey, type EvidenceState } from "./evidence";
 import { DEMO_DIRECTORY, PEOPLE_KEY, type EntityPerson } from "./people";
 import { useJourney, useScreenState } from "./store";
-import { EMPTY_OVERLAY, stageOf, isReturned, type Stage, type WorkOverlay } from "./work";
+import { EMPTY_OVERLAY, stageOf, isReturned, type EvidenceSignal, type Stage, type WorkOverlay } from "./work";
 
 export const ALL = "all";
 
@@ -53,11 +53,19 @@ export function frameworkRequirements(
   return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
 }
 
-/** Files uploaded on each requirement count as received evidence everywhere the requirement is shown. */
-function withUploads(reqs: ClientRequirement[], clientId: string, fwId: string, screens: Record<string, unknown>): ClientRequirement[] {
+export type WorkRequirement = ClientRequirement & { upload?: EvidenceSignal };
+
+/** Files uploaded on each requirement count as received evidence everywhere the requirement is shown, and move its stage on. */
+function withUploads(reqs: ClientRequirement[], clientId: string, fwId: string, screens: Record<string, unknown>): WorkRequirement[] {
   return reqs.map((r) => {
-    const n = ((screens[evidenceKey(clientId, fwId, r.code)] as EvidenceState | undefined)?.files ?? []).filter((f) => !f.error).length;
-    return n ? { ...r, evidence: { ...r.evidence, valid: r.evidence.valid + n, expected: Math.max(r.evidence.expected, r.evidence.valid + n) } } : r;
+    const ev = screens[evidenceKey(clientId, fwId, r.code)] as EvidenceState | undefined;
+    const ids = (ev?.files ?? []).filter((f) => !f.error).map((f) => f.id);
+    if (!ids.length && !ev?.run) return r;
+    const run = ev?.run;
+    const assessed = !!run && ids.length > 0 && run.fileIds.length === ids.length && ids.every((id) => run.fileIds.includes(id));
+    const upload: EvidenceSignal = { files: ids.length, assessed, sig: `${ids.join(",")}|${run?.runId ?? ""}` };
+    const n = ids.length;
+    return { ...r, upload, evidence: n ? { ...r.evidence, valid: r.evidence.valid + n, expected: Math.max(r.evidence.expected, r.evidence.valid + n) } : r.evidence };
   });
 }
 
@@ -99,11 +107,18 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
     for (const c of codes) ws.assign(workspace ? c : assignmentKey(fwId, c), person, due);
   };
 
+  // A move holds against the evidence as it stands now; only evidence that changes afterwards moves it on.
+  const remember = (o: WorkOverlay, codes: string[]) => {
+    o.seen ??= {};
+    for (const c of codes) o.seen[c] = reqs.find((x) => x.code === c)?.upload?.sig ?? "";
+  };
+
   const move = (codes: string[], to: Stage, text?: string) => {
     if (!codes.length) return;
     setOverlay((o) => {
       for (const c of codes) o.stage[c] = to;
       o.returned = o.returned.filter((c) => !codes.includes(c));
+      remember(o, codes);
     });
     if (text) log(text);
   };
@@ -114,6 +129,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
         o.stage[c] = "prog";
         if (!o.returned.includes(c)) o.returned.push(c);
       }
+      remember(o, codes);
     });
     if (text) log(text);
   };
