@@ -100,6 +100,9 @@ export interface OrphanRow {
   dismissed?: boolean;
 }
 
+/** "none": the framework publishes no weights and every requirement counts equally (e.g. Qiyas). */
+export type Weighting = "weighted" | "none";
+
 export interface Extraction {
   files: string[];
   sheets: string[];
@@ -110,6 +113,7 @@ export interface Extraction {
   nodes: ExtractedNode[];
   orphans: OrphanRow[];
   seq: number;
+  weighting: Weighting;
 }
 
 export type WarningKind = "duplicate" | "missing_parent" | "orphan" | "missing_weight" | "pattern" | "empty";
@@ -604,15 +608,34 @@ function isTableLine(s: string) {
   return t.startsWith("|") && t.split("|").length >= 3;
 }
 
+// A contents entry ends in the page it points to ("5.1 Digital planning ........ 11"), always further on.
+const TOC_ENTRY = /^(.*\S)[\s.·…_-]+(\d{1,4})$/;
+
+/** Drops table-of-contents pages of a paged document: pages where most lines point to a later page. */
+export function dropContentsPages(lines: TextLine[]): TextLine[] {
+  const pages = new Map<number, TextLine[]>();
+  for (const l of lines) if (l.page) pages.set(l.page, [...(pages.get(l.page) ?? []), l]);
+  const contents = new Set<number>();
+  for (const [page, ls] of pages) {
+    const entries = ls.filter((l) => {
+      const m = TOC_ENTRY.exec(l.text.trim());
+      return m && Number(m[2]) > page && Number(m[2]) < 5000;
+    });
+    if (entries.length >= 5 && entries.length >= ls.length * 0.5) contents.add(page);
+  }
+  return contents.size ? lines.filter((l) => !l.page || !contents.has(l.page)) : lines;
+}
+
 function textNodes(doc: TextDoc, b: Builder, meta: ExtractionMeta) {
   // Markdown tables inside a text document go through the table reader.
   const lines: TextLine[] = [];
-  for (let i = 0; i < doc.lines.length; i++) {
-    if (isTableLine(doc.lines[i].text) && i + 1 < doc.lines.length && isTableLine(doc.lines[i + 1].text)) {
+  const source = dropContentsPages(doc.lines);
+  for (let i = 0; i < source.length; i++) {
+    if (isTableLine(source[i].text) && i + 1 < source.length && isTableLine(source[i + 1].text)) {
       const block: TableDoc = { kind: "table", file: doc.file, rows: [] };
-      while (i < doc.lines.length && isTableLine(doc.lines[i].text)) {
-        const cells = doc.lines[i].text.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
-        if (!cells.every((c) => /^:?-{2,}:?$/.test(c) || !c)) block.rows.push({ ref: doc.lines[i].line, cells });
+      while (i < source.length && isTableLine(source[i].text)) {
+        const cells = source[i].text.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+        if (!cells.every((c) => /^:?-{2,}:?$/.test(c) || !c)) block.rows.push({ ref: source[i].line, cells });
         i++;
       }
       i--;
@@ -622,7 +645,7 @@ function textNodes(doc: TextDoc, b: Builder, meta: ExtractionMeta) {
       for (const x of [...b.nodes.slice(n0), ...b.orphans.slice(o0)]) x.loc = { file: doc.file, line: x.loc.row };
       continue;
     }
-    lines.push(doc.lines[i]);
+    lines.push(source[i]);
   }
 
   type Kind = "code" | "label" | "weight" | "evidence" | "other";
@@ -920,6 +943,7 @@ export function extractFramework(docs: SourceDoc[], opts: ExtractOptions = {}): 
     nodes: b.nodes,
     orphans: b.orphans,
     seq: b.seq,
+    weighting: b.nodes.some((n) => n.weight) ? "weighted" : "none",
   };
   resolveTree(ex);
   ex.levels = inferLevels(ex, docs.find((d) => d.levels?.length)?.levels);
@@ -972,6 +996,7 @@ export function checkExtraction(ex: Extraction): ExtractWarning[] {
   for (const o of ex.orphans) {
     if (!o.dismissed) out.push({ id: `or-${o.id}`, kind: "orphan", orphanId: o.id, loc: o.loc, message: `Row without a code: "${o.preview}"` });
   }
+  if (ex.weighting === "none") return out;
   const wl = weightedLevel(ex);
   const atLevel = ex.nodes.filter((n) => d.get(n.id) === wl);
   const missing = atLevel.filter((n) => !n.weight);
@@ -1100,6 +1125,10 @@ export function mergeDuplicates(ex: Extraction): Extraction {
   return next;
 }
 
+export function setWeighting(ex: Extraction, weighting: Weighting): Extraction {
+  return edit(ex, (e) => void (e.weighting = weighting));
+}
+
 export function applyDefaultWeight(ex: Extraction, weight = "med"): Extraction {
   const wl = weightedLevel(ex);
   const d = depths(ex);
@@ -1148,7 +1177,7 @@ export function treeOrder(ex: Extraction): { node: ExtractedNode; depth: number 
 }
 
 /** The reviewed result as Admin Studio configuration. */
-export function toFrameworkDraft(ex: Extraction): { levels: HierarchyLevel[]; requirements: FrameworkRequirement[] } {
+export function toFrameworkDraft(ex: Extraction): { levels: HierarchyLevel[]; requirements: FrameworkRequirement[]; weighting: Weighting } {
   const levels: HierarchyLevel[] = ex.levels.map((l, i) => ({ id: `lv-${i + 1}`, en: l.en.trim(), ar: l.ar.trim(), pattern: l.pattern.trim(), assessed: l.assessed }));
   const byId = new Map(ex.nodes.map((n) => [n.id, n]));
   const requirements = treeOrder(ex).map(({ node: n, depth }) => {
@@ -1156,10 +1185,10 @@ export function toFrameworkDraft(ex: Extraction): { levels: HierarchyLevel[]; re
     const p = n.parentId ? byId.get(n.parentId) : undefined;
     if (p) r.parent = p.code;
     if (n.text.trim()) r.text = n.text.trim();
-    if (n.weight) r.weight = n.weight;
+    if (n.weight && ex.weighting === "weighted") r.weight = n.weight;
     if (n.evidence?.trim()) r.evidence = n.evidence.trim();
     r.source = formatLoc(n.loc);
     return r;
   });
-  return { levels, requirements };
+  return { levels, requirements, weighting: ex.weighting };
 }

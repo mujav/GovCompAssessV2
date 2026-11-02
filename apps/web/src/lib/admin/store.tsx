@@ -82,6 +82,7 @@ export interface ImportPayload {
   importJob: ImportJob;
   /** Full SHA-256 of each source document. */
   fileHashes: string[];
+  weighting: "weighted" | "none";
 }
 
 interface AdminApi {

@@ -11,6 +11,7 @@ import {
   checkExtraction,
   deleteNode,
   dismissOrphan,
+  dropContentsPages,
   extractFramework,
   levelCounts,
   mergeDuplicates,
@@ -18,6 +19,7 @@ import {
   normalizeWeight,
   parentCode,
   patternOf,
+  setWeighting,
   splitCode,
   codeMatcher,
   toFrameworkDraft,
@@ -148,7 +150,22 @@ describe("hierarchical spreadsheet columns", () => {
     expect(ex.levels[2].assessed).toBe("accepted");
     expect(parentOf(ex, "ECC 1-1-2")).toBe("ECC 1-1");
     expect(byCode(ex, "ECC 1-1-1").text).toMatch(/^A cybersecurity strategy/);
-    expect(kinds(ex)).toEqual(expect.arrayContaining(["duplicate", "orphan", "missing_weight"]));
+    // The file has no weights, so the framework starts unweighted and nothing is flagged.
+    expect(ex.weighting).toBe("none");
+    expect(kinds(ex)).toEqual(["duplicate", "orphan"]);
+    const weighted = setWeighting(ex, "weighted");
+    expect(kinds(weighted)).toEqual(expect.arrayContaining(["duplicate", "orphan", "missing_weight"]));
+    expect(toFrameworkDraft(applyDefaultWeight(weighted)).requirements.some((r) => r.weight)).toBe(true);
+    expect(toFrameworkDraft(setWeighting(applyDefaultWeight(weighted), "none")).requirements.some((r) => r.weight)).toBe(false);
+  });
+
+  it("skips table-of-contents pages in paged documents", () => {
+    const toc = ["5. Standards 11", "5.1 Planning 11", "5.2 Governance 14", "5.3 Architecture 18", "5.4 Culture 23", "6. Definitions 126"].map((text, i) => ({ page: 2, line: i + 1, text }));
+    const body = ["5.1 Planning", "5.1.1 Strategic plan", "5.2 Governance", "5.2.1 Governance framework approved by the board in 2024"].map((text, i) => ({ page: 11, line: i + 1, text }));
+    expect(dropContentsPages([...toc, ...body])).toEqual(body);
+    const ex = extractFramework([{ kind: "text", file: "std.pdf", lines: [...toc, ...body] }]);
+    expect(kinds(ex)).toEqual([]);
+    expect(ex.nodes.map((n) => n.code)).toEqual(["5.1", "5.1.1", "5.2", "5.2.1"]);
   });
 
   it("reads the Qiyas workbook, skips the prose sheet and finds criteria (xlsx)", () => {
