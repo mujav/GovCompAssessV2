@@ -4,7 +4,9 @@
 // Screens keep their own slices here so work done on one screen shows on the others.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
+import { shortName } from "./frameworks";
 import { CLIENTS, ENGAGEMENTS, asActive, type Client, type Engagement } from "./portfolio";
+import { PROFILE_KEY, applyProfile, engagementsFor, type EntityProfile } from "./profile";
 
 const STORAGE_KEY = "ci-journey-v1";
 
@@ -68,11 +70,22 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback((fn: (s: JourneyState) => void) => dispatch({ type: "mutate", fn }), []);
 
-  const api = useMemo<JourneyApi>(
-    () => ({
+  const api = useMemo<JourneyApi>(() => {
+    // Profile edits made after onboarding apply to every screen that shows the entity.
+    const profile = (id: string) => state.screens[PROFILE_KEY(id)] as EntityProfile | undefined;
+    const base = [...CLIENTS, ...state.added.map((a) => asActive(a).client)];
+    const allEngagements = [...ENGAGEMENTS, ...state.added.flatMap((a) => [asActive(a).engagement, ...(a.more ?? [])])];
+    return {
       state,
-      clients: [...CLIENTS, ...state.added.map((a) => asActive(a).client)],
-      engagements: [...ENGAGEMENTS, ...state.added.flatMap((a) => [asActive(a).engagement, ...(a.more ?? [])])],
+      clients: base.map((c) => applyProfile(c, profile(c.id))),
+      engagements: base.flatMap((c) =>
+        engagementsFor(
+          c,
+          allEngagements.filter((e) => e.clientId === c.id),
+          profile(c.id),
+          shortName,
+        ),
+      ),
       update,
       log: (text) => update((s) => void s.log.unshift({ at: stamp(), text })),
       reset: () => {
@@ -81,9 +94,8 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         } catch {}
         dispatch({ type: "replace", state: initial() });
       },
-    }),
-    [state, update],
-  );
+    };
+  }, [state, update]);
 
   return <JourneyContext.Provider value={api}>{children}</JourneyContext.Provider>;
 }

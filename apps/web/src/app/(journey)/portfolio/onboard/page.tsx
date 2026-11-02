@@ -11,6 +11,7 @@ import { useAdmin } from "@/lib/admin/store";
 import { shortName } from "@/lib/journey/frameworks";
 import { LOGO, clientHref, type Client, type Engagement } from "@/lib/journey/portfolio";
 import { PEOPLE_KEY, normalizePerson, type EntityPerson } from "@/lib/journey/people";
+import { DEFAULT_FACTS, PROFILE_KEY } from "@/lib/journey/profile";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 
 // 04 · Onboard client. A six-step wizard; creating the entity makes it active straight away,
@@ -177,6 +178,7 @@ export default function OnboardPage() {
       s.added.push({ client, engagement: engagements[0], more: engagements.slice(1) });
       // The people captured here are who requirements can be assigned to in the workspace.
       s.screens[PEOPLE_KEY(ref.id)] = people;
+      s.screens[PROFILE_KEY(ref.id)] = { name: ref.name, nameAr: ref.nameAr, type: ref.type, parent: ref.parent, domain: ref.domain, facts: structuredClone(DEFAULT_FACTS) };
       const wz = (s.screens.onboard as Wizard | undefined) ?? structuredClone(START);
       wz.created = [...(wz.created ?? wz.sent ?? []), ref.id];
       delete wz.sent;

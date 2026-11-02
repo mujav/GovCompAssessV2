@@ -54,6 +54,7 @@ function clientNav(id: string, name: string, workBadge?: string, outboxBadge?: s
         { label: "My work", icon: "act", href: c("/work"), badge: workBadge },
         { label: "Outbox", icon: "send", href: c("/outbox"), badge: outboxBadge, badgeBg: "#4F46E5" },
         { label: "Evidence library", icon: "ev", href: c("/evidence") },
+        { label: "People", icon: "ent", href: c("/360?tab=people") },
         { label: "Clarifications", icon: "cla", href: c("/clarifications") },
         { label: "Submission", icon: "sub", href: c("/submission") },
       ],

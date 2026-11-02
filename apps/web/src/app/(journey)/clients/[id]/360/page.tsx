@@ -1,16 +1,19 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { PeopleEditor } from "@/components/journey/people-editor";
 import { ClientShell, JMain, useCurrentClient } from "@/components/journey/shell";
-import { JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
+import { EntityEditor } from "@/components/journey/entity-editor";
+import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { useAdmin } from "@/lib/admin/store";
 import { WORKSPACE_FRAMEWORK_ID, shortName } from "@/lib/journey/frameworks";
 import { LOGO, clientHref, completionColor } from "@/lib/journey/portfolio";
-import { useJourney, useScreenState } from "@/lib/journey/store";
+import { useJourney } from "@/lib/journey/store";
+import { initialsOf } from "@/lib/journey/people";
+import { PROFILE_KEY, defaultProfile, type EntityProfile } from "@/lib/journey/profile";
 import { useEntityFrameworks, useEntityPeople } from "@/lib/journey/use-work";
 
 // 05 · Entity 360. Profile, index enrollments, history and stakeholders for one client.
@@ -23,15 +26,6 @@ const BARS: { y: string; v: number; src: "reg" | "file" | "live"; rank: string }
   { y: "2024", v: 63.0, src: "file", rank: "#24" },
   { y: "2025", v: 65.6, src: "reg", rank: "#21" },
   { y: "2026", v: 72.4, src: "live", rank: "live" },
-];
-
-const FACTS: [string, string][] = [
-  ["Employees", "1,000–5,000"],
-  ["Beneficiaries", "≈ 2.1 M / yr"],
-  ["Digital services", "38"],
-  ["Hosting", "Gov cloud · in-Kingdom"],
-  ["DGA liaison", "Noura A."],
-  ["Data level", "Restricted"],
 ];
 
 const SYSTEMS: [string, string, string][] = [
@@ -52,15 +46,26 @@ export default function Entity360Page() {
   const notEnrolled = admin.frameworks.filter((f) => f.live && !frameworks.some((x) => x.id === f.id)).map((f) => shortName(f.live!.name));
   const params = useSearchParams();
   const [tab, setTab] = useState(params.get("tab") === "people" ? 1 : 0);
+  // The sidebar's People link lands here with ?tab=people, also when 360 is already open.
+  const wantsPeople = params.get("tab") === "people";
+  useEffect(() => {
+    if (wantsPeople) setTab(1);
+  }, [wantsPeople]);
   const [people, setPeople] = useEntityPeople();
-  const [proposed, setProposed] = useScreenState<string[]>(`360.${client.id}.proposed`, []);
+  const [editing, setEditing] = useState(false);
+  const onboarded = state.added.some((a) => a.client.id === client.id);
+  const saved = state.screens[PROFILE_KEY(client.id)] as EntityProfile | undefined;
+  const profileData = saved ?? defaultProfile(client, onboarded);
+  const liaison = people.find((p) => p.roles.includes("DGA liaison officer"))?.name;
+  const facts: [string, string][] = [
+    ...(profileData.parent ? [["Parent body", profileData.parent] as [string, string]] : []),
+    ...(profileData.domain ? [["Official domain", profileData.domain] as [string, string]] : []),
+    ...profileData.facts,
+    ...(liaison ? [["DGA liaison", liaison] as [string, string]] : []),
+  ];
   const [lbg, lfg] = LOGO[client.logo];
   const pct = client.id === "demo-entity" ? 72.4 : client.pct;
 
-  const propose = (what: string) => {
-    setProposed((d) => void (d.includes(what) || d.push(what)));
-    log(`Proposed ${what} to ${client.name}`);
-  };
 
   const history = (
     <Panel className="flex flex-[2_1_520px] flex-col gap-4 p-[22px]">
@@ -130,12 +135,15 @@ export default function Entity360Page() {
   const profile = (
     <Panel className="flex flex-[1_1_300px] flex-col gap-1 p-[22px]">
       <h2 className="m-0 mb-2 text-base">Profile</h2>
-      {FACTS.map(([k, v]) => (
+      {facts.map(([k, v]) => (
         <div key={k} className="flex justify-between gap-3 border-b border-j-line-soft py-2.5 text-sm last:border-0">
           <span className="text-j-muted">{k}</span>
-          <b className="text-end">{v}</b>
+          <b className={cx("text-end", !v && "font-normal text-j-muted")}>{v || "Not set"}</b>
         </div>
       ))}
+      <JButton size="sm" className="mt-2 self-start" onClick={() => setEditing(true)}>
+        Edit profile
+      </JButton>
       <div className="mt-2 flex gap-1.5">
         {["DGA", "NCA", "SDAIA"].map((r) => (
           <Pill key={r} round={false}>
@@ -177,11 +185,7 @@ export default function Entity360Page() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {proposed.includes("a profile change") ? (
-              <Pill tone="cx">Profile change proposed</Pill>
-            ) : (
-              <JButton onClick={() => propose("a profile change")}>Propose profile change</JButton>
-            )}
+            <JButton onClick={() => setEditing(true)}>Edit entity</JButton>
             <JLink href={clientHref(client.id)} variant="primary">
               Open workspace
             </JLink>
@@ -232,13 +236,13 @@ export default function Entity360Page() {
               })}
               <button
                 type="button"
-                onClick={() => propose("another index")}
-                disabled={proposed.includes("another index")}
+                onClick={() => setEditing(true)}
+                disabled={notEnrolled.length === 0}
                 className="flex cursor-pointer items-center gap-4 rounded-[20px] border-2 border-dashed border-cx-line bg-cx-tint p-[18px] text-left text-j-ink disabled:cursor-default"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cx text-xl text-white">+</span>
                 <span className="flex flex-col text-sm">
-                  <b className="text-base">{proposed.includes("another index") ? "Add-on proposed" : "Propose another index"}</b>
+                  <b className="text-base">Add a framework</b>
                   <span className="text-[13px] text-j-muted">{notEnrolled.length ? `${notEnrolled.slice(0, 3).join(", ")} · from the library` : "Every library framework is already enrolled"}</span>
                 </span>
               </button>
@@ -247,6 +251,32 @@ export default function Entity360Page() {
               {history}
               {profile}
             </div>
+            <Panel className="flex flex-col gap-3 p-[22px]">
+              <PanelHead
+                title={`Key people · ${people.length}`}
+                aside={
+                  <JButton size="sm" onClick={() => setTab(1)}>
+                    Manage people
+                  </JButton>
+                }
+              />
+              {people.length === 0 ? (
+                <p className="m-0 text-sm text-j-muted">No people yet. Add the client&apos;s stakeholders so requirements can be assigned.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {[...people]
+                    .sort((a, b) => b.roles.length - a.roles.length)
+                    .slice(0, 8)
+                    .map((p) => (
+                      <span key={p.id} className="inline-flex items-center gap-2 rounded-full border border-j-line py-1 ps-1 pe-3 text-[13px]">
+                        <Avatar initials={initialsOf(p.name)} size={28} />
+                        <b>{p.name}</b>
+                        <span className="text-j-muted">{p.roles[0] ?? p.title ?? p.department}</span>
+                      </span>
+                    ))}
+                </div>
+              )}
+            </Panel>
           </>
         )}
         {tab === 1 && team}
@@ -278,6 +308,7 @@ export default function Entity360Page() {
           </Panel>
         )}
       </JMain>
+      {editing && <EntityEditor open onClose={() => setEditing(false)} onPeople={() => setTab(1)} />}
     </ClientShell>
   );
 }
