@@ -40,6 +40,22 @@ async function readDocx(buf: ArrayBuffer): Promise<string> {
   return result.value;
 }
 
+type PdfPage = Awaited<ReturnType<Awaited<ReturnType<typeof import("pdfjs-dist")["getDocument"]>["promise"]>["getPage"]>>;
+
+// page.getTextContent() iterates a ReadableStream with `for await`, which Safari does not
+// support ("undefined is not a function … value of readableStream"). Reading the same
+// stream with getReader() works in every browser.
+async function textItems(page: PdfPage) {
+  const reader = page.streamTextContent().getReader();
+  const items: Awaited<ReturnType<PdfPage["getTextContent"]>>["items"] = [];
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    items.push(...value.items);
+  }
+  return items;
+}
+
 async function readPdf(buf: ArrayBuffer): Promise<PdfTextItem[][]> {
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc ||= new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
@@ -47,8 +63,7 @@ async function readPdf(buf: ArrayBuffer): Promise<PdfTextItem[][]> {
   const pages: PdfTextItem[][] = [];
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
-    const content = await page.getTextContent();
-    pages.push(content.items.flatMap((it) => ("str" in it ? [{ str: it.str, transform: it.transform, height: it.height, width: it.width }] : [])));
+    pages.push((await textItems(page)).flatMap((it) => ("str" in it ? [{ str: it.str, transform: it.transform, height: it.height, width: it.width }] : [])));
   }
   await doc.destroy();
   return pages;
