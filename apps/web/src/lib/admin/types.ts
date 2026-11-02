@@ -46,6 +46,22 @@ export interface ImportJob {
   errors: number;
 }
 
+/** One node of the framework tree (any level), as published with the version. */
+export interface FrameworkRequirement {
+  code: string;
+  /** HierarchyLevel.id this node sits at. */
+  level: string;
+  /** Code of the parent node; absent for top-level nodes. */
+  parent?: string;
+  title: string;
+  text?: string;
+  /** "high" | "med" | "low" or a numeric weight as written in the source. */
+  weight?: string;
+  evidence?: string;
+  /** Where the node came from, e.g. "qiyas.xlsx · 03_Requirements · row 14". */
+  source?: string;
+}
+
 export interface FrameworkVersion {
   name: string;
   version: string;
@@ -54,11 +70,29 @@ export interface FrameworkVersion {
   scoringNote: string;
   levels: HierarchyLevel[];
   importJob?: ImportJob;
+  requirements?: FrameworkRequirement[];
+  /** Full SHA-256 of the source documents, so the same file cannot be added twice. */
+  fileHashes?: string[];
+  /** Date the version was created (draft) and went live, e.g. "02 Nov 2026". */
+  createdAt?: string;
+  publishedAt?: string;
+}
+
+/** A version that was live before the current one. */
+export interface FrameworkVersionRecord {
+  version: string;
+  effective: string;
+  publishedAt?: string;
+  supersededAt: string;
+  nodes: number;
+  fileHashes?: string[];
 }
 
 export interface FrameworkPackage extends Versioned<FrameworkVersion> {
   /** Assessment cycles using the live version; used versions are immutable. */
   usedByCycles: number;
+  /** Earlier live versions, newest first. */
+  history?: FrameworkVersionRecord[];
 }
 
 /* ---------- Scoring ---------- */

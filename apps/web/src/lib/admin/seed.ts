@@ -2,6 +2,7 @@
 
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
+import { QIYAS_V12_REQUIREMENTS } from "./qiyas-base";
 import type {
   AcceptancePolicy,
   AdminState,
@@ -26,12 +27,17 @@ const qiyasLive: FrameworkVersion = {
   effective: "01 Jan 2026",
   scoringNote: "Compliant / partial / non · weighted",
   levels: QIYAS_LEVELS,
+  requirements: QIYAS_V12_REQUIREMENTS,
+  createdAt: "18 Nov 2025",
+  publishedAt: "15 Dec 2025",
 };
 
 const qiyasDraft: FrameworkVersion = {
   ...qiyasLive,
   version: "1.3",
   effective: "01 Dec 2026 · Cycle 2",
+  createdAt: "20 Oct 2026",
+  publishedAt: undefined,
   levels: QIYAS_LEVELS.map((l) => (l.id === "lv-4" ? { ...l, ar: "المعيار الفرعي" } : l)),
   importJob: {
     file: "qiyas-2026.xlsx",
@@ -188,15 +194,27 @@ export function createSeed(): AdminState {
       { id: "u-huda", name: "Huda S.", role: "Compliance Lead", canApprove: true },
     ],
     frameworks: [
-      { id: "fw-qiyas", live: qiyasLive, draft: qiyasDraft, usedByCycles: 1 },
+      {
+        id: "fw-qiyas",
+        live: qiyasLive,
+        draft: qiyasDraft,
+        usedByCycles: 1,
+        history: [
+          { version: "1.1", effective: "01 Jul 2025", publishedAt: "12 Jun 2025", supersededAt: "15 Dec 2025", nodes: 31 },
+          { version: "1.0", effective: "01 Jan 2025", publishedAt: "05 Dec 2024", supersededAt: "12 Jun 2025", nodes: 28 },
+        ],
+      },
       {
         id: "fw-nca",
         usedByCycles: 1,
+        history: [{ version: "2018", effective: "01 Oct 2018", publishedAt: "15 Sep 2018", supersededAt: "20 Feb 2024", nodes: 0 }],
         live: {
           name: "NCA ECC",
           version: "2024",
           authority: "NCA",
           effective: "01 Mar 2024",
+          createdAt: "02 Feb 2024",
+          publishedAt: "20 Feb 2024",
           scoringNote: "Maturity 0–5 · minimum by domain",
           levels: [
             { id: "lv-1", en: "Domain", ar: "المجال", pattern: "#", assessed: "rollup" },
@@ -214,6 +232,7 @@ export function createSeed(): AdminState {
           version: "0.1",
           authority: "Internal audit",
           effective: "—",
+          createdAt: "14 Oct 2026",
           scoringNote: "Binary scoring",
           levels: [
             { id: "lv-1", en: "Clause", ar: "البند", pattern: "#", assessed: "rollup" },

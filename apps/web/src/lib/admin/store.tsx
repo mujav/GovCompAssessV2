@@ -6,8 +6,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
+import { dateStamp, findDuplicate, findVersionClash, retireLive } from "./library";
 import { createSeed } from "./seed";
-import type { AdminState, ChangeRequest, ConfigKind, FrameworkVersion, Versioned } from "./types";
+import type { AdminState, ChangeRequest, ConfigKind, FrameworkPackage, FrameworkRequirement, FrameworkVersion, HierarchyLevel, ImportJob, Versioned } from "./types";
 
 export const STORAGE_KEY = "ci-admin-studio-v2";
 
@@ -70,6 +71,19 @@ function displayName(kind: ConfigKind, id: string, v: unknown) {
 
 export type Result = { ok: true; id?: string } | { ok: false; error: string };
 
+/** Where an accepted file import goes: a new version of an existing package, or a new package. */
+export type ImportTarget =
+  | { kind: "version"; id: string }
+  | { kind: "new"; name: string; authority: string; version: string };
+
+export interface ImportPayload {
+  levels: HierarchyLevel[];
+  requirements: FrameworkRequirement[];
+  importJob: ImportJob;
+  /** Full SHA-256 of each source document. */
+  fileHashes: string[];
+}
+
 interface AdminApi {
   state: AdminState;
   hydrated: boolean;
@@ -84,6 +98,8 @@ interface AdminApi {
   submit: (kind: ConfigKind, id: string) => Result;
   decide: (crId: string, decision: "approve" | "reject", comment: string, effectiveFrom?: string) => Result;
   log: (text: string) => void;
+  /** Writes a reviewed file import into a framework draft (creating the draft or package if needed). */
+  importFramework: (target: ImportTarget, payload: ImportPayload) => Result;
   /** Generic mutation for create/rename operations. */
   update: (fn: (s: AdminState) => void) => void;
 }
@@ -142,6 +158,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           const v = slot(s, kind, id);
           if (!v || v.draft || !v.live) return;
           v.draft = bump(kind, v.live);
+          if (kind === "framework") Object.assign(v.draft as FrameworkVersion, { createdAt: dateStamp(), publishedAt: undefined });
           pushAudit(s, who(s), `Draft ${displayName(kind, id, v.draft)} ${versionLabel(kind, v.draft)} created from published ${versionLabel(kind, v.live)}.`);
         }),
       discardDraft: (kind, id) =>
@@ -157,6 +174,50 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           if (!v?.draft || v.pendingCr) return;
           fn(v.draft as never);
         }),
+      importFramework: (target, payload) => {
+        const n = payload.requirements.length;
+        if (target.kind === "new") {
+          if (!target.name.trim()) return { ok: false, error: "Give the new framework a name." };
+          const dup = findDuplicate(state.frameworks, { name: target.name, hashes: payload.fileHashes });
+          if (dup) return { ok: false, error: dup.message };
+          const id = `fw-${state.seq + 1}`;
+          mutate((s) => {
+            s.seq += 1;
+            const version: FrameworkVersion = {
+              name: target.name.trim(),
+              version: target.version.trim() || "1.0",
+              authority: target.authority.trim() || "Internal",
+              effective: dateStamp(),
+              scoringNote: "Not configured",
+              ...structuredClone(payload),
+              createdAt: dateStamp(),
+              publishedAt: dateStamp(),
+            };
+            // A brand-new framework is not used by any cycle yet, so the admin publishes it
+            // directly; later versions go through draft → change request → four-eyes approval.
+            s.frameworks.push({ id, usedByCycles: 0, live: version });
+            pushAudit(s, who(s), `Created and published framework "${version.name}" v${version.version} from ${payload.importJob.file} (${n} requirement nodes).`);
+          });
+          return { ok: true, id };
+        }
+        const v = state.frameworks.find((f) => f.id === target.id);
+        if (!v) return { ok: false, error: "Framework not found." };
+        if (v.pendingCr) return { ok: false, error: `The draft is waiting on ${v.pendingCr}. Decide it before importing again.` };
+        const clash = findVersionClash(v, { hashes: payload.fileHashes }) ?? findDuplicate(state.frameworks, { hashes: payload.fileHashes, exceptId: v.id });
+        if (clash) return { ok: false, error: clash.message };
+        mutate((s) => {
+          const f = s.frameworks.find((x) => x.id === target.id)!;
+          if (!f.draft) {
+            f.draft = bump("framework", f.live) as FrameworkVersion;
+            f.draft.createdAt = dateStamp();
+            f.draft.publishedAt = undefined;
+            pushAudit(s, who(s), `Draft ${f.draft.name} v${f.draft.version} created from published v${f.live?.version}.`);
+          }
+          Object.assign(f.draft, structuredClone(payload));
+          pushAudit(s, who(s), `Imported ${n} requirement nodes from ${payload.importJob.file} into draft ${f.draft.name} v${f.draft.version} (${payload.importJob.changed}).`);
+        });
+        return { ok: true, id: target.id };
+      },
       submit: (kind, id) => {
         const v = slot(state, kind, id);
         if (!v?.draft) return { ok: false, error: "There is no draft to submit." };
@@ -203,6 +264,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           if (target) {
             target.pendingCr = undefined;
             if (decision === "approve") {
+              if (c.kind === "framework") retireLive(target as FrameworkPackage);
               target.live = target.draft;
               target.draft = undefined;
             }
