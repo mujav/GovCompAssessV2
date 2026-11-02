@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { Icon } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { CLARIFICATIONS, addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
+import type { CriterionVerdict, RequirementRecommendation } from "@/lib/assessor/assessor";
+import { GENERIC_CRITERIA, criteriaFor } from "@/lib/journey/evidence";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
+import { useRequirementEvidence } from "@/lib/journey/use-evidence";
 import { useClientWork } from "@/lib/journey/use-work";
 import { RESULT, STAGES, codeKey, initials, isReturned, stageOf } from "@/lib/journey/work";
 
@@ -19,7 +23,9 @@ type Tab = "req" | "ev" | "rev" | "hand" | "rem" | "cla" | "act";
 type Mark = "met" | "gap" | "part";
 const MARK: Record<Mark, [string, PillTone]> = { met: ["Met", "ok"], gap: ["Gap", "bad"], part: ["Partly", "warn"] };
 
-const CRITERIA = ["Defined and approved by the right authority", "In place across the entity", "Evidence shows it in use this cycle", "Reviewed and improved on a schedule"];
+const CRITERIA = GENERIC_CRITERIA;
+const VERDICT: Record<CriterionVerdict, [string, PillTone]> = { satisfied: ["Met", "ok"], partial: ["Partly", "warn"], not_satisfied: ["Gap", "bad"] };
+const RECO_TONE: Record<RequirementRecommendation, PillTone> = { Compliant: "ok", Partial: "warn", "Non-compliant": "bad", "Insufficient evidence": "gray" };
 
 /** Criterion marks implied by the requirement's current assessment. */
 function marksFor(r: WsRequirement): Mark[] {
@@ -49,6 +55,9 @@ export default function RequirementWorkspacePage() {
   const [tab, setTab] = useState<Tab>("rev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
   const c = (p: string) => clientHref(client.id, p);
+  const { ev, readable, stale, busy, upload, assess, remove } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [drag, setDrag] = useState(false);
 
   const sorted = useMemo(() => [...reqs].sort((a, b) => codeKey(a.code).localeCompare(codeKey(b.code))), [reqs]);
   if (!r) {
@@ -71,14 +80,19 @@ export default function RequirementWorkspacePage() {
   const stageIdx = STAGES.findIndex((x) => x.key === stage);
   const returned = isReturned(r, overlay);
   const marks = marksFor(r);
-  const gaps = marks.filter((m) => m !== "met").length;
-  const confidence = 98 - gaps * 6;
+  // The AI assessor's verdict on uploaded files replaces the seeded marks once it exists.
+  const run = ev.run;
+  const gaps = run ? run.criteria.filter((x) => x.verdict !== "satisfied").length : marks.filter((m) => m !== "met").length;
+  const confidence = run ? Math.round(run.confidence * 100) : 98 - gaps * 6;
+  const criteria = criteriaFor(r);
+  const fileName = (id: string) => ev.files.find((f) => f.id === id)?.name ?? id;
   const cla = CLARIFICATIONS.find((x) => x.affects.includes(r.code));
   const axis = [...new Set(reqs.map((x) => x.domain))].indexOf(r.domain) + 1;
   const [res, rbg, rfg] = RESULT[r.status];
   const owner = r.owner || "Unassigned";
   const evidence = [
-    ...Array.from({ length: r.evidence.valid }, (_, i) => ({ id: `EV-${1900 + ((codeKey(r.code).length * 37 + i * 53) % 400)}`, t: `${CRITERIA[i % 4].split(" ")[0]} record ${i + 1}`, meta: `${4 + i * 3} pages · Oct 2026`, ok: true })),
+    // Library-linked records only; uploaded files are listed separately above.
+    ...Array.from({ length: Math.max(0, r.evidence.valid - readable.length) }, (_, i) => ({ id: `EV-${1900 + ((codeKey(r.code).length * 37 + i * 53) % 400)}`, t: `${CRITERIA[i % 4].split(" ")[0]} record ${i + 1}`, meta: `${4 + i * 3} pages · Oct 2026`, ok: true })),
     ...Array.from({ length: r.evidence.invalid }, (_, i) => ({ id: `EV-${1700 + i}`, t: "Prior-cycle sample", meta: "3 pages · Mar 2025", ok: false })),
   ];
   const missing = Math.max(0, r.evidence.expected - r.evidence.valid);
@@ -110,7 +124,7 @@ export default function RequirementWorkspacePage() {
 
   const tabs: [Tab, string, number?][] = [
     ["req", "Requirement"],
-    ["ev", "Evidence", evidence.length],
+    ["ev", "Evidence", evidence.length + ev.files.length],
     ["rev", "Review", stage === "rev" ? 1 : undefined],
     ["hand", "Hand-offs", requests.filter((h) => !h.done).length || undefined],
     ["rem", "Remediation", gaps ? 1 : undefined],
@@ -121,7 +135,9 @@ export default function RequirementWorkspacePage() {
   const nextAction = stage === "rev" ? "Complete L1 review" : stage === "cli" ? "Waiting for client" : stage === "acc" ? "Accepted" : stage === "start" ? "Start draft" : "Continue draft";
   const activity = [
     ...s.activity.map((a) => ({ av: "SR", tone: "me", what: a.what, who: "Sami R.", when: `Today, ${a.when}` })),
-    { av: "AI", tone: "ai", what: `AI check: ${gaps ? "not ready to accept" : "ready to accept"} · ${confidence}%`, who: "Platform", when: "Today, 09:40" },
+    run
+      ? { av: "AI", tone: "ai", what: `AI assessor: ${run.recommendation} · ${confidence}% · ${run.fileIds.length} files`, who: "Platform", when: run.at }
+      : { av: "AI", tone: "ai", what: `AI check: ${gaps ? "not ready to accept" : "ready to accept"} · ${confidence}%`, who: "Platform", when: "Today, 09:40" },
     ...(r.evidence.valid ? [{ av: initials(owner), tone: "cl", what: `Uploaded ${r.evidence.valid} evidence files`, who: owner, when: "Yesterday" }] : []),
     { av: "SR", tone: "me", what: "Drafted response", who: "Sami R.", when: "9 d ago" },
     { av: "SR", tone: "me", what: `Assigned to ${r.department}`, who: "Sami R.", when: "12 d ago" },
@@ -289,6 +305,88 @@ export default function RequirementWorkspacePage() {
         )}
 
         {tab === "ev" && (
+          <div className="flex flex-col gap-3.5">
+          <Panel className="flex flex-col gap-3 p-[22px]">
+            <PanelHead
+              title="Upload evidence"
+              aside={
+                run && !stale ? (
+                  <Pill tone={RECO_TONE[run.recommendation]}>
+                    AI: {run.recommendation} · {confidence}%
+                  </Pill>
+                ) : undefined
+              }
+            />
+            {r.evidenceText && (
+              <p className="m-0 rounded-xl bg-j-canvas px-3.5 py-2.5 text-[13px] text-j-ink-2" dir="auto">
+                <b>Asked for:</b> {r.evidenceText}
+              </p>
+            )}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDrag(true);
+              }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDrag(false);
+                if (e.dataTransfer.files.length) void upload([...e.dataTransfer.files]);
+              }}
+              className={cx("flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-5 py-6 text-center text-sm", drag ? "border-cx bg-cx-tint" : "border-j-line bg-j-canvas")}
+            >
+              <b>{busy === "reading" ? "Reading files…" : busy === "assessing" ? "AI assessor is reviewing the evidence…" : "Drop evidence files here"}</b>
+              <span className="text-[13px] text-j-muted">PDF, Word, Excel, CSV or text. The AI assessor checks them against each criterion as soon as they are in.</span>
+              <input
+                ref={fileInput}
+                type="file"
+                multiple
+                accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md"
+                className="sr-only"
+                aria-label="Upload evidence files"
+                onChange={(e) => {
+                  const list = [...(e.target.files ?? [])];
+                  e.target.value = "";
+                  if (list.length) void upload(list);
+                }}
+              />
+              <JButton variant="primary" size="sm" disabled={!!busy} onClick={() => fileInput.current?.click()}>
+                <Icon name="upload" size={14} />
+                Choose files
+              </JButton>
+            </div>
+            {ev.files.map((f) => (
+              <div key={f.id} className="flex items-center gap-3 border-b border-j-line-soft py-2.5 last:border-0">
+                <span className="flex h-10 w-9 flex-none items-center justify-center rounded-lg bg-cx-soft text-[10px] font-bold text-cx">{f.name.split(".").pop()?.toUpperCase().slice(0, 4)}</span>
+                <span className="min-w-0 flex-auto text-sm">
+                  <b className="block truncate">{f.name}</b>
+                  <span className={cx("text-xs", f.error ? "text-j-bad" : "text-j-muted")}>
+                    <span className="font-mono">{f.id}</span> · {f.uploadedAt} · {f.error ?? `${f.pages.length} pages read${f.truncated ? " (long file: first part assessed)" : ""}`}
+                  </span>
+                </span>
+                {!f.error && run && !stale && run.fileIds.includes(f.id) && <Pill tone="ai">Assessed</Pill>}
+                <JButton size="sm" variant="ghost" className="text-j-bad" onClick={() => remove(f.id)} aria-label={`Remove ${f.name}`}>
+                  Remove
+                </JButton>
+              </div>
+            ))}
+            {ev.error && (
+              <p role="alert" className="m-0 rounded-xl bg-j-bad-soft px-3.5 py-2.5 text-[13px] text-j-bad">
+                {ev.error}
+              </p>
+            )}
+            {readable.length > 0 && (stale || !run || ev.error) && (
+              <JButton size="sm" className="self-start" disabled={!!busy} onClick={() => void assess()}>
+                <Icon name="ai" size={14} />
+                {busy === "assessing" ? "Assessing…" : run ? "Re-assess with the current files" : "Assess with AI"}
+              </JButton>
+            )}
+            {run && !stale && (
+              <JButton size="sm" variant="outline" className="self-start" onClick={() => setTab("rev")}>
+                See the AI assessment
+              </JButton>
+            )}
+          </Panel>
           <Panel className="flex flex-col gap-2 p-[22px]">
             <PanelHead
               title="Linked evidence"
@@ -316,37 +414,105 @@ export default function RequirementWorkspacePage() {
                 <Pill tone={e.ok ? "ok" : "warn"}>{e.ok ? "Valid" : "Wrong period"}</Pill>
               </div>
             ))}
-            {evidence.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked yet.</p>}
+            {evidence.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked from the library yet.</p>}
           </Panel>
+          </div>
         )}
 
         {tab === "rev" && (
           <div className="flex flex-wrap items-start gap-3.5">
-            <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-2 p-[22px]">
-              <PanelHead title="AI check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"} · {confidence}%</Pill>} />
-              <p className="m-0 text-xs text-j-muted">AI recommends; you decide. Nothing changes until you record a decision.</p>
-              {CRITERIA.map((t, i) => (
-                <div key={t} className="flex items-start gap-3 border-b border-j-line-soft py-3 last:border-0">
-                  <span className="pt-0.5 font-mono text-xs text-j-muted">C{i + 1}</span>
-                  <span className="flex-auto text-sm">
-                    <b>{t}</b>
-                    <br />
-                    <span className="text-[13px] text-j-ink-3">
-                      {marks[i] === "met" ? "Evidence covers this criterion." : marks[i] === "part" ? "Partly covered; the record is incomplete." : "No current-cycle evidence for this criterion."}
+            {run ? (
+              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-2 p-[22px]">
+                <PanelHead
+                  title="AI assessment"
+                  aside={
+                    <Pill tone={RECO_TONE[run.recommendation]}>
+                      {run.recommendation} · {confidence}%
+                    </Pill>
+                  }
+                />
+                <p className="m-0 text-xs text-j-muted">
+                  {run.model} · {run.at} · {run.fileIds.length} files · citations checked {run.checks.citationsResolved}/{run.checks.citationsTotal}. AI recommends; you decide.
+                  {stale && <b className="text-[#8A4B00]"> Files changed since this assessment: re-assess from the Evidence tab.</b>}
+                </p>
+                {run.summary && (
+                  <p className="m-0 rounded-xl bg-j-canvas px-3.5 py-2.5 text-sm" dir="auto">
+                    {run.summary}
+                  </p>
+                )}
+                {run.criteria.map((x) => {
+                  const def = criteria.find((k) => k.id === x.criterion_id);
+                  return (
+                    <div key={x.criterion_id} className="flex items-start gap-3 border-b border-j-line-soft py-3 last:border-0">
+                      <span className="pt-0.5 font-mono text-xs text-j-muted">{x.criterion_id}</span>
+                      <span className="flex min-w-0 flex-auto flex-col gap-1 text-sm">
+                        <b dir="auto">
+                          {def?.text ?? x.criterion_id}
+                          {def?.mandatory && <span className="ms-1.5 text-xs font-semibold text-j-bad">mandatory</span>}
+                        </b>
+                        <span className="text-[13px] text-j-ink-3" dir="auto">
+                          {x.rationale}
+                        </span>
+                        {x.gap && x.gap_kind !== "none" && (
+                          <span className="text-[13px] text-[#8A4B00]" dir="auto">
+                            Gap: {x.gap}
+                          </span>
+                        )}
+                        {x.citations.map((q, i) => (
+                          <span key={i} className={cx("text-xs", q.resolved ? "text-j-ai" : "text-j-bad")} dir="auto">
+                            {fileName(q.evidence_id)} · p.{q.page} · &ldquo;{q.quote}&rdquo;{q.resolved ? "" : " · quote not found in the file"}
+                          </span>
+                        ))}
+                      </span>
+                      <Pill tone={VERDICT[x.verdict][1]}>{VERDICT[x.verdict][0]}</Pill>
+                    </div>
+                  );
+                })}
+              </Panel>
+            ) : r.status === "nas" && !r.evidence.valid ? (
+              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col items-start gap-3 p-[22px]">
+                <PanelHead title="AI assessment" />
+                <p className="m-0 text-sm text-j-ink-2">
+                  {busy === "assessing" ? "The AI assessor is reviewing the uploaded evidence…" : `No assessment yet. Upload evidence and the AI assessor checks it against ${criteria.length} criteria.`}
+                </p>
+                <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[13px] text-j-ink-3">
+                  {criteria.map((k) => (
+                    <li key={k.id} dir="auto">
+                      <span className="font-mono text-xs text-j-muted">{k.id}</span> {k.text}
+                    </li>
+                  ))}
+                </ul>
+                <JButton size="sm" variant="primary" onClick={() => setTab("ev")}>
+                  Upload evidence
+                </JButton>
+              </Panel>
+            ) : (
+              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-2 p-[22px]">
+                <PanelHead title="AI check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"} · {confidence}%</Pill>} />
+                <p className="m-0 text-xs text-j-muted">AI recommends; you decide. Nothing changes until you record a decision.</p>
+                {CRITERIA.map((t, i) => (
+                  <div key={t} className="flex items-start gap-3 border-b border-j-line-soft py-3 last:border-0">
+                    <span className="pt-0.5 font-mono text-xs text-j-muted">C{i + 1}</span>
+                    <span className="flex-auto text-sm">
+                      <b>{t}</b>
+                      <br />
+                      <span className="text-[13px] text-j-ink-3">
+                        {marks[i] === "met" ? "Evidence covers this criterion." : marks[i] === "part" ? "Partly covered; the record is incomplete." : "No current-cycle evidence for this criterion."}
+                      </span>
+                      {evidence[i] && (
+                        <>
+                          <br />
+                          <Link href={c("/evidence")} className="font-mono text-xs text-j-ai">
+                            {evidence[i].id} · p.{i + 2}
+                          </Link>
+                        </>
+                      )}
                     </span>
-                    {evidence[i] && (
-                      <>
-                        <br />
-                        <Link href={c("/evidence")} className="font-mono text-xs text-j-ai">
-                          {evidence[i].id} · p.{i + 2}
-                        </Link>
-                      </>
-                    )}
-                  </span>
-                  <Pill tone={MARK[marks[i]][1]}>{MARK[marks[i]][0]}</Pill>
-                </div>
-              ))}
-            </Panel>
+                    <Pill tone={MARK[marks[i]][1]}>{MARK[marks[i]][0]}</Pill>
+                  </div>
+                ))}
+              </Panel>
+            )}
             <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
               <Panel className="flex flex-col gap-3 p-[22px]">
                 <h2 className="m-0 text-base">Your L1 decision</h2>

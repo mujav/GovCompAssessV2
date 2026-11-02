@@ -6,6 +6,7 @@ import { useAdmin } from "@/lib/admin/store";
 import type { WsRequirement } from "@/lib/workspace/data";
 import { useWorkspace } from "@/lib/workspace/store";
 import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceRecords, withAssignments, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
+import { evidenceKey, type EvidenceState } from "./evidence";
 import { DEMO_DIRECTORY, PEOPLE_KEY, type EntityPerson } from "./people";
 import { useJourney, useScreenState } from "./store";
 import { EMPTY_OVERLAY, stageOf, isReturned, type Stage, type WorkOverlay } from "./work";
@@ -52,6 +53,14 @@ export function frameworkRequirements(
   return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
 }
 
+/** Files uploaded on each requirement count as received evidence everywhere the requirement is shown. */
+function withUploads(reqs: ClientRequirement[], clientId: string, fwId: string, screens: Record<string, unknown>): ClientRequirement[] {
+  return reqs.map((r) => {
+    const n = ((screens[evidenceKey(clientId, fwId, r.code)] as EvidenceState | undefined)?.files ?? []).filter((f) => !f.error).length;
+    return n ? { ...r, evidence: { ...r.evidence, valid: r.evidence.valid + n, expected: Math.max(r.evidence.expected, r.evidence.valid + n) } } : r;
+  });
+}
+
 /** Every framework of the entity with its requirements and stage moves, for the all-frameworks overview. */
 export function useAllFrameworkWork() {
   const client = useCurrentClient();
@@ -64,7 +73,7 @@ export function useAllFrameworkWork() {
     () =>
       frameworks.map((f) => {
         const workspace = usesWorkspaceRecords(f.id, onboarded);
-        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+        return { framework: f, workspace, reqs: withUploads(frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people), client.id, f.id, state.screens), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
       }),
     [frameworks, onboarded, ws.ctx.reqs, ws.state.assignments, people, state.screens, client.id],
   );
@@ -80,7 +89,10 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   const workspace = usesWorkspaceRecords(fwId, onboarded);
   const [people] = useEntityPeople();
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
-  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people), [framework, workspace, ws.ctx.reqs, ws.state.assignments, people]);
+  const reqs = useMemo(
+    () => withUploads(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people), client.id, fwId, state.screens),
+    [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, client.id, fwId, state.screens],
+  );
 
   /** Assigns requirements to a person (their department follows), due in the given date. */
   const assign = (codes: string[], person: string, due: string) => {
