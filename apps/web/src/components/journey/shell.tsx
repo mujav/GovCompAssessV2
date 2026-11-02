@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "@/components/ui";
-import { CONSULTANT, getClient, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
+import { CONSULTANT, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
+import { useJourney } from "@/lib/journey/store";
 import { Icon, type IconName } from "./icon";
 
 type NavItem = { label: string; icon: IconName; href: string; badge?: string; badgeBg?: string; exact?: boolean };
@@ -94,7 +95,8 @@ export function ConsultantShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const current = getClient(clientId ?? DEMO_CLIENT_ID)!;
+  const { clients } = useJourney();
+  const current = clients.find((c) => c.id === (clientId ?? DEMO_CLIENT_ID)) ?? clients[0];
   const groups = clientId ? clientNav(clientId, current.name, workBadge) : portfolioNav();
   // Several items share a destination; highlight only the first match.
   let matched = false;
@@ -182,6 +184,23 @@ export function ConsultantShell({
         {children}
       </div>
     </div>
+  );
+}
+
+/** The client whose workspace the current route shows (falls back to Demo Entity). */
+export function useCurrentClient() {
+  const { id } = useParams<{ id?: string }>();
+  const { clients } = useJourney();
+  return clients.find((c) => c.id === id) ?? clients.find((c) => c.id === DEMO_CLIENT_ID)!;
+}
+
+/** Consultant shell in client-workspace mode for the client in the URL. */
+export function ClientShell({ children, workBadge, search }: { children: ReactNode; workBadge?: string; search?: string }) {
+  const client = useCurrentClient();
+  return (
+    <ConsultantShell clientId={client.id} workBadge={workBadge} search={search ?? `Search ${client.name}`} headerExtra={<ClientHeaderExtra />}>
+      {children}
+    </ConsultantShell>
   );
 }
 
