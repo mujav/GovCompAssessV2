@@ -4,13 +4,13 @@
 // Screens keep their own slices here so work done on one screen shows on the others.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
-import { CLIENTS, ENGAGEMENTS, type Client, type Engagement } from "./portfolio";
+import { CLIENTS, ENGAGEMENTS, asActive, type Client, type Engagement } from "./portfolio";
 
 const STORAGE_KEY = "ci-journey-v1";
 
 export interface JourneyState {
-  /** Clients onboarded in this demo, waiting for activation. */
-  added: { client: Client; engagement: Engagement }[];
+  /** Clients onboarded in this demo, one engagement per framework they are enrolled in. */
+  added: { client: Client; engagement: Engagement; more?: Engagement[] }[];
   /** Free-form per-screen state, keyed by screen. */
   screens: Record<string, unknown>;
   log: { at: string; text: string }[];
@@ -71,8 +71,8 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   const api = useMemo<JourneyApi>(
     () => ({
       state,
-      clients: [...CLIENTS, ...state.added.map((a) => a.client)],
-      engagements: [...ENGAGEMENTS, ...state.added.map((a) => a.engagement)],
+      clients: [...CLIENTS, ...state.added.map((a) => asActive(a).client)],
+      engagements: [...ENGAGEMENTS, ...state.added.flatMap((a) => [asActive(a).engagement, ...(a.more ?? [])])],
       update,
       log: (text) => update((s) => void s.log.unshift({ at: stamp(), text })),
       reset: () => {

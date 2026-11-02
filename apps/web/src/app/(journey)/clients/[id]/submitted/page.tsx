@@ -13,7 +13,8 @@ import { useClientWork } from "@/lib/journey/use-work";
 // 14 · Submitted. Portal receipt, what went in, the sign-off trail and what comes next.
 
 export default function SubmittedPage() {
-  const { client, ws } = useClientWork();
+  const { client, ws, framework } = useClientWork();
+  const fwName = framework?.name ?? client.frameworks[0];
   const { clients, log } = useJourney();
   const [s] = useScreenState<SubmissionState>(submissionKey(client.id), NO_SUBMISSION);
   const [sent, setSent] = useScreenState<boolean>(`submitted.${client.id}.report`, false);
@@ -54,7 +55,7 @@ export default function SubmittedPage() {
   ];
 
   const downloadReceipt = () => {
-    const text = [`DGA portal receipt ${s.receipt}`, `${client.name} · ${client.frameworks[0]}`, `Submitted ${s.submittedAt} by ${uploader}`, `Requirements: ${f.total}`, `Evidence files: ${f.files}`].join("\n");
+    const text = [`DGA portal receipt ${s.receipt}`, `${client.name} · ${fwName}`, `Submitted ${s.submittedAt} by ${uploader}`, `Requirements: ${f.total}`, `Evidence files: ${f.files}`].join("\n");
     const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
     const a = document.createElement("a");
     a.href = url;
@@ -74,7 +75,7 @@ export default function SubmittedPage() {
             <span className="text-[11px] font-semibold tracking-[0.08em] text-cx-line">SUBMITTED TO DGA</span>
             <br />
             <b className="text-2xl">
-              {client.name} · {client.frameworks[0]}
+              {client.name} · {fwName}
             </b>
             <br />
             <span className="text-sm text-cx-line">

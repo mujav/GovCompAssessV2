@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { cx } from "@/components/ui";
 import { CONSULTANT, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
 import { useAdmin } from "@/lib/admin/store";
+import { entityFrameworks } from "@/lib/journey/frameworks";
 import { useJourney } from "@/lib/journey/store";
 import { useWorkspace } from "@/lib/workspace/store";
 import { Icon, type IconName } from "./icon";
@@ -130,7 +131,7 @@ export function ConsultantShell({
           <span className="min-w-0 flex-auto leading-4">
             <b className="text-[13px]">{current.name}</b>
             <br />
-            <span className="text-xs text-j-muted">{current.frameworks[0]}</span>
+            <span className="text-xs text-j-muted">{entityFrameworks(current, admin.frameworks).map((f) => f.short).join(" · ") || current.frameworks.join(" · ")}</span>
           </span>
           <Icon name="switch" size={16} />
           <span className="sr-only">Switch entity</span>
@@ -221,10 +222,21 @@ export function JMain({ children, className, max = 1360 }: { children: ReactNode
 
 /** Header extras for a client workspace: service model, engagement term, switch entity. */
 export function ClientHeaderExtra() {
+  const client = useCurrentClient();
+  const { engagements } = useJourney();
+  const mine = engagements.filter((e) => e.clientId === client.id);
+  const managed = mine.length > 0 && mine.every((e) => e.model === "managed");
+  const term = mine[0]?.term;
   return (
     <>
-      <span className="inline-flex h-[30px] items-center rounded-full bg-cx-soft px-3 text-xs font-bold text-cx">Managed service</span>
-      <span className="inline-flex h-[30px] items-center rounded-full bg-j-canvas px-3 text-xs font-semibold text-j-ink-2">ENG-0142 · 214 d left</span>
+      <span className="inline-flex h-[30px] items-center rounded-full bg-cx-soft px-3 text-xs font-bold text-cx">{managed ? "Managed service" : "Co-managed service"}</span>
+      {term && (
+        <span className="inline-flex h-[30px] items-center rounded-full bg-j-canvas px-3 text-xs font-semibold text-j-ink-2">
+          {client.id === DEMO_CLIENT_ID ? "ENG-0142 · " : ""}
+          {mine.length > 1 ? `${mine.length} engagements · ` : ""}
+          {term}
+        </span>
+      )}
       <Link
         href="/entities"
         className="inline-flex h-9 items-center rounded-[10px] border border-j-line px-3 text-[13px] font-semibold text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink"

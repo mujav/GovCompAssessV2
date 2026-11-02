@@ -6,7 +6,7 @@ import { Icon, type IconName } from "@/components/journey/icon";
 import { ConsultantShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
-import { LOGO, clientHref, readyColor, type Model } from "@/lib/journey/portfolio";
+import { ENGAGEMENTS, LOGO, clientHref, readyColor, type Model } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 
 // 03 · Portfolio cockpit. Metadata only: the consultant sees every assigned client and
@@ -28,7 +28,7 @@ const heat = (v: number) => (v > 100 ? ["#FAD6D0", "#8C1D12"] : v > 85 ? ["#FFF0
 
 const EXPIRING: { id: string; name: string; what: string; cta: string; done: string; tone: PillTone }[] = [
   { id: "renew", name: "Demo Ministry of Services", what: "Qiyas + NCA ECC · 41 days", cta: "Request renewal", done: "Renewal requested", tone: "warn" },
-  { id: "remind", name: "Demo Skills Fund", what: "Waiting for client activation", cta: "Send reminder", done: "Reminder sent", tone: "bad" },
+  { id: "kickoff", name: "Demo Skills Fund", what: "New client · kickoff not scheduled", cta: "Schedule kickoff", done: "Kickoff scheduled", tone: "bad" },
   { id: "jit", name: "Demo Ports Authority", what: "Secret items need JIT access", cta: "Request JIT", done: "JIT requested", tone: "cx" },
 ];
 
@@ -37,6 +37,7 @@ export default function PortfolioPage() {
   const [done, setDone] = useScreenState<string[]>("portfolio.done", []);
   const [q, setQ] = useState("");
   const added = state.added.length;
+  const addedEngagements = engagements.length - ENGAGEMENTS.length;
 
   const rows = engagements
     .map((e) => ({ e, c: clients.find((c) => c.id === e.clientId)! }))
@@ -44,7 +45,7 @@ export default function PortfolioPage() {
 
   const kpis: { v: number; l: string; icon: IconName; tone: PillTone }[] = [
     { v: 12 + added, l: "Clients", icon: "ent", tone: "cx" },
-    { v: 15 + added, l: "Index engagements", icon: "eng", tone: "cx" },
+    { v: 15 + addedEngagements, l: "Index engagements", icon: "eng", tone: "cx" },
     { v: 6, l: "Milestones ≤ 14 days", icon: "clock", tone: "warn" },
     { v: 2, l: "Terms ending", icon: "key", tone: "bad" },
   ];
@@ -117,17 +118,16 @@ export default function PortfolioPage() {
               {rows.map(({ e, c }) => {
                 const [lbg, lfg] = LOGO[c.logo];
                 const [model, mTone] = MODEL[e.model];
-                const draft = e.model === "draft";
-                const href = draft ? "/portfolio/onboard" : clientHref(c.id, "/360");
+                const href = clientHref(c.id, "/360");
                 return (
-                  <div key={`${e.clientId}-${e.index}`} role="row" className={cx("grid items-center gap-3 border-b border-[#EEF1F5] px-[22px] py-3", COLS, draft ? "bg-[#FFFBF3]" : "bg-white")}>
+                  <div key={`${e.clientId}-${e.frameworkId ?? e.index}`} role="row" className={cx("grid items-center gap-3 border-b border-[#EEF1F5] bg-white px-[22px] py-3", COLS)}>
                     <span role="cell" className="flex min-w-0 items-center gap-2.5">
                       <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] text-[11px] font-bold" style={{ background: lbg, color: lfg }}>
                         {c.ini}
                       </span>
                       <span className="flex min-w-0 flex-col">
                         <b className="truncate text-sm">{c.name}</b>
-                        <span className={cx("text-xs", draft ? "text-[#8A4B00]" : "text-j-muted")}>{draft ? "Awaiting client activation" : c.sub}</span>
+                        <span className="text-xs text-j-muted">{c.sub}</span>
                       </span>
                     </span>
                     <span role="cell">

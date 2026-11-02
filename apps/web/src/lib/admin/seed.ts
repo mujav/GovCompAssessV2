@@ -2,6 +2,7 @@
 
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
+import { NCA_LIVE_LEVELS, NCA_REQUIREMENTS, NDMO_LIVE } from "./library-seed";
 import { QIYAS_V12_REQUIREMENTS } from "./qiyas-base";
 import type {
   AcceptancePolicy,
@@ -216,14 +217,12 @@ export function createSeed(): AdminState {
           createdAt: "02 Feb 2024",
           publishedAt: "20 Feb 2024",
           scoringNote: "Maturity 0–5 · minimum by domain",
-          levels: [
-            { id: "lv-1", en: "Domain", ar: "المجال", pattern: "#", assessed: "rollup" },
-            { id: "lv-2", en: "Subdomain", ar: "المجال الفرعي", pattern: "#-#", assessed: "rollup" },
-            { id: "lv-3", en: "Control", ar: "الضابط", pattern: "#-#-#", assessed: "accepted" },
-            { id: "lv-4", en: "Subcontrol", ar: "الضابط الفرعي", pattern: "#-#-#-#", assessed: "ai_reviewer" },
-          ],
+          weighting: "none",
+          levels: NCA_LIVE_LEVELS,
+          requirements: NCA_REQUIREMENTS,
         },
       },
+      { id: "fw-ndmo", usedByCycles: 2, live: NDMO_LIVE },
       {
         id: "fw-iso",
         usedByCycles: 0,

@@ -55,7 +55,7 @@ export default function EntitiesPage() {
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 text-[32px] leading-10 font-bold tracking-[-0.02em]">Which entity are you working on?</h1>
             <span className="text-[15px] text-j-muted">
-              {clients.length - count("draft")} entities assigned to you · {count("attn")} need attention this week
+              {clients.length} entities assigned to you · {count("attn")} need attention this week
             </span>
           </div>
           <JLink href="/portfolio" className="border-j-field">
@@ -84,7 +84,6 @@ export default function EntitiesPage() {
               { value: "all", label: "All", n: clients.length },
               { value: "attn", label: "Needs attention", n: count("attn") },
               { value: "active", label: "On track", n: count("active") },
-              { value: "draft", label: "Drafts", n: count("draft") },
             ]}
           />
         </div>
@@ -108,7 +107,7 @@ export default function EntitiesPage() {
             return (
               <Link
                 key={c.id}
-                href={c.flag === "draft" ? "/portfolio/onboard" : clientHref(c.id)}
+                href={clientHref(c.id)}
                 className={cx(
                   "box-border flex min-h-[196px] flex-col gap-3.5 rounded-[20px] border bg-white p-5 text-j-ink no-underline hover:text-j-ink hover:shadow-[0_2px_10px_rgba(16,28,23,0.06)]",
                   c.nextTone === "late" ? "border-[#F0C2BA]" : "border-j-line",

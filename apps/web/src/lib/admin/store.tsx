@@ -112,6 +112,17 @@ function pushAudit(s: AdminState, who: string, text: string) {
   s.audit.unshift({ id: `ev-${s.seq}`, at: stamp(), who, text });
 }
 
+/** Saved state from before a seeded framework or requirement list existed gets them added; admin edits are kept. */
+function withSeedLibrary(saved: AdminState): AdminState {
+  const seed = createSeed();
+  for (const f of seed.frameworks) {
+    const mine = saved.frameworks.find((x) => x.id === f.id);
+    if (!mine) saved.frameworks.push(f);
+    else if (mine.live && !mine.live.requirements?.length && f.live?.requirements?.length) mine.live.requirements = f.live.requirements;
+  }
+  return saved;
+}
+
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, createSeed);
   const hydrated = useRef(false);
@@ -120,7 +131,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) dispatch({ type: "replace", state: JSON.parse(raw) as AdminState });
+      if (raw) dispatch({ type: "replace", state: withSeedLibrary(JSON.parse(raw) as AdminState) });
     } catch {
       // Corrupt or blocked storage: keep the seed.
     }

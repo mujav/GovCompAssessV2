@@ -1,16 +1,69 @@
 "use client";
 
+import { useMemo } from "react";
 import { useCurrentClient } from "@/components/journey/shell";
+import { useAdmin } from "@/lib/admin/store";
+import type { WsRequirement } from "@/lib/workspace/data";
 import { useWorkspace } from "@/lib/workspace/store";
+import { entityFrameworks, libraryRequirements, usesWorkspaceRecords, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
 import { useJourney, useScreenState } from "./store";
 import { EMPTY_OVERLAY, stageOf, isReturned, type Stage, type WorkOverlay } from "./work";
 
-/** Workspace records for the client in the URL, with the consultant's moves applied. */
-export function useClientWork() {
+export const ALL = "all";
+
+/** The entity's frameworks and which one the client pages show. "all" is only offered by the overview. */
+export function useEntityFrameworks() {
+  const client = useCurrentClient();
+  const { state } = useAdmin();
+  const frameworks = useMemo(() => entityFrameworks(client, state.frameworks), [client, state.frameworks]);
+  const [choice, setChoice] = useScreenState<{ id: string }>(`framework.${client.id}`, { id: "" });
+  const chosen = choice.id;
+  const valid = chosen === ALL || frameworks.some((f) => f.id === chosen);
+  const active = valid && chosen ? chosen : frameworks.length > 1 ? ALL : (frameworks[0]?.id ?? "");
+  /** The framework single-framework pages show: the active one, or the first when "all" is active. */
+  const current: EntityFramework | undefined = frameworks.find((f) => f.id === active) ?? frameworks[0];
+  return { frameworks, active, current, setActive: (id: string) => setChoice((d) => void (d.id = id)) };
+}
+
+// The workspace framework keeps its original slice so earlier moves are not lost.
+const overlayKey = (clientId: string, fwId: string) => (fwId === WORKSPACE_FRAMEWORK_ID ? `work.${clientId}` : `work.${clientId}.${fwId}`);
+
+/** One framework's requirement list for an entity: the shared workspace records, or fresh items from the library. */
+export function frameworkRequirements(framework: EntityFramework | undefined, workspace: boolean, wsReqs: WsRequirement[]): ClientRequirement[] {
+  const library = framework ? libraryRequirements(framework.live) : [];
+  if (!workspace) return library;
+  // Workspace records carry the work state; the library adds the official wording where codes match.
+  const wording = new Map(library.map((r) => [r.code, r]));
+  return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
+}
+
+/** Every framework of the entity with its requirements and stage moves, for the all-frameworks overview. */
+export function useAllFrameworkWork() {
   const client = useCurrentClient();
   const ws = useWorkspace();
-  const { log } = useJourney();
-  const [overlay, setOverlay] = useScreenState<WorkOverlay>(`work.${client.id}`, EMPTY_OVERLAY);
+  const { state } = useJourney();
+  const { frameworks } = useEntityFrameworks();
+  const onboarded = state.added.some((a) => a.client.id === client.id);
+  return useMemo(
+    () =>
+      frameworks.map((f) => {
+        const workspace = usesWorkspaceRecords(f.id, onboarded);
+        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+      }),
+    [frameworks, onboarded, ws.ctx.reqs, state.screens, client.id],
+  );
+}
+
+/** Requirements and the consultant's stage moves for one framework of one entity. */
+export function useFrameworkWork(framework: EntityFramework | undefined) {
+  const client = useCurrentClient();
+  const ws = useWorkspace();
+  const { state, log } = useJourney();
+  const onboarded = state.added.some((a) => a.client.id === client.id);
+  const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
+  const workspace = usesWorkspaceRecords(fwId, onboarded);
+  const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
+  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs), [framework, workspace, ws.ctx.reqs]);
 
   const move = (codes: string[], to: Stage, text?: string) => {
     if (!codes.length) return;
@@ -34,18 +87,27 @@ export function useClientWork() {
   return {
     client,
     ws,
-    reqs: ws.ctx.reqs,
+    framework,
+    /** True when the list comes from the shared workspace records (with evidence, issues and reviews). */
+    workspace,
+    reqs,
     overlay,
     stage: (code: string) => {
-      const r = ws.ctx.reqs.find((x) => x.code === code);
+      const r = reqs.find((x) => x.code === code);
       return r ? stageOf(r, overlay) : "start";
     },
     returned: (code: string) => {
-      const r = ws.ctx.reqs.find((x) => x.code === code);
+      const r = reqs.find((x) => x.code === code);
       return r ? isReturned(r, overlay) : false;
     },
     move,
     ret,
     log,
   };
+}
+
+/** Workspace records for the client in the URL and its active framework, with the consultant's moves applied. */
+export function useClientWork() {
+  const { current } = useEntityFrameworks();
+  return useFrameworkWork(current);
 }

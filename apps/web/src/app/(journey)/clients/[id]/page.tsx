@@ -3,19 +3,23 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Drawer } from "@/components/overlay";
+import { FrameworkSwitcher } from "@/components/journey/framework-switcher";
 import { Icon, type IconName } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { readiness } from "@/lib/engine/metrics";
 import { clientHref } from "@/lib/journey/portfolio";
+import type { ClientRequirement, EntityFramework } from "@/lib/journey/frameworks";
 import { useScreenState } from "@/lib/journey/store";
-import { useClientWork } from "@/lib/journey/use-work";
-import { codeKey, initials, pipelineBands, stageOf } from "@/lib/journey/work";
+import { ALL, useAllFrameworkWork, useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
+import { codeKey, initials, pipelineBands, stageOf, type WorkOverlay } from "@/lib/journey/work";
 import { executiveUpdate } from "@/lib/workspace/drafts";
 import { PRIOR_CYCLE, SUBMISSION_DEADLINE, daysBetween, shortDate } from "@/lib/workspace/data";
+import type { useWorkspace } from "@/lib/workspace/store";
 
-// 07 · Client overview. Where the engagement stands and what the consultant does next.
+// 07 · Client overview. Where the engagement stands and what the consultant does next, for
+// one framework or, when the entity has several, for all of them side by side.
 
 const KIND: Record<string, [IconName, PillTone, string]> = {
   rev: ["rev", "cx", "L1 review"],
@@ -27,8 +31,76 @@ const KIND: Record<string, [IconName, PillTone, string]> = {
 
 const AV_TONE = { late: ["#FDECEA", "#B42318"], warn: ["#FFF4DF", "#8A4B00"], ok: ["#E7F3ED", "#0E5A45"] } as const;
 
+type Ws = ReturnType<typeof useWorkspace>;
+type QueueItem = { k: keyof typeof KIND; t: string; code: string; due: string; late: boolean; cta: string; href: string; fw?: EntityFramework };
+
+/** Headline numbers, pipeline, queue and SPOC hand-offs for one framework's requirements. */
+function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: boolean, ws: Ws, c: (p: string) => string, fw?: EntityFramework) {
+  const today = ws.ctx.today;
+  const total = reqs.length;
+  const st = reqs.map((r) => stageOf(r, overlay));
+  const atLeast = (s: string[]) => st.filter((x) => s.includes(x)).length;
+  // The workspace framework has a scoring model; library frameworks show the share accepted so far.
+  const pct = workspace ? readiness(ws.ctx).projected.pct : total ? Math.round((atLeast(["acc"]) / total) * 1000) / 10 : 0;
+  const issues = workspace ? ws.ctx.issues.filter((i) => !ws.state.returned.includes(i.id)) : [];
+  const clarifications = workspace ? ws.ctx.clarifications : [];
+  const evValid = reqs.filter((r) => r.evidence.valid > 0 && r.evidence.invalid === 0 && !issues.some((i) => i.code === r.code)).length;
+  const bands = pipelineBands(reqs, overlay);
+  const inReview = reqs.filter((r) => stageOf(r, overlay) === "rev").sort((a, b) => a.due.localeCompare(b.due) || codeKey(a.code).localeCompare(codeKey(b.code)));
+  const drafting = reqs.filter((r) => stageOf(r, overlay) === "prog" && r.work !== "update" && r.work !== "prog").sort((a, b) => a.due.localeCompare(b.due));
+  const dueLabel = (d: string) => {
+    const n = daysBetween(today, d);
+    return n <= 0 ? "Today" : n === 1 ? "Tomorrow" : `${n} d`;
+  };
+  const queue: QueueItem[] = [
+    ...inReview.slice(0, 2).map((r) => ({ k: "rev" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due <= today, cta: "Review", href: c(`/requirements/${r.code}`), fw })),
+    ...(issues.length ? [{ k: "ev" as const, t: `${issues.length} files failed validation`, code: issues[0].id, due: "Today", late: true, cta: "Check", href: c("/evidence"), fw }] : []),
+    ...drafting.slice(0, 1).map((r) => ({ k: "draft" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due < today, cta: "Draft", href: c(`/requirements/${r.code}`), fw })),
+    ...clarifications.map((cl) => ({ k: "cla" as const, t: `Apply DGA answer to ${cl.affects.length} items`, code: cl.id, due: "2 d", late: false, cta: "Apply", href: c("/clarifications"), fw })),
+    ...(inReview.length ? [{ k: "send" as const, t: `${inReview.length} requirements waiting for L1 before the client`, code: "Batch", due: "2 d", late: false, cta: "Open", href: c("/work"), fw }] : []),
+  ];
+  // SPOC hand-offs: requirements waiting on a department, grouped by department.
+  const spocMap = new Map<string, { who: string; codes: string[]; oldest: string }>();
+  for (const r of reqs) {
+    if (stageOf(r, overlay) !== "prog" || (r.work !== "update" && r.work !== "prog")) continue;
+    const e = spocMap.get(r.department) ?? { who: r.owner || "Unassigned", codes: [], oldest: r.due };
+    e.codes.push(r.code);
+    if (r.due < e.oldest) e.oldest = r.due;
+    spocMap.set(r.department, e);
+  }
+  const spocs = [...spocMap.entries()].map(([dept, e]) => ({ dept, ...e, age: Math.max(1, daysBetween(e.oldest, today)), fw }));
+  return {
+    total,
+    pct,
+    delta: workspace ? Math.round((pct - PRIOR_CYCLE[PRIOR_CYCLE.length - 1]) * 10) / 10 : null,
+    stats: [
+      { l: "Prepared", v: atLeast(["rev", "cli", "acc"]), bar: "#1E4E8C", href: c("/requirements") },
+      { l: "L1 reviewed", v: atLeast(["cli", "acc"]), bar: "#3A6FB8", href: c("/work") },
+      { l: "Client accepted", v: atLeast(["acc"]), bar: "#1F9D6E", href: c("/submission") },
+      { l: "Evidence valid", v: evValid, bar: "#5FBF93", href: c("/evidence") },
+    ],
+    bands,
+    queue,
+    queueCount: inReview.length + issues.length + drafting.length + clarifications.length,
+    spocs,
+  };
+}
+
+const PIPE: { key: keyof ReturnType<typeof pipelineBands>; l: string; color: string; path: string }[] = [
+  { key: "start", l: "Not started", color: "#D5DCD8", path: "/requirements?stage=start" },
+  { key: "draft", l: "Drafting", color: "#9AA6A0", path: "/requirements?stage=prog" },
+  { key: "spoc", l: "Waiting on SPOC", color: "#E0A100", path: "/work" },
+  { key: "rev", l: "L1 review", color: "#3A6FB8", path: "/requirements?stage=rev" },
+  { key: "cli", l: "With client", color: "#7E8FD9", path: "/requirements?stage=cli" },
+  { key: "acc", l: "Accepted", color: "#1F9D6E", path: "/submission" },
+  { key: "ret", l: "Returned", color: "#D9442E", path: "/requirements?returned=1" },
+];
+
 export default function ClientOverviewPage() {
-  const { client, ws, reqs, overlay, log } = useClientWork();
+  const { client, ws, framework, workspace, reqs, overlay, log } = useClientWork();
+  const { frameworks, active, setActive } = useEntityFrameworks();
+  const all = useAllFrameworkWork();
+  const showAll = active === ALL && frameworks.length > 1;
   const [reminded, setReminded] = useScreenState<string[]>(`overview.${client.id}.reminded`, []);
   const [update, setUpdate] = useState(false);
   const c = (p: string) => clientHref(client.id, p);
@@ -36,63 +108,30 @@ export default function ClientOverviewPage() {
   const daysLeft = daysBetween(today, SUBMISSION_DEADLINE);
 
   const m = useMemo(() => {
-    const total = reqs.length;
-    const st = reqs.map((r) => stageOf(r, overlay));
-    const atLeast = (s: string[]) => st.filter((x) => s.includes(x)).length;
-    const pct = readiness(ws.ctx).projected.pct;
-    const evValid = reqs.filter((r) => r.evidence.valid > 0 && r.evidence.invalid === 0 && !ws.state.returned.some((id) => ws.ctx.issues.find((i) => i.id === id)?.code === r.code)).length;
-    const bands = pipelineBands(reqs, overlay);
-    const inReview = reqs.filter((r) => stageOf(r, overlay) === "rev").sort((a, b) => a.due.localeCompare(b.due) || codeKey(a.code).localeCompare(codeKey(b.code)));
-    const drafting = reqs.filter((r) => stageOf(r, overlay) === "prog" && r.work !== "update" && r.work !== "prog").sort((a, b) => a.due.localeCompare(b.due));
-    const issues = ws.ctx.issues.filter((i) => !ws.state.returned.includes(i.id));
-    const dueLabel = (d: string) => {
-      const n = daysBetween(today, d);
-      return n <= 0 ? "Today" : n === 1 ? "Tomorrow" : `${n} d`;
-    };
-    const queue: { k: keyof typeof KIND; t: string; code: string; due: string; late: boolean; cta: string; href: string }[] = [
-      ...inReview.slice(0, 2).map((r) => ({ k: "rev" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due <= today, cta: "Review", href: c(`/requirements/${r.code}`) })),
-      ...(issues.length ? [{ k: "ev" as const, t: `${issues.length} files failed validation`, code: issues[0].id, due: "Today", late: true, cta: "Check", href: c("/evidence") }] : []),
-      ...drafting.slice(0, 1).map((r) => ({ k: "draft" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due < today, cta: "Draft", href: c(`/requirements/${r.code}`) })),
-      ...ws.ctx.clarifications.map((cl) => ({ k: "cla" as const, t: `Apply DGA answer to ${cl.affects.length} items`, code: cl.id, due: "2 d", late: false, cta: "Apply", href: c("/clarifications") })),
-      ...(inReview.length ? [{ k: "send" as const, t: `${inReview.length} requirements waiting for L1 before the client`, code: "Batch", due: "2 d", late: false, cta: "Open", href: c("/work") }] : []),
-    ];
-    // SPOC hand-offs: requirements waiting on a department, grouped by department.
-    const spocMap = new Map<string, { who: string; codes: string[]; oldest: string }>();
-    for (const r of reqs) {
-      if (stageOf(r, overlay) !== "prog" || (r.work !== "update" && r.work !== "prog")) continue;
-      const e = spocMap.get(r.department) ?? { who: r.owner || "Unassigned", codes: [], oldest: r.due };
-      e.codes.push(r.code);
-      if (r.due < e.oldest) e.oldest = r.due;
-      spocMap.set(r.department, e);
+    if (!showAll) {
+      const one = summarize(reqs, overlay, workspace, ws, c, framework);
+      return { ...one, spocs: one.spocs.sort((a, b) => b.codes.length - a.codes.length).slice(0, 5), parts: [] };
     }
-    const spocs = [...spocMap.entries()]
-      .map(([dept, e]) => ({ dept, ...e, age: Math.max(1, daysBetween(e.oldest, today)) }))
-      .sort((a, b) => b.codes.length - a.codes.length)
-      .slice(0, 5);
+    const parts = all.map((x) => summarize(x.reqs, x.overlay, x.workspace, ws, c, x.framework));
+    const bands = PIPE.reduce((acc, p) => ({ ...acc, [p.key]: parts.reduce((n, x) => n + x.bands[p.key], 0) }), {} as ReturnType<typeof pipelineBands>);
     return {
-      total,
-      pct,
-      delta: Math.round((pct - PRIOR_CYCLE[PRIOR_CYCLE.length - 1]) * 10) / 10,
-      stats: [
-        { l: "Prepared", v: atLeast(["rev", "cli", "acc"]), bar: "#1E4E8C", href: c("/requirements") },
-        { l: "L1 reviewed", v: atLeast(["cli", "acc"]), bar: "#3A6FB8", href: c("/work") },
-        { l: "Client accepted", v: atLeast(["acc"]), bar: "#1F9D6E", href: c("/submission") },
-        { l: "Evidence valid", v: evValid, bar: "#5FBF93", href: c("/evidence") },
-      ],
-      pipe: [
-        { l: "Not started", n: bands.start, color: "#D5DCD8", href: c("/requirements?stage=start") },
-        { l: "Drafting", n: bands.draft, color: "#9AA6A0", href: c("/requirements?stage=prog") },
-        { l: "Waiting on SPOC", n: bands.spoc, color: "#E0A100", href: c("/work") },
-        { l: "L1 review", n: bands.rev, color: "#3A6FB8", href: c("/requirements?stage=rev") },
-        { l: "With client", n: bands.cli, color: "#7E8FD9", href: c("/requirements?stage=cli") },
-        { l: "Accepted", n: bands.acc, color: "#1F9D6E", href: c("/submission") },
-        { l: "Returned", n: bands.ret, color: "#D9442E", href: c("/requirements?returned=1") },
-      ],
-      queue,
-      queueCount: inReview.length + issues.length + drafting.length + ws.ctx.clarifications.length,
-      spocs,
+      total: parts.reduce((n, x) => n + x.total, 0),
+      pct: 0,
+      delta: null,
+      stats: [],
+      bands,
+      queue: parts.flatMap((x) => x.queue),
+      queueCount: parts.reduce((n, x) => n + x.queueCount, 0),
+      spocs: parts
+        .flatMap((x) => x.spocs)
+        .sort((a, b) => b.codes.length - a.codes.length)
+        .slice(0, 5),
+      parts,
     };
-  }, [reqs, overlay, ws, today, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [showAll, reqs, overlay, workspace, ws, framework, all, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const pipe = PIPE.map((p) => ({ ...p, n: m.bands[p.key], href: c(p.path) }));
+  /** In the all-frameworks view a link first makes its framework the active one. */
+  const follow = (fw?: EntityFramework) => (fw && showAll ? () => setActive(fw.id) : undefined);
 
   return (
     <ClientShell workBadge={String(m.queueCount)}>
@@ -100,15 +139,18 @@ export default function ClientOverviewPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
             <span className="flex flex-wrap gap-1.5">
-              <Pill tone="cx">{client.frameworks[0]}</Pill>
+              {showAll ? <Pill tone="cx">{frameworks.length} frameworks</Pill> : <Pill tone="cx">{framework ? `${framework.name} v${framework.version}` : client.frameworks[0]}</Pill>}
               <Pill>Self-assessment</Pill>
-              <Pill tone={daysLeft <= 7 ? "bad" : "warn"}>
-                Portal closes {shortDate(SUBMISSION_DEADLINE)} · {daysLeft} d
-              </Pill>
+              {(showAll ? all.some((x) => x.workspace) : workspace) && (
+                <Pill tone={daysLeft <= 7 ? "bad" : "warn"}>
+                  Portal closes {shortDate(SUBMISSION_DEADLINE)} · {daysLeft} d
+                </Pill>
+              )}
             </span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">{client.name}</h1>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <FrameworkSwitcher allowAll />
             <JButton onClick={() => setUpdate(true)}>Client update</JButton>
             <JLink href={c("/submission")} variant="primary">
               Submission pack
@@ -116,50 +158,108 @@ export default function ClientOverviewPage() {
           </div>
         </div>
 
-        <section className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
-          <div className="flex items-center gap-4 rounded-[20px] bg-cx-deep p-[18px] text-white">
-            <Ring pct={m.pct} color="#5FBF93" track="#2A3F5E" hole="#0F1F36" size={72} label={`Completion ${m.pct} percent`}>
-              <b className="text-base">{Math.round(m.pct)}%</b>
-            </Ring>
-            <span className="text-sm">
-              <b className="text-base">Completion</b>
-              <br />
-              <span className="text-cx-line">
-                {m.delta >= 0 ? "+" : ""}
-                {m.delta} vs 2025
+        {showAll ? (
+          <section aria-label="Frameworks" className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
+            {m.parts.map((x, i) => {
+              const f = all[i].framework;
+              return (
+                <div key={f.id} className="flex flex-col gap-3.5 rounded-[20px] border border-j-line bg-white p-[18px]">
+                  <span className="flex items-center gap-3.5">
+                    <Ring pct={x.pct} color="#1F9D6E" size={64} label={`${f.short} completion ${x.pct} percent`}>
+                      <b className="text-sm">{Math.round(x.pct)}%</b>
+                    </Ring>
+                    <span className="flex min-w-0 flex-col">
+                      <b className="text-base" dir="auto">
+                        {f.name}
+                      </b>
+                      <span className="text-xs text-j-muted">
+                        v{f.version} · {f.authority} · {x.total} requirements
+                      </span>
+                    </span>
+                  </span>
+                  <span role="img" aria-label={`${f.short} by stage`} className="flex h-2.5 gap-[2px] overflow-hidden rounded-md bg-j-line-soft">
+                    {PIPE.filter((p) => x.bands[p.key] > 0).map((p) => (
+                      <span key={p.key} style={{ flex: x.bands[p.key], background: p.color }} />
+                    ))}
+                  </span>
+                  <span className="grid grid-cols-3 gap-2 text-xs">
+                    {[
+                      [x.stats[0].v, "prepared"],
+                      [x.stats[2].v, "accepted"],
+                      [x.queueCount, "open tasks"],
+                    ].map(([v, l]) => (
+                      <span key={l}>
+                        <b className="text-base">{v}</b>
+                        <br />
+                        <span className="text-j-muted">{l}</span>
+                      </span>
+                    ))}
+                  </span>
+                  <JButton size="sm" className="self-start" onClick={() => setActive(f.id)}>
+                    Open {f.short}
+                  </JButton>
+                </div>
+              );
+            })}
+          </section>
+        ) : (
+          <section className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
+            <div className="flex items-center gap-4 rounded-[20px] bg-cx-deep p-[18px] text-white">
+              <Ring pct={m.pct} color="#5FBF93" track="#2A3F5E" hole="#0F1F36" size={72} label={`Completion ${m.pct} percent`}>
+                <b className="text-base">{Math.round(m.pct)}%</b>
+              </Ring>
+              <span className="text-sm">
+                <b className="text-base">Completion</b>
+                <br />
+                <span className="text-cx-line">{m.delta == null ? "First cycle on the platform" : `${m.delta >= 0 ? "+" : ""}${m.delta} vs 2025`}</span>
               </span>
-            </span>
-          </div>
-          {m.stats.map((s) => (
-            <Link key={s.l} href={s.href} className="flex flex-col gap-2 rounded-[20px] border border-j-line bg-white p-[18px] text-j-ink no-underline hover:border-cx-line hover:text-j-ink">
-              <span className="text-[13px] text-j-muted">{s.l}</span>
-              <span>
-                <b className="text-[26px] leading-[30px]">{s.v}</b> <span className="text-sm text-j-muted">/ {m.total}</span>
-              </span>
-              <span className="block h-1.5 overflow-hidden rounded-[3px] bg-j-line-soft">
-                <span className="block h-full rounded-[3px]" style={{ width: `${(s.v / m.total) * 100}%`, background: s.bar }} />
-              </span>
-            </Link>
-          ))}
-        </section>
+            </div>
+            {m.stats.map((s) => (
+              <Link key={s.l} href={s.href} className="flex flex-col gap-2 rounded-[20px] border border-j-line bg-white p-[18px] text-j-ink no-underline hover:border-cx-line hover:text-j-ink">
+                <span className="text-[13px] text-j-muted">{s.l}</span>
+                <span>
+                  <b className="text-[26px] leading-[30px]">{s.v}</b> <span className="text-sm text-j-muted">/ {m.total}</span>
+                </span>
+                <span className="block h-1.5 overflow-hidden rounded-[3px] bg-j-line-soft">
+                  <span className="block h-full rounded-[3px]" style={{ width: `${m.total ? (s.v / m.total) * 100 : 0}%`, background: s.bar }} />
+                </span>
+              </Link>
+            ))}
+          </section>
+        )}
 
         <Panel className="flex flex-col gap-4 p-[22px]">
-          <PanelHead title="Work pipeline" aside={<Link href={c("/requirements")} className="text-[13px] font-semibold text-cx">All requirements →</Link>} />
-          <div role="img" aria-label={`Requirements by stage: ${m.pipe.map((p) => `${p.l} ${p.n}`).join(", ")}`} className="flex h-4 gap-[3px] overflow-hidden rounded-lg">
-            {m.pipe
+          <PanelHead
+            title={showAll ? `Work pipeline · all frameworks · ${m.total} requirements` : "Work pipeline"}
+            aside={showAll ? undefined : <Link href={c("/requirements")} className="text-[13px] font-semibold text-cx">All requirements →</Link>}
+          />
+          <div role="img" aria-label={`Requirements by stage: ${pipe.map((p) => `${p.l} ${p.n}`).join(", ")}`} className="flex h-4 gap-[3px] overflow-hidden rounded-lg">
+            {pipe
               .filter((p) => p.n > 0)
               .map((p) => (
                 <span key={p.l} style={{ flex: p.n, background: p.color }} />
               ))}
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2">
-            {m.pipe.map((p) => (
-              <Link key={p.l} href={p.href} className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-[13px] text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink">
-                <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: p.color }} />
-                <span className="flex-auto text-j-ink-2">{p.l}</span>
-                <b>{p.n}</b>
-              </Link>
-            ))}
+            {pipe.map((p) => {
+              const body = (
+                <>
+                  <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: p.color }} />
+                  <span className="flex-auto text-j-ink-2">{p.l}</span>
+                  <b>{p.n}</b>
+                </>
+              );
+              // Stage links open one framework's list, so the combined view shows totals only.
+              return showAll ? (
+                <span key={p.l} className="flex items-center gap-2 px-2.5 py-2 text-[13px]">
+                  {body}
+                </span>
+              ) : (
+                <Link key={p.l} href={p.href} className="flex items-center gap-2 rounded-xl px-2.5 py-2 text-[13px] text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink">
+                  {body}
+                </Link>
+              );
+            })}
           </div>
         </Panel>
 
@@ -169,23 +269,25 @@ export default function ClientOverviewPage() {
             {m.queue.map((q) => {
               const [icon, tone, kind] = KIND[q.k];
               return (
-                <div key={`${q.k}-${q.code}`} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <div key={`${q.fw?.id ?? ""}-${q.k}-${q.code}`} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
                   <Pill tone={tone} round={false} className="h-9 w-9 flex-none justify-center rounded-[10px] p-0">
                     <Icon name={icon} size={17} />
                   </Pill>
                   <span className="min-w-0 flex-auto text-sm">
                     <b className="block truncate">{q.t}</b>
                     <span className="text-xs text-j-muted">
+                      {showAll && q.fw && <b className="text-j-ink-2">{q.fw.short} · </b>}
                       <span className="font-mono">{q.code}</span> · {kind}
                     </span>
                   </span>
                   <span className={cx("text-xs font-semibold", q.late ? "text-j-bad" : "text-j-muted")}>{q.due}</span>
-                  <JLink href={q.href} size="sm" variant="outline">
+                  <JLink href={q.href} size="sm" variant="outline" onClick={follow(q.fw)}>
                     {q.cta}
                   </JLink>
                 </div>
               );
             })}
+            {m.queue.length === 0 && <p className="m-0 text-sm text-j-muted">No open tasks yet. Assign owners and start drafting from Requirements.</p>}
           </Panel>
           <Panel className="flex min-w-0 flex-[2_1_360px] flex-col gap-1 p-[22px]">
             <PanelHead title="Waiting on SPOCs" aside={<Link href={c("/work")} className="text-[13px] font-semibold text-cx">Hand-offs →</Link>} className="mb-2" />
@@ -193,12 +295,13 @@ export default function ClientOverviewPage() {
               const k = p.age >= 10 ? "late" : p.age >= 4 ? "warn" : "ok";
               const done = reminded.includes(p.dept);
               return (
-                <div key={p.dept} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <div key={`${p.fw?.id ?? ""}-${p.dept}`} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
                   <Avatar initials={initials(p.who)} bg={AV_TONE[k][0]} fg={AV_TONE[k][1]} size={34} />
                   <span className="min-w-0 flex-auto text-sm">
                     <b>{p.dept}</b>
                     <br />
                     <span className="text-xs text-j-muted">
+                      {showAll && p.fw ? `${p.fw.short} · ` : ""}
                       {p.who} · {p.codes.length} open
                     </span>
                   </span>

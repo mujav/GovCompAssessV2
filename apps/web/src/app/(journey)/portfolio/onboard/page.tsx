@@ -6,21 +6,24 @@ import { Icon } from "@/components/journey/icon";
 import { ConsultantShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, Pill, Segmented, inputClass, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
-import { LOGO, type Client, type Engagement } from "@/lib/journey/portfolio";
+import { useAdmin } from "@/lib/admin/store";
+import { shortName } from "@/lib/journey/frameworks";
+import { LOGO, clientHref, type Client, type Engagement } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 
-// 04 · Onboard client. A seven-step wizard that builds a draft workspace from public data;
-// the client's index owner activates it. Kickoff stays locked until then.
+// 04 · Onboard client. A six-step wizard; creating the entity makes it active straight away,
+// with one engagement per framework picked from the Framework Builder library. Stakeholders
+// marked as users are invited, but nothing waits on their approval.
 
 const STEPS: [string, string][] = [
   ["Client", "Reference list"],
   ["Stakeholders", "People & roles"],
-  ["Frameworks & history", "Past cycles"],
+  ["Frameworks & history", "From the library"],
   ["Team & access", "Assignments"],
   ["Engagement", "Contract & ECC 4-1"],
-  ["Send for activation", "Client activates"],
-  ["Kickoff", "After approval"],
+  ["Review & create", "Entity goes live"],
 ];
+const LAST = STEPS.length - 1;
 
 /** Government entities from the reference list that are not yet on the platform. */
 const REFERENCE: { id: string; ini: string; name: string; nameAr: string; type: string; parent: string; domain: string; logo: number }[] = [
@@ -80,18 +83,23 @@ interface Wizard {
   step: number;
   refId: string;
   people: Person[];
-  indices: string[];
+  /** Library frameworks the entity is enrolled in. */
+  frameworkIds?: string[];
+  /** Short names picked before frameworks came from the library. */
+  indices?: string[];
   choices: { model: string; duration: string; data: string; accept: string };
   contract: { ref: string; start: string; end: string };
   attest: boolean[];
   history: "none" | "imported";
-  sent: string[];
+  /** Entities created from this wizard (called "sent" while creation needed client approval). */
+  created?: string[];
+  sent?: string[];
   savedAt?: string;
 }
 
 const START: Wizard = {
   step: 0,
-  refId: "demo-skills",
+  refId: "demo-housing",
   people: [
     { av: "AM", name: "Abdullah M.", roles: ["Index owner", "Approver"], tone: 0, user: true },
     { av: "RZ", name: "Dr. Rania Z.", roles: ["Executive sponsor"], tone: 0, user: false },
@@ -99,90 +107,112 @@ const START: Wizard = {
     { av: "HB", name: "Hessa B.", roles: ["IT head", "SPOC"], tone: 2, user: true },
     { av: "TQ", name: "Turki Q.", roles: ["HR head"], tone: 3, user: false },
   ],
-  indices: ["Qiyas"],
+  frameworkIds: ["fw-qiyas"],
   choices: { model: "Co-managed", duration: "12 months", data: "Restricted", accept: "Client only" },
   contract: { ref: "CT-2026-118", start: "15 Nov 2026", end: "14 Nov 2027" },
   attest: [true, true, true, true, false, true, true, false],
   history: "imported",
-  sent: [],
+  created: [],
 };
 
 export default function OnboardPage() {
   const { clients, update, log } = useJourney();
+  const { state: admin } = useAdmin();
   const [w, setW] = useScreenState<Wizard>("onboard", START);
   const [search, setSearch] = useState("");
   const [newName, setNewName] = useState("");
+  const [historyFor, setHistoryFor] = useState<string | null>(null);
   const ref = REFERENCE.find((r) => r.id === w.refId) ?? REFERENCE[0];
-  const sent = w.sent.includes(ref.id);
+  const created = w.created ?? w.sent ?? [];
+  const done = created.includes(ref.id);
   const users = w.people.filter((p) => p.user).length;
   const attestOk = w.attest.every(Boolean);
   const matches = REFERENCE.filter((r) => `${r.name} ${r.nameAr}`.toLowerCase().includes(search.trim().toLowerCase()));
   const months = w.choices.duration.startsWith("6") ? "6 mo" : "12 mo";
+  const onPlatform = (id: string) => clients.some((c) => c.id === id);
 
-  const go = (step: number) => setW((d) => void (d.step = Math.max(0, Math.min(5, step))));
+  // Only published library frameworks can be assigned; drafts are listed but locked.
+  const library = admin.frameworks.filter((f) => f.live || f.draft).sort((x, y) => (x.live ? 0 : 1) - (y.live ? 0 : 1) || (x.live ?? x.draft)!.name.localeCompare((y.live ?? y.draft)!.name));
+  const legacy = (w.indices ?? []).map((i) => admin.frameworks.find((f) => f.live && shortName(f.live.name).toLowerCase().startsWith(i.toLowerCase().split(" ")[0]))?.id).filter((x): x is string => !!x);
+  const picked = (w.frameworkIds ?? legacy).filter((id) => admin.frameworks.some((f) => f.id === id && f.live));
+  const pickedFw = picked.map((id) => admin.frameworks.find((f) => f.id === id)!.live!);
+  const historyFw = historyFor && picked.includes(historyFor) ? historyFor : picked[0];
 
-  function send() {
-    const exists = clients.some((c) => c.id === ref.id);
+  const go = (step: number) => setW((d) => void (d.step = Math.max(0, Math.min(LAST, step))));
+  const toggle = (id: string) =>
+    setW((d) => {
+      const cur = (d.frameworkIds ?? legacy).filter((x) => x !== id);
+      d.frameworkIds = picked.includes(id) ? cur : [...cur, id];
+      delete d.indices;
+    });
+
+  function create() {
+    if (onPlatform(ref.id)) return;
+    const term = w.choices.duration.startsWith("6") ? "182 d left" : "365 d left";
+    const model = w.choices.model === "Managed" ? "managed" : "co";
     const client: Client = {
       id: ref.id,
       ini: ref.ini,
       name: ref.name,
       nameAr: ref.nameAr,
-      sub: "Draft · waiting for client activation",
+      sub: `${ref.type} · new client`,
       logo: ref.logo,
-      frameworks: w.indices.map((i) => (i === "Qiyas" ? "Qiyas 2026" : i)),
-      pct: null,
-      next: "Draft",
-      nextTone: "draft",
-      flag: "draft",
+      frameworks: pickedFw.map((f) => f.name),
+      frameworkIds: picked,
+      pct: 0,
+      next: "Kickoff · 7 d",
+      nextTone: "ok",
+      flag: "active",
     };
-    const engagement: Engagement = {
+    const engagements: Engagement[] = picked.map((id, i) => ({
       clientId: ref.id,
-      index: w.indices[0] ?? "Qiyas",
-      model: "draft",
-      ready: null,
-      delta: "—",
-      milestone: "Draft expires · 60 d",
+      index: shortName(pickedFw[i].name),
+      frameworkId: id,
+      model,
+      ready: 0,
+      delta: "new",
+      milestone: "Kickoff · 7 d",
       milestoneLate: false,
-      term: "Pending approval",
-      termState: "pend",
+      term,
+      termState: "ok",
       lead: "SR",
-    };
+    }));
     update((s) => {
-      if (!exists) s.added.push({ client, engagement });
-      const wz = s.screens.onboard as Wizard | undefined;
-      if (wz) wz.sent.push(ref.id);
-      else s.screens.onboard = { ...structuredClone(START), sent: [ref.id] };
+      s.added.push({ client, engagement: engagements[0], more: engagements.slice(1) });
+      const wz = (s.screens.onboard as Wizard | undefined) ?? structuredClone(START);
+      wz.created = [...(wz.created ?? wz.sent ?? []), ref.id];
+      delete wz.sent;
+      s.screens.onboard = wz;
     });
-    log(`Activation request sent to ${w.people.find((p) => p.roles.includes("Index owner"))?.name ?? "index owner"} · ${ref.name}`);
+    log(`Created ${ref.name} with ${pickedFw.map((f) => shortName(f.name)).join(" + ")}`);
+    const invited = w.people.filter((p) => p.user).map((p) => p.name);
+    if (invited.length) log(`Invitations sent to ${invited.join(", ")} · ${ref.name}`);
   }
 
   const stepper = (
     <ol aria-label="Steps" className="m-0 flex flex-[1_1_240px] list-none flex-col gap-1 p-0">
       {STEPS.map(([label, sub], i) => {
-        const done = i < w.step || (sent && i <= 5);
-        const on = i === w.step && !sent;
-        const locked = i === 6;
+        const past = i < w.step || done;
+        const on = i === w.step && !done;
         return (
           <li key={label}>
             <button
               type="button"
               aria-current={on ? "step" : undefined}
-              disabled={locked}
+              disabled={done}
               onClick={() => go(i)}
               className={cx(
-                "flex min-h-[52px] w-full cursor-pointer items-center gap-3 rounded-xl border-0 px-3 text-left disabled:cursor-not-allowed",
+                "flex min-h-[52px] w-full cursor-pointer items-center gap-3 rounded-xl border-0 px-3 text-left text-j-ink disabled:cursor-default",
                 on ? "bg-cx-soft" : "bg-transparent hover:bg-white",
-                locked ? "text-[#8A968F]" : "text-j-ink",
               )}
             >
               <span
                 className={cx(
                   "flex h-7 w-7 flex-none items-center justify-center rounded-full text-[13px] font-bold",
-                  done ? "bg-cx text-white" : on ? "bg-white text-cx" : "bg-[#F5F7F9] text-j-muted",
+                  past ? "bg-cx text-white" : on ? "bg-white text-cx" : "bg-[#F5F7F9] text-j-muted",
                 )}
               >
-                {locked ? <Icon name="lock" size={13} /> : done ? <Icon name="check" size={14} strokeWidth={2.6} /> : i + 1}
+                {past ? <Icon name="check" size={14} strokeWidth={2.6} /> : i + 1}
               </span>
               <span className="flex flex-col">
                 <b className="text-sm">{label}</b>
@@ -196,18 +226,7 @@ export default function OnboardPage() {
   );
 
   return (
-    <ConsultantShell
-      search="Search clients and engagements"
-      headerExtra={
-        <span className="text-xs text-[#8A4B00]">Auto-expires in 60 days</span>
-      }
-    >
-      <div className="flex flex-wrap items-center gap-3 border-b border-[#F0DDB0] bg-[#FFF8EA] px-8 py-3">
-        <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#8A4B00]">
-          <Icon name="draft" size={16} />
-          Draft workspace · Public data only until the client activates it
-        </span>
-      </div>
+    <ConsultantShell search="Search clients and engagements">
       <JMain max={1320}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Onboard client</h1>
@@ -218,10 +237,10 @@ export default function OnboardPage() {
               onClick={() => {
                 const at = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
                 setW((d) => void (d.savedAt = at));
-                log(`Draft saved · ${ref.name}`);
+                log(`Onboarding progress saved · ${ref.name}`);
               }}
             >
-              Save draft
+              Save progress
             </JButton>
           </span>
         </div>
@@ -229,26 +248,26 @@ export default function OnboardPage() {
         <div className="flex flex-wrap items-start gap-5">
           {stepper}
           <Panel className="flex min-w-0 flex-[999_1_640px] flex-col gap-5 border-[#E3E8EF] p-[26px]">
-            {sent ? (
+            {done ? (
               <div className="flex flex-col items-start gap-4">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cx text-white">
-                  <Icon name="send" size={22} />
+                  <Icon name="check" size={22} strokeWidth={2.6} />
                 </span>
-                <h2 className="m-0 text-xl">Activation request sent</h2>
+                <h2 className="m-0 text-xl">{ref.name} is on the platform</h2>
                 <p className="m-0 max-w-[560px] text-sm text-j-ink-2">
-                  {w.people.find((p) => p.roles.includes("Index owner"))?.name ?? "The index owner"} verifies with work email and MFA, then activates the {ref.name} workspace.
-                  Kickoff unlocks after approval. The draft stays on public data until then.
+                  The workspace is active with {clients.find((c) => c.id === ref.id)?.frameworks.join(" and ") ?? "its frameworks"}. {users ? `${users} stakeholders were invited to sign in with their work email.` : ""} Schedule the
+                  kickoff and start assigning requirements.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <JLink href="/portfolio" variant="primary">
-                    Back to portfolio
+                  <JLink href={clientHref(ref.id)} variant="primary">
+                    Open the workspace
                   </JLink>
-                  <JLink href="/entities">See it in the entity list</JLink>
+                  <JLink href="/portfolio">Back to portfolio</JLink>
                   <JButton
                     variant="ghost"
                     onClick={() =>
                       setW((d) => {
-                        const next = REFERENCE.find((r) => !d.sent.includes(r.id) && !clients.some((c) => c.id === r.id));
+                        const next = REFERENCE.find((r) => !clients.some((c) => c.id === r.id) && r.id !== ref.id);
                         d.step = 0;
                         d.refId = next?.id ?? d.refId;
                       })
@@ -278,18 +297,18 @@ export default function OnboardPage() {
                       {matches.map((r) => {
                         const on = r.id === ref.id;
                         const [lbg, lfg] = LOGO[r.logo];
-                        const onPlatform = clients.some((c) => c.id === r.id && c.flag !== "draft");
+                        const exists = onPlatform(r.id);
                         return (
                           <button
                             key={r.id}
                             type="button"
                             role="radio"
                             aria-checked={on}
-                            disabled={onPlatform}
+                            disabled={exists}
                             onClick={() => setW((d) => void (d.refId = r.id))}
                             className={cx(
-                              "flex cursor-pointer items-center gap-3.5 rounded-[14px] border p-3.5 text-left text-sm text-j-ink",
-                              on ? "border-cx-soft bg-cx-soft" : "border-j-line bg-white hover:bg-j-canvas",
+                              "flex cursor-pointer items-center gap-3.5 rounded-[14px] border p-3.5 text-left text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
+                              on && !exists ? "border-cx-soft bg-cx-soft" : "border-j-line bg-white hover:bg-j-canvas",
                             )}
                           >
                             <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl text-[13px] font-bold" style={{ background: lbg, color: lfg }}>
@@ -302,10 +321,10 @@ export default function OnboardPage() {
                               </span>
                               <br />
                               <span className="text-xs text-j-ink-3">
-                                From reference list · {r.type} · {clients.some((c) => c.id === r.id) ? "draft exists" : "not yet on the platform"}
+                                From reference list · {r.type} · {exists ? "already on the platform" : "not yet on the platform"}
                               </span>
                             </span>
-                            {on && <span className="text-xs font-bold text-cx">✓ Selected</span>}
+                            {on && !exists && <span className="text-xs font-bold text-cx">✓ Selected</span>}
                           </button>
                         );
                       })}
@@ -390,27 +409,53 @@ export default function OnboardPage() {
 
                 {w.step === 2 && (
                   <div className="flex flex-col gap-4">
-                    <h2 className="m-0 text-xl">Frameworks &amp; history</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {["Qiyas", "NCA ECC", "NDMO data", "ISO 27001"].map((x) => {
-                        const on = w.indices.includes(x);
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h2 className="m-0 text-xl">Frameworks &amp; history</h2>
+                      <Link href="/studio/frameworks" className="text-[13px] font-semibold text-cx">
+                        Manage the library →
+                      </Link>
+                    </div>
+                    <p className="m-0 text-sm text-j-ink-2">Pick the indices this entity is managed for. Each one becomes its own engagement and requirement list.</p>
+                    <div role="group" aria-label="Framework library" className="flex flex-col gap-2">
+                      {library.map((f) => {
+                        const v = (f.live ?? f.draft)!;
+                        const on = picked.includes(f.id);
+                        const locked = !f.live;
                         return (
                           <button
-                            key={x}
+                            key={f.id}
                             type="button"
                             aria-pressed={on}
-                            onClick={() => setW((d) => void (d.indices = on ? d.indices.filter((i) => i !== x) : [...d.indices, x]))}
+                            disabled={locked}
+                            onClick={() => toggle(f.id)}
                             className={cx(
-                              "inline-flex h-11 cursor-pointer items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 text-sm font-semibold text-j-ink",
-                              on ? "border-cx bg-cx-soft" : "border-[#E3E8EF] bg-white",
+                              "flex cursor-pointer items-center gap-3 rounded-[14px] border-[1.5px] p-3.5 text-left text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
+                              on ? "border-cx bg-cx-soft" : "border-[#E3E8EF] bg-white hover:bg-j-canvas",
                             )}
                           >
-                            {x}
-                            <span className={cx("flex h-5 w-5 items-center justify-center rounded-md border-[1.5px] text-[11px] text-white", on ? "border-cx bg-cx" : "border-[#E3E8EF]")}>{on ? "✓" : ""}</span>
+                            <span className={cx("flex h-5 w-5 flex-none items-center justify-center rounded-md border-[1.5px] text-[11px] text-white", on ? "border-cx bg-cx" : "border-[#C9D1CD]")}>{on ? "✓" : ""}</span>
+                            <span className="flex min-w-0 flex-auto flex-col">
+                              <b dir="auto">
+                                {v.name} · v{v.version}
+                              </b>
+                              <span className="text-xs text-j-ink-3">
+                                {v.authority} · {v.levels.map((l) => l.en).join(" › ")} · {v.requirements?.length ?? 0} nodes
+                                {v.weighting === "none" ? " · no weights" : ""}
+                              </span>
+                            </span>
+                            {locked ? <Pill tone="warn">Not published yet</Pill> : <span className="text-xs text-j-muted">{v.publishedAt ? `Published ${v.publishedAt}` : "Published"}</span>}
                           </button>
                         );
                       })}
                     </div>
+                    {picked.length > 1 && (
+                      <Segmented
+                        label="History for"
+                        value={historyFw ?? ""}
+                        options={pickedFw.map((f, i) => ({ value: picked[i], label: shortName(f.name) }))}
+                        onChange={setHistoryFor}
+                      />
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <JButton size="sm" onClick={() => setW((d) => void (d.history = "imported"))}>
                         Import Excel
@@ -423,9 +468,11 @@ export default function OnboardPage() {
                         Pull public results
                       </JButton>
                     </div>
-                    {w.history === "imported" ? (
+                    {!historyFw ? (
+                      <p className="m-0 text-sm text-j-muted">Pick at least one framework to bring in its past cycles.</p>
+                    ) : w.history === "imported" && historyFw === "fw-qiyas" ? (
                       <>
-                        <div role="table" aria-label="Qiyas history" className="overflow-hidden rounded-[14px] border border-j-line text-sm">
+                        <div role="table" aria-label="Past cycles" className="overflow-hidden rounded-[14px] border border-j-line text-sm">
                           {HISTORY.map((h) => {
                             const [prov, tone] = PROVENANCE[h.prov];
                             return (
@@ -458,7 +505,7 @@ export default function OnboardPage() {
                         </div>
                       </>
                     ) : (
-                      <p className="m-0 text-sm text-j-muted">No past cycles yet. Import a file or pull the published results.</p>
+                      <p className="m-0 text-sm text-j-muted">No past cycles for {shortName(admin.frameworks.find((f) => f.id === historyFw)?.live?.name ?? "this framework")} yet. Import a file or pull the published results.</p>
                     )}
                   </div>
                 )}
@@ -527,15 +574,15 @@ export default function OnboardPage() {
                   </div>
                 )}
 
-                {w.step === 5 && (
+                {w.step === LAST && (
                   <div className="flex flex-col gap-4">
-                    <h2 className="m-0 text-xl">Send to the client</h2>
+                    <h2 className="m-0 text-xl">Review and create</h2>
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
                       {[
+                        [picked.length, picked.length === 1 ? "framework" : "frameworks"],
                         [w.people.length, "stakeholders"],
-                        [w.history === "imported" ? HISTORY.length : 0, "cycles of history"],
                         [TEAM.length, "consultants"],
-                        [months, "access requested"],
+                        [months, "engagement term"],
                       ].map(([v, l]) => (
                         <div key={l} className="rounded-[14px] bg-j-canvas p-3.5">
                           <b className="text-[22px]">{v}</b>
@@ -544,26 +591,32 @@ export default function OnboardPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 rounded-[14px] border border-cx-line bg-cx-tint p-3.5 text-sm">
-                      <Avatar initials="AM" bg={AV[0][0]} fg={AV[0][1]} size={36} />
-                      <span>
-                        <b>{w.people.find((p) => p.roles.includes("Index owner"))?.name ?? "Index owner"}</b> · Index owner
-                        <br />
-                        <span className="text-[13px] text-j-ink-3">Verifies with work email and MFA, then activates the workspace</span>
+                    <div className="flex flex-col gap-2 rounded-[14px] border border-cx-line bg-cx-tint p-3.5 text-sm">
+                      <b>{ref.name} goes live as soon as you create it</b>
+                      <span className="text-[13px] text-j-ink-3">
+                        One engagement per framework: {pickedFw.map((f) => `${shortName(f.name)} v${f.version}`).join(", ") || "none picked"}.{" "}
+                        {users ? `${users} stakeholders get an invitation to sign in with their work email and MFA.` : "No stakeholder gets a user account yet."}
                       </span>
                     </div>
-                    {(!attestOk || w.indices.length === 0) && (
+                    {(onPlatform(ref.id) || !attestOk || picked.length === 0) && (
                       <p role="alert" className="m-0 flex items-center gap-2 rounded-xl bg-j-warn-soft px-3.5 py-2.5 text-[13px] text-[#8A4B00]">
                         <Icon name="flag" size={14} />
-                        {!attestOk ? (
+                        {onPlatform(ref.id) ? (
+                          `${ref.name} is already on the platform. Pick another entity.`
+                        ) : picked.length === 0 ? (
                           <>
-                            {w.attest.filter((a) => !a).length} ECC 4-1 attestations are still open.{" "}
+                            Pick at least one framework.{" "}
+                            <button type="button" onClick={() => go(2)} className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-[#8A4B00] underline">
+                              Choose frameworks
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {w.attest.filter((x) => !x).length} ECC 4-1 attestations are still open.{" "}
                             <button type="button" onClick={() => go(4)} className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-[#8A4B00] underline">
                               Complete them
                             </button>
                           </>
-                        ) : (
-                          "Choose at least one framework."
                         )}
                       </p>
                     )}
@@ -574,14 +627,14 @@ export default function OnboardPage() {
                   <JButton onClick={() => go(w.step - 1)} disabled={w.step === 0}>
                     Back
                   </JButton>
-                  {w.step < 5 ? (
+                  {w.step < LAST ? (
                     <JButton variant="primary" onClick={() => go(w.step + 1)}>
                       Continue
                     </JButton>
                   ) : (
-                    <JButton variant="primary" onClick={send} disabled={!attestOk || w.indices.length === 0}>
-                      <Icon name="send" size={15} />
-                      Send activation request
+                    <JButton variant="primary" onClick={create} disabled={onPlatform(ref.id) || !attestOk || picked.length === 0}>
+                      <Icon name="check" size={15} strokeWidth={2.6} />
+                      Create entity
                     </JButton>
                   )}
                 </div>
@@ -590,7 +643,7 @@ export default function OnboardPage() {
           </Panel>
         </div>
         <p className="m-0 text-xs text-j-muted">
-          Drafts hold public data only. <Link href="/portfolio">Back to portfolio</Link>
+          Progress is saved as you go. <Link href="/portfolio">Back to portfolio</Link>
         </p>
       </JMain>
     </ConsultantShell>

@@ -84,7 +84,7 @@ export default function EngagementPage() {
           <div className="flex flex-col gap-1.5">
             <span className="font-mono text-[13px] text-j-muted">ENG-0142 · CT-2025-087</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">
-              {client.name} · {client.frameworks[0]}
+              {client.name} · {client.frameworks.join(" + ")}
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">

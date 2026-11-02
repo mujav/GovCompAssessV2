@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { FrameworkSwitcher } from "@/components/journey/framework-switcher";
 import { Icon } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { DEPARTMENTS, SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
-import { useClientWork } from "@/lib/journey/use-work";
+import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
 
 // 08 · Requirements. Every requirement with its owner, last DGA result and stage; select
@@ -27,9 +28,15 @@ function updatedLabel(days: number) {
   return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days > 60 ? "—" : `${days} d ago`;
 }
 
+// Filters, paging and the selection belong to one framework, so switching starts afresh.
 export default function RequirementsPage() {
+  const { current } = useEntityFrameworks();
+  return <RequirementsView key={current?.id ?? "none"} />;
+}
+
+function RequirementsView() {
   const params = useSearchParams();
-  const { client, ws, reqs, overlay, move } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move } = useClientWork();
   const [stage, setStage] = useState<Stage | null>((params.get("stage") as Stage) || null);
   const [onlyReturned, setOnlyReturned] = useState(params.get("returned") === "1");
   const [q, setQ] = useState("");
@@ -44,6 +51,8 @@ export default function RequirementsPage() {
   const [toast, setToast] = useState("");
   const today = ws.ctx.today;
   const domains = useMemo(() => [...new Set(reqs.map((r) => r.domain))], [reqs]);
+  // The top hierarchy level carries the framework's own name: Axis for Qiyas, Domain for NCA ECC.
+  const topLevel = framework?.live.levels[0]?.en ?? "Axis";
 
   const rows = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -108,7 +117,7 @@ export default function RequirementsPage() {
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${client.id}-requirements.csv`;
+    a.download = `${client.id}-${framework?.short.replace(/\s+/g, "-").toLowerCase() ?? "requirements"}-requirements.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -119,8 +128,9 @@ export default function RequirementsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Requirements</h1>
-            <span className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-j-line bg-white px-3 text-[13px] font-semibold">
-              {client.frameworks[0]} · {reqs.length}
+            <FrameworkSwitcher />
+            <span className="inline-flex h-9 items-center gap-1.5 rounded-[10px] border border-j-line bg-white px-3 text-[13px] font-semibold" dir="auto">
+              {framework ? `${framework.name} v${framework.version}` : client.frameworks[0]} · {reqs.length}
             </span>
             <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#8A4B00]">
               <Icon name="clock" size={14} />
@@ -173,11 +183,11 @@ export default function RequirementsPage() {
               className="min-w-0 flex-auto border-0 bg-transparent text-sm text-j-ink outline-none"
             />
           </label>
-          <select aria-label="Axis" value={axis} onChange={(e) => (setAxis(e.target.value), reset())} className={cx(inputClass, "h-10")}>
-            <option value="all">All axes</option>
+          <select aria-label={topLevel} value={axis} onChange={(e) => (setAxis(e.target.value), reset())} className={cx(inputClass, "h-10")}>
+            <option value="all">All {topLevel.toLowerCase()}s</option>
             {domains.map((d, i) => (
               <option key={d} value={d}>
-                Axis {i + 1} · {d}
+                {topLevel} {i + 1} · {d}
               </option>
             ))}
           </select>

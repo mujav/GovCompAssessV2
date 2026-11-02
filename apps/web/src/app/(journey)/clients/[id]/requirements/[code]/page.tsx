@@ -44,7 +44,7 @@ interface ReqScreen {
 
 export default function RequirementWorkspacePage() {
   const { code } = useParams<{ code: string }>();
-  const { client, ws, reqs, overlay, move, ret, log } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move, ret, log } = useClientWork();
   const r = reqs.find((x) => x.code === code);
   const [tab, setTab] = useState<Tab>("rev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
@@ -55,7 +55,9 @@ export default function RequirementWorkspacePage() {
     return (
       <ClientShell>
         <JMain>
-          <h1 className="m-0 text-2xl">Requirement {code} not found</h1>
+          <h1 className="m-0 text-2xl">
+            Requirement {code} is not in {framework?.name ?? "this framework"}
+          </h1>
           <JLink href={c("/requirements")}>Back to requirements</JLink>
         </JMain>
       </ClientShell>
@@ -136,7 +138,7 @@ export default function RequirementWorkspacePage() {
             </Link>
             <span>›</span>
             <span>
-              Axis {axis} · {r.domain}
+              {framework?.live.levels[0]?.en ?? "Axis"} {axis} · {r.domain}
             </span>
             <span>›</span>
             <b className="font-mono text-j-ink">{r.code}</b>
@@ -212,15 +214,26 @@ export default function RequirementWorkspacePage() {
         {tab === "req" && (
           <div className="flex flex-wrap items-start gap-3.5">
             <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-3 p-[22px]">
-              <PanelHead title="Official requirement" aside={<span className="text-xs text-j-muted">{client.frameworks[0]} · v1.2</span>} />
-              <p className="m-0 text-sm leading-6">
-                The entity demonstrates that &ldquo;{r.title.split(":")[0].toLowerCase()}&rdquo; is {r.title.split(": ")[1]}, with evidence from the current cycle for each criterion.
-              </p>
+              <PanelHead title="Official requirement" aside={<span className="text-xs text-j-muted" dir="auto">{framework ? `${framework.name} · v${framework.version}` : client.frameworks[0]}</span>} />
+              {r.text || r.evidenceText ? (
+                <div className="flex flex-col gap-2 text-sm leading-6" dir="auto">
+                  {r.text && <p className="m-0 whitespace-pre-line">{r.text}</p>}
+                  {r.evidenceText && (
+                    <p className="m-0 whitespace-pre-line text-j-ink-2">
+                      <b>Evidence required:</b> {r.evidenceText}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="m-0 text-sm leading-6">
+                  The entity demonstrates that &ldquo;{r.title.split(":")[0].toLowerCase()}&rdquo; is {r.title.split(": ")[1] ?? "in place"}, with evidence from the current cycle for each criterion.
+                </p>
+              )}
               <h2 className="m-0 mt-2 text-base">Response draft</h2>
               <textarea
                 aria-label="Response draft"
                 rows={6}
-                value={s.draft ?? `${r.department} owns this requirement. ${r.evidence.valid} of ${r.evidence.expected} expected evidence items are linked; ${missing ? `${missing} more requested from ${owner}.` : "the set is complete."}`}
+                value={s.draft ?? `${r.department ? `${r.department} owns this requirement.` : "No department owns this requirement yet."} ${r.evidence.valid} of ${r.evidence.expected} expected evidence items are linked; ${missing ? `${missing} more requested from ${owner}.` : "the set is complete."}`}
                 onChange={(e) => set((d) => void (d.draft = e.target.value))}
                 className="rounded-xl border border-j-line p-3 font-sans text-sm leading-6 text-j-ink"
               />

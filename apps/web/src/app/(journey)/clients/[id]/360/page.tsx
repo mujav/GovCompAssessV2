@@ -5,8 +5,11 @@ import { Icon } from "@/components/journey/icon";
 import { ClientShell, JMain, useCurrentClient } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
+import { useAdmin } from "@/lib/admin/store";
+import { WORKSPACE_FRAMEWORK_ID, shortName } from "@/lib/journey/frameworks";
 import { LOGO, clientHref, completionColor } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
+import { useEntityFrameworks } from "@/lib/journey/use-work";
 
 // 05 · Entity 360. Profile, index enrollments, history and stakeholders for one client.
 
@@ -50,11 +53,15 @@ const SYSTEMS: [string, string, string][] = [
 
 export default function Entity360Page() {
   const client = useCurrentClient();
-  const { state, log } = useJourney();
+  const { state, log, engagements } = useJourney();
+  const { state: admin } = useAdmin();
+  const { frameworks, current, setActive } = useEntityFrameworks();
+  // Past cycles exist for the seeded clients' Qiyas only; a new entity or another framework starts with none.
+  const hasHistory = current?.id === WORKSPACE_FRAMEWORK_ID && !state.added.some((a) => a.client.id === client.id);
+  const notEnrolled = admin.frameworks.filter((f) => f.live && !frameworks.some((x) => x.id === f.id)).map((f) => shortName(f.live!.name));
   const [tab, setTab] = useState(0);
   const [proposed, setProposed] = useScreenState<string[]>(`360.${client.id}.proposed`, []);
   const [lbg, lfg] = LOGO[client.logo];
-  const active = client.flag !== "draft";
   const pct = client.id === "demo-entity" ? 72.4 : client.pct;
 
   const propose = (what: string) => {
@@ -65,55 +72,65 @@ export default function Entity360Page() {
   const history = (
     <Panel className="flex flex-[2_1_520px] flex-col gap-4 p-[22px]">
       <PanelHead
-        title={`${client.frameworks[0]?.split(" ")[0] ?? "Qiyas"} history`}
+        title={`${current?.short ?? client.frameworks[0] ?? "Index"} history`}
         aside={
-          <span className="flex gap-3 text-xs text-j-muted">
-            {[
-              ["#0E5A45", "Regulator"],
-              ["#1E4E8C", "Client file"],
-              ["#EAF1FA", "Live"],
-            ].map(([c, l]) => (
-              <span key={l} className="inline-flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: c, border: l === "Live" ? "1.5px dashed #1E4E8C" : undefined }} />
-                {l}
-              </span>
-            ))}
-          </span>
+          hasHistory && (
+            <span className="flex gap-3 text-xs text-j-muted">
+              {[
+                ["#0E5A45", "Regulator"],
+                ["#1E4E8C", "Client file"],
+                ["#EAF1FA", "Live"],
+              ].map(([c, l]) => (
+                <span key={l} className="inline-flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ background: c, border: l === "Live" ? "1.5px dashed #1E4E8C" : undefined }} />
+                  {l}
+                </span>
+              ))}
+            </span>
+          )
         }
       />
-      <div role="img" aria-label="Qiyas score: 2022 58.2, 2023 61.9, 2024 63.0, 2025 65.6, 2026 live 72.4, target 85" className="relative flex h-[240px] items-end gap-[6%] border-b border-j-line px-[4%]">
-        <span className="absolute inset-x-0 border-t-2 border-dashed border-j-ok" style={{ bottom: `${(85 / 100) * 220}px` }} />
-        <span className="absolute end-0 text-[11px] font-semibold text-brand" style={{ bottom: `${(85 / 100) * 220 + 4}px` }}>
-          Target 85
-        </span>
-        {BARS.map((b) => (
-          <span key={b.y} className="flex flex-1 flex-col items-center gap-1.5">
-            <b className="text-[13px]">{b.v}%</b>
-            <span
-              className="block w-full max-w-[64px] rounded-t-[10px]"
-              style={{
-                height: (b.v / 100) * 220,
-                background: b.src === "live" ? "#EAF1FA" : b.src === "reg" ? "#0E5A45" : "#1E4E8C",
-                border: b.src === "live" ? "2px dashed #1E4E8C" : 0,
-              }}
-            />
-          </span>
-        ))}
-      </div>
-      <div className="flex gap-[6%] px-[4%]">
-        {BARS.map((b) => (
-          <span key={b.y} className="flex flex-1 flex-col items-center text-xs">
-            <b>{b.y}</b>
-            <span className="text-j-muted">{b.rank}</span>
-          </span>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        <Pill>Carried from 2025</Pill>
-        <Pill tone="warn">↻ 6 repeat observations</Pill>
-        <Pill tone="cx">214 evidence items to re-validate</Pill>
-        <Pill tone="ok">Crosswalk 96% mapped</Pill>
-      </div>
+      {!hasHistory ? (
+        <p className="m-0 text-sm text-j-muted">
+          No past cycles for {current?.name ?? "this framework"} on the platform yet. Import them from the onboarding wizard or start this cycle as the baseline.
+        </p>
+      ) : (
+        <>
+          <div role="img" aria-label="Qiyas score: 2022 58.2, 2023 61.9, 2024 63.0, 2025 65.6, 2026 live 72.4, target 85" className="relative flex h-[240px] items-end gap-[6%] border-b border-j-line px-[4%]">
+            <span className="absolute inset-x-0 border-t-2 border-dashed border-j-ok" style={{ bottom: `${(85 / 100) * 220}px` }} />
+            <span className="absolute end-0 text-[11px] font-semibold text-brand" style={{ bottom: `${(85 / 100) * 220 + 4}px` }}>
+              Target 85
+            </span>
+            {BARS.map((b) => (
+              <span key={b.y} className="flex flex-1 flex-col items-center gap-1.5">
+                <b className="text-[13px]">{b.v}%</b>
+                <span
+                  className="block w-full max-w-[64px] rounded-t-[10px]"
+                  style={{
+                    height: (b.v / 100) * 220,
+                    background: b.src === "live" ? "#EAF1FA" : b.src === "reg" ? "#0E5A45" : "#1E4E8C",
+                    border: b.src === "live" ? "2px dashed #1E4E8C" : 0,
+                  }}
+                />
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-[6%] px-[4%]">
+            {BARS.map((b) => (
+              <span key={b.y} className="flex flex-1 flex-col items-center text-xs">
+                <b>{b.y}</b>
+                <span className="text-j-muted">{b.rank}</span>
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <Pill>Carried from 2025</Pill>
+            <Pill tone="warn">↻ 6 repeat observations</Pill>
+            <Pill tone="cx">214 evidence items to re-validate</Pill>
+            <Pill tone="ok">Crosswalk 96% mapped</Pill>
+          </div>
+        </>
+      )}
     </Panel>
   );
 
@@ -200,7 +217,7 @@ export default function Entity360Page() {
               </h1>
               <span className="flex flex-wrap gap-1.5">
                 <Pill>{client.sub.split(" · ")[0]}</Pill>
-                {active ? <Pill tone="ok">✓ Activated by client</Pill> : <Pill tone="warn">Waiting for client activation</Pill>}
+                <Pill tone="ok">✓ Active</Pill>
               </span>
             </div>
           </div>
@@ -210,11 +227,9 @@ export default function Entity360Page() {
             ) : (
               <JButton onClick={() => propose("a profile change")}>Propose profile change</JButton>
             )}
-            {active && (
-              <JLink href={clientHref(client.id)} variant="primary">
-                Open {client.frameworks[0]?.split(" ")[0]} workspace
-              </JLink>
-            )}
+            <JLink href={clientHref(client.id)} variant="primary">
+              Open workspace
+            </JLink>
           </div>
         </div>
 
@@ -239,26 +254,27 @@ export default function Entity360Page() {
         {tab === 0 && (
           <>
             <section aria-label="Index enrollments" className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3.5">
-              <Panel className="flex items-center gap-4 border-2 border-cx p-[18px]">
-                <Ring pct={pct ?? 0} color={completionColor(pct ?? null)} label={pct == null ? "Not started" : `Completion ${pct} percent`}>
-                  <b className="text-base">{pct == null ? "—" : `${Math.round(pct)}%`}</b>
-                </Ring>
-                <span className="flex flex-col gap-0.5 text-sm">
-                  <b className="text-base">{client.frameworks[0]}</b>
-                  <span className="font-semibold text-cx">Managed by you</span>
-                  <span className="text-[13px] text-j-muted">Target 85 · verification in 9 d</span>
-                </span>
-              </Panel>
-              <Panel className="flex items-center gap-4 p-[18px]">
-                <span className="flex h-[76px] w-[76px] items-center justify-center rounded-full bg-j-canvas text-j-muted">
-                  <Icon name="lock" size={22} />
-                </span>
-                <span className="flex flex-col gap-0.5 text-sm">
-                  <b className="text-base">NCA ECC</b>
-                  <span className="font-semibold text-j-ink-3">Self-managed</span>
-                  <span className="text-[13px] text-j-muted">Not in your engagement</span>
-                </span>
-              </Panel>
+              {frameworks.map((f, i) => {
+                const e = engagements.find((x) => x.clientId === client.id && (x.frameworkId === f.id || (!x.frameworkId && f.short.startsWith(x.index))));
+                const done = client.id === "demo-entity" && i === 0 ? pct : (e?.ready ?? null);
+                return (
+                  <Panel key={f.id} className={cx("flex items-center gap-4 p-[18px]", i === 0 && "border-2 border-cx")}>
+                    <Ring pct={done ?? 0} color={completionColor(done ?? null)} label={done == null ? "Not started" : `Completion ${done} percent`}>
+                      <b className="text-base">{done == null ? "—" : `${Math.round(done)}%`}</b>
+                    </Ring>
+                    <span className="flex min-w-0 flex-col gap-0.5 text-sm">
+                      <b className="text-base" dir="auto">
+                        {f.name}
+                      </b>
+                      <span className="font-semibold text-cx">Managed by you · v{f.version}</span>
+                      <span className="text-[13px] text-j-muted">{e?.milestone ?? "Not started"}</span>
+                      <JLink href={clientHref(client.id)} size="sm" className="mt-1 self-start" onClick={() => setActive(f.id)}>
+                        Open {f.short}
+                      </JLink>
+                    </span>
+                  </Panel>
+                );
+              })}
               <button
                 type="button"
                 onClick={() => propose("another index")}
@@ -268,7 +284,7 @@ export default function Entity360Page() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cx text-xl text-white">+</span>
                 <span className="flex flex-col text-sm">
                   <b className="text-base">{proposed.includes("another index") ? "Add-on proposed" : "Propose another index"}</b>
-                  <span className="text-[13px] text-j-muted">NDMO, ISO 27001 · offer as add-on</span>
+                  <span className="text-[13px] text-j-muted">{notEnrolled.length ? `${notEnrolled.slice(0, 3).join(", ")} · from the library` : "Every library framework is already enrolled"}</span>
                 </span>
               </button>
             </section>
