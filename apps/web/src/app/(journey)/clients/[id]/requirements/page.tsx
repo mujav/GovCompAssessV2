@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FrameworkSwitcher } from "@/components/journey/framework-switcher";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
@@ -36,6 +37,7 @@ export default function RequirementsPage() {
 function RequirementsView() {
   const params = useSearchParams();
   const { client, ws, framework, reqs, overlay, move, assign, people } = useClientWork();
+  const { send, drawer } = useDraftSender();
   const [stage, setStage] = useState<Stage | null>((params.get("stage") as Stage) || null);
   const [onlyReturned, setOnlyReturned] = useState(params.get("returned") === "1");
   const [q, setQ] = useState("");
@@ -395,8 +397,8 @@ function RequirementsView() {
                 <JButton
                   size="sm"
                   onClick={() => {
-                    ws.createDraft("evidence-request", sel);
-                    flash(`Evidence request drafted for ${sel.length} requirements. Review it in Outbox before it is sent.`);
+                    const n = sel.length;
+                    send("evidence-request", sel, () => flash(`Evidence request sent for ${n} requirements.`));
                   }}
                 >
                   Request evidence
@@ -426,6 +428,7 @@ function RequirementsView() {
           </div>
         )}
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
@@ -45,6 +46,7 @@ const ago = (d: number) => (d <= 0 ? "Today" : d === 1 ? "Yesterday" : `${d} d a
 
 export default function MyWorkPage() {
   const { client, ws, reqs, overlay, move, ret, log } = useClientWork();
+  const { send, drawer } = useDraftSender();
   const [tab, setTab] = useState(0);
   const [s, set] = useScreenState<WorkScreen>(`work-screen.${client.id}`, { rules: [true, true, false], reminded: {}, escalated: [] });
   const [toast, setToast] = useState("");
@@ -109,10 +111,10 @@ export default function MyWorkPage() {
                   {
                     label: "Escalate",
                     run: () => {
-                      ws.createDraft("escalation", [a.code]);
-                      set((d) => void d.escalated.unshift({ id: `ESC-${10 + d.escalated.length}`, dept: a.department, who: "Department head", codes: [a.code] }));
-                      log(`Escalated ${a.code} to the ${a.department} head`);
-                      flash(`Escalation drafted for ${a.code}. Review it in Outbox before it is sent.`);
+                      send("escalation", [a.code], () => {
+                        set((d) => void d.escalated.unshift({ id: `ESC-${10 + d.escalated.length}`, dept: a.department, who: "Department head", codes: [a.code] }));
+                        flash(`Escalation sent to the ${a.department} head for ${a.code}.`);
+                      });
                     },
                   },
                 ]
@@ -152,7 +154,7 @@ export default function MyWorkPage() {
         who: e.who,
         role: e.dept,
         since: "Today",
-        st: ["Draft · in Outbox", "ai"] as [string, PillTone],
+        st: ["Sent", "cx"] as [string, PillTone],
         actions: [{ label: "Open", href: c(`/requirements/${e.codes[0]}`) }],
       })),
       { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c("/departments"), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("/departments") }] },
@@ -298,6 +300,7 @@ export default function MyWorkPage() {
           </aside>
         </div>
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

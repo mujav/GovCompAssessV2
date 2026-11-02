@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
-import { CLARIFICATIONS, addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
+import { addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
 import type { CriterionVerdict, RequirementRecommendation } from "@/lib/assessor/assessor";
-import { GENERIC_CRITERIA, criteriaFor } from "@/lib/journey/evidence";
+import { GENERIC_CRITERIA, criteriaFor, libraryKey, type LibraryUpload } from "@/lib/journey/evidence";
 import { clientHref } from "@/lib/journey/portfolio";
-import { useScreenState } from "@/lib/journey/store";
+import { useJourney, useScreenState } from "@/lib/journey/store";
+import { nextClarificationId, useClarifications } from "@/lib/journey/use-clarifications";
 import { useRequirementEvidence } from "@/lib/journey/use-evidence";
 import { useClientWork } from "@/lib/journey/use-work";
 import { RESULT, STAGES, codeKey, initials, isReturned, stageOf } from "@/lib/journey/work";
@@ -50,12 +52,16 @@ interface ReqScreen {
 
 export default function RequirementWorkspacePage() {
   const { code } = useParams<{ code: string }>();
-  const { client, ws, framework, reqs, overlay, move, ret, assign, people, log } = useClientWork();
+  const { client, ws, framework, workspace, reqs, overlay, move, ret, assign, people, log } = useClientWork();
+  const { send, drawer } = useDraftSender();
   const r = reqs.find((x) => x.code === code);
   const [tab, setTab] = useState<Tab>("rev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
   const c = (p: string) => clientHref(client.id, p);
   const { ev, readable, stale, busy, upload, assess, remove } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
+  const [clar, setClar] = useClarifications(client.id, framework, workspace, reqs, ws);
+  const { state: journey } = useJourney();
+  const [question, setQuestion] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
 
@@ -86,7 +92,10 @@ export default function RequirementWorkspacePage() {
   const confidence = run ? Math.round(run.confidence * 100) : 98 - gaps * 6;
   const criteria = criteriaFor(r);
   const fileName = (id: string) => ev.files.find((f) => f.id === id)?.name ?? id;
-  const cla = CLARIFICATIONS.find((x) => x.affects.includes(r.code));
+  const related = clar.list.filter((x) => x.affects.includes(r.code));
+  // Files mapped to this requirement in the evidence library.
+  const fromLibrary = ((journey.screens[libraryKey(client.id, framework?.id, workspace)] as LibraryUpload[] | undefined) ?? []).filter((u) => u.linked && u.suggested.includes(r.code));
+  const openCla = related.filter((x) => x.status !== "done" && !x.appliedTo?.includes(r.code)).length;
   const axis = [...new Set(reqs.map((x) => x.domain))].indexOf(r.domain) + 1;
   const [res, rbg, rfg] = RESULT[r.status];
   const owner = r.owner || "Unassigned";
@@ -112,10 +121,9 @@ export default function RequirementWorkspacePage() {
       move([r.code], "cli", `L1 approved ${r.code} and sent to ${client.name}`);
       act("L1 approved · sent to client");
     } else if (s.dec === 1) {
-      ws.createDraft("evidence-request", [r.code]);
       move([r.code], "prog");
-      act("Requested more evidence");
-      log(`Evidence request drafted for ${r.code}`);
+      act("Asked for more evidence");
+      send("evidence-request", [r.code]);
     } else {
       ret([r.code], `Returned ${r.code} to ${owner}`);
       act(`Returned to ${owner}`);
@@ -124,11 +132,11 @@ export default function RequirementWorkspacePage() {
 
   const tabs: [Tab, string, number?][] = [
     ["req", "Requirement"],
-    ["ev", "Evidence", evidence.length + ev.files.length],
+    ["ev", "Evidence", evidence.length + ev.files.length + fromLibrary.length],
     ["rev", "Review", stage === "rev" ? 1 : undefined],
     ["hand", "Hand-offs", requests.filter((h) => !h.done).length || undefined],
     ["rem", "Remediation", gaps ? 1 : undefined],
-    ["cla", "Clarifications", cla ? 1 : undefined],
+    ["cla", "Clarifications", openCla || undefined],
     ["act", "Activity"],
   ];
 
@@ -414,7 +422,19 @@ export default function RequirementWorkspacePage() {
                 <Pill tone={e.ok ? "ok" : "warn"}>{e.ok ? "Valid" : "Wrong period"}</Pill>
               </div>
             ))}
-            {evidence.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked from the library yet.</p>}
+            {fromLibrary.map((u) => (
+              <div key={u.id} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <span className="flex h-10 w-9 items-center justify-center rounded-lg bg-cx-soft text-[10px] font-bold text-cx">{u.name.split(".").pop()?.toUpperCase().slice(0, 4)}</span>
+                <span className="min-w-0 flex-auto text-sm">
+                  <b className="block truncate">{u.name}</b>
+                  <span className="text-xs text-j-muted">
+                    <span className="font-mono">{u.id}</span> · from the evidence library
+                  </span>
+                </span>
+                <Pill tone="ok">Linked</Pill>
+              </div>
+            ))}
+            {evidence.length + fromLibrary.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked from the library yet.</p>}
           </Panel>
           </div>
         )}
@@ -646,19 +666,16 @@ export default function RequirementWorkspacePage() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <JLink size="sm" href={c("/outbox")}>
-                    Open Outbox
-                  </JLink>
                   <JButton
                     size="sm"
                     variant="primary"
                     disabled={s.remProposed}
-                    onClick={() => {
-                      ws.createDraft("remediation", [r.code]);
-                      set((d) => void (d.remProposed = true));
-                      act("Proposed remediation to client");
-                      log(`Remediation proposed for ${r.code}`);
-                    }}
+                    onClick={() =>
+                      send("remediation", [r.code], () => {
+                        set((d) => void (d.remProposed = true));
+                        act("Proposed remediation to client");
+                      })
+                    }
                   >
                     Propose to client
                   </JButton>
@@ -671,45 +688,97 @@ export default function RequirementWorkspacePage() {
         )}
 
         {tab === "cla" && (
-          <Panel className="flex flex-col gap-3 p-[22px]">
-            {cla ? (
-              <>
-                <PanelHead
-                  title={
-                    <>
-                      <span className="font-mono">{cla.id}</span> · {cla.title}
-                    </>
-                  }
-                  aside={<Pill tone={s.claApplied ? "ok" : "ai"}>{s.claApplied ? "Applied" : "Answered · not applied"}</Pill>}
-                />
-                <p className="m-0 text-sm">
-                  <b>DGA answer:</b> evidence must be dated in the current cycle, even for unchanged items.
-                </p>
-                <span className="text-[13px] text-j-muted">Affects {cla.affects.length} requirements</span>
-                <div className="flex gap-2">
-                  <JButton
-                    size="sm"
-                    variant="primary"
-                    disabled={s.claApplied}
-                    onClick={() => {
-                      set((d) => void (d.claApplied = true));
-                      act(`Applied ${cla.id}`);
-                      log(`Applied ${cla.id} to ${r.code}`);
-                    }}
-                  >
-                    Apply to this requirement
-                  </JButton>
-                  <JLink size="sm" href={c("/clarifications")}>
-                    All clarifications
-                  </JLink>
-                </div>
-              </>
-            ) : (
-              <p className="m-0 text-sm text-j-muted">
-                No clarification affects this requirement. <Link href={c("/clarifications")}>Ask the DGA</Link>
-              </p>
-            )}
-          </Panel>
+          <div className="flex flex-col gap-3.5">
+            {related.map((x) => {
+              const applied = x.status === "done" || !!x.appliedTo?.includes(r.code);
+              const [label, tone] = applied ? (["Applied", "ok"] as const) : x.status === "ans" ? (["Answered · not applied", "ai"] as const) : x.status === "sub" ? (["Awaiting DGA", "warn"] as const) : (["Draft · client sends", "draft"] as const);
+              return (
+                <Panel key={x.id} className="flex flex-col gap-2.5 p-[22px]">
+                  <PanelHead
+                    title={
+                      <span dir="auto">
+                        <span className="font-mono">{x.id}</span> · {x.q}
+                      </span>
+                    }
+                    aside={<Pill tone={tone}>{label}</Pill>}
+                  />
+                  {x.said && (
+                    <p className="m-0 text-sm" dir="auto">
+                      <b>{framework?.authority ?? "DGA"} answer:</b> {x.said}
+                    </p>
+                  )}
+                  {x.meaning && <p className="m-0 text-[13px] text-j-ink-2">What it means: {x.meaning}</p>}
+                  <span className="text-xs text-j-muted">
+                    {x.when} · affects {x.affects.length} requirement{x.affects.length === 1 ? "" : "s"}
+                  </span>
+                  {x.status === "ans" && !applied && (
+                    <JButton
+                      size="sm"
+                      variant="primary"
+                      className="self-start"
+                      onClick={() => {
+                        // An answer that changes what counts as evidence reopens finished work on this requirement.
+                        move([r.code], stage === "acc" || stage === "cli" ? "prog" : "rev", `Applied ${x.id} to ${r.code}`);
+                        setClar((d) => {
+                          const it = d.list.find((y) => y.id === x.id)!;
+                          it.appliedTo = [...new Set([...(it.appliedTo ?? []), r.code])];
+                          if (it.affects.every((cd) => it.appliedTo!.includes(cd))) it.status = "done";
+                        });
+                        act(`Applied ${x.id}`);
+                      }}
+                    >
+                      Apply to this requirement
+                    </JButton>
+                  )}
+                  {x.status === "draft" && (
+                    <JButton
+                      size="sm"
+                      className="self-start"
+                      onClick={() => {
+                        setClar((d) => {
+                          const it = d.list.find((y) => y.id === x.id)!;
+                          it.status = "sub";
+                          it.when = "Sent today";
+                        });
+                        act(`Sent ${x.id} to ${framework?.authority ?? "the DGA"}`);
+                        log(`Clarification ${x.id} sent to ${framework?.authority ?? "the DGA"}`);
+                      }}
+                    >
+                      Mark as sent by the client
+                    </JButton>
+                  )}
+                </Panel>
+              );
+            })}
+            <Panel className="flex flex-col gap-2.5 p-[22px]">
+              <PanelHead title={related.length ? "Ask another question about this requirement" : `No clarifications for ${r.code} yet`} />
+              <textarea
+                aria-label="Question for the regulator"
+                rows={3}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder={`What do you need ${framework?.authority ?? "the DGA"} to confirm about ${r.code}?`}
+                dir="auto"
+                className="rounded-xl border border-j-line p-3 font-sans text-sm text-j-ink"
+              />
+              <JButton
+                size="sm"
+                variant="primary"
+                className="self-start"
+                disabled={!question.trim()}
+                onClick={() => {
+                  const id = nextClarificationId(clar.list);
+                  setClar((d) => void d.list.unshift({ id, status: "draft", q: question.trim(), affects: [r.code], when: "Draft · client sends" }));
+                  act(`Drafted clarification ${id}`);
+                  log(`Drafted clarification ${id} for ${r.code}`);
+                  setQuestion("");
+                }}
+              >
+                Save question
+              </JButton>
+              <span className="text-xs text-j-muted">The client sends questions to the regulator; the answer is recorded here and on the Clarifications page.</span>
+            </Panel>
+          </div>
         )}
 
         {tab === "act" && (
@@ -732,6 +801,7 @@ export default function RequirementWorkspacePage() {
           </Panel>
         )}
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

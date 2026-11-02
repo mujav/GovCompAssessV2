@@ -8,7 +8,6 @@ import { CONSULTANT, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/port
 import { useAdmin } from "@/lib/admin/store";
 import { entityFrameworks } from "@/lib/journey/frameworks";
 import { useJourney } from "@/lib/journey/store";
-import { useWorkspace } from "@/lib/workspace/store";
 import { Icon, type IconName } from "./icon";
 
 type NavItem = { label: string; icon: IconName; href: string; badge?: string; badgeBg?: string; exact?: boolean };
@@ -36,7 +35,7 @@ function portfolioNav(studioBadge?: string): [string, NavItem[]][] {
   ];
 }
 
-function clientNav(id: string, name: string, workBadge?: string, outboxBadge?: string, studioBadge?: string): [string, NavItem[]][] {
+function clientNav(id: string, name: string, workBadge?: string, studioBadge?: string): [string, NavItem[]][] {
   const c = (path: string) => clientHref(id, path);
   return [
     [
@@ -52,7 +51,6 @@ function clientNav(id: string, name: string, workBadge?: string, outboxBadge?: s
         { label: "Overview", icon: "home", href: c(""), exact: true },
         { label: "Requirements", icon: "req", href: c("/requirements") },
         { label: "My work", icon: "act", href: c("/work"), badge: workBadge },
-        { label: "Outbox", icon: "send", href: c("/outbox"), badge: outboxBadge, badgeBg: "#4F46E5" },
         { label: "Evidence library", icon: "ev", href: c("/evidence") },
         { label: "People", icon: "ent", href: c("/360?tab=people") },
         { label: "Clarifications", icon: "cla", href: c("/clarifications") },
@@ -85,14 +83,12 @@ function isActive(pathname: string, item: NavItem) {
 export function ConsultantShell({
   clientId,
   workBadge,
-  outboxBadge,
   search,
   headerExtra,
   children,
 }: {
   clientId?: string;
   workBadge?: string;
-  outboxBadge?: string;
   search: string;
   headerExtra?: ReactNode;
   children: ReactNode;
@@ -103,7 +99,7 @@ export function ConsultantShell({
   const { state: admin } = useAdmin();
   const pending = admin.changeRequests.filter((cr) => cr.status === "awaiting").length;
   const studioBadge = pending ? String(pending) : undefined;
-  const groups = clientId ? clientNav(clientId, current.name, workBadge, outboxBadge, studioBadge) : portfolioNav(studioBadge);
+  const groups = clientId ? clientNav(clientId, current.name, workBadge, studioBadge) : portfolioNav(studioBadge);
   // Several items share a destination; highlight only the first match.
   let matched = false;
   const [lbg, lfg] = LOGO[current.logo];
@@ -203,10 +199,8 @@ export function useCurrentClient() {
 /** Consultant shell in client-workspace mode for the client in the URL. */
 export function ClientShell({ children, workBadge, search }: { children: ReactNode; workBadge?: string; search?: string }) {
   const client = useCurrentClient();
-  const ws = useWorkspace();
-  const drafts = ws.state.drafts.filter((d) => d.status === "draft").length;
   return (
-    <ConsultantShell clientId={client.id} workBadge={workBadge} outboxBadge={drafts ? String(drafts) : undefined} search={search ?? `Search ${client.name}`} headerExtra={<ClientHeaderExtra />}>
+    <ConsultantShell clientId={client.id} workBadge={workBadge} search={search ?? `Search ${client.name}`} headerExtra={<ClientHeaderExtra />}>
       {children}
     </ConsultantShell>
   );

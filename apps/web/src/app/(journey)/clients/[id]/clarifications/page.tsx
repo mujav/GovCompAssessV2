@@ -3,56 +3,31 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, Pill, inputClass, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { clientHref } from "@/lib/journey/portfolio";
-import { useScreenState } from "@/lib/journey/store";
+import { nextClarificationId, useClarifications, type ClarificationStatus } from "@/lib/journey/use-clarifications";
 import { useClientWork } from "@/lib/journey/use-work";
 import { STAGE_OF, stageOf } from "@/lib/journey/work";
 
 // 12 · Clarifications. Questions to the DGA, their answers, and the effect of applying an
 // answer to the requirements it touches. Applying is a preview first, then one confirm.
 
-type Status = "ans" | "sub" | "draft" | "done";
-const STATUS: Record<Status, [string, PillTone, string]> = {
+const STATUS: Record<ClarificationStatus, [string, PillTone, string]> = {
   ans: ["Answered", "cx", "#2F6FB0"],
   sub: ["Awaiting DGA", "warn", "#E0A100"],
   draft: ["Draft", "draft", "#C9D1CD"],
   done: ["Applied", "ok", "#1F9D6E"],
 };
 
-interface Cl {
-  id: string;
-  status: Status;
-  q: string;
-  affects: string[];
-  when: string;
-  said?: string;
-  meaning?: string;
-}
 
 export default function ClarificationsPage() {
   const { client, ws, framework, workspace, reqs, overlay, move, log } = useClientWork();
+  const { send, drawer } = useDraftSender();
   const c = (p: string) => clientHref(client.id, p);
-  const base = ws.ctx.clarifications[0];
-  const pick = (n: number, from: number) => reqs.slice(from, from + n).map((r) => r.code);
-  // The seeded questions are DGA (Qiyas) clarifications; other frameworks start with none.
-  const seed: Cl[] = !workspace ? [] : [
-    {
-      id: base.id,
-      status: "ans",
-      q: "Is a prior-cycle sample valid for unchanged integrations?",
-      affects: base.affects,
-      when: "24 Oct",
-      said: "يجب أن يكون النموذج التطبيقي من الدورة الحالية، ولا يُقبل نموذج الدورة السابقة.",
-      meaning: base.title + ", even for unchanged systems.",
-    },
-    { id: "CL-015", status: "sub", q: "Does a staging transaction count?", affects: pick(2, 40), when: "8 days waiting" },
-    { id: "CL-016", status: "draft", q: "Is 5.7.1 not applicable for shared hosting?", affects: pick(1, 120), when: "AI draft" },
-    { id: "CL-012", status: "done", q: "Approval level for the data policy", affects: pick(3, 200), when: "2 Oct", said: "تكفي موافقة رئيس الجهة.", meaning: "Approval by the head of the entity is enough." },
-  ];
-  const [s, set] = useScreenState<{ list: Cl[]; sel: number }>(workspace || !framework ? `clar.${client.id}` : `clar.${client.id}.${framework.id}`, { list: seed, sel: 0 });
+  const [s, set] = useClarifications(client.id, framework, workspace, reqs, ws);
   const [preview, setPreview] = useState(false);
   const [asking, setAsking] = useState(false);
   const [q, setQ] = useState("");
@@ -87,7 +62,7 @@ export default function ClarificationsPage() {
     const flag = impact.filter((i) => !i.reopen && i.st !== "rev").map((i) => i.code);
     move(re, "prog");
     move(flag, "rev");
-    if (re.length) ws.createDraft("evidence-request", re);
+    if (re.length) send("evidence-request", re);
     set((d) => void (d.list[d.sel].status = "done"));
     log(`Applied ${cur.id}: ${re.length} reopened, ${flag.length} flagged for review`);
     setPreview(false);
@@ -125,7 +100,7 @@ export default function ClarificationsPage() {
                     .map((x) => x.trim())
                     .filter((x) => reqs.some((r) => r.code === x));
                   set((d) => {
-                    d.list.unshift({ id: `CL-0${17 + d.list.length - 4}`, status: "draft", q: q.trim(), affects, when: "Draft · client sends" });
+                    d.list.unshift({ id: nextClarificationId(d.list), status: "draft", q: q.trim(), affects, when: "Draft · client sends" });
                     d.sel = 0;
                   });
                   log(`Drafted clarification: ${q.trim()}`);
@@ -285,6 +260,7 @@ export default function ClarificationsPage() {
           </Panel>
         </div>
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

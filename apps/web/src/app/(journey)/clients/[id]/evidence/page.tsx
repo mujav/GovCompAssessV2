@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, Bar, JButton, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { clientHref } from "@/lib/journey/portfolio";
-import { useScreenState } from "@/lib/journey/store";
+import { libraryKey, requirementUploads, type LibraryUpload } from "@/lib/journey/evidence";
+import { useJourney, useScreenState } from "@/lib/journey/store";
 import { useClientWork } from "@/lib/journey/use-work";
 import { codeKey, initials } from "@/lib/journey/work";
 
@@ -40,16 +42,8 @@ function typeOf(name: string) {
   return "ZIP";
 }
 
-interface Upload {
-  id: string;
-  name: string;
-  size: number;
-  /** 0–100 while processing. */
-  pct: number;
-  /** Requirement codes AI suggests; empty until mapped. */
-  suggested: string[];
-  linked: boolean;
-}
+type Upload = LibraryUpload;
+const RECO: Record<string, PillTone> = { Compliant: "ok", Partial: "warn", "Non-compliant": "bad", "Insufficient evidence": "gray" };
 
 interface Doc {
   id: string;
@@ -65,8 +59,12 @@ interface Doc {
 
 export default function EvidencePage() {
   const { client, ws, framework, workspace, reqs, log } = useClientWork();
+  const { send, drawer } = useDraftSender();
   // Uploads are mapped to one framework's requirements, so each framework keeps its own list.
-  const [uploads, setUploads] = useScreenState<Upload[]>(workspace || !framework ? `evidence.${client.id}.uploads` : `evidence.${client.id}.${framework.id}.uploads`, []);
+  const [uploads, setUploads] = useScreenState<Upload[]>(libraryKey(client.id, framework?.id, workspace), []);
+  // Files uploaded on requirement pages belong to the same library.
+  const { state: journey } = useJourney();
+  const onRequirements = useMemo(() => (framework ? requirementUploads(journey.screens, client.id, framework.id) : []), [journey.screens, client.id, framework]);
   const [picked, setPicked] = useState(0);
   const [filter, setFilter] = useState<"all" | "fix" | "ok">("all");
   const [toast, setToast] = useState("");
@@ -85,6 +83,19 @@ export default function EvidencePage() {
     const linkedUploads = uploads.filter((u) => u.linked).length;
     const missing = Math.max(0, expected - valid - invalid - linkedUploads);
     const docs: Doc[] = [
+      ...onRequirements.map(({ code, file, run }) => {
+        const r = reqs.find((x) => x.code === code);
+        return {
+          id: file.id,
+          type: typeOf(file.name),
+          name: file.name,
+          lang: "—",
+          owner: r?.owner || "Sami R.",
+          dept: r?.department || "Uploaded on the requirement",
+          codes: [code],
+          valid: (run ? [`AI: ${run.recommendation}`, RECO[run.recommendation] ?? "gray"] : ["Uploaded · not assessed", "cx"]) as [string, PillTone],
+        };
+      }),
       ...uploads
         .filter((u) => u.linked)
         .map((u) => ({ id: u.id, type: typeOf(u.name), name: u.name, lang: "EN", owner: "Sami R.", dept: "Demo Advisory", codes: u.suggested, valid: ["Valid", "ok"] as [string, PillTone] })),
@@ -119,7 +130,7 @@ export default function EvidencePage() {
         })),
     ];
     return { expected, valid: valid + linkedUploads, invalid, returned, pending, missing, docs };
-  }, [reqs, ws, uploads, workspace]);
+  }, [reqs, ws, uploads, workspace, onRequirements]);
 
   // Simulated pipeline: upload → OCR → classify → map. Ticks while any upload is processing.
   const processing = uploads.some((u) => u.pct < 100);
@@ -365,9 +376,7 @@ export default function EvidencePage() {
                     size="sm"
                     variant="primary"
                     onClick={() => {
-                      ws.createDraft("return", doc.codes);
-                      setToast(`Return drafted for ${doc.id}. Review it in Outbox before ${doc.owner || "the owner"} is notified.`);
-                      log(`Drafted return of ${doc.id} to ${doc.owner}`);
+                      send("return", doc.codes, () => setToast(`${doc.id} returned to ${doc.owner || "the owner"}.`));
                     }}
                   >
                     Request update
@@ -381,6 +390,7 @@ export default function EvidencePage() {
           )}
         </div>
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

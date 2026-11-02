@@ -34,6 +34,34 @@ export const EMPTY_EVIDENCE: EvidenceState = { files: [] };
 
 export const evidenceKey = (clientId: string, frameworkId: string, code: string) => `evidence.${clientId}.${frameworkId}.${code}`;
 
+/** Files uploaded in the evidence library (the workspace framework keeps its original per-client key). */
+export const libraryKey = (clientId: string, frameworkId: string | undefined, workspace: boolean) =>
+  workspace || !frameworkId ? `evidence.${clientId}.uploads` : `evidence.${clientId}.${frameworkId}.uploads`;
+
+/** A file uploaded in the evidence library and mapped to requirements there. */
+export interface LibraryUpload {
+  id: string;
+  name: string;
+  size: number;
+  /** 0–100 while processing. */
+  pct: number;
+  /** Requirement codes AI suggests; empty until mapped. */
+  suggested: string[];
+  linked: boolean;
+}
+
+/** Files uploaded on requirement pages for one framework, with the requirement each belongs to and its latest verdict. */
+export function requirementUploads(screens: Record<string, unknown>, clientId: string, frameworkId: string) {
+  const prefix = `evidence.${clientId}.${frameworkId}.`;
+  return Object.entries(screens)
+    .filter(([k]) => k.startsWith(prefix) && k !== `${prefix}uploads`)
+    .flatMap(([k, v]) => {
+      const st = v as EvidenceState;
+      const code = k.slice(prefix.length);
+      return (st.files ?? []).filter((f) => !f.error).map((f) => ({ code, file: f, run: st.run && st.run.fileIds.includes(f.id) ? st.run : undefined }));
+    });
+}
+
 /** Used when the requirement does not spell out its own sub-items. */
 export const GENERIC_CRITERIA = ["Defined and approved by the right authority", "In place across the entity", "Evidence shows it in use this cycle", "Reviewed and improved on a schedule"];
 
