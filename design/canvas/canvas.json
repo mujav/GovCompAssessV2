@@ -1,50 +1,553 @@
 {
   "v": 3,
-  "createdOnFiles": {"v": 1, "at": "2026-10-28T19:50:00Z"},
-  "title": "Compliance Intelligence Platform — Flows & Screens",
-  "launch": {"view": "canvas", "page": "flows"},
-  "pages": [
-    {"id": "flows", "name": "Flows"},
-    {"id": "screens", "name": "Workspace screens"},
-    {"id": "admin", "name": "Admin Studio"}
-  ],
+  "attachments": {},
   "boards": {
-    "Main.dc.html": {"x": 0, "y": 0, "w": 2536, "h": 1340, "title": "F1 · End-to-end journey (swimlanes)", "page": "flows"},
-    "IA.dc.html": {"x": 2616, "y": 0, "w": 1600, "h": 1100, "title": "F0 · Information architecture", "page": "flows"},
-    "Flow-Evidence-AI.dc.html": {"x": 0, "y": 1460, "w": 1712, "h": 880, "title": "F2 · Evidence → AI assessment pipeline", "page": "flows"},
-    "Flow-Acceptance.dc.html": {"x": 1792, "y": 1460, "w": 1764, "h": 860, "title": "F3 · Human acceptance state machine", "page": "flows"},
-    "Flow-Actions.dc.html": {"x": 0, "y": 2460, "w": 2160, "h": 1040, "title": "F4 · Action, reminder & escalation", "page": "flows"},
-    "Flow-Config.dc.html": {"x": 2240, "y": 2460, "w": 1600, "h": 760, "title": "F5 · Configuration lifecycle", "page": "flows"},
-
-    "Command-Center.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 2000, "title": "S01 · Command Center", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Requirements.dc.html": {"x": 1520, "y": 0, "w": 1440, "h": 1300, "title": "S02 · Requirements register", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Requirement-Detail.dc.html": {"x": 3040, "y": 0, "w": 1440, "h": 1800, "title": "S03 · Requirement detail & criteria", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Evidence.dc.html": {"x": 0, "y": 2120, "w": 1440, "h": 1500, "title": "S04 · Evidence workspace", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Review-Workspace.dc.html": {"x": 1520, "y": 2120, "w": 1440, "h": 1500, "title": "S05 · Reviewer workspace", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Action-Center.dc.html": {"x": 3040, "y": 2120, "w": 1440, "h": 1500, "title": "S06 · Action Center", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Remediation.dc.html": {"x": 0, "y": 3740, "w": 1440, "h": 1500, "title": "S07 · Gaps, remediation & initiatives", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Departments.dc.html": {"x": 1520, "y": 3740, "w": 1440, "h": 1400, "title": "S08 · Department performance", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Submission.dc.html": {"x": 3040, "y": 3740, "w": 1440, "h": 1400, "title": "S09 · Submission Control Tower", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Clarifications.dc.html": {"x": 0, "y": 5360, "w": 1440, "h": 1200, "title": "S10 · Regulator clarifications", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Comparisons.dc.html": {"x": 1520, "y": 5360, "w": 1440, "h": 1500, "title": "S11 · Framework & cycle comparison", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Arabic-SPOC.dc.html": {"x": 3040, "y": 5360, "w": 1440, "h": 1300, "title": "S12 · Department SPOC (Arabic, RTL)", "page": "screens", "expand": "fill", "is_interactive": true},
-
-    "Admin-Frameworks.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1400, "title": "A01 · Framework Builder", "page": "admin", "expand": "fill", "is_interactive": true},
-    "Admin-Scoring.dc.html": {"x": 1520, "y": 0, "w": 1440, "h": 1400, "title": "A02 · Scoring & maturity designer", "page": "admin", "expand": "fill", "is_interactive": true},
-    "Admin-Acceptance.dc.html": {"x": 3040, "y": 0, "w": 1440, "h": 1500, "title": "A03 · Acceptance workflow designer", "page": "admin", "expand": "fill", "is_interactive": true},
-    "Admin-Automation.dc.html": {"x": 0, "y": 1620, "w": 1440, "h": 1400, "title": "A04 · Rule & automation studio", "page": "admin", "expand": "fill", "is_interactive": true},
-    "Admin-History.dc.html": {"x": 1520, "y": 1620, "w": 1440, "h": 1400, "title": "A05 · Configuration history & approval", "page": "admin", "expand": "fill", "is_interactive": true}
+    "Action-Center.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S06 · Action Center",
+      "w": 1440,
+      "x": 3040,
+      "y": 2020
+    },
+    "Admin-Acceptance.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A03 · Acceptance workflow designer",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Admin-Automation.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A04 · Rule & automation studio",
+      "w": 1440,
+      "x": 0,
+      "y": 1370
+    },
+    "Admin-Clients.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A00 · Clients & domains",
+      "w": 1440,
+      "x": 3040,
+      "y": 1370
+    },
+    "Admin-Frameworks.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A01 · Framework Builder",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Admin-History.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A05 · Configuration history & approval",
+      "w": 1440,
+      "x": 1520,
+      "y": 1370
+    },
+    "Admin-Scoring.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "admin",
+      "title": "A02 · Scoring designer",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Arabic-SPOC.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S12 · Department SPOC (Arabic, RTL)",
+      "w": 1440,
+      "x": 3040,
+      "y": 4910
+    },
+    "Artboard-gezb.dc.html": {
+      "h": 600,
+      "page": "page-tpsx3a",
+      "title": "Artboard 1",
+      "w": 800,
+      "x": 0,
+      "y": 0
+    },
+    "C-Actions.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "10 · My work",
+      "w": 1440,
+      "x": 0,
+      "y": 5530
+    },
+    "C-Clarifications.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "12 · Clarifications",
+      "w": 1440,
+      "x": 3040,
+      "y": 5530
+    },
+    "C-Comparisons.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "16 · Comparisons",
+      "w": 1440,
+      "x": 0,
+      "y": 8470
+    },
+    "C-Departments.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "15 · Departments",
+      "w": 1440,
+      "x": 3040,
+      "y": 6950
+    },
+    "C-Evidence.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "11 · Evidence library",
+      "w": 1440,
+      "x": 1520,
+      "y": 5530
+    },
+    "C-Overview.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "07 · Entity overview",
+      "w": 1440,
+      "x": 0,
+      "y": 3910
+    },
+    "C-Requirement-Detail.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "09 · Requirement workspace",
+      "w": 1440,
+      "x": 3040,
+      "y": 3910
+    },
+    "C-Requirements.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "08 · Requirements",
+      "w": 1440,
+      "x": 1520,
+      "y": 3910
+    },
+    "C-Submission.dc.html": {
+      "expand": "fill",
+      "h": 1400,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "13 · Submission pack",
+      "w": 1440,
+      "x": 0,
+      "y": 6950
+    },
+    "C-Submitted.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "14 · Submitted",
+      "w": 1440,
+      "x": 1520,
+      "y": 6950
+    },
+    "Clarifications.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S10 · Regulator clarifications",
+      "w": 1440,
+      "x": 0,
+      "y": 4910
+    },
+    "Command-Center.dc.html": {
+      "expand": "fill",
+      "h": 1900,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S01 · Command Center",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Comparisons.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S11 · Framework & cycle comparison",
+      "w": 1440,
+      "x": 1520,
+      "y": 4910
+    },
+    "Departments.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S08 · Department performance",
+      "w": 1440,
+      "x": 1520,
+      "y": 3440
+    },
+    "Evidence.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S04 · Evidence workspace",
+      "w": 1440,
+      "x": 0,
+      "y": 2020
+    },
+    "Flow-Acceptance.dc.html": {
+      "h": 860,
+      "page": "flows",
+      "title": "F3 · Human acceptance state machine",
+      "w": 1764,
+      "x": 1792,
+      "y": 1460
+    },
+    "Flow-Actions.dc.html": {
+      "h": 1040,
+      "page": "flows",
+      "title": "F4 · Action, reminder & escalation",
+      "w": 2160,
+      "x": 0,
+      "y": 2460
+    },
+    "Flow-Config.dc.html": {
+      "h": 760,
+      "page": "flows",
+      "title": "F5 · Configuration lifecycle",
+      "w": 1600,
+      "x": 2240,
+      "y": 2460
+    },
+    "Flow-Consultant.dc.html": {
+      "h": 1000,
+      "page": "journey",
+      "title": "J00 · Consultant journey map",
+      "w": 2400,
+      "x": 0,
+      "y": 0
+    },
+    "Flow-Evidence-AI.dc.html": {
+      "h": 880,
+      "page": "flows",
+      "title": "F2 · Evidence → AI assessment pipeline",
+      "w": 1712,
+      "x": 0,
+      "y": 1460
+    },
+    "Flow-Onboarding.dc.html": {
+      "h": 760,
+      "page": "flows",
+      "title": "F7 · Client onboarding & lifecycle",
+      "w": 2200,
+      "x": 2080,
+      "y": 3620
+    },
+    "Flow-Tenancy.dc.html": {
+      "h": 1100,
+      "page": "flows",
+      "title": "F6 · Platform ownership & access model",
+      "w": 2000,
+      "x": 0,
+      "y": 3620
+    },
+    "IA.dc.html": {
+      "h": 1300,
+      "page": "flows",
+      "title": "F0 · Information architecture",
+      "w": 1900,
+      "x": 2616,
+      "y": 0
+    },
+    "Login.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "01 · Sign in",
+      "w": 1440,
+      "x": 0,
+      "y": 1120
+    },
+    "Main.dc.html": {
+      "h": 1340,
+      "page": "flows",
+      "title": "F1 · End-to-end journey (swimlanes)",
+      "w": 2536,
+      "x": 0,
+      "y": 0
+    },
+    "Partner-Cockpit.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "03 · Portfolio",
+      "w": 1440,
+      "x": 3040,
+      "y": 1120
+    },
+    "Partner-Engagement.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "06 · Engagement",
+      "w": 1440,
+      "x": 3040,
+      "y": 2340
+    },
+    "Partner-Entity360.dc.html": {
+      "expand": "fill",
+      "h": 1450,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "05 · Entity 360",
+      "w": 1440,
+      "x": 1520,
+      "y": 2340
+    },
+    "Partner-Onboarding.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "04 · Add entity",
+      "w": 1440,
+      "x": 0,
+      "y": 2340
+    },
+    "Partners-Access.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "E01 · License & advisory (entity side)",
+      "w": 1440,
+      "x": 0,
+      "y": 6380
+    },
+    "Remediation.dc.html": {
+      "expand": "fill",
+      "h": 1350,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S07 · Gaps, remediation & initiatives",
+      "w": 1440,
+      "x": 0,
+      "y": 3440
+    },
+    "Requirement-Detail.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S03 · Requirement detail & criteria",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Requirements.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S02 · Requirements register",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Review-Workspace.dc.html": {
+      "expand": "fill",
+      "h": 1250,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S05 · Reviewer workspace",
+      "w": 1440,
+      "x": 1520,
+      "y": 2020
+    },
+    "Submission.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "page": "screens",
+      "title": "S09 · Submission Control Tower",
+      "w": 1440,
+      "x": 3040,
+      "y": 3440
+    },
+    "Workspace-Chooser.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "page": "journey",
+      "title": "02 · Choose entity",
+      "w": 1440,
+      "x": 1520,
+      "y": 1120
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-28T19:50:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "journey",
+    "view": "canvas"
+  },
+  "notes": {
+    "adminTitle": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "admin",
+      "text": "Admin Studio — Qiyas as configuration, not code",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "flowsTitle": {
+      "kind": "title1",
+      "maxW": 4216,
+      "page": "flows",
+      "text": "Flows — how work moves through the platform",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "journeyTitle": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "journey",
+      "text": "Consultant journey — sign in → prepare → L1 review → client acceptance → submission",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "screensTitle": {
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "screens",
+      "text": "Entity workspace — parked",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
   },
   "order": [
-    "Main.dc.html", "IA.dc.html", "Flow-Evidence-AI.dc.html", "Flow-Acceptance.dc.html", "Flow-Actions.dc.html", "Flow-Config.dc.html",
-    "Command-Center.dc.html", "Requirements.dc.html", "Requirement-Detail.dc.html", "Evidence.dc.html", "Review-Workspace.dc.html", "Action-Center.dc.html",
-    "Remediation.dc.html", "Departments.dc.html", "Submission.dc.html", "Clarifications.dc.html", "Comparisons.dc.html", "Arabic-SPOC.dc.html",
-    "Admin-Frameworks.dc.html", "Admin-Scoring.dc.html", "Admin-Acceptance.dc.html", "Admin-Automation.dc.html", "Admin-History.dc.html"
+    "Flow-Consultant.dc.html",
+    "Login.dc.html",
+    "Workspace-Chooser.dc.html",
+    "Partner-Cockpit.dc.html",
+    "Partner-Onboarding.dc.html",
+    "Partner-Entity360.dc.html",
+    "Partner-Engagement.dc.html",
+    "C-Overview.dc.html",
+    "C-Requirements.dc.html",
+    "C-Requirement-Detail.dc.html",
+    "C-Actions.dc.html",
+    "C-Evidence.dc.html",
+    "C-Clarifications.dc.html",
+    "C-Submission.dc.html",
+    "C-Submitted.dc.html",
+    "C-Departments.dc.html",
+    "C-Comparisons.dc.html",
+    "Main.dc.html",
+    "IA.dc.html",
+    "Flow-Evidence-AI.dc.html",
+    "Flow-Acceptance.dc.html",
+    "Flow-Actions.dc.html",
+    "Flow-Config.dc.html",
+    "Flow-Tenancy.dc.html",
+    "Flow-Onboarding.dc.html",
+    "Partners-Access.dc.html",
+    "Command-Center.dc.html",
+    "Requirements.dc.html",
+    "Requirement-Detail.dc.html",
+    "Evidence.dc.html",
+    "Review-Workspace.dc.html",
+    "Action-Center.dc.html",
+    "Remediation.dc.html",
+    "Departments.dc.html",
+    "Submission.dc.html",
+    "Clarifications.dc.html",
+    "Comparisons.dc.html",
+    "Arabic-SPOC.dc.html",
+    "Admin-Clients.dc.html",
+    "Admin-Frameworks.dc.html",
+    "Admin-Scoring.dc.html",
+    "Admin-Acceptance.dc.html",
+    "Admin-Automation.dc.html",
+    "Admin-History.dc.html",
+    "Artboard-gezb.dc.html"
   ],
-  "notes": {
-    "flowsTitle": {"x": 0, "y": -300, "text": "Flows — how work moves through the platform", "kind": "title1", "maxW": 4216, "page": "flows"},
-    "screensTitle": {"x": 0, "y": -300, "text": "Workspace screens — operate, review, act, submit", "kind": "title1", "maxW": 4480, "page": "screens"},
-    "adminTitle": {"x": 0, "y": -300, "text": "Admin Studio — Qiyas as configuration, not code", "kind": "title1", "maxW": 4480, "page": "admin"}
-  },
-  "designSystems": []
+  "pages": [
+    {
+      "id": "journey",
+      "name": "Consultant journey"
+    },
+    {
+      "id": "flows",
+      "name": "Flows"
+    },
+    {
+      "id": "screens",
+      "name": "Entity workspace · parked"
+    },
+    {
+      "id": "admin",
+      "name": "Admin Studio"
+    },
+    {
+      "id": "page-tpsx3a",
+      "name": "Page 5"
+    }
+  ],
+  "title": "Compliance Intelligence Platform — Flows & Screens"
 }

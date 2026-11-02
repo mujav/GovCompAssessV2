@@ -101,7 +101,7 @@ function AdminFrame({ children }: { children: ReactNode }) {
           </div>
         </div>
         <Link
-          href="/command-center"
+          href="/entity/command-center"
           className="flex min-h-11 items-center rounded-lg border border-admin-line px-2.5 text-[13px] text-admin-text no-underline hover:text-white"
         >
           ← Back to workspace

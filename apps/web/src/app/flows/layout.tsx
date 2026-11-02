@@ -7,7 +7,7 @@ export default function FlowsLayout({ children }: { children: React.ReactNode })
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line bg-white px-8 py-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <div className="text-[13px] text-muted">
-            <Link href="/command-center">Workspace</Link> / Flows &amp; architecture
+            <Link href="/entity/command-center">Workspace</Link> / Flows &amp; architecture
           </div>
           <h1 className="m-0 text-2xl leading-8 font-bold">How work moves through the platform</h1>
         </div>

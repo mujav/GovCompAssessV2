@@ -11,21 +11,21 @@ const NAV: { heading: string; items: NavItem[] }[] = [
   {
     heading: "WORKSPACE",
     items: [
-      { href: "/command-center", label: "Command Center" },
-      { href: "/requirements", label: "Requirements" },
-      { href: "/evidence", label: "Evidence" },
-      { href: "/reviews", label: "Reviews", badge: { n: 14, bg: "#2E8B6A" } },
-      { href: "/actions", label: "Action Center", badge: { n: 9, bg: "#B4580A" } },
-      { href: "/remediation", label: "Remediation" },
-      { href: "/clarifications", label: "Clarifications" },
-      { href: "/submission", label: "Submission" },
+      { href: "/entity/command-center", label: "Command Center" },
+      { href: "/entity/requirements", label: "Requirements" },
+      { href: "/entity/evidence", label: "Evidence" },
+      { href: "/entity/reviews", label: "Reviews", badge: { n: 14, bg: "#2E8B6A" } },
+      { href: "/entity/actions", label: "Action Center", badge: { n: 9, bg: "#B4580A" } },
+      { href: "/entity/remediation", label: "Remediation" },
+      { href: "/entity/clarifications", label: "Clarifications" },
+      { href: "/entity/submission", label: "Submission" },
     ],
   },
   {
     heading: "INSIGHTS",
     items: [
-      { href: "/departments", label: "Departments" },
-      { href: "/comparisons", label: "Comparisons" },
+      { href: "/entity/departments", label: "Departments" },
+      { href: "/entity/comparisons", label: "Comparisons" },
     ],
   },
   {

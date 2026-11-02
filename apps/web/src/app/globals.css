@@ -58,6 +58,34 @@
   --color-chart-non: #c4412f;
   --color-chart-nas: #b9c2bd;
   --color-chart-na: #8796b0;
+
+  /* Consultant journey (screens 01–16): consultant blue over a lighter neutral set */
+  --color-cx: #1e4e8c;
+  --color-cx-strong: #163c6e;
+  --color-cx-mid: #3a6fb8;
+  --color-cx-soft: #eaf1fa;
+  --color-cx-tint: #f3f7fc;
+  --color-cx-line: #c8daee;
+  --color-cx-deep: #0f1f36;
+  --color-cx-ring: #8db4e2;
+  --color-j-ink: #101c17;
+  --color-j-ink-2: #33413b;
+  --color-j-ink-3: #47534d;
+  --color-j-muted: #5e6b65;
+  --color-j-line: #e6ebe8;
+  --color-j-line-soft: #eef1ef;
+  --color-j-field: #c9d1cd;
+  --color-j-canvas: #f5f7f6;
+  --color-j-chip: #f7f9f8;
+  --color-j-ok: #1f9d6e;
+  --color-j-ok-soft: #e7f3ed;
+  --color-j-warn: #e0a100;
+  --color-j-warn-soft: #fff4df;
+  --color-j-bad: #b42318;
+  --color-j-bad-mark: #d9442e;
+  --color-j-bad-soft: #fdecea;
+  --color-j-ai: #4f46e5;
+  --color-j-ai-soft: #eeedfd;
 }
 
 @layer base {

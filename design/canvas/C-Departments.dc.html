@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Department performance</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0E5A45}a:hover{color:#0A3F31}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
+
+<nav aria-label="Consultant portal" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E3E8EF; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #1E4E8C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">DA</span><span style="line-height: 17px"><b style="font-size: 14px">Consultant portal</b><br><span style="font-size: 12px; color: #5E6B65">Demo Advisory Co.</span></span></div>
+<a href="Workspace-Chooser.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border: 1px solid #C8DAEE; border-radius: 12px; background: #F3F7FC; text-decoration: none; color: #101C17"><span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; background: #E7F3ED; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700">DE</span><span style="flex: 1 1 auto; min-width: 0; line-height: 16px"><b style="font-size: 13px">Demo Entity</b><br><span style="font-size: 12px; color: #5E6B65">Qiyas 2026</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"></path></svg></a>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
+</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E3E8EF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E0ECF8; color: #1E4E8C; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">SR</span><span style="font-size: 13px; line-height: 17px"><b>Sami R.</b><br><span style="color: #5E6B65">Engagement Lead</span></span></div>
+</nav>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 420px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search in Demo Entity" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #EAF1FA; color: #1E4E8C; font-size: 12px; font-weight: 700">Managed service</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #F5F7F6; color: #33413B; font-size: 12px; font-weight: 600">ENG-0142 · 214 d left</span>
+<a href="Workspace-Chooser.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; color: #101C17">Switch entity</a>
+</header>
+
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Departments</h1>
+<div style="display: flex; gap: 8px">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; color: #101C17">Lowest first ▾</button>
+<button type="button" style="height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Send client report</button>
+</div>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="overflow-x: auto">
+<div role="table" aria-label="Departments" style="min-width: 960px; font-size: 14px">
+<div role="row" style="display: grid; grid-template-columns: 2fr 0.8fr 2fr 0.8fr 1fr 1fr 44px; gap: 14px; align-items: center; padding: 14px 22px; color: #5E6B65; font-size: 12px; font-weight: 600; border-bottom: 1px solid #E6EBE8">
+<span role="columnheader">Department</span><span role="columnheader">Completion</span><span role="columnheader">Acceptance mix</span><span role="columnheader">Overdue</span><span role="columnheader">Last update</span><span role="columnheader">Response</span><span role="columnheader"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Open</span></span>
+</div>
+<sc-for list="{{depts}}" as="d" hint-placeholder-count="7">
+<div role="row" style="display: grid; grid-template-columns: 2fr 0.8fr 2fr 0.8fr 1fr 1fr 44px; gap: 14px; align-items: center; padding: 14px 22px; border-bottom: 1px solid #EEF1EF">
+<span role="cell" style="display: flex; align-items: center; gap: 12px; min-width: 0"><span style="flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; background: {{d.avBg}}; color: {{d.avFg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{d.av}}</span><span style="min-width: 0; display: flex; flex-direction: column"><b style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{d.name}}</b><span style="font-size: 12px; color: #5E6B65">{{d.applicable}} requirements</span></span><sc-if value="{{d.esc}}" hint-placeholder-val="{{ false }}"><span title="Escalation criteria met" style="flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: #FDECEA; color: #B42318; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Escalation criteria met" role="img"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></span></sc-if></span>
+<span role="cell" style="display: flex; align-items: center; gap: 8px"><span role="img" aria-label="{{d.ready}} completion" style="flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; background: {{d.ring}}; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 50%; background: #FFFFFF"></span></span><b style="font-size: 14px; color: {{d.ink}}">{{d.ready}}</b></span>
+<span role="cell" aria-label="{{d.mix}}" style="display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px"><span style="display: block; flex: {{d.comp}} 1 0; background: #1F9D6E"></span><span style="display: block; flex: {{d.part}} 1 0; background: #E0A100"></span><span style="display: block; flex: {{d.non}} 1 0; background: #D9442E"></span><span style="display: block; flex: {{d.nas}} 1 0; background: #C9D1CD"></span></span>
+<span role="cell"><span style="display: inline-flex; min-width: 28px; justify-content: center; padding: 3px 8px; border-radius: 999px; font-size: 13px; font-weight: 700; background: {{d.odBg}}; color: {{d.odFg}}">{{d.overdue}}</span></span>
+<span role="cell" style="font-size: 13px; font-weight: 600; color: {{d.luInk}}">{{d.last}}</span>
+<span role="cell" style="display: flex; align-items: center; gap: 8px"><span style="flex: 1 1 auto; display: block; height: 6px; border-radius: 3px; background: #EEF1EF; overflow: hidden"><span style="display: block; height: 6px; width: {{d.rate}}; background: {{d.rateBar}}"></span></span><span style="font-size: 12px; font-weight: 600; width: 34px">{{d.rate}}</span></span>
+<span role="cell"><a href="C-Requirements.dc.html" aria-label="Open {{d.name}}" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #0E5A45; background: #E7F3ED"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></a></span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; padding: 14px 22px; font-size: 12px; color: #5E6B65">
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #1F9D6E"></span>Accepted</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #E0A100"></span>In progress</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #D9442E"></span>Returned</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #C9D1CD"></span>Not started</span>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 16px">Engagement</h2><span style="display: flex; gap: 10px; font-size: 12px; color: #5E6B65"><span style="display: inline-flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #DDF0E6"></span>Good</span><span style="display: inline-flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FFF0CC"></span>Watch</span><span style="display: inline-flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #FAD6D0"></span>Act</span></span></div>
+<div style="overflow-x: auto">
+<div role="table" aria-label="Engagement heat map" style="min-width: 760px; display: grid; grid-template-columns: 1.8fr repeat(5, minmax(0, 1fr)); gap: 6px; font-size: 13px">
+<span role="columnheader"></span><span role="columnheader" style="font-size: 12px; font-weight: 600; color: #5E6B65; text-align: center">Response rate</span><span role="columnheader" style="font-size: 12px; font-weight: 600; color: #5E6B65; text-align: center">Days to evidence</span><span role="columnheader" style="font-size: 12px; font-weight: 600; color: #5E6B65; text-align: center">Review loops</span><span role="columnheader" style="font-size: 12px; font-weight: 600; color: #5E6B65; text-align: center">No update</span><span role="columnheader" style="font-size: 12px; font-weight: 600; color: #5E6B65; text-align: center">Meetings</span>
+<sc-for list="{{heat}}" as="h" hint-placeholder-count="7">
+<span role="rowheader" style="display: flex; align-items: center; font-weight: 500">{{h.name}}</span>
+<sc-for list="{{h.cells}}" as="c" hint-placeholder-count="5"><span role="cell" style="height: 40px; border-radius: 10px; background: {{c.bg}}; color: {{c.fg}}; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">{{c.v}}</span></sc-for>
+</sc-for>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ACTIVE = 'Departments';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const CA = 'C-Departments';
+    const CP = { grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', plus: 'M12 5v14M5 12h14', home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', ent: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', eng: 'M4 7h16v13H4zM9 7V4h6v3', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const CN = [['PORTFOLIO', [['All entities', 'grid', 'Partner-Cockpit'], ['Add entity', 'plus', 'Partner-Onboarding']]], ['DEMO ENTITY', [['Overview', 'home', 'C-Overview'], ['Requirements', 'req', 'C-Requirements'], ['My work', 'act', 'C-Actions', '23', '#1E4E8C'], ['Evidence library', 'ev', 'C-Evidence'], ['Clarifications', 'cla', 'C-Clarifications'], ['Submission', 'sub', 'C-Submission']]], ['INSIGHTS', [['Departments', 'dep', 'C-Departments'], ['Comparisons', 'cmp', 'C-Comparisons'], ['Entity 360', 'ent', 'Partner-Entity360']]], ['ENGAGEMENT', [['Engagement', 'eng', 'Partner-Engagement'], ['Entity settings', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = CN.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === CA; return { label, d: CP[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#EAF1FA' : 'transparent', fg: on ? '#1E4E8C' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge: badge || '', badgeBg: bb || '#1E4E8C' }; }) }));
+    const AV = [['#FDE9D9', '#9A3412'], ['#E0ECF8', '#1E4E8C'], ['#E6E4FB', '#3F37A8'], ['#DDEFE6', '#0E5A45'], ['#F3E8F7', '#7A2E8C']];
+    const mk = (name, av, a, comp, part, non, nas, overdue, last, stale, rate, esc) => {
+      const applicable = comp + part + non + nas, r = Math.round(((comp + part * 0.5) / applicable) * 100);
+      const col = r >= 85 ? '#1F9D6E' : r >= 60 ? '#E0A100' : '#D9442E';
+      return { name, av, avBg: AV[a][0], avFg: AV[a][1], applicable, comp, part, non, nas, mix: comp + ' accepted, ' + part + ' in progress, ' + non + ' returned, ' + nas + ' not started', ready: r + '%', ink: r >= 85 ? '#0E5A45' : r >= 60 ? '#8A4B00' : '#B42318', ring: 'conic-gradient(' + col + ' 0 ' + r + '%, #EEF1EF ' + r + '% 100%)', overdue, odBg: overdue >= 5 ? '#FDECEA' : overdue > 0 ? '#FFF4DF' : '#E7F3ED', odFg: overdue >= 5 ? '#B42318' : overdue > 0 ? '#8A4B00' : '#0E5A45', last, luInk: stale ? '#B42318' : '#33413B', rate: rate + '%', rateBar: rate < 60 ? '#D9442E' : rate < 85 ? '#E0A100' : '#1F9D6E', esc };
+    };
+    const lvl = (v, good, bad, higherBetter) => { const ok = higherBetter ? v >= good : v <= good; const no = higherBetter ? v < bad : v > bad; return no ? ['#FAD6D0', '#8C1D12'] : ok ? ['#DDF0E6', '#0B4A38'] : ['#FFF0CC', '#6B3F05']; };
+    const row = (name, rate, days, loops, nu, meet) => ({ name, cells: [[rate + '%', lvl(rate, 85, 60, true)], [days + 'd', lvl(days, 3, 6, false)], [loops, lvl(loops, 1.5, 2.2, false)], [nu, lvl(nu, 1, 4, false)], [meet + '/4', lvl(meet, 4, 2, true)]].map(([v, c]) => ({ v, bg: c[0], fg: c[1] })) });
+    return {
+      navGroups,
+      depts: [
+        mk('Cybersecurity', 'YA', 4, 6, 11, 5, 20, 1, '4 days', false, 64, false),
+        mk('Human Capital', 'LT', 0, 16, 12, 9, 4, 7, '15 days', true, 48, true),
+        mk('IT Operations', 'FK', 1, 27, 15, 8, 6, 6, '12 days', true, 58, true),
+        mk('Digital Transformation', 'RS', 2, 38, 14, 4, 5, 3, 'Yesterday', false, 91, false),
+        mk('Strategy & Performance', 'OH', 3, 36, 9, 2, 3, 2, '2 days', false, 93, false),
+        mk('Customer Experience', 'HM', 2, 33, 8, 2, 2, 1, '3 days', false, 88, false),
+        mk('Legal & Governance', 'SN', 4, 30, 5, 1, 2, 0, 'Yesterday', false, 100, false)
+      ],
+      heat: [row('Human Capital', 48, 9.2, 2.6, 5, 1), row('IT Operations', 58, 6.8, 2.1, 3, 2), row('Cybersecurity', 64, 4.4, 1.5, 1, 3), row('Digital Transformation', 91, 2.1, 1.4, 2, 4), row('Strategy & Performance', 93, 1.8, 1.2, 0, 4), row('Customer Experience', 88, 2.6, 1.6, 0, 3), row('Legal & Governance', 100, 1.2, 1.1, 0, 4)]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -8,143 +8,125 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="Admin Studio" style="flex: 1 1 240px; background: #1A1F2E; color: #E3E6EF; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #B4580A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">AS</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Admin Studio</div><div style="font-size: 12px; color: #A9B0C4">Demo Entity · Sandbox</div></div></div>
-<a href="Command-Center.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 13px; border: 1px solid #2E3548">← Back to workspace</a>
-<div style="display: flex; flex-direction: column; gap: 1px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">FRAMEWORK PACKAGE</div>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Framework Builder</a>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Requirement schema</a>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Criteria &amp; evidence rules</a>
-<a href="Admin-Scoring.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Scoring &amp; maturity</a>
-<a href="Admin-Acceptance.dc.html" aria-current="page" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; background: #343C55; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Workflow &amp; acceptance</a>
+<nav aria-label="Admin Studio" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #C2410C; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Admin Studio</b><br><a href="Command-Center.dc.html" style="font-size: 12px; color: #5E6B65; text-decoration: none">← Workspace</a></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #F3D3BF; border-radius: 12px; background: #FFF6F0; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: left"><span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #C2410C"></span>Qiyas 2026 · v1.3</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 1px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">OPERATIONS</div>
-<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Actions &amp; automation</a>
-<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Metrics &amp; dashboards</a>
-<a href="Admin-Automation.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Reports &amp; notifications</a>
-</div>
-<div style="display: flex; flex-direction: column; gap: 1px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #A9B0C4; padding: 4px 10px">PLATFORM</div>
-<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Organization &amp; roles</a>
-<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">AI configuration</a>
-<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Terminology &amp; localization</a>
-<a href="Admin-History.dc.html" style="display: flex; align-items: center; min-height: 40px; padding: 0 10px; border-radius: 8px; color: #C9CEDC; text-decoration: none; font-size: 14px">Configuration history</a>
-</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #FDE9D9; color: #9A3412; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">MF</span><span style="font-size: 13px; line-height: 17px"><b>Majed F.</b><br><span style="color: #5E6B65">Framework Admin</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Admin Studio / Acceptance policies</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Acceptance workflow designer</h1></div>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">New policy</button>
-<a href="Admin-History.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Submit for approval</a>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<span style="display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: #FFF6F0; color: #9A3412; font-size: 12px; font-weight: 700">Sandbox · changes are not live</span>
+<span style="flex: 1 1 auto"></span>
+<a href="Admin-History.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 500; color: #101C17"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2"></path></svg>2 pending</a>
 </header>
 
-<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
 
-<section aria-label="Policies" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Acceptance</h1>
+<div style="display: flex; gap: 8px">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; color: #101C17">New policy</button>
+<a href="Admin-History.dc.html" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Submit for approval</a>
+</div>
+</div>
+
+<div role="tablist" aria-label="Policies" style="display: flex; flex-wrap: wrap; gap: 6px">
 <sc-for list="{{policies}}" as="p" hint-placeholder-count="4">
-<button type="button" onClick="{{p.pick}}" style="text-align: left; font: inherit; cursor: pointer; background: #FFFFFF; border: {{p.border}}; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; color: #14211C">
-<span style="display: flex; justify-content: space-between; gap: 8px"><b style="font-size: 13px; font-family: 'IBM Plex Mono', monospace">{{p.id}}</b><span style="font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: {{p.sBg}}; color: {{p.sFg}}">{{p.status}}</span></span>
-<span style="font-size: 13px; font-weight: 600">{{p.name}}</span>
-<span style="font-size: 12px; color: #56625C">{{p.scope}}</span>
+<button type="button" role="tab" aria-selected="{{p.on}}" onClick="{{p.pick}}" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{p.bd}}; background: {{p.bg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: {{p.fg}}"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{p.dot}}"></span>{{p.name}}</button>
+</sc-for>
+</div>
+
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 18px">Critical requirements</h2><span style="display: flex; gap: 6px"><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #F5F7F6">Qiyas 2026</span><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #FDECEA; color: #B42318">Risk: critical · 23</span></span></div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0">
+<div style="flex: 0 0 auto; width: 120px; padding: 16px 12px; border-radius: 16px; background: #EEEDFD; color: #4F46E5; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg><b style="font-size: 13px">AI</b><span style="font-size: 11px">recommends</span></div>
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="3">
+<span aria-hidden="true" style="flex: 0 0 32px; height: 2px; background: #C9D1CD"></span>
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="flex: 1 1 190px; min-width: 0; text-align: left; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; border: 2px solid {{s.bd}}; background: #FFFFFF; color: #101C17">
+<span style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: #0E5A45">STAGE {{s.n}}</span><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: #F5F7F6">{{s.mode}}</span></span>
+<b style="font-size: 15px">{{s.name}}</b>
+<span style="display: flex; align-items: center; justify-content: space-between">
+<span style="display: flex"><sc-for list="{{s.people}}" as="p" hint-placeholder-count="2"><span style="width: 28px; height: 28px; margin-right: -6px; border-radius: 50%; border: 2px solid #FFFFFF; background: {{p.bg}}; color: {{p.fg}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">{{p.i}}</span></sc-for></span>
+<span style="display: flex; gap: 4px"><span style="font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; background: #E7F3ED; color: #0E5A45">{{s.min}}</span><span style="font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; background: #F5F7F6">{{s.sla}}</span></span>
+</span>
 </button>
 </sc-for>
+<span aria-hidden="true" style="flex: 0 0 32px; height: 2px; background: #C9D1CD"></span>
+<div style="flex: 0 0 auto; width: 120px; padding: 16px 12px; border-radius: 16px; background: #0E5A45; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><b style="font-size: 13px">Official</b><span style="font-size: 11px; color: #CFE8DC">scored</span></div>
+</div>
+<button type="button" style="align-self: flex-start; height: 36px; padding: 0 12px; border: 1px dashed #A9B6AF; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #47534D">+ Add stage</button>
 </section>
 
 <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
-<section style="flex: 999 1 600px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 17px">AP-QIYAS-CRIT · v2 draft</h2><span style="font-size: 12px; color: #56625C">Scope: Qiyas 2026 · risk band = critical · 23 requirements</span></div>
-
-<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
-<div style="flex: 0 0 auto; display: flex; align-items: center; padding: 10px 14px; border-radius: 10px; background: #EEEDFB; color: #3F37A8; font-size: 13px; font-weight: 600">AI assessment<br>recommendation only</div>
-<sc-for list="{{stages}}" as="s" hint-placeholder-count="3">
-<div style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 2px solid {{s.border}}; border-radius: 12px; background: #FFFFFF">
-<div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #0E5A45">STAGE {{s.n}}</span><span style="font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid #CBD3CE; color: #33403A">{{s.mode}}</span></div>
-<b style="font-size: 14px; line-height: 20px">{{s.name}}</b>
-<div style="display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 3px 8px; font-size: 12px; line-height: 17px">
-<span style="color: #56625C">Reviewers</span><span>{{s.who}}</span>
-<span style="color: #56625C">Approvals</span><span>{{s.min}}</span>
-<span style="color: #56625C">On reject</span><span>{{s.reject}}</span>
-<span style="color: #56625C">SLA</span><span>{{s.sla}}</span>
-<span style="color: #56625C">Independent</span><span>{{s.indep}}</span>
-</div>
-<div style="display: flex; flex-wrap: wrap; gap: 4px">
-<sc-for list="{{s.rights}}" as="r" hint-placeholder-count="3"><span style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #F1F4F2; color: #33403A">{{r}}</span></sc-for>
-</div>
+<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">Rules</h2></div>
+<sc-for list="{{toggles}}" as="t" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span style="flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; background: #F5F7F6; color: #47534D; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"></path></svg></span>
+<span style="flex: 1 1 auto; font-size: 14px; font-weight: 500">{{t.label}}</span>
+<button type="button" role="switch" aria-checked="{{t.on}}" aria-label="{{t.label}}" onClick="{{t.toggle}}" style="flex: 0 0 auto; width: 44px; height: 26px; border: 0; border-radius: 13px; background: {{t.track}}; cursor: pointer; padding: 3px; display: flex; justify-content: {{t.justify}}"><span style="width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.2)"></span></button>
 </div>
 </sc-for>
-<button type="button" style="flex: 0 0 auto; min-width: 120px; border: 1px dashed #7D8C85; border-radius: 12px; background: #FFFFFF; font: inherit; font-size: 13px; cursor: pointer; color: #33403A">+ Add stage</button>
-</div>
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; font-size: 13px">
-<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
-<legend style="font-weight: 600; padding: 0 4px">Override governance</legend>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Rationale and reason code required</label>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Material override adds senior approval</label>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" style="width: 18px; height: 18px; accent-color: #0E5A45">Allow bulk approval (off for critical)</label>
-</fieldset>
-<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
-<legend style="font-weight: 600; padding: 0 4px">Reopen when</legend>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">New or replaced evidence</label>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Authority clarification applied</label>
-<label style="display: flex; gap: 8px; align-items: center; min-height: 32px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px; accent-color: #0E5A45">Material configuration change</label>
-</fieldset>
-<fieldset style="border: 1px solid #DCE2DE; border-radius: 10px; padding: 12px; margin: 0; display: flex; flex-direction: column; gap: 6px">
-<legend style="font-weight: 600; padding: 0 4px">Finalization</legend>
-<div style="line-height: 20px">Result becomes official, scored and submittable when <b>stage 3 approves</b> and no blocking rejection exists.</div>
-<div style="line-height: 20px; color: #56625C">Delegation allowed for absence; delegate identity is recorded.</div>
-</fieldset>
-</div>
 </section>
 
-<aside style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 2px solid #3F6FB5; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
-<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 700; color: #2F5893">SIMULATE</div>
-<label style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600">Sample record<select style="height: 44px; border: 1px solid #CBD3CE; border-radius: 8px; padding: 0 10px; font: inherit; font-size: 14px; font-weight: 400; background: #FFFFFF"><option>5.11.2-2 · AI Non-compliant · reviewer overrides to Partial</option><option>1.1.1-1 · AI Compliant · no override</option></select></label>
-<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19px">
-<li style="padding: 8px 10px; border-radius: 8px; background: #EEEDFB; color: #3F37A8">AI Assessed → routed to stage 1 (critical band)</li>
-<li style="padding: 8px 10px; border-radius: 8px; background: #F7F8F6">Stage 1: SME A approves · SME B overrides to Partial</li>
-<li style="padding: 8px 10px; border-radius: 8px; background: #FBEFD9; color: #6B3F05">Override is material → Override Pending Approval</li>
-<li style="padding: 8px 10px; border-radius: 8px; background: #F7F8F6">Stage 2: Control owner approves override</li>
-<li style="padding: 8px 10px; border-radius: 8px; background: #E3F1EA; color: #11603F">Stage 3: Compliance Lead → Accepted (Partial)</li>
+<aside style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 2px solid #5B8FC9; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 12px; font-weight: 700; color: #1E4E8C; letter-spacing: 0.04em">SIMULATE</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 2px 8px; border-radius: 6px; background: #F5F7F6">5.11.2-2</span></div>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0">
+<sc-for list="{{sim}}" as="s" hint-placeholder-count="5">
+<li style="display: flex; gap: 12px; align-items: flex-start">
+<span style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center"><span style="width: 24px; height: 24px; border-radius: 50%; background: {{s.bg}}; color: {{s.fg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{s.mark}}</span><span style="width: 2px; height: 22px; background: {{s.line}}"></span></span>
+<span style="font-size: 13px; line-height: 24px; font-weight: 500">{{s.label}}</span>
+</li>
+</sc-for>
 </ol>
-<div style="font-size: 12px; line-height: 18px; color: #56625C">Checks passed: no person fills two stages · AI never satisfies a human stage · SLA chain totals 9 working days.</div>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 12px; background: #E7F3ED; color: #0E5A45; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>All guardrails pass</span>
 </aside>
 </div>
 </main>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { sel: 1 }; }
+  constructor(props) { super(props); this.state = { pol: 1, st: 0, t: { 0: true, 1: true, 2: false, 3: true, 4: true, 5: true } }; }
   renderVals() {
-    const S = { pub: ['PUBLISHED', '#E3F1EA', '#11603F'], draft: ['DRAFT', '#FBEFD9', '#8A4B00'] };
-    const raw = [
-      ['AP-QIYAS-STD v2', 'pub', 'Standard entity', 'Qiyas 2026 · default'],
-      ['AP-QIYAS-CRIT v2', 'draft', 'Critical requirements', 'Qiyas 2026 · risk = critical'],
-      ['AP-LOW-SAMPLED v1', 'pub', 'Low risk, 10% sampled QA', 'Qiyas 2026 · risk = low'],
-      ['AP-NCA-SEQ v1', 'pub', 'Two sequential reviewers', 'NCA ECC 2024 · default']
+    const ACTIVE = 'Acceptance';
+    const P = { org: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6', grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', ev: 'M14 3H6v18h12V7zM14 3v4h4', cmp: 'M18 20V10M12 20V4M6 20v-6', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', dash: 'M3 3v18h18M7 14l4-4 4 4 5-5', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', ai: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', hist: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2' };
+    const N = [['CLIENTS', [['Clients & domains', 'org', 'Admin-Clients']]], ['FRAMEWORK', [['Frameworks', 'grid', 'Admin-Frameworks'], ['Criteria & evidence', 'ev', 'Admin-Frameworks'], ['Scoring', 'cmp', 'Admin-Scoring'], ['Acceptance', 'rev', 'Admin-Acceptance']]], ['OPERATIONS', [['Rules', 'act', 'Admin-Automation'], ['Dashboards', 'dash', 'Admin-Automation'], ['Templates', 'cla', 'Admin-Automation']]], ['PLATFORM', [['Roles & access', 'dep', 'Admin-History'], ['AI settings', 'ai', 'Admin-History'], ['History', 'hist', 'Admin-History']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f]) => { const on = label === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#FFF1E8' : 'transparent', fg: on ? '#9A3412' : '#33413B', fw: on ? 600 : 500 }; }) }));
+    const pol = [['Standard', '#1F9D6E'], ['Critical · draft', '#C2410C'], ['Low risk · sampled', '#1F9D6E'], ['NCA sequential', '#1F9D6E']];
+    const policies = pol.map(([name, dot], i) => { const on = this.state.pol === i; return { name, dot, on, bg: on ? '#101C17' : '#FFFFFF', fg: on ? '#FFFFFF' : '#101C17', bd: on ? '#101C17' : '#E6EBE8', pick: () => this.setState({ pol: i }) }; });
+    const pp = (i, bg, fg) => ({ i, bg, fg });
+    const sts = [
+      ['Parallel', 'Two domain SMEs', [pp('KR', '#FFF4DF', '#8A4B00'), pp('AM', '#E0ECF8', '#1E4E8C')], '2 of 2', '3 d'],
+      ['Single', 'Control owner', [pp('CO', '#F3E8F7', '#7A2E8C')], '1', '3 d'],
+      ['Final', 'Compliance Lead', [pp('HS', '#DDEFE6', '#0E5A45')], '1', '3 d']
     ];
-    const policies = raw.map((x, i) => ({ id: x[0], status: S[x[1]][0], sBg: S[x[1]][1], sFg: S[x[1]][2], name: x[2], scope: x[3], border: this.state.sel === i ? '2px solid #0E5A45' : '1px solid #DCE2DE', pick: () => this.setState({ sel: i }) }));
+    const stages = sts.map((x, i) => { const on = this.state.st === i; return { n: i + 1, mode: x[0], name: x[1], people: x[2], min: x[3], sla: x[4], on, bd: on ? '#0E5A45' : '#E6EBE8', pick: () => this.setState({ st: i }) }; });
+    const tg = [['Reviewer must be independent', 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'], ['Override needs rationale + senior approval', 'M7 16V4M3 8l4-4 4 4M17 8v12M21 16l-4 4-4-4'], ['Allow bulk approval', 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'], ['Reopen on new evidence', 'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5'], ['Reopen on DGA clarification', 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'], ['Allow delegation when absent', 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z']];
+    const toggles = tg.map(([label, icon], i) => { const on = !!this.state.t[i]; return { label, icon, on, track: on ? '#0E5A45' : '#C9D1CD', justify: on ? 'flex-end' : 'flex-start', toggle: () => this.setState({ t: Object.assign({}, this.state.t, { [i]: !on }) }) }; });
+    const sm = (label, k, last) => ({ label, mark: k === 'ai' ? '✦' : '✓', bg: k === 'ai' ? '#EEEDFD' : k === 'warn' ? '#FFF4DF' : k === 'done' ? '#0E5A45' : '#E7F3ED', fg: k === 'ai' ? '#4F46E5' : k === 'warn' ? '#8A4B00' : k === 'done' ? '#FFFFFF' : '#0E5A45', line: last ? 'transparent' : '#E6EBE8' });
     return {
-      policies,
-      stages: [
-        { n: 1, mode: 'Parallel', name: 'Two domain SMEs', who: 'Pool: Qiyas SMEs', min: '2 of 2', reject: 'Return to evidence owner', sla: '3 working days', indep: 'Not owner or submitter', rights: ['Approve', 'Override', 'Return', 'Clarify'], border: '#0E5A45' },
-        { n: 2, mode: 'Single', name: 'Control owner', who: 'Role: control owner', min: '1', reject: 'Back to stage 1', sla: '3 working days', indep: 'Not a stage 1 reviewer', rights: ['Approve', 'Reject', 'Escalate'], border: '#0E5A45' },
-        { n: 3, mode: 'Final', name: 'Compliance Lead', who: 'Named: Huda S.', min: '1', reject: 'Rejected Final', sla: '3 working days', indep: 'Not stages 1–2', rights: ['Accept', 'Reject final', 'Return'], border: '#0A3F31' }
-      ]
+      navGroups, policies, stages, toggles,
+      sim: [sm('AI: Not satisfied', 'ai'), sm('SME A approves', 'ok'), sm('SME B overrides → Partial', 'warn'), sm('Control owner approves override', 'ok'), sm('Accepted · Partial', 'done', true)]
     };
   }
 }

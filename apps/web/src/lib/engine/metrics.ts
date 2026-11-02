@@ -263,7 +263,7 @@ export function nextStep(r: WsRequirement): NextStep {
   switch (r.work) {
     case "review":
     case "evsub":
-      return { label: "Review now", href: "/reviews" };
+      return { label: "Review now", href: "/entity/reviews" };
     case "returned":
       return { label: "Escalate", kind: "escalation" };
     case "update":

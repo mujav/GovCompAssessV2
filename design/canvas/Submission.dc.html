@@ -8,117 +8,107 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
-<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<nav aria-label="Primary" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Compliance</b><br><span style="font-size: 12px; color: #5E6B65">Intelligence Platform</span></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 12px; background: #F5F7F6; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: left">Qiyas 2026 · Cycle 1<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="3">
 <div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
-<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
-<a href="Requirements.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Requirements</a>
-<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
-<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
-<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
-<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
-<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
-<a href="Submission.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Submission</a>
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
-<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
-<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
-</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
-</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DDEFE6; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">NA</span><span style="font-size: 13px; line-height: 17px"><b>Noura A.</b><br><span style="color: #5E6B65">Assessment Manager</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><div style="font-size: 13px; color: #56625C">Workspace / Submission</div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700">Submission Control Tower</h1></div>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Preview evidence index</button>
-<button type="button" style="height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF">Prepare submission pack · 198 items</button>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<label style="flex: 0 1 440px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #F5F7F6; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span><input type="search" placeholder="Search requirements, evidence, people" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; color: #101C17"></label>
+<span style="flex: 1 1 auto"></span>
+<button type="button" lang="ar" aria-label="العربية" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; color: #101C17">ع</button>
+<button type="button" aria-label="Notifications, 6 new" style="position: relative; width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: #C2410C; border: 2px solid #FFFFFF"></span></button>
 </header>
 
-<main style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1360px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; box-sizing: border-box; width: 100%">
 
-<section style="background: #0F1F1A; color: #E4ECE8; border-radius: 16px; padding: 22px 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between">
-<div style="display: flex; flex-direction: column; gap: 4px">
-<div style="font-size: 12px; letter-spacing: 0.08em; color: #8FD3B5; font-weight: 600">PORTAL CLOSES 20 NOV 2026, 23:59</div>
-<div style="font-size: 44px; line-height: 52px; font-weight: 700; color: #FFFFFF">23 days</div>
-<div style="font-size: 13px; color: #B5C6BE">Needed pace: 6.1 requirements ready per day · current pace 4.4</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<h1 style="margin: 0; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -0.02em">Submission</h1>
+<div style="display: flex; gap: 8px">
+<button type="button" style="height: 40px; padding: 0 14px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; color: #101C17">Evidence index</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #0E5A45; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"></path></svg>Prepare pack · 198</button>
 </div>
-<div style="display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 20px">
-<div><div style="font-size: 12px; color: #B5C6BE">Ready vs applicable</div><div style="font-size: 26px; font-weight: 700; color: #FFFFFF">198 <span style="font-size: 15px; color: #B5C6BE">/ 338</span></div></div>
-<div><div style="font-size: 12px; color: #B5C6BE">Evidence validated</div><div style="font-size: 26px; font-weight: 700; color: #FFFFFF">612 <span style="font-size: 15px; color: #B5C6BE">/ 862</span></div></div>
-<div><div style="font-size: 12px; color: #B5C6BE">Critical blockers</div><div style="font-size: 26px; font-weight: 700; color: #F4A99C">8</div></div>
+</div>
+
+<section aria-label="Countdown" style="background: #0F2A21; color: #FFFFFF; border-radius: 24px; padding: 26px 28px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center">
+<div role="img" aria-label="198 of 338 requirements ready" style="flex: 0 0 auto; width: 136px; height: 136px; border-radius: 50%; background: conic-gradient(#5FD3A4 0 58.6%, #24463A 58.6% 100%); display: flex; align-items: center; justify-content: center"><span style="width: 108px; height: 108px; border-radius: 50%; background: #0F2A21; display: flex; flex-direction: column; align-items: center; justify-content: center"><b style="font-size: 28px">198</b><span style="font-size: 12px; color: #A9C7BA">of 338 ready</span></span></div>
+<div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #A9C7BA">Portal closes 20 Nov, 23:59</span>
+<b style="font-size: 52px; line-height: 56px; letter-spacing: -0.02em">23 days</b>
+</div>
+<div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; font-weight: 600; color: #A9C7BA">Pace · requirements ready per day</span>
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><span style="width: 64px">Needed</span><span style="flex: 1 1 auto; height: 10px; border-radius: 5px; background: #24463A; display: block"><span style="display: block; height: 10px; width: 100%; border-radius: 5px; background: #FFFFFF"></span></span><b style="width: 30px">6.1</b></span>
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><span style="width: 64px">Current</span><span style="flex: 1 1 auto; height: 10px; border-radius: 5px; background: #24463A; display: block"><span style="display: block; height: 10px; width: 72%; border-radius: 5px; background: #F2B544"></span></span><b style="width: 30px; color: #F2B544">4.4</b></span>
 </div>
 </section>
 
-<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
-<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 16px">Readiness gates</h2><span style="font-size: 12px; color: #56625C">Each requirement must pass every gate, in order · denominator 338</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 16px">Readiness gates</h2><span title="Every requirement passes each gate in order. Items without completed human acceptance are held back." style="font-size: 12px; color: #5E6B65">of 338 ⓘ</span></div>
 <sc-for list="{{gates}}" as="g" hint-placeholder-count="6">
-<div style="display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 90px; gap: 12px; align-items: center; font-size: 13px">
-<span>{{g.label}}</span>
-<span style="height: 14px; background: #EEF0EE; border-radius: 7px; overflow: hidden; display: block"><span style="display: block; height: 14px; width: {{g.w}}; background: {{g.color}}; border-radius: 7px"></span></span>
-<span style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 12px"><b>{{g.n}}</b> / 338</span>
+<div style="display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr) 54px 46px; gap: 12px; align-items: center; font-size: 13px">
+<span style="display: flex; align-items: center; gap: 8px"><span style="width: 22px; height: 22px; border-radius: 50%; background: #F5F7F6; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #47534D">{{g.i}}</span>{{g.label}}</span>
+<span style="height: 26px; background: #F5F7F6; border-radius: 8px; overflow: hidden; display: block"><span style="display: block; height: 26px; width: {{g.w}}; background: {{g.color}}; border-radius: 8px"></span></span>
+<b style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">{{g.n}}</b>
+<span style="font-size: 12px; font-weight: 600; color: #B42318; text-align: right">{{g.drop}}</span>
 </div>
 </sc-for>
-<div style="font-size: 12px; line-height: 18px; color: #8A4B00; background: #FBEFD9; border-radius: 8px; padding: 10px 12px">7 requirements have validated evidence but incomplete human acceptance. They are excluded from the pack until their acceptance policy evaluates complete.</div>
 </section>
 
-<section style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-size: 16px">Waiting on</h2>
-<a href="Departments.dc.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #F7F8F6; text-decoration: none; color: #14211C; font-size: 14px">Departments <b>46</b></a>
-<a href="Review-Workspace.dc.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #F7F8F6; text-decoration: none; color: #14211C; font-size: 14px">Internal reviewers / QA <b>57</b></a>
-<a href="Clarifications.dc.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #F7F8F6; text-decoration: none; color: #14211C; font-size: 14px">Authority clarifications <b>3</b></a>
-<a href="Requirements.dc.html" style="display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; background: #FBE4E1; text-decoration: none; color: #A3261B; font-size: 14px">Unassigned <b>5</b></a>
+<section style="flex: 1 1 280px; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{waiting}}" as="w" hint-placeholder-count="4">
+<a href="{{w.href}}" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; text-decoration: none; color: #101C17">
+<span style="width: 36px; height: 36px; border-radius: 10px; background: {{w.tint}}; color: {{w.ink}}; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{w.icon}}"></path></svg></span>
+<b style="font-size: 26px; line-height: 28px; color: {{w.vInk}}">{{w.n}}</b>
+<span style="font-size: 13px; color: #5E6B65">{{w.l}}</span>
+</a>
+</sc-for>
 </section>
 </div>
 
 <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
-<section style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; padding: 14px 16px; border-bottom: 1px solid #DCE2DE"><h2 style="margin: 0; font-size: 16px">Critical blockers</h2><span style="font-size: 12px; color: #56625C">8 · score-impacting</span></div>
-<div style="overflow-x: auto">
-<div role="table" aria-label="Critical blockers" style="min-width: 680px; font-size: 13px">
-<div role="row" style="display: grid; grid-template-columns: 0.9fr 1.8fr 1.2fr 0.6fr 1fr; gap: 10px; padding: 10px 16px; color: #56625C; font-size: 12px; font-weight: 600; background: #F7F8F6; border-bottom: 1px solid #DCE2DE">
-<span role="columnheader">Requirement</span><span role="columnheader">Blocker</span><span role="columnheader">Waiting on</span><span role="columnheader">Age</span><span role="columnheader">Action</span>
-</div>
+<section style="flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">Critical blockers <span style="font-weight: 500; color: #5E6B65">· 8</span></h2></div>
 <sc-for list="{{blockers}}" as="b" hint-placeholder-count="6">
-<div role="row" style="display: grid; grid-template-columns: 0.9fr 1.8fr 1.2fr 0.6fr 1fr; gap: 10px; padding: 10px 16px; align-items: center; border-bottom: 1px solid #EEF0EE">
-<span role="cell"><a href="Requirement-Detail.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600">{{b.code}}</a></span>
-<span role="cell" style="line-height: 18px"><span style="font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: {{b.bg}}; color: {{b.fg}}">{{b.type}}</span><br>{{b.detail}}</span>
-<span role="cell">{{b.who}}</span>
-<span role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{b.age}}</span>
-<span role="cell"><a href="Action-Center.dc.html" style="font-weight: 600">{{b.action}}</a></span>
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-top: 1px solid #EEF1EF">
+<span style="flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; background: {{b.bg}}; color: {{b.fg}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px; font-weight: 600">{{b.type}}</span><span style="font-size: 12px; color: #5E6B65"><span style="font-family: 'IBM Plex Mono', monospace">{{b.code}}</span> · {{b.who}} · {{b.age}}</span></span>
+<a href="Action-Center.dc.html" style="flex: 0 0 auto; height: 36px; padding: 0 12px; border-radius: 10px; background: #E7F3ED; color: #0E5A45; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center">{{b.action}}</a>
 </div>
 </sc-for>
-</div>
-</div>
 </section>
 
-<section style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
-<h2 style="margin: 0; font-size: 16px">Submission pack</h2>
+<section style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 16px">Pack</h2>
 <sc-for list="{{pack}}" as="p" hint-placeholder-count="6">
-<div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px">
-<div style="display: flex; justify-content: space-between; gap: 8px"><span>{{p.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{p.v}}</span></div>
-<span style="height: 6px; background: #EEF0EE; border-radius: 3px; overflow: hidden; display: block"><span style="display: block; height: 6px; width: {{p.w}}; background: #0E5A45"></span></span>
+<div style="display: flex; align-items: center; gap: 12px; font-size: 13px">
+<span role="img" aria-label="{{p.w}}" style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; background: {{p.ring}}; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border-radius: 50%; background: #FFFFFF"></span></span>
+<span style="flex: 1 1 auto">{{p.label}}</span>
+<b style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{p.w}}</b>
 </div>
 </sc-for>
-<div style="border-top: 1px solid #EEF0EE; padding-top: 12px; font-size: 13px; line-height: 20px; display: flex; flex-direction: column; gap: 4px">
-<div><b>Portal upload</b> · 0 / 12 batches · not started</div>
-<div><b>Final QA sign-off</b> · Compliance Lead · locked until all gates pass</div>
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #EEF1EF; padding-top: 14px; font-size: 13px">
+<span style="display: flex; justify-content: space-between"><span>Portal upload</span><span style="font-weight: 600; color: #5E6B65">0 / 12 batches</span></span>
+<span style="display: flex; justify-content: space-between; align-items: center"><span>Final sign-off</span><span style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #5E6B65"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"></path></svg>Locked</span></span>
 </div>
 </section>
 </div>
@@ -126,30 +116,36 @@ a{color:#0E5A45}a:hover{color:#0A3F31}
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
 class Component extends DCLogic {
   renderVals() {
-    const gate = (label, n, color) => ({ label, n, w: Math.round((n / 338) * 1000) / 10 + '%', color });
-    const T = { acc: ['Acceptance incomplete', '#EEEDFB', '#3F37A8'], cla: ['Pending clarification', '#E8ECF3', '#3E4B63'], ev: ['Evidence invalid', '#FBE4E1', '#A3261B'], sum: ['Summary page missing', '#FBEFD9', '#8A4B00'], own: ['Unassigned', '#FBE4E1', '#A3261B'] };
-    const bl = (code, t, detail, who, age, action) => ({ code, type: T[t][0], bg: T[t][1], fg: T[t][2], detail, who, age, action });
+    const ACTIVE = 'Submission';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6', user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z', file: 'M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6', lock: 'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#E7F3ED' : 'transparent', fg: on ? '#0E5A45' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge, badgeBg: bb }; }) }));
+    const G = [['Evidence valid', 241], ['QA passed', 226], ['Summary page', 214], ['Accepted', 205], ['Portal-ready', 198], ['Uploaded', 0]];
+    const gates = G.map(([label, n], i) => ({ i: i + 1, label, n, w: Math.max(0.5, Math.round((n / 338) * 1000) / 10) + '%', color: i >= 3 ? '#0E5A45' : '#5B8FC9', drop: i === 0 ? '' : '−' + (G[i - 1][1] - n) }));
+    const T = { ev: ['Evidence invalid', '#FDECEA', '#B42318', P.ev], acc: ['Acceptance pending', '#EEEDFD', '#4F46E5', P.rev], cla: ['Awaiting DGA', '#E0ECF8', '#1E4E8C', P.cla], sum: ['Summary page missing', '#FFF4DF', '#8A4B00', P.file], own: ['No owner', '#FDECEA', '#B42318', P.user] };
+    const bl = (t, code, who, age, action) => ({ type: T[t][0], bg: T[t][1], fg: T[t][2], icon: T[t][3], code, who, age, action });
+    const ring = (pct) => 'conic-gradient(#1F9D6E 0 ' + pct + '%, #EEF1EF ' + pct + '% 100%)';
+    const pk = (label, pct) => ({ label, w: pct + '%', ring: ring(pct) });
     return {
-      gates: [gate('Evidence validated', 241, '#3F6FB5'), gate('Internal QA passed', 226, '#3F6FB5'), gate('Summary page ready', 214, '#3F6FB5'), gate('Human acceptance complete', 205, '#0E5A45'), gate('Portal-ready (AR + EN descriptions)', 198, '#0E5A45'), gate('Uploaded to portal', 0, '#0E5A45')],
-      blockers: [
-        bl('5.11.2-2', 'ev', 'Samples missing for 3 of 4 integrations', 'IT Operations', '12 d', 'Escalate'),
-        bl('4.1.2-1', 'ev', 'Plan unapproved; returned 3 times', 'Human Capital', '19 d', 'Convert to initiative'),
-        bl('6.2.1-3', 'acc', 'Override awaiting L2 approval', 'Noura A.', '2 d', 'Review now'),
-        bl('5.11.1-1', 'cla', 'CL-014 response changes sample rule', 'DGA', '9 d', 'Apply clarification'),
-        bl('3.4.1-1', 'sum', 'Summary page lacks page references', 'Digital Transformation', '4 d', 'Request update'),
-        bl('4.3.1-1', 'own', 'No owner after ownership SLA', 'Assessment Admin', '6 d', 'Assign owner')
+      navGroups, gates,
+      waiting: [
+        { n: 46, l: 'Departments', icon: P.dep, tint: '#F5F7F6', ink: '#47534D', vInk: '#101C17', href: 'Departments.dc.html' },
+        { n: 57, l: 'Reviewers', icon: P.rev, tint: '#EEEDFD', ink: '#4F46E5', vInk: '#101C17', href: 'Review-Workspace.dc.html' },
+        { n: 3, l: 'DGA answers', icon: P.cla, tint: '#E0ECF8', ink: '#1E4E8C', vInk: '#101C17', href: 'Clarifications.dc.html' },
+        { n: 5, l: 'Unassigned', icon: P.user, tint: '#FDECEA', ink: '#B42318', vInk: '#B42318', href: 'Requirements.dc.html' }
       ],
-      pack: [
-        { label: 'Evidence index', v: '241 / 338', w: '71%' },
-        { label: 'Summary pages with page refs', v: '214 / 338', w: '63%' },
-        { label: 'Portal descriptions, Arabic', v: '198 / 338', w: '59%' },
-        { label: 'Portal descriptions, English', v: '205 / 338', w: '61%' },
-        { label: 'File format and size checks', v: '689 / 701', w: '98%' },
-        { label: 'Version and date checks', v: '663 / 701', w: '95%' }
-      ]
+      blockers: [
+        bl('ev', '5.11.2-2', 'IT Operations', '12 d', 'Escalate'),
+        bl('ev', '4.1.2-1', 'Human Capital', '19 d', 'Make initiative'),
+        bl('acc', '6.2.1-3', 'Noura A.', '2 d', 'Review'),
+        bl('cla', '5.11.1-1', 'DGA', '9 d', 'Apply CL-014'),
+        bl('sum', '3.4.1-1', 'Digital Transformation', '4 d', 'Request'),
+        bl('own', '4.3.1-1', 'Assessment Admin', '6 d', 'Assign')
+      ],
+      pack: [pk('Evidence index', 71), pk('Summary pages', 63), pk('Arabic descriptions', 59), pk('English descriptions', 61), pk('Format & size checks', 98), pk('Version & date checks', 95)]
     };
   }
 }

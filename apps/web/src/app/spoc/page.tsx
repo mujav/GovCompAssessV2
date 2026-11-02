@@ -17,13 +17,13 @@ const NAV = [
     heading: "مساحة العمل",
     items: [
       { href: "/spoc", label: "متطلباتي", badge: 12, current: true },
-      { href: "/evidence", label: "الأدلة" },
-      { href: "/actions", label: "الطلبات والتذكيرات" },
-      { href: "/remediation", label: "الإجراءات التصحيحية" },
-      { href: "/clarifications", label: "الاستيضاحات" },
+      { href: "/entity/evidence", label: "الأدلة" },
+      { href: "/entity/actions", label: "الطلبات والتذكيرات" },
+      { href: "/entity/remediation", label: "الإجراءات التصحيحية" },
+      { href: "/entity/clarifications", label: "الاستيضاحات" },
     ],
   },
-  { heading: "التحليلات", items: [{ href: "/departments", label: "أداء إدارتي" }] },
+  { heading: "التحليلات", items: [{ href: "/entity/departments", label: "أداء إدارتي" }] },
 ];
 
 const summary: [string, number, string?, string?][] = [
@@ -91,7 +91,7 @@ export default function SpocPage() {
             <h1 className="m-0 text-[26px] leading-9 font-bold">متطلباتي</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
-            <Link href="/requirements" lang="en" dir="ltr" className={`${btn} border border-field bg-white font-sans text-ink hover:text-ink`}>
+            <Link href="/entity/requirements" lang="en" dir="ltr" className={`${btn} border border-field bg-white font-sans text-ink hover:text-ink`}>
               English
             </Link>
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#DCEDE5] text-[15px] font-semibold text-brand">ف</div>
@@ -161,10 +161,10 @@ export default function SpocPage() {
                 <button type="button" className={`${btn} cursor-pointer border border-field bg-white text-ink`}>
                   طلب تمديد
                 </button>
-                <Link href="/clarifications" className={`${btn} border border-field text-ink hover:text-ink`}>
+                <Link href="/entity/clarifications" className={`${btn} border border-field text-ink hover:text-ink`}>
                   طلب استيضاح
                 </Link>
-                <Link href="/evidence" className={`${btn} bg-brand px-4 font-semibold text-white hover:text-white`}>
+                <Link href="/entity/evidence" className={`${btn} bg-brand px-4 font-semibold text-white hover:text-white`}>
                   رفع الأدلة
                 </Link>
               </div>
@@ -184,7 +184,7 @@ export default function SpocPage() {
                 <b>سبب الإعادة من المراجِع:</b> لقطة الشاشة مؤرخة 2025 ولا تُظهر تاريخ آخر تحديث للمستودع.
               </div>
             </div>
-            <Link href="/evidence" className={`${btn} bg-brand px-4 font-semibold text-white hover:text-white`}>
+            <Link href="/entity/evidence" className={`${btn} bg-brand px-4 font-semibold text-white hover:text-white`}>
               رفع نسخة محدّثة
             </Link>
           </article>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Choose where to work</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #7FB8A4;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; gap: 12px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>
+<span style="line-height: 17px"><b style="font-size: 14px">Compliance Intelligence</b><br><span style="font-size: 12px; color: #5E6B65">by Demo Advisory Co.</span></span>
+<span style="flex: 1 1 auto"></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: {{me.tagBg}}; color: {{me.tagFg}}">{{me.tag}}</span>
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px"><span style="width: 32px; height: 32px; border-radius: 50%; background: {{me.bg}}; color: {{me.fg}}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">{{me.av}}</span><span style="line-height: 17px"><b>{{me.name}}</b><br><span style="color: #5E6B65">{{me.via}}</span></span></span>
+<a href="Login.dc.html" style="height: 36px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 10px; text-decoration: none; font-size: 13px; color: #33413B; display: inline-flex; align-items: center">Sign out</a>
+</header>
+
+<main style="flex: 1 1 auto; width: 100%; max-width: 1120px; margin: 0 auto; padding: 44px 24px 64px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><h1 style="margin: 0; font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em">Which entity are you working on?</h1><span style="font-size: 15px; color: #5E6B65">6 entities assigned to you · 2 need attention this week</span></div>
+<a href="Partner-Cockpit.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid #C9D1CD; border-radius: 10px; background: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; color: #101C17"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg>Portfolio overview</a>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<label style="flex: 1 1 320px; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 14px; border-radius: 12px; background: #FFFFFF; border: 1px solid #E6EBE8; color: #5E6B65"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search entities</span><input type="search" placeholder="Search entities" style="flex: 1 1 auto; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px; color: #101C17"></label>
+<div role="group" aria-label="Filter" style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="4"><button type="button" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{f.bd}}; background: {{f.bg}}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: {{f.fg}}">{{f.l}} <span style="opacity: 0.7">{{f.n}}</span></button></sc-for>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px">
+<a href="Partner-Onboarding.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 196px; padding: 20px; border-radius: 20px; border: 2px dashed #9FC9B7; background: #F3FAF6; text-decoration: none; color: #0E5A45; text-align: center">
+<span style="width: 52px; height: 52px; border-radius: 16px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>
+<span><b style="font-size: 17px">Add an entity</b><br><span style="font-size: 13px; color: #33413B">Profile, stakeholders, framework history</span></span>
+</a>
+<sc-for list="{{entities}}" as="e" hint-placeholder-count="5">
+<a href="{{e.href}}" style="display: flex; flex-direction: column; gap: 14px; min-height: 196px; box-sizing: border-box; padding: 20px; border-radius: 20px; background: #FFFFFF; border: 1px solid {{e.bd}}; text-decoration: none; color: #101C17">
+<span style="display: flex; align-items: center; gap: 12px"><span style="flex: 0 0 auto; width: 46px; height: 46px; border-radius: 14px; background: {{e.lBg}}; color: {{e.lFg}}; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700">{{e.ini}}</span><span style="flex: 1 1 auto; min-width: 0"><b style="font-size: 16px">{{e.name}}</b><br><span style="font-size: 13px; color: #5E6B65">{{e.sub}}</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5E6B65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{e.fw}}" as="w" hint-placeholder-count="2"><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #F5F7F6; color: #33413B">{{w}}</span></sc-for></span>
+<span style="margin-top: auto; display: flex; align-items: center; gap: 12px">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 6px"><span style="display: flex; justify-content: space-between; font-size: 12px"><span style="color: #5E6B65">Completion</span><b>{{e.pctL}}</b></span><span style="display: block; height: 6px; border-radius: 3px; background: #EEF1EF"><span style="display: block; height: 6px; width: {{e.pct}}; border-radius: 3px; background: {{e.bar}}"></span></span></span>
+<span style="flex: 0 0 auto; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: {{e.nBg}}; color: {{e.nFg}}">{{e.next}}</span>
+</span>
+</a>
+</sc-for>
+</div>
+</main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { f: 'all' }; }
+  renderVals() {
+    const persona = 'consultant';
+    const N = { ok: ['#E7F3ED', '#0E5A45'], warn: ['#FFF4DF', '#8A4B00'], late: ['#FDECEA', '#B42318'], draft: ['#F5F7F6', '#47534D'] };
+    const en = (ini, lBg, lFg, name, sub, fw, pct, next, k, href, flag) => ({ ini, lBg, lFg, name, sub, fw, pct: (pct || 0) + '%', pctL: pct == null ? '—' : pct + '%', bar: pct == null ? '#C9D1CD' : pct >= 70 ? '#1F9D6E' : pct >= 55 ? '#E0A100' : '#D9442E', next, nBg: N[k][0], nFg: N[k][1], href: href + '.dc.html', bd: k === 'late' ? '#F0C2BA' : '#E6EBE8', flag });
+    const all = [
+      en('DE', '#E7F3ED', '#0E5A45', 'Demo Entity', 'Authority', ['Qiyas 2026'], 72, 'Verification · 9 d', 'ok', 'C-Overview', 'active'),
+      en('DM', '#E0ECF8', '#1E4E8C', 'Demo Ministry of Services', 'Ministry', ['Qiyas 2026', 'NCA ECC'], 81, 'Self-assess · 21 d', 'ok', 'C-Overview', 'active'),
+      en('DC', '#FDE9D9', '#9A3412', 'Demo Commission', 'Commission', ['Qiyas 2026'], 58, 'Evidence due · 3 d', 'late', 'C-Overview', 'attn'),
+      en('DH', '#EEEDFD', '#4F46E5', 'Demo Health Cluster', 'Cluster', ['NDMO'], 52, 'Gap report · 5 d', 'warn', 'C-Overview', 'attn'),
+      en('SF', '#FFF4DF', '#8A4B00', 'Demo Skills Fund', 'Draft · waiting for client activation', ['Qiyas 2026'], null, 'Draft', 'draft', 'Partner-Onboarding', 'draft')
+    ];
+    const F = [['all', 'All', all.length], ['attn', 'Needs attention', all.filter(e => e.flag === 'attn').length], ['active', 'On track', all.filter(e => e.flag === 'active').length], ['draft', 'Drafts', all.filter(e => e.flag === 'draft').length]];
+    const cur = this.state.f;
+    const filters = F.map(([k, l, n]) => { const on = cur === k; return { l, n, on, bg: on ? '#101C17' : '#FFFFFF', fg: on ? '#FFFFFF' : '#33413B', bd: on ? '#101C17' : '#E6EBE8', pick: () => this.setState({ f: k }) }; });
+    const fwk = (name, pct, state, sk, l1, l2, late, cta, href, main) => ({ name, pctL: pct == null ? '—' : pct + '%', deg: ((pct || 0) * 3.6) + 'deg', ring: pct == null ? '#C9D1CD' : pct >= 70 ? '#1F9D6E' : '#E0A100', state, sBg: N[sk][0], sFg: N[sk][1], l1, l2, l2Ink: late ? '#B42318' : '#101C17', cta, href: href + '.dc.html', bw: main ? '2px' : '1px', bd: main ? '#0E5A45' : '#E6EBE8' });
+    return {
+      isConsultant: persona === 'consultant', isClient: persona === 'client',
+      me: persona === 'consultant'
+        ? { av: 'SR', name: 'Sami R.', via: 'Company SSO', bg: '#E0ECF8', fg: '#1E4E8C', tag: 'Consultant', tagBg: '#EAF1FA', tagFg: '#1E4E8C' }
+        : { av: 'NA', name: 'Noura A.', via: 'Demo Entity · Entity admin · Microsoft', bg: '#DDEFE6', fg: '#0E5A45', tag: 'Client', tagBg: '#E7F3ED', tagFg: '#0E5A45' },
+      filters,
+      entities: cur === 'all' ? all : all.filter(e => e.flag === cur),
+      frameworks: [
+        fwk('Qiyas 2026', 72, 'Self-assessment', 'ok', '14 reviews waiting', 'Verification in 9 days', false, 'Continue', 'Command-Center', true),
+        fwk('NCA ECC', 64, 'In progress', 'warn', '9 controls open', '3 actions overdue', true, 'Open', 'Requirements', false),
+        fwk('ISO 27001', null, 'Not started', 'draft', 'Licensed, not set up', 'Set up in the admin panel', false, 'Set up', 'Admin-Frameworks', false)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

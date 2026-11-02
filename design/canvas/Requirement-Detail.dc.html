@@ -8,202 +8,186 @@
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
 <style>
 body{margin:0}
 a{color:#0E5A45}a:hover{color:#0A3F31}
 </style>
 </helmet>
-<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F4F6F4; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #14211C">
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F7F6; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #101C17">
 
-<nav aria-label="Primary" style="flex: 1 1 240px; background: #0F1F1A; color: #E4ECE8; padding: 20px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
-<div style="display: flex; align-items: center; gap: 10px; padding: 0 6px"><div style="width: 34px; height: 34px; border-radius: 9px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px">CI</div><div><div style="font-weight: 600; font-size: 15px; color: #FFFFFF">Compliance Intelligence</div><div style="font-size: 12px; color: #9FB3AA">Demo Entity · Pilot sandbox</div></div></div>
-<button type="button" style="border: 0; text-align: left; font: inherit; cursor: pointer; background: #18302A; color: #FFFFFF; border-radius: 10px; padding: 10px 12px; min-height: 44px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; letter-spacing: 0.06em; color: #9FB3AA">FRAMEWORK · CYCLE</span><span style="font-size: 14px; font-weight: 600">Qiyas 2026 · Cycle 1 ▾</span></button>
+<nav aria-label="Primary" style="flex: 1 1 232px; background: #FFFFFF; border-right: 1px solid #E6EBE8; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px"><span style="width: 34px; height: 34px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 17px"><b style="font-size: 14px">Compliance</b><br><span style="font-size: 12px; color: #5E6B65">Intelligence Platform</span></span></div>
+<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #E6EBE8; border-radius: 12px; background: #F5F7F6; font: inherit; font-size: 13px; font-weight: 600; color: #101C17; cursor: pointer; text-align: left">Qiyas 2026 · Cycle 1<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<sc-for list="{{navGroups}}" as="g" hint-placeholder-count="3">
 <div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">WORKSPACE</div>
-<a href="Command-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Command Center</a>
-<a href="Requirements.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #24493D; color: #FFFFFF; font-weight: 600; text-decoration: none; font-size: 14px">Requirements</a>
-<a href="Evidence.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Evidence</a>
-<a href="Review-Workspace.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Reviews<span style="font-size: 11px; font-weight: 600; background: #2E8B6A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">14</span></a>
-<a href="Action-Center.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Action Center<span style="font-size: 11px; font-weight: 600; background: #B4580A; color: #FFFFFF; border-radius: 999px; padding: 1px 7px">9</span></a>
-<a href="Remediation.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Remediation</a>
-<a href="Clarifications.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Clarifications</a>
-<a href="Submission.dc.html" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Submission</a>
+<div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: #5E6B65; padding: 0 12px 4px">{{g.title}}</div>
+<sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" aria-current="{{n.cur}}" style="display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.fw}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.d}}"></path></svg><span style="flex: 1 1 auto">{{n.label}}</span><sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: {{n.badgeBg}}; color: #FFFFFF">{{n.badge}}</span></sc-if></a>
+</sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">INSIGHTS</div>
-<a href="Departments.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Departments</a>
-<a href="Comparisons.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Comparisons</a>
-</div>
-<div style="display: flex; flex-direction: column; gap: 2px">
-<div style="font-size: 11px; letter-spacing: 0.08em; color: #9FB3AA; padding: 4px 10px">CONFIGURE</div>
-<a href="Admin-Frameworks.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; color: #D5E0DB; text-decoration: none; font-size: 14px">Admin Studio</a>
-</div>
+</sc-for>
+<div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #E6EBE8"><span style="width: 32px; height: 32px; border-radius: 50%; background: #DDEFE6; color: #0E5A45; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">NA</span><span style="font-size: 13px; line-height: 17px"><b>Noura A.</b><br><span style="color: #5E6B65">Assessment Manager</span></span></div>
 </nav>
 
 <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
-<header style="display: flex; flex-direction: column; gap: 12px; padding: 16px 32px 0; background: #FFFFFF; border-bottom: 1px solid #DCE2DE">
-<div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
-<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 520px">
-<div style="font-size: 13px; color: #56625C"><a href="Requirements.dc.html">Requirements</a> / Technology &amp; integration / 5.11.2</div>
-<h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 700"><span style="font-family: 'IBM Plex Mono', monospace">5.11.2-2</span> · Integrated systems demonstrate end-to-end data exchange</h1>
-<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px">
-<span style="padding: 2px 8px; border-radius: 999px; font-weight: 600; background: #ECEEEC; color: #4A5550">Not assessed (official)</span>
-<span style="padding: 2px 8px; border-radius: 999px; font-weight: 600; background: #EEEDFB; color: #3F37A8">AI · Non-compliant · 0.82</span>
-<span style="display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A"><span style="width: 6px; height: 6px; border-radius: 50%; background: #A3261B"></span>No update · 12 days</span>
-<span style="padding: 1px 8px; border-radius: 6px; border: 1px solid #CBD3CE; color: #33403A">Pending Review L1</span>
-<span style="color: #56625C">Weight high · score impact <b style="color: #14211C">+2.4 pts</b> · due 04 Nov</span>
-</div>
-</div>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" style="height: 44px; padding: 0 14px; border: 1px solid #CBD3CE; border-radius: 8px; background: #FFFFFF; font: inherit; font-size: 14px; cursor: pointer; color: #14211C">Request clarification</button>
-<a href="Action-Center.dc.html" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #0E5A45; color: #0E5A45; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center">Request evidence</a>
-<a href="Review-Workspace.dc.html" style="height: 44px; padding: 0 16px; border-radius: 8px; background: #0E5A45; color: #FFFFFF; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center">Open in review</a>
-</div>
-</div>
-<div role="tablist" aria-label="Requirement sections" style="display: flex; flex-wrap: wrap; gap: 4px">
-<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
-<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 3px solid {{t.bar}}; background: transparent; font: inherit; font-size: 14px; font-weight: {{t.weight}}; cursor: pointer; color: {{t.color}}">{{t.label}}</button>
-</sc-for>
-</div>
+<header style="display: flex; align-items: center; gap: 12px; padding: 12px 32px; background: #FFFFFF; border-bottom: 1px solid #E6EBE8">
+<a href="Requirements.dc.html" style="display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 10px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 500; color: #33413B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>Requirements</a>
+<span style="flex: 1 1 auto"></span>
+<button type="button" aria-label="Previous requirement" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17">‹</button>
+<button type="button" aria-label="Next requirement" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17">›</button>
 </header>
 
-<main style="padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; max-width: 1360px; box-sizing: border-box; width: 100%">
+<main style="padding: 28px 32px 56px; display: flex; flex-direction: column; gap: 20px; max-width: 1360px; box-sizing: border-box; width: 100%">
 
-<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 16px">Official requirement</h2><span style="font-size: 12px; color: #56625C">Qiyas 2026 · framework version 1.2 · published, immutable · <a href="#">source p. 87</a></span></div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
-<div style="font-size: 14px; line-height: 22px"><div style="font-size: 11px; letter-spacing: 0.08em; color: #56625C; font-weight: 600; margin-bottom: 4px">ENGLISH</div>The entity demonstrates that its core systems are integrated and exchange data end to end, supported by a complete implementation sample for each required integration.</div>
-<div lang="ar" dir="rtl" style="font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 15px; line-height: 26px"><div style="font-size: 11px; color: #56625C; font-weight: 600; margin-bottom: 4px">العربية</div>تُثبت الجهة تكامل أنظمتها الأساسية وتبادل البيانات بينها بشكل متكامل، مع تقديم نموذج تطبيقي كامل لكل تكامل مطلوب.</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1 1 480px">
+<span style="align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 8px; background: #FFFFFF; border: 1px solid #E6EBE8">5.11.2-2</span>
+<h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em">End-to-end system integration</h1>
 </div>
-<div style="font-size: 13px; line-height: 20px; color: #33403A; background: #F7F8F6; border-radius: 8px; padding: 10px 12px"><b>Implementation requirement:</b> provide the integration inventory and at least one end-to-end sample (source, target, interface and transaction) per listed integration, from the current cycle.</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<a href="Action-Center.dc.html" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #E6EBE8; background: #FFFFFF; color: #101C17; text-decoration: none; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center">Request evidence</a>
+<a href="Review-Workspace.dc.html" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #0E5A45; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center">Open review</a>
+<button type="button" aria-label="More actions" style="width: 40px; height: 40px; border: 1px solid #E6EBE8; border-radius: 10px; background: #FFFFFF; cursor: pointer; color: #101C17; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path></svg></button>
+</div>
+</div>
+
+<section aria-label="Status" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; color: #5E6B65">Compliance</span><span style="align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #EEF1EF; color: #47534D">Not assessed</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; color: #5E6B65">AI recommends</span><span style="display: flex; align-items: center; gap: 8px"><span style="padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #EEEDFD; color: #4F46E5">Non-compliant</span><b style="font-size: 13px; color: #4F46E5">86%</b></span></div>
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; color: #5E6B65">Work</span><span style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600"><span style="width: 8px; height: 8px; border-radius: 50%; background: #D9442E"></span>No update · 12 d</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; color: #5E6B65">Score at stake</span><b style="font-size: 20px; color: #0E5A45">+2.4 pts</b></div>
+<div style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px"><span style="font-size: 12px; color: #5E6B65">Due</span><b style="font-size: 20px; color: #B42318">4 Nov</b></div>
 </section>
 
-<section style="display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline"><h2 style="margin: 0; font-size: 18px">Criteria assessment</h2><span style="font-size: 12px; color: #56625C">3 criteria · SME-approved decomposition v1 · AI run MR-88213 · prompt assess-v1.4</span></div>
+<div role="tablist" aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #E6EBE8">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="height: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid {{t.bar}}; background: transparent; font: inherit; font-size: 14px; font-weight: {{t.fw}}; cursor: pointer; color: {{t.fg}}">{{t.label}}</button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 22px"><h2 style="margin: 0; font-size: 16px">Criteria</h2><span style="display: flex; gap: 6px; font-size: 12px; font-weight: 600"><span style="padding: 2px 8px; border-radius: 999px; background: #E7F3ED; color: #0E5A45">1 met</span><span style="padding: 2px 8px; border-radius: 999px; background: #FFF4DF; color: #8A4B00">1 partial</span><span style="padding: 2px 8px; border-radius: 999px; background: #FDECEA; color: #B42318">1 not met</span></span></div>
 <sc-for list="{{criteria}}" as="c" hint-placeholder-count="3">
-<article style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; overflow: hidden">
-<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; padding: 16px 20px; border-bottom: 1px solid #EEF0EE">
-<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 4px">
-<div style="font-size: 12px; color: #56625C"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #14211C">{{c.id}}</span> · {{c.mand}}</div>
-<div style="font-size: 15px; line-height: 22px; font-weight: 600">{{c.text}}</div>
-<div style="font-size: 12px; line-height: 18px; color: #56625C">Expected: {{c.expect}} · Fails if: {{c.fail}}</div>
+<div style="border-top: 1px solid #EEF1EF">
+<button type="button" onClick="{{c.toggle}}" aria-expanded="{{c.open}}" style="width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px 22px; border: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; color: #101C17">
+<span style="flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%; background: {{c.bg}}; color: {{c.fg}}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">{{c.icon}}</span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">{{c.title}}</span><span style="font-size: 12px; color: #5E6B65">{{c.id}} · {{c.mand}}</span></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4F46E5; font-weight: 600"><span style="width: 48px; height: 5px; border-radius: 3px; background: #EEEDFD; display: block; overflow: hidden"><span style="display: block; height: 5px; width: {{c.conf}}; background: #4F46E5"></span></span>{{c.conf}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E6B65" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.chev}}"></path></svg>
+</button>
+<sc-if value="{{c.open}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; padding: 0 22px 18px 66px">
+<div style="background: #F7F7FE; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #4F46E5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg>AI finding</span>
+<span style="font-size: 14px; line-height: 21px">{{c.why}}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{c.cites}}" as="q" hint-placeholder-count="2"><a href="Evidence.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 3px 8px; border-radius: 6px; background: #FFFFFF; border: 1px solid #DCD9FA; color: #4F46E5; text-decoration: none">{{q}}</a></sc-for></span>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end">
-<span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: {{c.sBg}}; color: {{c.sFg}}">AI · {{c.status}}</span>
-<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #33403A">confidence <span style="width: 80px; height: 6px; border-radius: 3px; background: #EEF0EE; display: block; overflow: hidden"><span style="display: block; height: 6px; width: {{c.confW}}; background: #3F37A8"></span></span><b style="font-family: 'IBM Plex Mono', monospace">{{c.conf}}</b></span>
-</div>
-</div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0">
-<div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid #EEF0EE">
-<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: #3F37A8">AI RATIONALE</div>
-<div style="font-size: 13px; line-height: 20px">{{c.why}}</div>
-<div style="display: flex; flex-wrap: wrap; gap: 6px">
-<sc-for list="{{c.cites}}" as="q" hint-placeholder-count="2"><a href="Evidence.dc.html" style="font-size: 12px; font-family: 'IBM Plex Mono', monospace; padding: 3px 8px; border-radius: 6px; background: #F3F2FD; color: #3F37A8; text-decoration: none">{{q}}</a></sc-for>
-</div>
-</div>
-<div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 8px">
-<div style="font-size: 11px; letter-spacing: 0.08em; font-weight: 600; color: {{c.gapColor}}">{{c.gapHead}}</div>
-<div style="font-size: 13px; line-height: 20px">{{c.gap}}</div>
-<div style="font-size: 12px; color: #56625C">Human decision: <b style="color: #14211C">{{c.human}}</b></div>
+<div style="background: {{c.gapBg}}; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 700; color: {{c.gapFg}}">{{c.gapHead}}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{c.gaps}}" as="m" hint-placeholder-count="3"><span style="font-size: 13px; padding: 4px 10px; border-radius: 999px; background: #FFFFFF; color: #101C17">{{m}}</span></sc-for></span>
 </div>
 </div>
-</article>
+</sc-if>
+</div>
 </sc-for>
 </section>
 
-<section style="background: #F1F4F2; border: 1px dashed #7D8C85; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
-<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><h2 style="margin: 0; font-size: 15px">Deterministic roll-up preview</h2><span style="font-size: 12px; color: #44524B; font-family: 'IBM Plex Mono', monospace">scoring scheme QY-2026 v3 · rule SR-03</span></div>
-<div style="font-size: 13px; line-height: 20px; color: #33403A">If accepted as recommended: mandatory criterion C1 not satisfied → <b>blocking rule caps the requirement at Non-compliant</b>. Requirement score 0 / 1.5 → Technology &amp; integration domain 61.3% → 58.9%. Calculated by the rule engine, never by AI; not reportable until accepted.</div>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 18px 22px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 16px">Official requirement</h2>
+<div role="group" aria-label="Language" style="display: flex; padding: 3px; border-radius: 10px; background: #F5F7F6">
+<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: {{enBg}}; color: #101C17">EN</button>
+<button type="button" onClick="{{toAr}}" aria-pressed="{{isAr}}" lang="ar" style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; background: {{arBg}}; color: #101C17">عربي</button>
+</div>
+</div>
+<sc-if value="{{isEn}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 15px; line-height: 24px">Core systems are integrated and exchange data end to end, with a complete implementation sample for each required integration.</p></sc-if>
+<sc-if value="{{isAr}}" hint-placeholder-val="{{ false }}"><p lang="ar" dir="rtl" style="margin: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 16px; line-height: 28px">تُثبت الجهة تكامل أنظمتها الأساسية وتبادل البيانات بينها بشكل متكامل، مع نموذج تطبيقي كامل لكل تكامل مطلوب.</p></sc-if>
+<span style="font-size: 12px; color: #5E6B65">Qiyas 2026 · v1.2 · <a href="#">Source p. 87</a></span>
+</section>
+
+<section style="background: #F1F4F2; border: 1px dashed #A9B6AF; border-radius: 16px; padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+<span style="font-size: 12px; font-weight: 700; color: #47534D; letter-spacing: 0.04em">IF ACCEPTED</span>
+<span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #FDECEA; color: #B42318">Non-compliant</span>
+<span style="font-size: 14px">Domain <b style="font-family: 'IBM Plex Mono', monospace">61.3 → 58.9</b></span>
+<span title="Mandatory criterion failed caps the requirement. Calculated by the rule engine, not AI." style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #47534D">rule SR-03 ⓘ</span>
 </section>
 </div>
 
-<aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-size: 15px">Acceptance chain</h2>
-<div style="font-size: 12px; color: #56625C">Policy AP-QIYAS-STD v2 · sequential</div>
-<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 18px">
-<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 22px; border-radius: 50%; background: #3F37A8; color: #FFFFFF; font-size: 12px; display: flex; align-items: center; justify-content: center">✓</span><span><b>AI assessed</b><br><span style="color: #56625C">27 Oct, 18:12 · recommendation only</span></span></li>
-<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #0E5A45; background: #E2EFE9"></span><span><b>L1 · Domain SME</b><br><span style="color: #56625C">Dr. Khalid R. · due 02 Nov · pending</span></span></li>
-<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #CBD3CE"></span><span><b>L2 · Assessment Manager</b><br><span style="color: #56625C">Noura A.</span></span></li>
-<li style="display: flex; gap: 10px; align-items: flex-start"><span style="flex: 0 0 22px; height: 20px; border-radius: 50%; border: 2px solid #CBD3CE"></span><span><b>Final acceptance</b><br><span style="color: #56625C">Compliance Lead</span></span></li>
-</ol>
-</section>
-
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
-<h2 style="margin: 0; font-size: 15px">Ownership</h2>
-<div style="display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px">
-<span style="color: #56625C">Department</span><span>IT Operations</span>
-<span style="color: #56625C">SPOC</span><span>Faisal K.</span>
-<span style="color: #56625C">Contributing</span><span>Digital Transformation</span>
-<span style="color: #56625C">Reviewer</span><span>Dr. Khalid R. (SME)</span>
-<span style="color: #56625C">Evidence SLA</span><span style="color: #A3261B; font-weight: 600">Breached 2 days ago</span>
+<aside style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 15px">Approval</h2>
+<sc-for list="{{chain}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; gap: 12px; align-items: center">
+<span style="flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: {{s.bg}}; color: {{s.fg}}; border: 2px solid {{s.ring}}">{{s.av}}</span>
+<span style="flex: 1 1 auto; font-size: 13px; line-height: 18px"><b>{{s.role}}</b><br><span style="color: #5E6B65">{{s.who}}</span></span>
+<span style="font-size: 12px; font-weight: 600; color: {{s.stInk}}">{{s.state}}</span>
 </div>
+</sc-for>
 </section>
 
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-size: 15px">Linked evidence</h2>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 15px">Evidence</h2><button type="button" aria-label="Add evidence" style="width: 32px; height: 32px; border: 1px solid #E6EBE8; border-radius: 8px; background: #FFFFFF; cursor: pointer; color: #101C17; font-size: 16px">+</button></div>
 <sc-for list="{{evidence}}" as="e" hint-placeholder-count="4">
-<a href="Evidence.dc.html" style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; text-decoration: none; color: #14211C; font-size: 13px; line-height: 18px; padding: 8px 0; border-top: 1px solid #EEF0EE">
-<span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #56625C">{{e.id}}</span><br>{{e.name}}</span>
-<span style="flex: 0 0 auto; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: {{e.bg}}; color: {{e.fg}}">{{e.state}}</span>
+<a href="Evidence.dc.html" style="display: flex; gap: 10px; align-items: center; text-decoration: none; color: #101C17; padding: 6px 0">
+<span style="flex: 0 0 auto; width: 34px; height: 34px; border-radius: 8px; background: #F5F7F6; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #47534D">{{e.type}}</span>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 13px; line-height: 18px"><span style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{e.name}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5E6B65">{{e.id}}</span></span>
+<span title="{{e.state}}" style="flex: 0 0 auto; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: {{e.bg}}; color: {{e.fg}}">{{e.short}}</span>
 </a>
 </sc-for>
 </section>
 
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 20px">
-<h2 style="margin: 0; font-size: 15px">Prior cycle · 2025</h2>
-<div><span style="padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #FBEFD9; color: #8A4B00">Partial</span> <span style="color: #56625C">score 0.75 / 1.5</span></div>
-<blockquote style="margin: 0; padding: 10px 12px; border-radius: 8px; background: #F7F8F6; color: #33403A; font-size: 13px">"The sample covers one integration only. Provide end-to-end evidence for all integrations listed in the inventory." <br><span style="font-size: 12px; color: #56625C">DGA observation OBS-2025-31, received verbatim</span></blockquote>
-</section>
-
-<section style="background: #FFFFFF; border: 1px solid #DCE2DE; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
-<h2 style="margin: 0; font-size: 15px">History</h2>
-<sc-for list="{{history}}" as="h" hint-placeholder-count="4">
-<div style="font-size: 12px; line-height: 18px; border-left: 2px solid #DCE2DE; padding-left: 10px"><span style="font-family: 'IBM Plex Mono', monospace; color: #56625C">{{h.t}}</span><br>{{h.e}}</div>
+<section style="background: #FFFFFF; border: 1px solid #E6EBE8; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 15px">Activity</h2><a href="Admin-History.dc.html" style="font-size: 13px; font-weight: 600; text-decoration: none">All</a></div>
+<sc-for list="{{history}}" as="h" hint-placeholder-count="3">
+<div style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 18px"><span style="flex: 0 0 auto; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: {{h.dot}}"></span><span style="flex: 1 1 auto">{{h.e}}<br><span style="font-size: 12px; color: #5E6B65">{{h.t}}</span></span></div>
 </sc-for>
-<a href="Admin-History.dc.html" style="font-size: 13px">Full audit trail</a>
 </section>
 </aside>
+</div>
 </main>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { tab: 1 }; }
+  constructor(props) { super(props); this.state = { tab: 0, open: 0, lang: 'en' }; }
   renderVals() {
-    const labels = ['Overview', 'Criteria (3)', 'Evidence (4)', 'Observations & actions (2)', 'Clarifications (1)', 'History & audit'];
-    const tabs = labels.map((label, i) => {
-      const on = this.state.tab === i;
-      return { label, on, bar: on ? '#0E5A45' : 'transparent', color: on ? '#0E5A45' : '#33403A', weight: on ? 600 : 400, pick: () => this.setState({ tab: i }) };
-    });
-    const S = { not: ['#FBE4E1', '#A3261B', 'Not satisfied'], sat: ['#E3F1EA', '#11603F', 'Satisfied'], part: ['#FBEFD9', '#8A4B00', 'Partially satisfied'] };
-    const cr = (id, mand, text, expect, fail, s, conf, why, cites, gapHead, gap, gapColor, human) => ({
-      id, mand, text, expect, fail, status: S[s][2], sBg: S[s][0], sFg: S[s][1], conf: conf.toFixed(2), confW: Math.round(conf * 100) + '%', why, cites, gapHead, gap, gapColor, human
-    });
+    const ACTIVE = 'Requirements';
+    const P = { home: 'M3 11l9-8 9 8M5 9.5V21h14V9.5', req: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', ev: 'M14 3H6v18h12V7zM14 3v4h4', rev: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11', act: 'M13 2L3 14h9l-1 8 10-12h-9z', rem: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z', cla: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', sub: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', dep: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8', cmp: 'M18 20V10M12 20V4M6 20v-6', key: 'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4', adm: 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6' };
+    const N = [['WORKSPACE', [['Command Center', 'home', 'Command-Center'], ['Requirements', 'req', 'Requirements'], ['Evidence', 'ev', 'Evidence'], ['Reviews', 'rev', 'Review-Workspace', '14', '#0E5A45'], ['Actions', 'act', 'Action-Center', '9', '#C2410C'], ['Remediation', 'rem', 'Remediation'], ['Clarifications', 'cla', 'Clarifications'], ['Submission', 'sub', 'Submission']]], ['INSIGHTS', [['Departments', 'dep', 'Departments'], ['Comparisons', 'cmp', 'Comparisons']]], ['CONFIGURE', [['License & advisory', 'key', 'Partners-Access', '1', '#1E4E8C'], ['Admin Studio', 'adm', 'Admin-Frameworks']]]];
+    const navGroups = N.map(([title, items]) => ({ title, items: items.map(([label, k, f, badge, bb]) => { const on = f === ACTIVE; return { label, d: P[k], href: f + '.dc.html', cur: on ? 'page' : 'false', bg: on ? '#E7F3ED' : 'transparent', fg: on ? '#0E5A45' : '#33413B', fw: on ? 600 : 500, hasBadge: !!badge, badge, badgeBg: bb }; }) }));
+    const tabs = ['Overview', 'Evidence · 4', 'Actions · 2', 'Clarifications · 1', 'History'].map((label, i) => { const on = this.state.tab === i; return { label, on, bar: on ? '#0E5A45' : 'transparent', fg: on ? '#0E5A45' : '#47534D', fw: on ? 600 : 500, pick: () => this.setState({ tab: i }) }; });
+    const S = { not: ['#FDECEA', '#B42318', '✕'], sat: ['#E7F3ED', '#0E5A45', '✓'], part: ['#FFF4DF', '#8A4B00', '◐'] };
+    const raw = [
+      ['C1', 'Sample proves every integration', 'not', 0.86, 'Only HR ↔ Government Service Bus has a transaction sample.', ['EV-1988 p.4', 'EV-1988 p.6'], 'MISSING', ['ERP ↔ CRM', 'ERP ↔ Documents', 'CRM ↔ Portal'], '#FDECEA', '#B42318'],
+      ['C2', 'Inventory names source, target, interface', 'sat', 0.91, 'All four integrations fully listed.', ['EV-1988 p.2–3'], 'NOTHING MISSING', ['Table 1 complete'], '#E7F3ED', '#0E5A45'],
+      ['C3', 'Current-cycle and approved', 'part', 0.74, 'Signed, but dated March 2025. A second report lists 5 integrations, not 4.', ['EV-1988 p.1', 'EV-2012 p.3'], 'CONFLICT', ['2026 date', 'Confirm integration count'], '#FFF4DF', '#8A4B00']
+    ];
+    const criteria = raw.map((x, i) => { const open = this.state.open === i; return { id: '5.11.2-2-' + x[0], mand: 'Mandatory', title: x[1], icon: S[x[2]][2], bg: S[x[2]][0], fg: S[x[2]][1], conf: Math.round(x[3] * 100) + '%', why: x[4], cites: x[5], gapHead: x[6], gaps: x[7], gapBg: x[8], gapFg: x[9], open, chev: open ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6', toggle: () => this.setState({ open: open ? -1 : i }) }; });
+    const en = this.state.lang === 'en';
     return {
-      tabs,
-      criteria: [
-        cr('5.11.2-2-C1', 'Mandatory', 'A complete sample demonstrates every required integration end to end', 'source, target, interface, transaction or screenshot per integration', 'only one partial integration, or no end-to-end sample', 'not', 0.86,
-          'The sample shows the HR ↔ Government Service Bus exchange only. No transaction evidence was found for the other three integrations in the inventory.', ['EV-1988 · p.4 §2.1', 'EV-1988 · p.6 fig.3'], 'MISSING EVIDENCE', 'Transaction logs or screenshots for ERP ↔ CRM, ERP ↔ Document Management and CRM ↔ Portal.', '#A3261B', 'awaiting L1'),
-        cr('5.11.2-2-C2', 'Mandatory', 'The integration inventory names source, target and interface for each system', 'inventory table with all three fields', 'any listed integration missing a field', 'sat', 0.91,
-          'Table 1 lists four integrations with source, target and interface type; all fields are populated.', ['EV-1988 · p.2–3 table 1'], 'NOTHING MISSING', 'Criterion fully supported by the cited table.', '#11603F', 'awaiting L1'),
-        cr('5.11.2-2-C3', 'Mandatory', 'Evidence is current-cycle and formally approved', 'dated within the 2026 reporting period, signed approval page', 'outdated, unsigned or superseded version', 'part', 0.74,
-          'The approval page is signed, but the inventory is dated March 2025. A second document lists five integrations, contradicting the four in the inventory.', ['EV-1988 · p.1', 'EV-2012 · p.3 ⚠ contradiction'], 'CONTRADICTION FLAGGED', 'Inventory (4 integrations) and architecture report (5) disagree. Confirm which is current before accepting.', '#8A4B00', 'awaiting L1')
+      navGroups, tabs, criteria, isEn: en, isAr: !en, enBg: en ? '#FFFFFF' : 'transparent', arBg: en ? 'transparent' : '#FFFFFF',
+      toEn: () => this.setState({ lang: 'en' }), toAr: () => this.setState({ lang: 'ar' }),
+      chain: [
+        { av: 'AI', role: 'AI assessment', who: '27 Oct · run MR-88213', state: 'Done', bg: '#EEEDFD', fg: '#4F46E5', ring: '#4F46E5', stInk: '#4F46E5' },
+        { av: 'KR', role: 'Domain SME', who: 'Dr. Khalid R. · due 2 Nov', state: 'Now', bg: '#FFF4DF', fg: '#8A4B00', ring: '#E0A100', stInk: '#8A4B00' },
+        { av: 'NA', role: 'Assessment Manager', who: 'Noura A.', state: 'Next', bg: '#F5F7F6', fg: '#47534D', ring: '#E6EBE8', stInk: '#5E6B65' },
+        { av: 'HS', role: 'Final acceptance', who: 'Huda S.', state: '', bg: '#F5F7F6', fg: '#47534D', ring: '#E6EBE8', stInk: '#5E6B65' }
       ],
       evidence: [
-        { id: 'EV-1988', name: 'Integration inventory and sample, v2.pdf', state: 'Outdated period', bg: '#FBEFD9', fg: '#8A4B00' },
-        { id: 'EV-2012', name: 'Enterprise architecture report 2026.docx', state: 'Contradiction', bg: '#FBE4E1', fg: '#A3261B' },
-        { id: 'EV-1430', name: 'GSB integration screenshot (2025)', state: 'Superseded', bg: '#ECEEEC', fg: '#4A5550' },
-        { id: 'EV-1702', name: 'Integration policy, approved.pdf', state: 'Valid · reused ×3', bg: '#E3F1EA', fg: '#11603F' }
+        { type: 'PDF', id: 'EV-1988', name: 'Integration inventory v2', state: 'Outdated period', short: 'Outdated', bg: '#FFF4DF', fg: '#8A4B00' },
+        { type: 'DOC', id: 'EV-2012', name: 'Architecture report 2026', state: 'Contradiction', short: 'Conflict', bg: '#FDECEA', fg: '#B42318' },
+        { type: 'PDF', id: 'EV-1702', name: 'Integration policy', state: 'Valid, reused ×3', short: 'Valid', bg: '#E7F3ED', fg: '#0E5A45' },
+        { type: 'IMG', id: 'EV-1430', name: 'GSB screenshot (2025)', state: 'Superseded', short: 'Old', bg: '#EEF1EF', fg: '#47534D' }
       ],
       history: [
-        { t: '27 Oct 18:12', e: 'AI assessment run MR-88213 completed: 3 criteria, schema valid, 4 citations resolved.' },
-        { t: '25 Oct 10:03', e: 'Reminder 2 sent to Faisal K. (approved by Noura A.).' },
-        { t: '18 Oct 09:30', e: 'Evidence request ACT-102 created from DGA observation OBS-2025-31.' },
-        { t: '01 Oct 08:00', e: 'Cycle opened; requirement mapped from 2025 5.11.2-2 (unchanged wording).' }
+        { dot: '#4F46E5', e: 'AI assessed 3 criteria', t: '27 Oct, 18:12' },
+        { dot: '#E0A100', e: 'Reminder 2 sent to Faisal K.', t: '25 Oct, 10:03' },
+        { dot: '#2F6FB0', e: 'Evidence requested (ACT-102)', t: '18 Oct, 09:30' }
       ]
     };
   }

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #7FB8A4;outline-offset:2px}
+@keyframes ci-spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div dir="{{dir}}" lang="{{lang}}" style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #FFFFFF; font-family: {{font}}; color: #101C17">
+
+<section aria-label="{{t.brand}}" style="flex: 1 1 560px; min-height: 360px; background: #0F2A21; color: #E4ECE8; padding: 44px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px; position: relative; overflow: hidden">
+<div aria-hidden="true" style="position: absolute; width: 720px; height: 720px; inset-inline-end: -260px; bottom: -300px; border-radius: 50%; border: 90px solid #163A2E; opacity: 0.55; pointer-events: none"></div>
+<div aria-hidden="true" style="position: absolute; width: 380px; height: 380px; inset-inline-end: -80px; bottom: -120px; border-radius: 50%; border: 50px solid #163A2E; opacity: 0.8; pointer-events: none"></div>
+<div style="position: relative; display: flex; align-items: center; gap: 12px"><span style="width: 42px; height: 42px; border-radius: 12px; background: #2E8B6A; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span><span style="line-height: 20px"><b style="font-size: 16px; color: #FFFFFF">{{t.brand}}</b><br><span style="font-size: 13px; color: #A9C7BA">{{t.brandSub}}</span></span></div>
+<h1 style="position: relative; margin: auto 0 0; max-width: 540px; font-size: 46px; line-height: 56px; font-weight: 700; letter-spacing: -0.02em; color: #FFFFFF">{{t.hero}}</h1>
+<div style="position: relative; display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{t.trust}}" as="b" hint-placeholder-count="3"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; border: 1px solid #2D5446; font-size: 12px; font-weight: 600"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>{{b}}</span></sc-for>
+</div>
+</section>
+
+<section style="flex: 1 1 520px; padding: 28px 40px; box-sizing: border-box; display: flex; flex-direction: column">
+<div style="display: flex; justify-content: flex-end">
+<div role="group" aria-label="Language" style="display: flex; padding: 3px; border-radius: 10px; background: #F2F5F3">
+<button type="button" onClick="{{toEn}}" aria-pressed="{{isEn}}" style="height: 34px; padding: 0 14px; border: 0; border-radius: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; background: {{enBg}}; color: #101C17">English</button>
+<button type="button" onClick="{{toAr}}" aria-pressed="{{isAr}}" lang="ar" style="height: 34px; padding: 0 14px; border: 0; border-radius: 8px; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; background: {{arBg}}; color: #101C17">العربية</button>
+</div>
+</div>
+
+<div style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; padding: 28px 0">
+<div style="width: 100%; max-width: 400px">
+
+<sc-if value="{{isIdentify}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0 0 6px; font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em">{{t.signIn}}</h2>
+<div role="radiogroup" aria-label="{{t.signIn}}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: #F2F5F3">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="2"><button type="button" role="radio" aria-checked="{{m.on}}" onClick="{{m.pick}}" style="height: 42px; border: 0; border-radius: 9px; background: {{m.bg}}; box-shadow: {{m.sh}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: {{m.fg}}">{{m.l}}</button></sc-for>
+</div>
+<sc-if value="{{isEntityMode}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600">{{t.email}}<input type="email" autocomplete="username" value="{{email}}" onInput="{{onEmail}}" placeholder="name@organisation.sa" dir="ltr" style="height: 52px; border: 1.5px solid {{o.bd}}; border-radius: 12px; padding: 0 14px; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; font-weight: 400; color: #101C17"></label>
+<label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600"><span style="display: flex; justify-content: space-between"><span>{{t.password}}</span><a href="#" style="font-size: 13px; color: #0E5A45">{{t.forgot}}</a></span><input type="password" autocomplete="current-password" value="••••••••••" dir="ltr" style="height: 52px; border: 1.5px solid #C9D1CD; border-radius: 12px; padding: 0 14px; font-family: 'IBM Plex Sans', sans-serif; font-size: 16px; color: #101C17"></label>
+<a href="{{entHref}}" aria-disabled="{{noOrg}}" style="height: 52px; border-radius: 12px; background: {{entBtn}}; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{t.signInBtn}}</a>
+<div style="display: flex; justify-content: center; gap: 8px; font-size: 13px; color: #5E6B65">{{t.noLic}} <a href="#" style="color: #0E5A45; font-weight: 600">{{t.reqLic}}</a></div>
+</div>
+</sc-if>
+
+<sc-if value="{{isConsultantMode}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{toSso}}" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 56px; border: 0; border-radius: 12px; background: #1E4E8C; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; color: #FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>{{t.ssoBtn}}</button>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{isVerify}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 22px">
+<button type="button" onClick="{{toIdentify}}" style="align-self: flex-start; height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: #F2F5F3; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; color: #33413B">{{t.cancel}}</button>
+<div style="display: flex; align-items: center; gap: 14px">
+<span style="position: relative; flex: 0 0 auto; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center"><span aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; border: 3px solid {{o.soft}}; border-top-color: {{o.ink}}; animation: ci-spin 1s linear infinite"></span><span style="width: 36px; height: 36px; border-radius: 10px; background: {{o.ink}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 700">{{o.ini}}</span></span>
+<h2 style="margin: 0; font-size: 26px; line-height: 34px; font-weight: 700">{{o.redir}}</h2>
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; border: 1px solid #E6EBE8; border-radius: 14px; overflow: hidden">
+<sc-for list="{{handshake}}" as="h" hint-placeholder-count="3">
+<li style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border-bottom: 1px solid #EEF1EF; font-size: 14px">
+<span style="flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: {{h.dBg}}; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{h.mark}}"></path></svg></span>
+<span style="flex: 1 1 auto; font-weight: {{h.w}}; color: {{h.ink}}">{{h.l}}</span>
+</li>
+</sc-for>
+</ol>
+<a href="{{o.href}}" style="height: 52px; border-radius: 12px; background: {{o.ink}}; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">{{t.simulate}}</a>
+<span style="font-size: 13px; color: #5E6B65; text-align: center">{{t.notOpen}} <a href="#" style="color: {{o.ink}}; font-weight: 600">{{t.retry}}</a></span>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; font-size: 13px">
+<a href="#" style="text-decoration: none; color: #47534D">{{t.help}}</a><a href="#" style="text-decoration: none; color: #47534D">{{t.privacy}}</a><a href="#" style="text-decoration: none; color: #47534D">{{t.a11y}}</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"lang":{"editor":"enum","options":["en","ar"],"default":"en"},"detected":{"editor":"enum","options":["none","entity","consultant","unknown"],"default":"entity"},"step":{"editor":"enum","options":["identify","redirect"],"default":"identify"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { lang: null, email: null, step: null }; }
+  renderVals() {
+    const lang = this.state.lang || this.props.lang || 'en';
+    const en = lang === 'en';
+    const seed = { none: '', entity: 'noura@entity.example.gov.sa', consultant: '', unknown: 'ali@unknown-org.example.com' }[this.props.detected || 'entity'];
+    const REG = ['entity.example.gov.sa', 'services.example.gov.sa', 'commission.example.gov.sa', 'health.example.sa'];
+    const email = this.state.email == null ? seed : this.state.email;
+    const dom = (email.split('@')[1] || '').toLowerCase();
+    const valid = /@[^@\s]+\.[a-z]{2,}$/i.test(email);
+    const kind = !valid ? 'none' : REG.indexOf(dom) >= 0 ? 'entity' : 'unknown';
+    const step = this.state.step || (this.props.step === 'redirect' ? 'redirect' : 'identify');
+    const mode = this.state.mode || (this.props.detected === 'consultant' ? 'consultant' : 'entity');
+    const rk = mode;
+    const T = {
+      en: { brand: 'Compliance Intelligence', brandSub: 'by Demo Advisory Co.', hero: 'Every framework, standard and index. One workspace.', trust: ['Hosted in Saudi Arabia', 'NCA CCC aligned', 'PDPL ready'], signIn: 'Sign in', password: 'Password', forgot: 'Forgot password?', signInBtn: 'Sign in', ssoBtn: 'Sign in with Demo Advisory SSO', modes: ['Licensed entity', 'Demo Advisory SSO'], email: 'Work email', cont: 'Continue', or: 'or', sso: 'Sign in with SSO', noLic: 'No access yet?', reqLic: 'Request a license', cancel: '← Cancel', simulate: 'Continue (simulate return)', notOpen: 'Nothing opened?', retry: 'Try again', help: 'Help', privacy: 'Privacy', a11y: 'Accessibility',
+        unknown: 'Email not registered', unknownSub: 'Contact your administrator', org: { entity: { name: 'Demo Entity', tag: 'Microsoft', cta: 'Continue with Microsoft', redir: 'Opening Microsoft sign-in', hs: ['Entity recognised', 'Signing in with Microsoft', 'Opening your workspace'] }, consultant: { name: 'Demo Advisory Co.', tag: 'Company SSO', cta: 'Continue with company SSO', redir: 'Opening company sign-in', hs: ['Demo Advisory recognised', 'Signing in with company SSO', 'Loading your entities'] } } },
+      ar: { brand: 'ذكاء الامتثال', brandSub: 'من شركة الاستشارات التجريبية', hero: 'كل إطار ومعيار ومؤشر. في مساحة عمل واحدة.', trust: ['مستضافة في المملكة', 'متوافقة مع ضوابط الحوسبة السحابية', 'جاهزة لنظام حماية البيانات'], signIn: 'تسجيل الدخول', password: 'كلمة المرور', forgot: 'نسيت كلمة المرور؟', signInBtn: 'تسجيل الدخول', ssoBtn: 'الدخول الموحد للشركة', modes: ['جهة مرخّصة', 'الدخول الموحد للشركة'], email: 'بريد العمل', cont: 'متابعة', or: 'أو', sso: 'الدخول الموحد (SSO)', noLic: 'لا تملك وصولًا بعد؟', reqLic: 'اطلب ترخيصًا', cancel: 'إلغاء →', simulate: 'متابعة (محاكاة العودة)', notOpen: 'لم يُفتح شيء؟', retry: 'حاول مجددًا', help: 'المساعدة', privacy: 'الخصوصية', a11y: 'إمكانية الوصول',
+        unknown: 'البريد غير مسجل', unknownSub: 'تواصل مع المشرف', org: { entity: { name: 'الجهة التجريبية', tag: 'Microsoft', cta: 'المتابعة عبر Microsoft', redir: 'جارٍ فتح تسجيل الدخول عبر Microsoft', hs: ['تم التعرف على الجهة', 'تسجيل الدخول عبر Microsoft', 'فتح مساحة العمل'] }, consultant: { name: 'شركة الاستشارات التجريبية', tag: 'الدخول الموحد', cta: 'المتابعة عبر الدخول الموحد', redir: 'جارٍ فتح تسجيل الدخول للشركة', hs: ['تم التعرف على الشركة', 'تسجيل الدخول الموحد', 'تحميل الجهات'] } } }
+    };
+    const t = T[lang];
+    const C = { entity: { ink: '#0E5A45', soft: '#E7F3ED', ini: 'DE', href: 'Command-Center.dc.html' }, consultant: { ink: '#1E4E8C', soft: '#EAF1FA', ini: 'DA', href: 'Workspace-Chooser.dc.html' } };
+    const o = step === 'redirect'
+      ? Object.assign({ bd: C[rk].ink, btn: C[rk].ink }, C[rk], t.org[rk])
+      : kind === 'unknown'
+      ? { bd: '#D9442E', btn: '#9AA6A0', cta: t.cont, ink: '#B42318', soft: '#FDECEA', ini: '!', name: t.unknown, tag: t.unknownSub, redir: '', hs: [], href: '#' }
+      : kind === 'none'
+      ? { bd: '#C9D1CD', btn: '#9AA6A0', cta: t.cont, ink: '#0E5A45', soft: '#E7F3ED', ini: '', name: '', tag: '', redir: '', hs: [], href: '#' }
+      : Object.assign({ bd: C[kind].ink, btn: C[kind].ink }, C[kind], t.org[kind]);
+    const st = ['done', 'now', 'next'];
+    return {
+      lang, dir: en ? 'ltr' : 'rtl', font: en ? "'IBM Plex Sans', system-ui, sans-serif" : "'IBM Plex Sans Arabic', system-ui, sans-serif", t, o, email,
+      isEn: en, isAr: !en, enBg: en ? '#FFFFFF' : 'transparent', arBg: en ? 'transparent' : '#FFFFFF',
+      toEn: () => this.setState({ lang: 'en' }), toAr: () => this.setState({ lang: 'ar' }),
+      onEmail: (e) => this.setState({ email: e && e.target ? e.target.value : '' }),
+      hasOrg: kind !== 'none', noOrg: kind === 'none' || kind === 'unknown',
+      isIdentify: step === 'identify', isVerify: step === 'redirect',
+      toVerify: () => { if (kind === 'entity' || kind === 'consultant') this.setState({ email, step: 'redirect' }); },
+      toIdentify: () => this.setState({ email, step: 'identify' }),
+      toSso: () => this.setState({ email, mode: 'consultant', step: 'redirect' }),
+      modeInk: C[mode].ink,
+      isEntityMode: mode === 'entity', isConsultantMode: mode === 'consultant',
+      entHref: kind === 'entity' ? 'Command-Center.dc.html' : '#', entBtn: kind === 'entity' ? '#0E5A45' : '#9AA6A0',
+      modes: ['entity', 'consultant'].map((k, i) => { const on = mode === k; return { l: t.modes[i], on, bg: on ? '#FFFFFF' : 'transparent', sh: on ? '0 1px 3px rgba(16,28,23,0.12)' : 'none', fg: on ? C[k].ink : '#47534D', pick: () => this.setState({ mode: k, email }) }; }),
+      handshake: o.hs.map((l, i) => ({ l, dBg: st[i] === 'done' ? o.ink : st[i] === 'now' ? o.ink : '#C9D1CD', mark: st[i] === 'done' ? 'M20 6L9 17l-5-5' : st[i] === 'now' ? 'M12 8v4l2 2' : 'M8 12h8', w: st[i] === 'next' ? '400' : '600', ink: st[i] === 'next' ? '#5E6B65' : '#101C17' }))
+    };
+  }
+}
+</script>
+</body>
+</html>
