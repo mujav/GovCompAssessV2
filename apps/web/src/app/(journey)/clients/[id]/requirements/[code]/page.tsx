@@ -7,6 +7,7 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { CLARIFICATIONS, addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
+import { PEOPLE } from "@/lib/journey/frameworks";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
 import { useClientWork } from "@/lib/journey/use-work";
@@ -44,7 +45,7 @@ interface ReqScreen {
 
 export default function RequirementWorkspacePage() {
   const { code } = useParams<{ code: string }>();
-  const { client, ws, framework, reqs, overlay, move, ret, log } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move, ret, assign, log } = useClientWork();
   const r = reqs.find((x) => x.code === code);
   const [tab, setTab] = useState<Tab>("rev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
@@ -171,9 +172,32 @@ export default function RequirementWorkspacePage() {
                 {returned && stage !== "acc" && <Pill tone="bad">Returned by client</Pill>}
               </span>
               <h1 className="m-0 text-[26px] leading-[34px] font-bold tracking-[-0.01em]">{r.title}</h1>
-              <span className="flex items-center gap-2 text-[13px] text-j-ink-2">
-                <Avatar initials={initials(r.owner)} size={26} />
-                {owner} · {r.department} · SPOC · due {shortDate(r.due)}
+              <span className="flex flex-wrap items-center gap-2 text-[13px] text-j-ink-2">
+                <Avatar initials={initials(r.owner)} size={26} bg={r.owner ? undefined : "#FDECEA"} fg={r.owner ? undefined : "#B42318"} />
+                <label className="sr-only" htmlFor="req-owner">
+                  Owner
+                </label>
+                <select
+                  id="req-owner"
+                  value={r.owner}
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    assign([r.code], e.target.value, r.due > ws.ctx.today ? r.due : addDays(ws.ctx.today, 14));
+                    act(`Assigned to ${e.target.value}`);
+                    log(`Assigned ${r.code} to ${e.target.value}`);
+                  }}
+                  className={cx("h-8 cursor-pointer rounded-lg border border-j-line bg-white px-2 text-[13px]", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
+                >
+                  {!r.owner && <option value="">Assign an owner…</option>}
+                  {r.owner && !PEOPLE.some((p) => p.name === r.owner) && <option value={r.owner}>{r.owner}</option>}
+                  {PEOPLE.map((p) => (
+                    <option key={p.name} value={p.name}>
+                      {p.name} · {p.dept}
+                    </option>
+                  ))}
+                </select>
+                {r.department && <span>{r.department} · SPOC</span>}
+                <span>· due {shortDate(r.due)}</span>
               </span>
             </div>
             <div className="flex flex-col items-end gap-2">

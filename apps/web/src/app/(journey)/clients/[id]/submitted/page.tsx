@@ -16,7 +16,7 @@ export default function SubmittedPage() {
   const { client, ws, framework } = useClientWork();
   const fwName = framework?.name ?? client.frameworks[0];
   const { clients, log } = useJourney();
-  const [s] = useScreenState<SubmissionState>(submissionKey(client.id), NO_SUBMISSION);
+  const [s] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
   const [sent, setSent] = useScreenState<boolean>(`submitted.${client.id}.report`, false);
   const c = (p: string) => clientHref(client.id, p);
 

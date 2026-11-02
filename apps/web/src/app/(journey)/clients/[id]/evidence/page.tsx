@@ -64,8 +64,9 @@ interface Doc {
 }
 
 export default function EvidencePage() {
-  const { client, ws, reqs, log } = useClientWork();
-  const [uploads, setUploads] = useScreenState<Upload[]>(`evidence.${client.id}.uploads`, []);
+  const { client, ws, framework, workspace, reqs, log } = useClientWork();
+  // Uploads are mapped to one framework's requirements, so each framework keeps its own list.
+  const [uploads, setUploads] = useScreenState<Upload[]>(workspace || !framework ? `evidence.${client.id}.uploads` : `evidence.${client.id}.${framework.id}.uploads`, []);
   const [picked, setPicked] = useState(0);
   const [filter, setFilter] = useState<"all" | "fix" | "ok">("all");
   const [toast, setToast] = useState("");
@@ -77,11 +78,12 @@ export default function EvidencePage() {
     const expected = reqs.reduce((a, r) => a + r.evidence.expected, 0);
     const valid = reqs.reduce((a, r) => a + r.evidence.valid, 0);
     const invalid = reqs.reduce((a, r) => a + r.evidence.invalid, 0);
-    const returned = ws.state.returned.length;
+    // File-validation issues belong to the shared workspace records only.
+    const issues = workspace ? ws.ctx.issues.filter((i) => reqs.some((r) => r.code === i.code)) : [];
+    const returned = workspace ? ws.state.returned.length : 0;
     const pending = uploads.filter((u) => !u.linked).length;
     const linkedUploads = uploads.filter((u) => u.linked).length;
     const missing = Math.max(0, expected - valid - invalid - linkedUploads);
-    const issues = ws.ctx.issues;
     const docs: Doc[] = [
       ...uploads
         .filter((u) => u.linked)
@@ -117,7 +119,7 @@ export default function EvidencePage() {
         })),
     ];
     return { expected, valid: valid + linkedUploads, invalid, returned, pending, missing, docs };
-  }, [reqs, ws, uploads]);
+  }, [reqs, ws, uploads, workspace]);
 
   // Simulated pipeline: upload → OCR → classify → map. Ticks while any upload is processing.
   const processing = uploads.some((u) => u.pct < 100);
@@ -131,7 +133,7 @@ export default function EvidencePage() {
           if (u.pct === 100) {
             const words = u.name.toLowerCase().split(/[^a-z؀-ۿ]+/).filter((w) => w.length > 3);
             const hits = reqs.filter((r) => words.some((w) => r.title.toLowerCase().includes(w))).slice(0, 2);
-            u.suggested = (hits.length ? hits : [reqs[(u.size + u.name.length) % reqs.length]]).map((r) => r.code);
+            u.suggested = (hits.length ? hits : reqs.length ? [reqs[(u.size + u.name.length) % reqs.length]] : []).map((r) => r.code);
           }
         }
       });

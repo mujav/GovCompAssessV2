@@ -8,7 +8,8 @@ import { Icon } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
-import { DEPARTMENTS, SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
+import { SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
+import { PEOPLE } from "@/lib/journey/frameworks";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
@@ -22,7 +23,6 @@ const STAGE_ORDER: Record<Stage, number> = { start: 0, prog: 1, rev: 2, cli: 3, 
 const PAGE = 12;
 const COLS = "grid-cols-[36px_2.6fr_1.4fr_1.2fr_1.1fr_0.8fr]";
 
-const PEOPLE = Object.values(DEPARTMENTS).flatMap((d) => d.people.map((p) => ({ name: p, dept: d.name })));
 
 function updatedLabel(days: number) {
   return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days > 60 ? "—" : `${days} d ago`;
@@ -36,7 +36,7 @@ export default function RequirementsPage() {
 
 function RequirementsView() {
   const params = useSearchParams();
-  const { client, ws, framework, reqs, overlay, move } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move, assign } = useClientWork();
   const [stage, setStage] = useState<Stage | null>((params.get("stage") as Stage) || null);
   const [onlyReturned, setOnlyReturned] = useState(params.get("returned") === "1");
   const [q, setQ] = useState("");
@@ -279,7 +279,27 @@ function RequirementsView() {
                     </span>
                     <span role="cell" className="flex min-w-0 items-center gap-2">
                       <Avatar initials={initials(r.owner)} size={28} bg={r.owner ? "#E0ECF8" : "#FDECEA"} fg={r.owner ? "#1E4E8C" : "#B42318"} />
-                      <span className={cx("truncate text-[13px]", !r.owner && "font-semibold text-j-bad")}>{r.owner ? r.department : "Unassigned"}</span>
+                      <span className="flex min-w-0 flex-col">
+                        <select
+                          aria-label={`Owner of ${r.code}`}
+                          value={r.owner}
+                          onChange={(e) => {
+                            if (!e.target.value) return;
+                            assign([r.code], e.target.value, r.due > today ? r.due : addDays(today, 14));
+                            flash(`Assigned ${r.code} to ${e.target.value}`);
+                          }}
+                          className={cx("max-w-full cursor-pointer truncate rounded-md border-0 bg-transparent p-0 text-[13px] hover:underline", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
+                        >
+                          {!r.owner && <option value="">Assign…</option>}
+                          {!PEOPLE.some((p) => p.name === r.owner) && r.owner && <option value={r.owner}>{r.owner}</option>}
+                          {PEOPLE.map((p) => (
+                            <option key={p.name} value={p.name}>
+                              {p.name} · {p.dept}
+                            </option>
+                          ))}
+                        </select>
+                        {r.owner && <span className="truncate text-xs text-j-muted">{r.department}</span>}
+                      </span>
                     </span>
                     <span role="cell">
                       <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: rbg, color: rfg }}>
@@ -308,7 +328,7 @@ function RequirementsView() {
           </div>
           <div className="flex items-center justify-between px-[18px] py-3 text-[13px] text-j-muted">
             <span>
-              {rows.length ? `${cur * PAGE + 1}–${Math.min(rows.length, cur * PAGE + PAGE)}` : 0} of {rows.length}
+              {rows.length ? `${cur * PAGE + 1}–${Math.min(rows.length, cur * PAGE + PAGE)}` : 0} of {rows.length} · pick an owner on a row, or tick several rows to assign them together
             </span>
             <span className="flex gap-1.5">
               <JButton size="sm" aria-label="Previous page" disabled={cur === 0} onClick={() => setPage(cur - 1)}>
@@ -350,8 +370,8 @@ function RequirementsView() {
                   variant="primary"
                   disabled={!assignTo}
                   onClick={() => {
-                    for (const c of sel) ws.assign(c, assignTo!, addDays(today, 14));
-                    flash(`Assigned ${sel.length} requirements to ${assignTo}.`);
+                    assign(sel, assignTo!, addDays(today, 14));
+                    flash(`Assigned ${sel.length} requirements to ${assignTo}`);
                     setAssignTo(null);
                   }}
                 >

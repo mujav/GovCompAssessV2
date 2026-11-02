@@ -1,4 +1,4 @@
-// Submission pack state for one client, shared by screens 13 (pack) and 14 (submitted).
+// Submission pack state for one client and framework, shared by screens 13 (pack) and 14 (submitted).
 
 export interface SubmissionState {
   requested: boolean;
@@ -13,4 +13,5 @@ export interface SubmissionState {
 
 export const NO_SUBMISSION: SubmissionState = { requested: false, signed: false, uploader: 0 };
 
-export const submissionKey = (clientId: string) => `submission.${clientId}`;
+/** The workspace framework (Qiyas) keeps the original per-client key; other frameworks get their own. */
+export const submissionKey = (clientId: string, frameworkId?: string) => (!frameworkId || frameworkId === "fw-qiyas" ? `submission.${clientId}` : `submission.${clientId}.${frameworkId}`);

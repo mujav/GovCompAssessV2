@@ -33,11 +33,12 @@ interface Cl {
 }
 
 export default function ClarificationsPage() {
-  const { client, ws, reqs, overlay, move, log } = useClientWork();
+  const { client, ws, framework, workspace, reqs, overlay, move, log } = useClientWork();
   const c = (p: string) => clientHref(client.id, p);
   const base = ws.ctx.clarifications[0];
   const pick = (n: number, from: number) => reqs.slice(from, from + n).map((r) => r.code);
-  const seed: Cl[] = [
+  // The seeded questions are DGA (Qiyas) clarifications; other frameworks start with none.
+  const seed: Cl[] = !workspace ? [] : [
     {
       id: base.id,
       status: "ans",
@@ -51,12 +52,27 @@ export default function ClarificationsPage() {
     { id: "CL-016", status: "draft", q: "Is 5.7.1 not applicable for shared hosting?", affects: pick(1, 120), when: "AI draft" },
     { id: "CL-012", status: "done", q: "Approval level for the data policy", affects: pick(3, 200), when: "2 Oct", said: "تكفي موافقة رئيس الجهة.", meaning: "Approval by the head of the entity is enough." },
   ];
-  const [s, set] = useScreenState<{ list: Cl[]; sel: number }>(`clar.${client.id}`, { list: seed, sel: 0 });
+  const [s, set] = useScreenState<{ list: Cl[]; sel: number }>(workspace || !framework ? `clar.${client.id}` : `clar.${client.id}.${framework.id}`, { list: seed, sel: 0 });
   const [preview, setPreview] = useState(false);
   const [asking, setAsking] = useState(false);
   const [q, setQ] = useState("");
   const [codes, setCodes] = useState("");
   const cur = s.list[s.sel] ?? s.list[0];
+
+  if (!cur) {
+    return (
+      <ClientShell>
+        <JMain>
+          <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Clarifications</h1>
+          <Panel className="flex flex-col items-start gap-3 p-[22px]">
+            <b className="text-base">No clarifications for {framework?.name ?? "this framework"} yet</b>
+            <p className="m-0 text-sm text-j-ink-2">Questions to {framework?.authority ?? "the regulator"} and their answers appear here once you raise one from a requirement.</p>
+            <JLink href={c("/requirements")}>Go to requirements</JLink>
+          </Panel>
+        </JMain>
+      </ClientShell>
+    );
+  }
 
   const impact = cur.affects.map((code) => {
     const r = reqs.find((x) => x.code === code);

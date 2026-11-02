@@ -19,8 +19,8 @@ import { stageCounts, stageOf } from "@/lib/journey/work";
 
 export default function SubmissionPage() {
   const router = useRouter();
-  const { client, ws, reqs, overlay, log } = useClientWork();
-  const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id), NO_SUBMISSION);
+  const { client, ws, framework, workspace, reqs, overlay, log } = useClientWork();
+  const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
   const [confirm, setConfirm] = useState(false);
   const c = (p: string) => clientHref(client.id, p);
   const today = ws.ctx.today;
@@ -35,14 +35,15 @@ export default function SubmissionPage() {
     const mandatory = reqs.filter((r) => r.weight === "high" && r.status !== "na");
     const mandatoryOk = mandatory.filter((r) => r.evidence.valid >= r.evidence.expected && !r.mandatoryFail);
     const mandatoryMissing = mandatory.filter((r) => !mandatoryOk.includes(r));
-    const cla = ws.ctx.clarifications.length;
+    const cla = workspace ? ws.ctx.clarifications.length : 0;
+    const pct = (a: number, b: number) => (b ? (a / b) * 100 : 100);
     const notAccepted = total - n.acc;
     const gate = (l: string, v: string, pct: number, ok: boolean) => ({ l, v, pct, ok });
     const gates = [
-      gate("Client accepted", `${n.acc} / ${total}`, (n.acc / total) * 100, n.acc === total),
-      gate("L1 reviewed", `${reviewed} / ${total}`, (reviewed / total) * 100, reviewed === total),
-      gate("Evidence valid", `${Math.round((valid / expected) * 100)}%`, (valid / expected) * 100, valid / expected >= 0.95),
-      gate("Mandatory items", `${mandatoryOk.length} / ${mandatory.length}`, (mandatoryOk.length / mandatory.length) * 100, mandatoryOk.length === mandatory.length),
+      gate("Client accepted", `${n.acc} / ${total}`, pct(n.acc, total), n.acc === total),
+      gate("L1 reviewed", `${reviewed} / ${total}`, pct(reviewed, total), reviewed === total),
+      gate("Evidence valid", `${Math.round(pct(valid, expected))}%`, pct(valid, expected), pct(valid, expected) >= 95),
+      gate("Mandatory items", `${mandatoryOk.length} / ${mandatory.length}`, pct(mandatoryOk.length, mandatory.length), mandatoryOk.length === mandatory.length),
       gate("Clarifications applied", `${cla} / ${cla}`, 100, true),
     ];
     const blockers: { t: string; sub: string; c: string; cta: string; href: string }[] = [];

@@ -5,7 +5,7 @@ import { useCurrentClient } from "@/components/journey/shell";
 import { useAdmin } from "@/lib/admin/store";
 import type { WsRequirement } from "@/lib/workspace/data";
 import { useWorkspace } from "@/lib/workspace/store";
-import { entityFrameworks, libraryRequirements, usesWorkspaceRecords, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
+import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceRecords, withAssignments, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
 import { useJourney, useScreenState } from "./store";
 import { EMPTY_OVERLAY, stageOf, isReturned, type Stage, type WorkOverlay } from "./work";
 
@@ -29,9 +29,14 @@ export function useEntityFrameworks() {
 const overlayKey = (clientId: string, fwId: string) => (fwId === WORKSPACE_FRAMEWORK_ID ? `work.${clientId}` : `work.${clientId}.${fwId}`);
 
 /** One framework's requirement list for an entity: the shared workspace records, or fresh items from the library. */
-export function frameworkRequirements(framework: EntityFramework | undefined, workspace: boolean, wsReqs: WsRequirement[]): ClientRequirement[] {
+export function frameworkRequirements(
+  framework: EntityFramework | undefined,
+  workspace: boolean,
+  wsReqs: WsRequirement[],
+  assignments: Record<string, { owner: string; due: string }> = {},
+): ClientRequirement[] {
   const library = framework ? libraryRequirements(framework.live) : [];
-  if (!workspace) return library;
+  if (!workspace) return framework ? withAssignments(framework.id, library, assignments) : library;
   // Workspace records carry the work state; the library adds the official wording where codes match.
   const wording = new Map(library.map((r) => [r.code, r]));
   return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
@@ -48,9 +53,9 @@ export function useAllFrameworkWork() {
     () =>
       frameworks.map((f) => {
         const workspace = usesWorkspaceRecords(f.id, onboarded);
-        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
       }),
-    [frameworks, onboarded, ws.ctx.reqs, state.screens, client.id],
+    [frameworks, onboarded, ws.ctx.reqs, ws.state.assignments, state.screens, client.id],
   );
 }
 
@@ -63,7 +68,12 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
   const workspace = usesWorkspaceRecords(fwId, onboarded);
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
-  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs), [framework, workspace, ws.ctx.reqs]);
+  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments), [framework, workspace, ws.ctx.reqs, ws.state.assignments]);
+
+  /** Assigns requirements to a person (their department follows), due in the given date. */
+  const assign = (codes: string[], person: string, due: string) => {
+    for (const c of codes) ws.assign(workspace ? c : assignmentKey(fwId, c), person, due);
+  };
 
   const move = (codes: string[], to: Stage, text?: string) => {
     if (!codes.length) return;
@@ -102,6 +112,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
     },
     move,
     ret,
+    assign,
     log,
   };
 }
