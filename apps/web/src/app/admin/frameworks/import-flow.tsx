@@ -24,6 +24,7 @@ import {
   levelCounts,
   mergeDuplicates,
   mergeNodes,
+  setWeighting,
   toFrameworkDraft,
   treeOrder,
   updateLevel,
@@ -219,7 +220,9 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
       .then(({ ex, run }) => setResult({ ex, method: "ai", run }))
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
-        if (e instanceof AiUnavailable) setResult(rulesResult(session, `${e.message} The rule-based engine was used instead.`));
+        // No silent fallback: on a long document the rule-based engine also picks up contents
+        // pages, annexes and glossaries, so the admin chooses it knowingly.
+        if (e instanceof AiUnavailable) setFailed(`${e.message} Ask the platform administrator to set the Claude API key, or use the rule-based engine for documents with clear requirement codes.`);
         else setFailed(e instanceof Error ? e.message : "The extraction failed.");
       })
       .finally(() => clearInterval(timer));
@@ -243,7 +246,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
       {failed ? (
         <div className="flex flex-col gap-3">
           <div role="alert" className="rounded-lg bg-bad-soft px-3 py-2 text-[13px] text-bad">
-            Claude could not finish reading the file: {failed}
+            Claude could not read the file: {failed}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -257,7 +260,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
             >
               Try again
             </Button>
-            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine after the AI extraction failed."))}>
+            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine: check for contents, annex or glossary entries and delete them."))}>
               Use the rule-based engine
             </Button>
           </div>
@@ -430,6 +433,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
     const payload = {
       levels: draft.levels,
       requirements: draft.requirements,
+      weighting: draft.weighting,
       importJob: {
         file: readable.map((f) => f.name).join(", "),
         tab: ex.sheets.join(", ") || [...new Set(readable.map((f) => FORMAT_LABEL[f.format ?? ""] ?? "file"))].join(", "),
@@ -527,6 +531,23 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                 ))}
               </div>
             </div>
+            <fieldset className="m-0 flex flex-col gap-1.5 rounded-lg bg-surface-2 px-3 py-2.5 text-[13px]">
+              <legend className="sr-only">Weights</legend>
+              <span className="text-xs font-semibold text-muted">Weights</span>
+              <label className="flex items-start gap-2">
+                <input type="radio" name="weighting" checked={ex.weighting === "none"} onChange={() => apply(setWeighting(ex, "none"))} className="mt-1" />
+                <span>
+                  <b>No weights</b>: the framework does not publish weights (Qiyas, for example); every requirement counts equally.
+                </span>
+              </label>
+              <label className="flex items-start gap-2">
+                <input type="radio" name="weighting" checked={ex.weighting === "weighted"} onChange={() => apply(setWeighting(ex, "weighted"))} className="mt-1" />
+                <span>
+                  <b>Weighted</b>: requirements carry High / Medium / Low or numeric weights
+                  {ex.nodes.some((n) => n.weight) ? ` (${ex.nodes.filter((n) => n.weight).length} found in the document)` : "; each one needs a weight"}.
+                </span>
+              </label>
+            </fieldset>
             <div className="text-xs text-muted">
               In a code pattern <span className="font-mono">#</span> stands for a number, e.g. <span className="font-mono">#.#.#-#</span> or <span className="font-mono">ECC #-#-#</span>. Codes that
               do not match their level&apos;s pattern are listed as warnings.
@@ -638,7 +659,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                           {n.title || (n.placeholder ? "Missing parent: not in the file" : n.text ? "" : "No title")}
                         </span>
                         <Badge tone="gray">{ex.levels[depth]?.en ?? `Level ${depth + 1}`}</Badge>
-                        {n.weight && <Badge tone="brand">{weightLabel(n.weight)}</Badge>}
+                        {n.weight && ex.weighting === "weighted" && <Badge tone="brand">{weightLabel(n.weight)}</Badge>}
                         {n.evidence && <Badge tone="na">Evidence</Badge>}
                         {byNode.get(n.id)?.map((w) => (
                           <Badge key={w.id} tone="warn">
@@ -730,6 +751,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
             <div className="flex flex-col gap-1.5">
               <SummaryRow label="Levels" value={ex.levels.map((l) => l.en || "?").join(" › ") || "—"} />
               <SummaryRow label="Requirement nodes" value={String(draft.requirements.length)} />
+              <SummaryRow label="Weights" value={ex.weighting === "none" ? "None (equal)" : "Weighted"} />
               {target === "version" && (
                 <SummaryRow
                   label={`vs live ${pkg?.live ? `v${pkg.live.version}` : "(none)"}`}
@@ -912,9 +934,14 @@ function Warnings({
               </Button>
             )}
             {kind === "missing_weight" && (
-              <Button size="sm" className="h-8 text-xs" onClick={() => apply(applyDefaultWeight(ex))}>
-                Apply Medium to {ws.length === 1 && !ws[0].nodeId ? "all" : ws.length}
-              </Button>
+              <span className="flex gap-1.5">
+                <Button size="sm" className="h-8 text-xs" onClick={() => apply(applyDefaultWeight(ex))}>
+                  Apply Medium to {ws.length === 1 && !ws[0].nodeId ? "all" : ws.length}
+                </Button>
+                <Button size="sm" className="h-8 text-xs" onClick={() => apply(setWeighting(ex, "none"))}>
+                  No weights
+                </Button>
+              </span>
             )}
           </div>
           <ul className="m-0 flex list-none flex-col gap-1.5 p-0">

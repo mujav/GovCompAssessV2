@@ -10,6 +10,11 @@ type Body =
   | { step: "outline"; pages: SourcePage[]; total: { files: string[]; pages: number } }
   | { step: "chunk"; pages: SourcePage[]; outline: AiOutline };
 
+// GET /api/frameworks/extract  ->  { available, model }: whether AI extraction is configured on this server.
+export async function GET() {
+  return Response.json({ available: !!process.env.ANTHROPIC_API_KEY, model: process.env.ANTHROPIC_MODEL ?? "claude-opus-5-5" });
+}
+
 // POST /api/frameworks/extract
 //   { step: "outline", pages, total }  ->  { outline, model, ms, usage }
 //   { step: "chunk", pages, outline }  ->  { nodes, model, ms, usage }

@@ -71,6 +71,8 @@ export interface FrameworkVersion {
   levels: HierarchyLevel[];
   importJob?: ImportJob;
   requirements?: FrameworkRequirement[];
+  /** "none" when the framework publishes no weights and every requirement counts equally. */
+  weighting?: "weighted" | "none";
   /** Full SHA-256 of the source documents, so the same file cannot be added twice. */
   fileHashes?: string[];
   /** Date the version was created (draft) and went live, e.g. "02 Nov 2026". */

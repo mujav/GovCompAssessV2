@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-ui";
 import { PageHeader } from "@/components/workspace-shell";
 import { Button, TabBar } from "@/components/ui";
@@ -180,7 +180,8 @@ export default function FrameworkBuilderPage() {
                     </label>
                   )}
                   <div className="text-xs text-muted">
-                    Issuing authority {fw.authority} · effective {fw.effective} · {fw.scoringNote}
+                    Issuing authority {fw.authority} · effective {fw.effective} · {fw.scoringNote} ·{" "}
+                    {fw.weighting === "none" ? "no weights (requirements count equally)" : "weighted requirements"}
                   </div>
                 </div>
                 {pkg.live && pkg.usedByCycles > 0 && (
@@ -380,6 +381,13 @@ function StartScreen({
   onOpen: (id: string) => void;
   onBlank: () => void;
 }) {
+  const [ai, setAi] = useState<{ available: boolean } | null>(null);
+  useEffect(() => {
+    fetch("/api/frameworks/extract")
+      .then((r) => r.json())
+      .then(setAi)
+      .catch(() => setAi({ available: false }));
+  }, []);
   return (
     <>
       <PageHeader crumb="Admin Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
@@ -424,6 +432,12 @@ function StartScreen({
               </label>
             ))}
           </fieldset>
+          {method === "ai" && ai && !ai.available && (
+            <div role="alert" className="rounded-lg bg-warn-soft px-3 py-2 text-[13px] text-warn">
+              AI extraction is not configured on this server (ANTHROPIC_API_KEY is missing in apps/web/.env), so Claude cannot read documents yet. Set the key and
+              restart, or use the rule-based engine for documents with clear requirement codes.
+            </div>
+          )}
           <UploadZone busy={reading} onFiles={onFiles} />
         </section>
 
