@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { PeopleEditor } from "@/components/journey/people-editor";
 import { ClientShell, JMain, useCurrentClient } from "@/components/journey/shell";
+import { EngagementBody } from "@/components/journey/engagement-body";
 import { EntityEditor } from "@/components/journey/entity-editor";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
@@ -16,9 +17,10 @@ import { initialsOf } from "@/lib/journey/people";
 import { PROFILE_KEY, defaultProfile, type EntityProfile } from "@/lib/journey/profile";
 import { useEntityFrameworks, useEntityPeople } from "@/lib/journey/use-work";
 
-// 05 · Entity 360. Profile, index enrollments, history and stakeholders for one client.
+// 05 · Entity profile. Identity and frameworks, people, the engagement and index history for one client.
 
-const TABS = ["Overview", "People", "Index history", "Systems", "Activity"] as const;
+const TABS = ["Profile", "People", "Engagement", "History"] as const;
+const TAB_PARAM: Record<string, number> = { people: 1, engagement: 2, history: 3 };
 
 const BARS: { y: string; v: number; src: "reg" | "file" | "live"; rank: string }[] = [
   { y: "2022", v: 58.2, src: "reg", rank: "#31" },
@@ -45,12 +47,12 @@ export default function Entity360Page() {
   const hasHistory = current?.id === WORKSPACE_FRAMEWORK_ID && !state.added.some((a) => a.client.id === client.id);
   const notEnrolled = admin.frameworks.filter((f) => f.live && !frameworks.some((x) => x.id === f.id)).map((f) => shortName(f.live!.name));
   const params = useSearchParams();
-  const [tab, setTab] = useState(params.get("tab") === "people" ? 1 : 0);
+  const [tab, setTab] = useState(TAB_PARAM[params.get("tab") ?? ""] ?? 0);
   // The sidebar's People link lands here with ?tab=people, also when 360 is already open.
-  const wantsPeople = params.get("tab") === "people";
+  const wanted = TAB_PARAM[params.get("tab") ?? ""];
   useEffect(() => {
-    if (wantsPeople) setTab(1);
-  }, [wantsPeople]);
+    if (wanted !== undefined) setTab(wanted);
+  }, [wanted]);
   const [people, setPeople] = useEntityPeople();
   const [editing, setEditing] = useState(false);
   const onboarded = state.added.some((a) => a.client.id === client.id);
@@ -154,6 +156,23 @@ export default function Entity360Page() {
     </Panel>
   );
 
+  const systems = (
+    <Panel className="flex flex-[1_1_300px] flex-col overflow-hidden">
+      <h2 className="m-0 px-[22px] pt-[18px] pb-2 text-base">Systems</h2>
+      {SYSTEMS.map(([name, what, st]) => (
+        <div key={name} className="flex flex-wrap items-center gap-3 border-b border-j-line-soft px-[22px] py-3 text-sm last:border-0">
+          <Icon name="layers" size={18} className="text-cx" />
+          <span className="flex-auto">
+            <b>{name}</b>
+            <br />
+            <span className="text-[13px] text-j-muted">{what}</span>
+          </span>
+          <Pill tone={st === "Integrated" ? "ok" : st === "Connector pending" ? "warn" : "gray"}>{st}</Pill>
+        </div>
+      ))}
+    </Panel>
+  );
+
   const team = (
     <Panel className="flex flex-col gap-4 p-[22px]">
       <PanelHead title={`People · ${people.length}`} aside={<span className="text-xs text-j-muted">Requirements can be assigned to anyone on this list</span>} />
@@ -247,9 +266,9 @@ export default function Entity360Page() {
                 </span>
               </button>
             </section>
-            <div className="flex flex-wrap gap-3.5">
-              {history}
+            <div className="flex flex-wrap items-start gap-3.5">
               {profile}
+              {systems}
             </div>
             <Panel className="flex flex-col gap-3 p-[22px]">
               <PanelHead
@@ -280,32 +299,20 @@ export default function Entity360Page() {
           </>
         )}
         {tab === 1 && team}
-        {tab === 2 && <div className="flex flex-wrap gap-3.5">{history}</div>}
+        {tab === 2 && <EngagementBody />}
         {tab === 3 && (
-          <Panel className="overflow-hidden">
-            {SYSTEMS.map(([name, what, st]) => (
-              <div key={name} className="flex flex-wrap items-center gap-3 border-b border-j-line-soft px-[22px] py-3.5 text-sm last:border-0">
-                <Icon name="layers" size={18} className="text-cx" />
-                <span className="flex-auto">
-                  <b>{name}</b>
-                  <br />
-                  <span className="text-[13px] text-j-muted">{what}</span>
-                </span>
-                <Pill tone={st === "Integrated" ? "ok" : st === "Connector pending" ? "warn" : "gray"}>{st}</Pill>
-              </div>
-            ))}
-          </Panel>
-        )}
-        {tab === 4 && (
-          <Panel className="flex flex-col gap-2 p-[22px]">
-            <h2 className="m-0 text-base">Activity</h2>
-            {[...state.log.map((l) => [l.at, l.text]), ["10 Jun", "Engagement ENG-0142 activated by Noura A."], ["9 Jun", "Client signed the engagement"], ["2 Jun", "Draft workspace created by Sami R."]].map(([at, text], i) => (
-              <div key={i} className="flex gap-3 border-b border-j-line-soft py-2 text-sm last:border-0">
-                <span className="w-28 flex-none text-xs text-j-muted">{at}</span>
-                <span>{text}</span>
-              </div>
-            ))}
-          </Panel>
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-wrap gap-3.5">{history}</div>
+            <Panel className="flex flex-col gap-2 p-[22px]">
+              <h2 className="m-0 text-base">Activity</h2>
+              {[...state.log.map((l) => [l.at, l.text]), ["10 Jun", "Engagement ENG-0142 activated by Noura A."], ["9 Jun", "Client signed the engagement"], ["2 Jun", "Workspace created by Sami R."]].map(([at, text], i) => (
+                <div key={i} className="flex gap-3 border-b border-j-line-soft py-2 text-sm last:border-0">
+                  <span className="w-28 flex-none text-xs text-j-muted">{at}</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </Panel>
+          </div>
         )}
       </JMain>
       {editing && <EntityEditor open onClose={() => setEditing(false)} onPeople={() => setTab(1)} />}

@@ -14,7 +14,7 @@ import { PEOPLE_KEY, normalizePerson, type EntityPerson } from "@/lib/journey/pe
 import { DEFAULT_FACTS, PROFILE_KEY } from "@/lib/journey/profile";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 
-// 04 · Onboard client. A six-step wizard; creating the entity makes it active straight away,
+// 04 · Add entity. A six-step wizard; creating the entity makes it active straight away,
 // with one engagement per framework picked from the Framework Builder library. Stakeholders
 // marked as users are invited, but nothing waits on their approval.
 
@@ -229,7 +229,7 @@ export default function OnboardPage() {
     <ConsultantShell search="Search clients and engagements">
       <JMain max={1320}>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Onboard client</h1>
+          <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Add entity</h1>
           <span className="flex items-center gap-2.5">
             {w.savedAt && <span className="text-xs text-j-muted">Saved {w.savedAt}</span>}
             <JButton
@@ -274,7 +274,7 @@ export default function OnboardPage() {
                       })
                     }
                   >
-                    Onboard another client
+                    Add another entity
                   </JButton>
                 </div>
               </div>

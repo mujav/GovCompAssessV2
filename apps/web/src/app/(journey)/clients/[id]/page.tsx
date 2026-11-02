@@ -4,16 +4,14 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Drawer } from "@/components/overlay";
 import { FrameworkSwitcher } from "@/components/journey/framework-switcher";
-import { Icon, type IconName } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
-import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, type PillTone } from "@/components/journey/ui";
-import { cx } from "@/components/ui";
+import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
 import { readiness } from "@/lib/engine/metrics";
 import { clientHref } from "@/lib/journey/portfolio";
 import type { ClientRequirement, EntityFramework } from "@/lib/journey/frameworks";
 import { useScreenState } from "@/lib/journey/store";
 import { ALL, useAllFrameworkWork, useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
-import { codeKey, initials, pipelineBands, stageOf, type WorkOverlay } from "@/lib/journey/work";
+import { codeKey, initials, isReturned, pipelineBands, stageOf, type WorkOverlay } from "@/lib/journey/work";
 import { executiveUpdate } from "@/lib/workspace/drafts";
 import { PRIOR_CYCLE, SUBMISSION_DEADLINE, daysBetween, shortDate } from "@/lib/workspace/data";
 import type { useWorkspace } from "@/lib/workspace/store";
@@ -21,18 +19,18 @@ import type { useWorkspace } from "@/lib/workspace/store";
 // 07 · Client overview. Where the engagement stands and what the consultant does next, for
 // one framework or, when the entity has several, for all of them side by side.
 
-const KIND: Record<string, [IconName, PillTone, string]> = {
-  rev: ["rev", "cx", "L1 review"],
-  ev: ["ev", "warn", "Evidence check"],
-  draft: ["draft", "gray", "Draft response"],
-  cla: ["cla", "ai", "Clarification"],
-  send: ["send", "ok", "Send to client"],
-};
+
+const DEPT_MIX = [
+  ["Accepted", "#1F9D6E"],
+  ["In progress", "#E0A100"],
+  ["Returned", "#D9442E"],
+  ["Not started", "#C9D1CD"],
+] as const;
 
 const AV_TONE = { late: ["#FDECEA", "#B42318"], warn: ["#FFF4DF", "#8A4B00"], ok: ["#E7F3ED", "#0E5A45"] } as const;
 
 type Ws = ReturnType<typeof useWorkspace>;
-type QueueItem = { k: keyof typeof KIND; t: string; code: string; due: string; late: boolean; cta: string; href: string; fw?: EntityFramework };
+type QueueItem = { k: "rev" | "ev" | "draft" | "cla" | "send"; t: string; code: string; due: string; late: boolean; cta: string; href: string; fw?: EntityFramework };
 
 /** Headline numbers, pipeline, queue and SPOC hand-offs for one framework's requirements. */
 function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: boolean, ws: Ws, c: (p: string) => string, fw?: EntityFramework) {
@@ -56,7 +54,7 @@ function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: b
     ...inReview.slice(0, 2).map((r) => ({ k: "rev" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due <= today, cta: "Review", href: c(`/requirements/${r.code}`), fw })),
     ...(issues.length ? [{ k: "ev" as const, t: `${issues.length} files failed validation`, code: issues[0].id, due: "Today", late: true, cta: "Check", href: c("/evidence"), fw }] : []),
     ...drafting.slice(0, 1).map((r) => ({ k: "draft" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due < today, cta: "Draft", href: c(`/requirements/${r.code}`), fw })),
-    ...clarifications.map((cl) => ({ k: "cla" as const, t: `Apply DGA answer to ${cl.affects.length} items`, code: cl.id, due: "2 d", late: false, cta: "Apply", href: c("/clarifications"), fw })),
+    ...clarifications.map((cl) => ({ k: "cla" as const, t: `Apply DGA answer to ${cl.affects.length} items`, code: cl.id, due: "2 d", late: false, cta: "Apply", href: c("/requirements?view=cla"), fw })),
     ...(inReview.length ? [{ k: "send" as const, t: `${inReview.length} requirements waiting for L1 before the client`, code: "Batch", due: "2 d", late: false, cta: "Open", href: c("/work"), fw }] : []),
   ];
   // SPOC hand-offs: requirements waiting on a department, grouped by department.
@@ -130,8 +128,28 @@ export default function ClientOverviewPage() {
     };
   }, [showAll, reqs, overlay, workspace, ws, framework, all, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const pipe = PIPE.map((p) => ({ ...p, n: m.bands[p.key], href: c(p.path) }));
-  /** In the all-frameworks view a link first makes its framework the active one. */
-  const follow = (fw?: EntityFramework) => (fw && showAll ? () => setActive(fw.id) : undefined);
+  // Department progress (formerly its own page): every requirement in view, grouped by its owner's department.
+  const depts = useMemo(() => {
+    const sets = showAll ? all.map((x) => ({ reqs: x.reqs, overlay: x.overlay })) : [{ reqs, overlay }];
+    const map = new Map<string, { lead: string; mix: number[]; overdue: number; open: number }>();
+    for (const { reqs: list, overlay: o } of sets)
+      for (const r of list) {
+        if (r.status === "na" || !r.department) continue;
+        const e = map.get(r.department) ?? { lead: r.owner, mix: [0, 0, 0, 0], overdue: 0, open: 0 };
+        const st = stageOf(r, o);
+        e.mix[st === "acc" ? 0 : isReturned(r, o) ? 2 : st === "start" ? 3 : 1] += 1;
+        if (st !== "acc") e.open += 1;
+        if (st !== "acc" && r.due < today) e.overdue += 1;
+        e.lead ||= r.owner;
+        map.set(r.department, e);
+      }
+    return [...map.entries()]
+      .map(([name, e]) => {
+        const total = e.mix.reduce((x, y) => x + y, 0);
+        return { name, ...e, total, pct: total ? Math.round(((e.mix[0] + e.mix[1] * 0.5) / total) * 100) : 0 };
+      })
+      .sort((x, y) => x.pct - y.pct);
+  }, [showAll, all, reqs, overlay, today]);
 
   return (
     <ClientShell workBadge={String(m.queueCount)}>
@@ -263,70 +281,55 @@ export default function ClientOverviewPage() {
           </div>
         </Panel>
 
-        <div className="flex flex-wrap items-start gap-3.5">
-          <Panel className="flex min-w-0 flex-[3_1_520px] flex-col gap-1 p-[22px]">
-            <PanelHead title="My queue" aside={<span className="text-[13px] text-j-muted">{m.queueCount} tasks</span>} className="mb-2" />
-            {m.queue.map((q) => {
-              const [icon, tone, kind] = KIND[q.k];
-              return (
-                <div key={`${q.fw?.id ?? ""}-${q.k}-${q.code}`} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
-                  <Pill tone={tone} round={false} className="h-9 w-9 flex-none justify-center rounded-[10px] p-0">
-                    <Icon name={icon} size={17} />
-                  </Pill>
-                  <span className="min-w-0 flex-auto text-sm">
-                    <b className="block truncate">{q.t}</b>
-                    <span className="text-xs text-j-muted">
-                      {showAll && q.fw && <b className="text-j-ink-2">{q.fw.short} · </b>}
-                      <span className="font-mono">{q.code}</span> · {kind}
-                    </span>
+        <Panel className="flex flex-col gap-1 p-[22px]">
+          <PanelHead
+            title={`By department${showAll ? " · all frameworks" : ""}`}
+            aside={
+              <Link href={c("/work")} className="text-[13px] font-semibold text-cx">
+                My work →
+              </Link>
+            }
+            className="mb-2"
+          />
+          {depts.map((d) => {
+            const k = d.overdue >= 5 ? "late" : d.overdue >= 1 ? "warn" : "ok";
+            const done = reminded.includes(d.name);
+            return (
+              <div key={d.name} className="flex flex-wrap items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <Avatar initials={initials(d.lead || d.name)} bg={AV_TONE[k][0]} fg={AV_TONE[k][1]} size={34} />
+                <span className="min-w-[180px] flex-[2_1_180px] text-sm">
+                  <b>{d.name}</b>
+                  <br />
+                  <span className="text-xs text-j-muted">
+                    {d.lead || "No owner"} · {d.total} requirements
                   </span>
-                  <span className={cx("text-xs font-semibold", q.late ? "text-j-bad" : "text-j-muted")}>{q.due}</span>
-                  <JLink href={q.href} size="sm" variant="outline" onClick={follow(q.fw)}>
-                    {q.cta}
-                  </JLink>
-                </div>
-              );
-            })}
-            {m.queue.length === 0 && <p className="m-0 text-sm text-j-muted">No open tasks yet. Assign owners and start drafting from Requirements.</p>}
-          </Panel>
-          <Panel className="flex min-w-0 flex-[2_1_360px] flex-col gap-1 p-[22px]">
-            <PanelHead title="Waiting on SPOCs" aside={<Link href={c("/work")} className="text-[13px] font-semibold text-cx">Hand-offs →</Link>} className="mb-2" />
-            {m.spocs.map((p) => {
-              const k = p.age >= 10 ? "late" : p.age >= 4 ? "warn" : "ok";
-              const done = reminded.includes(p.dept);
-              return (
-                <div key={`${p.fw?.id ?? ""}-${p.dept}`} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
-                  <Avatar initials={initials(p.who)} bg={AV_TONE[k][0]} fg={AV_TONE[k][1]} size={34} />
-                  <span className="min-w-0 flex-auto text-sm">
-                    <b>{p.dept}</b>
-                    <br />
-                    <span className="text-xs text-j-muted">
-                      {showAll && p.fw ? `${p.fw.short} · ` : ""}
-                      {p.who} · {p.codes.length} open
-                    </span>
-                  </span>
-                  <span className="text-xs font-semibold" style={{ color: AV_TONE[k][1] }}>
-                    {p.age} d
-                  </span>
-                  {done ? (
-                    <Pill tone="ok">Reminded</Pill>
-                  ) : (
-                    <JButton
-                      size="sm"
-                      onClick={() => {
-                        setReminded((d) => void d.push(p.dept));
-                        log(`Reminder sent to ${p.who} (${p.dept}) for ${p.codes.length} requirements`);
-                      }}
-                    >
-                      Remind
-                    </JButton>
-                  )}
-                </div>
-              );
-            })}
-            {m.spocs.length === 0 && <p className="m-0 text-sm text-j-muted">Nothing is waiting on a department.</p>}
-          </Panel>
-        </div>
+                </span>
+                <span role="img" aria-label={`${d.name}: ${d.mix[0]} accepted, ${d.mix[1]} in progress, ${d.mix[2]} returned, ${d.mix[3]} not started`} className="flex h-2.5 min-w-[140px] flex-[3_1_200px] gap-[2px] overflow-hidden rounded-md bg-j-line-soft">
+                  {DEPT_MIX.map(([l, color], i) => (d.mix[i] ? <span key={l} style={{ flex: d.mix[i], background: color }} /> : null))}
+                </span>
+                <b className="w-12 text-end text-sm">{d.pct}%</b>
+                <span className="w-20 text-xs font-semibold" style={{ color: AV_TONE[k][1] }}>
+                  {d.overdue ? `${d.overdue} overdue` : "On time"}
+                </span>
+                {done ? (
+                  <Pill tone="ok">Reminded</Pill>
+                ) : (
+                  <JButton
+                    size="sm"
+                    disabled={!d.open}
+                    onClick={() => {
+                      setReminded((x) => void x.push(d.name));
+                      log(`Reminder sent to ${d.lead || d.name} for ${d.open} open requirements`);
+                    }}
+                  >
+                    Remind
+                  </JButton>
+                )}
+              </div>
+            );
+          })}
+          {depts.length === 0 && <p className="m-0 text-sm text-j-muted">No requirement is assigned to a department yet. Assign owners in Requirements.</p>}
+        </Panel>
       </JMain>
 
       <Drawer

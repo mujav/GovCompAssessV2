@@ -157,8 +157,8 @@ export default function MyWorkPage() {
         st: ["Sent", "cx"] as [string, PillTone],
         actions: [{ label: "Open", href: c(`/requirements/${e.codes[0]}`) }],
       })),
-      { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c("/departments"), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("/departments") }] },
-      { key: "ESC-01", t: "IT & Digital · catalogue", code: "ESC-01", href: c("/departments"), av: "KA", who: "Khalid A.", role: "IT & Digital", since: "9 d ago", st: ["Answered", "ok"], actions: [{ label: "Open", href: c("/departments") }] },
+      { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c(""), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("") }] },
+      { key: "ESC-01", t: "IT & Digital · catalogue", code: "ESC-01", href: c(""), av: "KA", who: "Khalid A.", role: "IT & Digital", since: "9 d ago", st: ["Answered", "ok"], actions: [{ label: "Open", href: c("") }] },
     ];
     return { reviews, spoc, client: client_, esc, overdue: open.filter((a) => a.due < today) };
   }, [reqs, overlay, ws, s, today, client.id]); // eslint-disable-line react-hooks/exhaustive-deps

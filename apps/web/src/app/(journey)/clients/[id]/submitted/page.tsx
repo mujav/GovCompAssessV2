@@ -49,8 +49,8 @@ export default function SubmittedPage() {
   const TONE: Record<string, [string, string]> = { me: ["#E0ECF8", "#1E4E8C"], cl: ["#E7F3ED", "#0E5A45"], sys: ["#F5F7F6", "#47534D"] };
   const next: { t: string; sub: string; icon: IconName; bg: string; fg: string; href: string }[] = [
     { t: "Prepare for verification", sub: "Open evidence register in read-only mode", icon: "rev", bg: "#EAF1FA", fg: "#1E4E8C", href: c("/evidence") },
-    { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/clarifications") },
-    { t: "Client report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: c("/engagement") },
+    { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/requirements?view=cla") },
+    { t: "Client report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: c("/360?tab=engagement") },
     { t: "Back to all entities", sub: `${clients.length - 1} more in your portfolio`, icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/portfolio" },
   ];
 

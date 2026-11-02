@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon, type IconName } from "@/components/journey/icon";
 import { ConsultantShell, JMain } from "@/components/journey/shell";
-import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, type PillTone } from "@/components/journey/ui";
+import { EntityCards } from "@/components/journey/entity-cards";
+import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, Segmented, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { ENGAGEMENTS, LOGO, clientHref, readyColor, type Model } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
@@ -36,6 +37,11 @@ export default function PortfolioPage() {
   const { clients, engagements, state, log } = useJourney();
   const [done, setDone] = useScreenState<string[]>("portfolio.done", []);
   const [q, setQ] = useState("");
+  // Table of engagements or one card per entity (the former entity picker); ?view=cards opens the cards.
+  const [view, setView] = useState<"table" | "cards">("table");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("view") === "cards") setView("cards");
+  }, []);
   const added = state.added.length;
   const addedEngagements = engagements.length - ENGAGEMENTS.length;
 
@@ -60,7 +66,7 @@ export default function PortfolioPage() {
           </div>
           <JLink href="/portfolio/onboard" variant="primary">
             <Icon name="plus" size={16} />
-            Onboard client
+            Add entity
           </JLink>
         </div>
 
@@ -98,11 +104,24 @@ export default function PortfolioPage() {
               <span className="sr-only">Filter clients</span>
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter" className="w-36 border-0 bg-transparent text-[13px] text-j-ink outline-none" />
             </label>
+            <Segmented
+              size="sm"
+              label="View"
+              value={view}
+              options={[
+                { value: "table", label: "Table" },
+                { value: "cards", label: "Cards" },
+              ]}
+              onChange={setView}
+            />
             <span title="Only clients you are assigned to are shown. Open one to work inside it." className="inline-flex items-center gap-1.5 text-xs text-j-muted">
               <Icon name="lock" size={13} />
               Metadata only ⓘ
             </span>
           </div>
+          {view === "cards" ? (
+            <EntityCards clients={clients.filter((c) => `${c.name} ${c.frameworks.join(" ")}`.toLowerCase().includes(q.trim().toLowerCase()))} />
+          ) : (
           <div className="overflow-x-auto">
             <div role="table" aria-label="Clients" className="min-w-[1000px] text-sm">
               <div role="row" className={cx("grid items-center gap-3 border-y border-[#E3E8EF] px-[22px] py-2.5 text-xs font-semibold text-j-muted", COLS)}>
@@ -162,6 +181,7 @@ export default function PortfolioPage() {
               })}
             </div>
           </div>
+          )}
         </Panel>
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(380px,1fr))] gap-3.5">

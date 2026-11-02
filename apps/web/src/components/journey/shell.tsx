@@ -12,7 +12,8 @@ import { Icon, type IconName } from "./icon";
 
 type NavItem = { label: string; icon: IconName; href: string; badge?: string; badgeBg?: string; exact?: boolean };
 
-const STUDIO: NavItem[] = [
+/** Studio sections; the side nav shows one Studio entry and the studio pages show these as a sub-menu. */
+export const STUDIO: NavItem[] = [
   { label: "Framework builder", icon: "layers", href: "/studio/frameworks" },
   { label: "Scoring", icon: "trend", href: "/studio/scoring" },
   { label: "Review & acceptance", icon: "rev", href: "/studio/acceptance" },
@@ -20,18 +21,18 @@ const STUDIO: NavItem[] = [
   { label: "Change log", icon: "history", href: "/studio/history" },
 ];
 
+const studioEntry = (badge?: string): NavItem => ({ label: "Studio", icon: "layers", href: "/studio", badge, badgeBg: "#C2410C" });
+
 function portfolioNav(studioBadge?: string): [string, NavItem[]][] {
   return [
     [
       "WORK",
       [
         { label: "Portfolio", icon: "home", href: "/portfolio", exact: true },
-        { label: "Entities", icon: "ent", href: "/entities", exact: true },
-        { label: "Engagements", icon: "eng", href: clientHref(DEMO_CLIENT_ID, "/engagement"), badge: "2" },
-        { label: "Onboard client", icon: "plus", href: "/portfolio/onboard" },
+        { label: "Add entity", icon: "plus", href: "/portfolio/onboard" },
       ],
     ],
-    ["STUDIO", STUDIO.map((n) => (n.href === "/studio/history" ? { ...n, badge: studioBadge, badgeBg: "#C2410C" } : n))],
+    ["STUDIO", [studioEntry(studioBadge)]],
   ];
 }
 
@@ -52,21 +53,11 @@ function clientNav(id: string, name: string, workBadge?: string, studioBadge?: s
         { label: "Requirements", icon: "req", href: c("/requirements") },
         { label: "My work", icon: "act", href: c("/work"), badge: workBadge },
         { label: "Evidence library", icon: "ev", href: c("/evidence") },
-        { label: "People", icon: "ent", href: c("/360?tab=people") },
-        { label: "Clarifications", icon: "cla", href: c("/clarifications") },
         { label: "Submission", icon: "sub", href: c("/submission") },
+        { label: "Entity profile", icon: "ent", href: c("/360") },
       ],
     ],
-    [
-      "INSIGHTS",
-      [
-        { label: "Departments", icon: "dep", href: c("/departments") },
-        { label: "Comparisons", icon: "cmp", href: c("/comparisons") },
-        { label: "Entity 360", icon: "ent", href: c("/360") },
-        { label: "Engagement", icon: "eng", href: c("/engagement") },
-      ],
-    ],
-    ["STUDIO", STUDIO.map((n) => (n.href === "/studio/history" ? { ...n, badge: studioBadge, badgeBg: "#C2410C" } : n))],
+    ["STUDIO", [studioEntry(studioBadge)]],
   ];
 }
 
@@ -119,7 +110,7 @@ export function ConsultantShell({
           </span>
         </div>
         <Link
-          href="/entities"
+          href="/portfolio?view=cards"
           className="flex min-h-[52px] items-center gap-2.5 rounded-xl border border-cx-line bg-cx-tint px-3 text-j-ink no-underline hover:text-j-ink"
         >
           <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-lg text-[11px] font-bold" style={{ background: lbg, color: lfg }}>
@@ -233,7 +224,7 @@ export function ClientHeaderExtra() {
         </span>
       )}
       <Link
-        href="/entities"
+        href="/portfolio?view=cards"
         className="inline-flex h-9 items-center rounded-[10px] border border-j-line px-3 text-[13px] font-semibold text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink"
       >
         Switch entity

@@ -153,7 +153,7 @@ export default function LoginPage() {
                     </li>
                   ))}
                 </ol>
-                <Link href="/entities" className="flex h-[52px] items-center justify-center rounded-xl bg-cx text-[15px] font-semibold text-white no-underline hover:bg-cx-strong hover:text-white">
+                <Link href="/portfolio?view=cards" className="flex h-[52px] items-center justify-center rounded-xl bg-cx text-[15px] font-semibold text-white no-underline hover:bg-cx-strong hover:text-white">
                   {t.simulate}
                 </Link>
                 <span className="text-center text-[13px] text-j-muted">

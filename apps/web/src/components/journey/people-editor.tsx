@@ -17,7 +17,7 @@ const EMPTY = { name: "", email: "", department: "", title: "" };
 
 /**
  * The entity's people: typed in one by one or imported from Excel/CSV. Requirements can be
- * assigned only to people on this list. Used by onboarding and by Entity 360.
+ * assigned only to people on this list. Used by onboarding and by the entity profile.
  */
 export function PeopleEditor({ people, onChange, onLog }: { people: EntityPerson[]; onChange: (next: EntityPerson[]) => void; onLog?: (text: string) => void }) {
   const [draft, setDraft] = useState(EMPTY);

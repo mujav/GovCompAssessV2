@@ -11,6 +11,7 @@ import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
+import { nextClarificationId, useClarifications, type Clarification } from "@/lib/journey/use-clarifications";
 import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
 
@@ -36,10 +37,24 @@ export default function RequirementsPage() {
 
 function RequirementsView() {
   const params = useSearchParams();
-  const { client, ws, framework, reqs, overlay, move, assign, people } = useClientWork();
+  const { client, ws, framework, workspace, reqs, overlay, move, assign, people } = useClientWork();
   const { send, drawer } = useDraftSender();
   const [stage, setStage] = useState<Stage | null>((params.get("stage") as Stage) || null);
   const [onlyReturned, setOnlyReturned] = useState(params.get("returned") === "1");
+  // Clarifications live on their requirements; this filter lists every requirement a question touches.
+  const [onlyCla, setOnlyCla] = useState(params.get("view") === "cla");
+  const [clar, setClar] = useClarifications(client.id, framework, workspace, reqs, ws);
+  const [asking, setAsking] = useState(false);
+  const [question, setQuestion] = useState("");
+  const claByCode = useMemo(() => {
+    const m = new Map<string, Clarification[]>();
+    for (const x of clar.list)
+      for (const cd of x.affects) {
+        if (x.status === "done" || x.appliedTo?.includes(cd)) continue;
+        m.set(cd, [...(m.get(cd) ?? []), x]);
+      }
+    return m;
+  }, [clar.list]);
   const [q, setQ] = useState("");
   const [axis, setAxis] = useState("all");
   const [owner, setOwner] = useState("all");
@@ -67,6 +82,7 @@ function RequirementsView() {
       .filter(({ r, s, ret }) => {
         if (stage && s !== stage) return false;
         if (onlyReturned && !ret) return false;
+        if (onlyCla && !claByCode.has(r.code)) return false;
         if (axis !== "all" && r.domain !== axis) return false;
         if (owner !== "all" && (owner === "none" ? r.owner !== "" : r.owner !== owner)) return false;
         if (result !== "all" && r.status !== result) return false;
@@ -84,7 +100,7 @@ function RequirementsView() {
       const kb = key(b);
       return (ka < kb ? -1 : ka > kb ? 1 : codeKey(a.r.code).localeCompare(codeKey(b.r.code))) * dir;
     });
-  }, [reqs, overlay, stage, onlyReturned, axis, owner, result, q, sort, dir, today]);
+  }, [reqs, overlay, stage, onlyReturned, onlyCla, claByCode, axis, owner, result, q, sort, dir, today]);
 
   const counts = useMemo(() => {
     const c: Record<Stage, number> = { start: 0, prog: 0, rev: 0, cli: 0, acc: 0 };
@@ -217,6 +233,14 @@ function RequirementsView() {
           >
             Returned
           </button>
+          <button
+            type="button"
+            aria-pressed={onlyCla}
+            onClick={() => (setOnlyCla(!onlyCla), reset())}
+            className={cx("h-10 cursor-pointer rounded-[10px] border px-3 text-[13px] font-semibold", onlyCla ? "border-j-ai bg-[#EEEDFD] text-j-ai" : "border-j-line bg-white text-j-ink-2")}
+          >
+            Clarifications · {claByCode.size}
+          </button>
           <label className="flex items-center gap-2 text-[13px] text-j-muted">
             Sort
             <select aria-label="Sort by" value={sort} onChange={(e) => (setSort(e.target.value as SortKey), setDir(1))} className={cx(inputClass, "h-10")}>
@@ -277,6 +301,11 @@ function RequirementsView() {
                         {r.code}
                       </Link>
                       <span className="truncate">{r.title}</span>
+                      {claByCode.get(r.code)?.map((x) => (
+                        <span key={x.id} className="truncate text-xs text-j-ai">
+                          {x.id} · {x.status === "ans" ? "answered, not applied" : x.status === "sub" ? "awaiting answer" : "draft question"}
+                        </span>
+                      ))}
                     </span>
                     <span role="cell" className="flex min-w-0 items-center gap-2">
                       <Avatar initials={initials(r.owner)} size={28} bg={r.owner ? "#E0ECF8" : "#FDECEA"} fg={r.owner ? "#1E4E8C" : "#B42318"} />
@@ -359,6 +388,41 @@ function RequirementsView() {
           </p>
         )}
 
+        {asking && (
+          <Panel className="flex flex-col gap-2.5 p-[18px]">
+            <b className="text-sm">
+              Question to {framework?.authority ?? "the regulator"} about {sel.length ? `${sel.length} selected requirement${sel.length > 1 ? "s" : ""}` : "these requirements"}
+            </b>
+            <textarea
+              aria-label="Question for the regulator"
+              rows={3}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              dir="auto"
+              className="rounded-xl border border-j-line p-3 font-sans text-sm text-j-ink"
+            />
+            <span className="flex gap-2">
+              <JButton
+                size="sm"
+                variant="primary"
+                disabled={!question.trim() || !sel.length}
+                onClick={() => {
+                  const id = nextClarificationId(clar.list);
+                  setClar((d) => void d.list.unshift({ id, status: "draft", q: question.trim(), affects: [...sel], when: "Draft · client sends" }));
+                  flash(`Question ${id} saved on ${sel.length} requirements.`);
+                  setQuestion("");
+                  setAsking(false);
+                }}
+              >
+                Save question
+              </JButton>
+              <JButton size="sm" variant="ghost" onClick={() => setAsking(false)}>
+                Cancel
+              </JButton>
+            </span>
+          </Panel>
+        )}
+
         {sel.length > 0 && (
           <div role="region" aria-label="Bulk actions" className="sticky bottom-4 flex flex-wrap items-center gap-2 rounded-2xl bg-j-ink px-4 py-3 text-white shadow-[0_8px_30px_rgba(16,28,23,0.25)]">
             <b className="text-sm">{sel.length} selected</b>
@@ -405,6 +469,9 @@ function RequirementsView() {
                 </JButton>
                 <JButton size="sm" onClick={() => setAssignTo("")}>
                   Assign
+                </JButton>
+                <JButton size="sm" onClick={() => setAsking(true)}>
+                  Ask the regulator
                 </JButton>
                 <JButton
                   size="sm"

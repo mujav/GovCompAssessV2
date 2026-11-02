@@ -21,7 +21,7 @@ import { RESULT, STAGES, codeKey, initials, isReturned, stageOf } from "@/lib/jo
 // 09 · Requirement workspace. Draft the response, check the AI assessment, make the L1
 // decision and chase the SPOC — all for one requirement.
 
-type Tab = "req" | "ev" | "rev" | "hand" | "rem" | "cla" | "act";
+type Tab = "req" | "ev" | "fu" | "act";
 type Mark = "met" | "gap" | "part";
 const MARK: Record<Mark, [string, PillTone]> = { met: ["Met", "ok"], gap: ["Gap", "bad"], part: ["Partly", "warn"] };
 
@@ -55,7 +55,7 @@ export default function RequirementWorkspacePage() {
   const { client, ws, framework, workspace, reqs, overlay, move, ret, assign, people, log } = useClientWork();
   const { send, drawer } = useDraftSender();
   const r = reqs.find((x) => x.code === code);
-  const [tab, setTab] = useState<Tab>("rev");
+  const [tab, setTab] = useState<Tab>("ev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
   const c = (p: string) => clientHref(client.id, p);
   const { ev, readable, stale, busy, upload, assess, remove } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
@@ -130,13 +130,11 @@ export default function RequirementWorkspacePage() {
     }
   };
 
+  const openRequests = requests.filter((h) => !h.done).length;
   const tabs: [Tab, string, number?][] = [
     ["req", "Requirement"],
-    ["ev", "Evidence", evidence.length + ev.files.length + fromLibrary.length],
-    ["rev", "Review", stage === "rev" ? 1 : undefined],
-    ["hand", "Hand-offs", requests.filter((h) => !h.done).length || undefined],
-    ["rem", "Remediation", gaps ? 1 : undefined],
-    ["cla", "Clarifications", openCla || undefined],
+    ["ev", "Evidence & assessment", evidence.length + ev.files.length + fromLibrary.length || undefined],
+    ["fu", "Follow-ups", openRequests + (gaps && !s.remProposed ? 1 : 0) + openCla || undefined],
     ["act", "Activity"],
   ];
 
@@ -224,7 +222,7 @@ export default function RequirementWorkspacePage() {
               </span>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <JButton variant="primary" disabled={stage === "cli" || stage === "acc"} onClick={() => setTab(stage === "rev" ? "rev" : "req")}>
+              <JButton variant="primary" disabled={stage === "cli" || stage === "acc"} onClick={() => setTab(stage === "rev" ? "ev" : "req")}>
                 {nextAction}
               </JButton>
               <span className="text-xs text-j-muted">
@@ -258,6 +256,8 @@ export default function RequirementWorkspacePage() {
           ))}
         </div>
 
+        <div className="flex flex-wrap items-start gap-3.5">
+          <div className="flex min-w-0 flex-[3_1_620px] flex-col gap-3.5">
         {tab === "req" && (
           <div className="flex flex-wrap items-start gap-3.5">
             <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-3 p-[22px]">
@@ -292,7 +292,7 @@ export default function RequirementWorkspacePage() {
                   onClick={() => {
                     move([r.code], "rev", `Response for ${r.code} ready for L1 review`);
                     act("Draft submitted for L1 review");
-                    setTab("rev");
+                    setTab("ev");
                   }}
                 >
                   Submit for L1 review
@@ -390,59 +390,13 @@ export default function RequirementWorkspacePage() {
               </JButton>
             )}
             {run && !stale && (
-              <JButton size="sm" variant="outline" className="self-start" onClick={() => setTab("rev")}>
+              <JButton size="sm" variant="outline" className="self-start" onClick={() => setTab("ev")}>
                 See the AI assessment
               </JButton>
             )}
           </Panel>
-          <Panel className="flex flex-col gap-2 p-[22px]">
-            <PanelHead
-              title="Linked evidence"
-              aside={
-                <span className="flex gap-2">
-                  <JLink size="sm" href={c("/evidence")}>
-                    Link from library
-                  </JLink>
-                  <JButton size="sm" variant="outline" onClick={() => setTab("hand")}>
-                    Request from SPOC
-                  </JButton>
-                </span>
-              }
-            />
-            {evidence.map((e) => (
-              <div key={e.id} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
-                <span className="flex h-10 w-9 items-center justify-center rounded-lg bg-j-bad-soft text-[10px] font-bold text-j-bad">PDF</span>
-                <span className="flex-auto text-sm">
-                  <b>{e.t}</b>
-                  <br />
-                  <span className="text-xs text-j-muted">
-                    <span className="font-mono">{e.id}</span> · {e.meta}
-                  </span>
-                </span>
-                <Pill tone={e.ok ? "ok" : "warn"}>{e.ok ? "Valid" : "Wrong period"}</Pill>
-              </div>
-            ))}
-            {fromLibrary.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
-                <span className="flex h-10 w-9 items-center justify-center rounded-lg bg-cx-soft text-[10px] font-bold text-cx">{u.name.split(".").pop()?.toUpperCase().slice(0, 4)}</span>
-                <span className="min-w-0 flex-auto text-sm">
-                  <b className="block truncate">{u.name}</b>
-                  <span className="text-xs text-j-muted">
-                    <span className="font-mono">{u.id}</span> · from the evidence library
-                  </span>
-                </span>
-                <Pill tone="ok">Linked</Pill>
-              </div>
-            ))}
-            {evidence.length + fromLibrary.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked from the library yet.</p>}
-          </Panel>
-          </div>
-        )}
-
-        {tab === "rev" && (
-          <div className="flex flex-wrap items-start gap-3.5">
             {run ? (
-              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-2 p-[22px]">
+              <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
                 <PanelHead
                   title="AI assessment"
                   aside={
@@ -490,7 +444,7 @@ export default function RequirementWorkspacePage() {
                 })}
               </Panel>
             ) : r.status === "nas" && !r.evidence.valid ? (
-              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col items-start gap-3 p-[22px]">
+              <Panel className="flex min-w-0 flex-col items-start gap-3 p-[22px]">
                 <PanelHead title="AI assessment" />
                 <p className="m-0 text-sm text-j-ink-2">
                   {busy === "assessing" ? "The AI assessor is reviewing the uploaded evidence…" : `No assessment yet. Upload evidence and the AI assessor checks it against ${criteria.length} criteria.`}
@@ -507,7 +461,7 @@ export default function RequirementWorkspacePage() {
                 </JButton>
               </Panel>
             ) : (
-              <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-2 p-[22px]">
+              <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
                 <PanelHead title="AI check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"} · {confidence}%</Pill>} />
                 <p className="m-0 text-xs text-j-muted">AI recommends; you decide. Nothing changes until you record a decision.</p>
                 {CRITERIA.map((t, i) => (
@@ -533,69 +487,53 @@ export default function RequirementWorkspacePage() {
                 ))}
               </Panel>
             )}
-            <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
-              <Panel className="flex flex-col gap-3 p-[22px]">
-                <h2 className="m-0 text-base">Your L1 decision</h2>
-                {stage === "rev" ? (
-                  <>
-                    <div role="radiogroup" aria-label="L1 decision" className="flex flex-col gap-1.5">
-                      {DECISIONS.map((l, i) => {
-                        const on = s.dec === i;
-                        return (
-                          <button
-                            key={l}
-                            type="button"
-                            role="radio"
-                            aria-checked={on}
-                            onClick={() => set((d) => void (d.dec = i))}
-                            className={cx("flex h-11 cursor-pointer items-center gap-2.5 rounded-xl border-[1.5px] px-3 text-left text-sm font-semibold text-j-ink", on ? "border-cx bg-cx-tint" : "border-j-line bg-white")}
-                          >
-                            <span className={cx("h-4 w-4 rounded-full border-[1.5px]", on ? "border-cx bg-cx shadow-[inset_0_0_0_3px_#fff]" : "border-j-field bg-white")} />
-                            {l}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <textarea
-                      aria-label="Note"
-                      placeholder="Note for the record"
-                      rows={3}
-                      value={s.note ?? ""}
-                      onChange={(e) => set((d) => void (d.note = e.target.value))}
-                      className="rounded-xl border border-j-line p-3 font-sans text-sm text-j-ink"
-                    />
-                    <JButton variant="primary" onClick={decide}>
-                      {DECISION_CTA[s.dec]}
-                    </JButton>
-                  </>
-                ) : (
-                  <p className="m-0 text-sm text-j-ink-3">
-                    {stage === "cli" ? "L1 done. Waiting for the client to accept." : stage === "acc" ? "Accepted by the client." : "Not in review yet. Submit the draft for L1 first."}
-                  </p>
-                )}
-              </Panel>
-              <Panel className="flex flex-col gap-2.5 p-[22px]">
-                <h2 className="m-0 text-base">Approval chain</h2>
-                {[
-                  ["AI", "AI check", "Done", `${confidence}%`, "ai", true],
-                  ["SR", "L1", "You", stage === "rev" ? "Now" : stageIdx > 2 ? "Done" : "—", "cx", stage === "rev"],
-                  ["NA", "Client", "Noura A.", stage === "cli" ? "Now" : stage === "acc" ? "Done" : "Next", "gray", stage === "cli"],
-                  ["HS", "Final", "Huda S.", stage === "acc" ? "Done" : "—", "gray", false],
-                ].map(([av, l, who, st, tone, now]) => (
-                  <div key={l as string} className={cx("flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-sm", now ? "border-cx" : "border-transparent")}>
-                    <Avatar initials={av as string} size={28} bg={tone === "ai" ? "#EEEDFD" : tone === "cx" ? "#EAF1FA" : "#F5F7F6"} fg={tone === "ai" ? "#4F46E5" : tone === "cx" ? "#1E4E8C" : "#47534D"} />
-                    <span className="flex-auto">
-                      <b>{l}</b> · {who}
-                    </span>
-                    <span className="text-xs font-semibold text-j-muted">{st}</span>
-                  </div>
-                ))}
-              </Panel>
-            </aside>
+          <Panel className="flex flex-col gap-2 p-[22px]">
+            <PanelHead
+              title="Linked evidence"
+              aside={
+                <span className="flex gap-2">
+                  <JLink size="sm" href={c("/evidence")}>
+                    Link from library
+                  </JLink>
+                  <JButton size="sm" variant="outline" onClick={() => setTab("fu")}>
+                    Request from SPOC
+                  </JButton>
+                </span>
+              }
+            />
+            {evidence.map((e) => (
+              <div key={e.id} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <span className="flex h-10 w-9 items-center justify-center rounded-lg bg-j-bad-soft text-[10px] font-bold text-j-bad">PDF</span>
+                <span className="flex-auto text-sm">
+                  <b>{e.t}</b>
+                  <br />
+                  <span className="text-xs text-j-muted">
+                    <span className="font-mono">{e.id}</span> · {e.meta}
+                  </span>
+                </span>
+                <Pill tone={e.ok ? "ok" : "warn"}>{e.ok ? "Valid" : "Wrong period"}</Pill>
+              </div>
+            ))}
+            {fromLibrary.map((u) => (
+              <div key={u.id} className="flex items-center gap-3 border-b border-j-line-soft py-3 last:border-0">
+                <span className="flex h-10 w-9 items-center justify-center rounded-lg bg-cx-soft text-[10px] font-bold text-cx">{u.name.split(".").pop()?.toUpperCase().slice(0, 4)}</span>
+                <span className="min-w-0 flex-auto text-sm">
+                  <b className="block truncate">{u.name}</b>
+                  <span className="text-xs text-j-muted">
+                    <span className="font-mono">{u.id}</span> · from the evidence library
+                  </span>
+                </span>
+                <Pill tone="ok">Linked</Pill>
+              </div>
+            ))}
+            {evidence.length + fromLibrary.length === 0 && <p className="m-0 text-sm text-j-muted">No evidence linked from the library yet.</p>}
+          </Panel>
           </div>
         )}
 
-        {tab === "hand" && (
+        {tab === "fu" && (
+          <div className="flex flex-col gap-3.5">
+            <h2 className="m-0 text-sm font-semibold text-j-muted">Waiting on the SPOC</h2>
           <Panel className="flex flex-col gap-2 p-[22px]">
             <PanelHead
               title="Requests"
@@ -644,9 +582,7 @@ export default function RequirementWorkspacePage() {
             ))}
             {requests.length === 0 && <p className="m-0 text-sm text-j-muted">No open requests.</p>}
           </Panel>
-        )}
-
-        {tab === "rem" && (
+            <h2 className="m-0 text-sm font-semibold text-j-muted">Fix with the client</h2>
           <Panel className="flex flex-col gap-4 p-[22px]">
             <PanelHead title="Gap and fix" aside={<Pill tone={gaps ? (s.remProposed ? "cx" : "warn") : "ok"}>{gaps ? (s.remProposed ? "Proposed to client" : "Open") : "No gap"}</Pill>} />
             {gaps ? (
@@ -685,10 +621,7 @@ export default function RequirementWorkspacePage() {
               <p className="m-0 text-sm text-j-muted">All criteria are met. Nothing to fix.</p>
             )}
           </Panel>
-        )}
-
-        {tab === "cla" && (
-          <div className="flex flex-col gap-3.5">
+            <h2 className="m-0 text-sm font-semibold text-j-muted">Questions to {framework?.authority ?? "the regulator"}</h2>
             {related.map((x) => {
               const applied = x.status === "done" || !!x.appliedTo?.includes(r.code);
               const [label, tone] = applied ? (["Applied", "ok"] as const) : x.status === "ans" ? (["Answered · not applied", "ai"] as const) : x.status === "sub" ? (["Awaiting DGA", "warn"] as const) : (["Draft · client sends", "draft"] as const);
@@ -800,6 +733,68 @@ export default function RequirementWorkspacePage() {
             ))}
           </Panel>
         )}
+          </div>
+          {/* The L1 decision stays in view on every tab. */}
+          <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
+              <Panel className="flex flex-col gap-3 p-[22px]">
+                <h2 className="m-0 text-base">Your L1 decision</h2>
+                {stage === "rev" ? (
+                  <>
+                    <div role="radiogroup" aria-label="L1 decision" className="flex flex-col gap-1.5">
+                      {DECISIONS.map((l, i) => {
+                        const on = s.dec === i;
+                        return (
+                          <button
+                            key={l}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            onClick={() => set((d) => void (d.dec = i))}
+                            className={cx("flex h-11 cursor-pointer items-center gap-2.5 rounded-xl border-[1.5px] px-3 text-left text-sm font-semibold text-j-ink", on ? "border-cx bg-cx-tint" : "border-j-line bg-white")}
+                          >
+                            <span className={cx("h-4 w-4 rounded-full border-[1.5px]", on ? "border-cx bg-cx shadow-[inset_0_0_0_3px_#fff]" : "border-j-field bg-white")} />
+                            {l}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <textarea
+                      aria-label="Note"
+                      placeholder="Note for the record"
+                      rows={3}
+                      value={s.note ?? ""}
+                      onChange={(e) => set((d) => void (d.note = e.target.value))}
+                      className="rounded-xl border border-j-line p-3 font-sans text-sm text-j-ink"
+                    />
+                    <JButton variant="primary" onClick={decide}>
+                      {DECISION_CTA[s.dec]}
+                    </JButton>
+                  </>
+                ) : (
+                  <p className="m-0 text-sm text-j-ink-3">
+                    {stage === "cli" ? "L1 done. Waiting for the client to accept." : stage === "acc" ? "Accepted by the client." : "Not in review yet. Submit the draft for L1 first."}
+                  </p>
+                )}
+              </Panel>
+              <Panel className="flex flex-col gap-2.5 p-[22px]">
+                <h2 className="m-0 text-base">Approval chain</h2>
+                {[
+                  ["AI", "AI check", "Done", `${confidence}%`, "ai", true],
+                  ["SR", "L1", "You", stage === "rev" ? "Now" : stageIdx > 2 ? "Done" : "—", "cx", stage === "rev"],
+                  ["NA", "Client", "Noura A.", stage === "cli" ? "Now" : stage === "acc" ? "Done" : "Next", "gray", stage === "cli"],
+                  ["HS", "Final", "Huda S.", stage === "acc" ? "Done" : "—", "gray", false],
+                ].map(([av, l, who, st, tone, now]) => (
+                  <div key={l as string} className={cx("flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-sm", now ? "border-cx" : "border-transparent")}>
+                    <Avatar initials={av as string} size={28} bg={tone === "ai" ? "#EEEDFD" : tone === "cx" ? "#EAF1FA" : "#F5F7F6"} fg={tone === "ai" ? "#4F46E5" : tone === "cx" ? "#1E4E8C" : "#47534D"} />
+                    <span className="flex-auto">
+                      <b>{l}</b> · {who}
+                    </span>
+                    <span className="text-xs font-semibold text-j-muted">{st}</span>
+                  </div>
+                ))}
+              </Panel>
+            </aside>
+        </div>
       </JMain>
     {drawer}
     </ClientShell>
