@@ -357,7 +357,7 @@ export default function RequirementsPage() {
                   size="sm"
                   onClick={() => {
                     ws.createDraft("evidence-request", sel);
-                    flash(`Evidence request drafted for ${sel.length} requirements. The client approves it in their workspace.`);
+                    flash(`Evidence request drafted for ${sel.length} requirements. Review it in Outbox before it is sent.`);
                   }}
                 >
                   Request evidence

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-ui";
-import { PageHeader } from "@/components/workspace-shell";
+import { PageHeader } from "@/components/journey/studio";
 import { Button, TabBar } from "@/components/ui";
 import { requirementCounts } from "@/lib/admin/diff";
 import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from "@/lib/admin/library";
@@ -113,7 +113,7 @@ export default function FrameworkBuilderPage() {
   if (session)
     return (
       <>
-        <PageHeader crumb="Admin Studio / Framework Builder / New from document" title="Create a framework from a document" />
+        <PageHeader crumb="Studio / Framework Builder / New from document" title="Create a framework from a document" />
         <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
           <ImportFlow
             session={session}
@@ -148,7 +148,7 @@ export default function FrameworkBuilderPage() {
   return (
     <>
       <PageHeader
-        crumb="Admin Studio / Framework Builder"
+        crumb="Studio / Framework Builder"
         title={`${fw.name} · v${fw.version}`}
         actions={
           <Button
@@ -382,7 +382,7 @@ function StartScreen({
 }) {
   return (
     <>
-      <PageHeader crumb="Admin Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
+      <PageHeader crumb="Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
         {notice && <NoticeBar notice={notice} onOpen={onOpen} />}
         <section aria-label="Create a framework from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">

@@ -30,7 +30,7 @@ export function DraftBar({ kind, id, checks = [] }: { kind: ConfigKind; id: stri
       {!!v.live && <StatusPill tone="live">{versionLabel(kind, v.live)} live</StatusPill>}
       {!!v.draft && !v.pendingCr && <StatusPill tone="draft">Draft {versionLabel(kind, v.draft)}</StatusPill>}
       {v.pendingCr && (
-        <Link href={`/admin/history?cr=${v.pendingCr}`} className="no-underline">
+        <Link href={`/studio/history?cr=${v.pendingCr}`} className="no-underline">
           <StatusPill tone="pending">
             {versionLabel(kind, v.draft)} awaiting approval · {v.pendingCr}
           </StatusPill>
@@ -52,7 +52,7 @@ export function DraftBar({ kind, id, checks = [] }: { kind: ConfigKind; id: stri
       {msg && (
         <span role="status" className={cx("text-[13px] font-semibold", msg.ok ? "text-good" : "text-bad")}>
           {msg.text}{" "}
-          {msg.cr && <Link href={`/admin/history?cr=${msg.cr}`}>Open</Link>}
+          {msg.cr && <Link href={`/studio/history?cr=${msg.cr}`}>Open</Link>}
         </span>
       )}
     </div>

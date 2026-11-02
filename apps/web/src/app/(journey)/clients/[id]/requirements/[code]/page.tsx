@@ -444,8 +444,8 @@ export default function RequirementWorkspacePage() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <JLink size="sm" href="/entity/remediation">
-                    Edit plan
+                  <JLink size="sm" href={c("/outbox")}>
+                    Open Outbox
                   </JLink>
                   <JButton
                     size="sm"

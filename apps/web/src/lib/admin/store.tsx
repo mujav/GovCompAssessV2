@@ -1,6 +1,6 @@
 "use client";
 
-// Client-side Admin Studio store (dummy data, persisted to localStorage).
+// Client-side Studio store (dummy data, persisted to localStorage).
 // Lifecycle per configuration object: live → draft → change request → approve (publish) | reject.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
@@ -10,7 +10,7 @@ import { dateStamp, findDuplicate, findVersionClash, retireLive } from "./librar
 import { createSeed } from "./seed";
 import type { AdminState, ChangeRequest, ConfigKind, FrameworkPackage, FrameworkRequirement, FrameworkVersion, HierarchyLevel, ImportJob, Versioned } from "./types";
 
-export const STORAGE_KEY = "ci-admin-studio-v2";
+export const STORAGE_KEY = "ci-studio-v1";
 
 type Action = { type: "replace"; state: AdminState } | { type: "mutate"; fn: (s: AdminState) => void };
 

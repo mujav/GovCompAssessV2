@@ -364,7 +364,7 @@ export default function EvidencePage() {
                     variant="primary"
                     onClick={() => {
                       ws.createDraft("return", doc.codes);
-                      setToast(`Return drafted for ${doc.id}. The client approves it before ${doc.owner || "the owner"} is notified.`);
+                      setToast(`Return drafted for ${doc.id}. Review it in Outbox before ${doc.owner || "the owner"} is notified.`);
                       log(`Drafted return of ${doc.id} to ${doc.owner}`);
                     }}
                   >

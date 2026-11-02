@@ -13,7 +13,7 @@ import { composeDraft, DRAFT_LABEL, type Draft } from "./drafts";
 
 const STORAGE_KEY = "ci-workspace-v1";
 
-export const CURRENT_USER = "Noura A.";
+export const CURRENT_USER = "Sami R.";
 
 export interface SavedView {
   id: string;

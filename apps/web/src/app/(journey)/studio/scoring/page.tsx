@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Checks, DraftBar, LockNote } from "@/components/admin-ui";
-import { PageHeader } from "@/components/workspace-shell";
+import { PageHeader } from "@/components/journey/studio";
 import { Button, Card } from "@/components/ui";
 import { SAMPLE_REQUIREMENTS } from "@/lib/admin/sample-data";
 import { useAdmin, working } from "@/lib/admin/store";
@@ -58,7 +58,7 @@ export default function ScoringDesignerPage() {
 
   return (
     <>
-      <PageHeader crumb={`Admin Studio / ${s.code} / Scoring`} title="Scoring & maturity designer">
+      <PageHeader crumb={`Studio / ${s.code} / Scoring`} title="Scoring & maturity designer">
         <DraftBar kind="scoring" id={slotV.id} checks={checks} />
       </PageHeader>
       <main className="box-border flex w-full max-w-[1360px] flex-wrap items-start gap-4 px-8 pb-12 pt-6">
@@ -78,7 +78,7 @@ export default function ScoringDesignerPage() {
                     disabled={locked}
                     onClick={() => edit((d) => void (d.method = key))}
                     className="flex min-h-11 cursor-pointer flex-col gap-1 rounded-[10px] p-3 text-left text-ink disabled:cursor-default"
-                    style={{ border: on ? "2px solid #0E5A45" : "1px solid #DCE2DE", background: on ? "#F2F8F5" : "#FFFFFF" }}
+                    style={{ border: on ? "2px solid #1E4E8C" : "1px solid #E6EBE8", background: on ? "#F3F7FC" : "#FFFFFF" }}
                   >
                     <b className="text-sm">{label}</b>
                     <span className="text-xs leading-4 text-muted">{desc}</span>
@@ -284,7 +284,7 @@ function NumField({ label, value, border, disabled, onChange }: { label: string;
         disabled={disabled}
         onChange={(e) => onChange(e.target.value === "" ? NaN : Number(e.target.value))}
         className={numCls}
-        style={{ border: border ?? "1px solid #CBD3CE" }}
+        style={{ border: border ?? "1px solid #C9D1CD" }}
       />
     </label>
   );

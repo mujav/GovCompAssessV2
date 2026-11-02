@@ -257,24 +257,6 @@ export function opportunities(ctx: Context, n = 4): Opportunity[] {
 
 const EFFORT = { low: 0, medium: 1, high: 2 };
 
-export type NextStep = { label: string; kind: DraftKind } | { label: string; href: string };
-
-export function nextStep(r: WsRequirement): NextStep {
-  switch (r.work) {
-    case "review":
-    case "evsub":
-      return { label: "Review now", href: "/entity/reviews" };
-    case "returned":
-      return { label: "Escalate", kind: "escalation" };
-    case "update":
-      return { label: "Request update", kind: "evidence-request" };
-    case "prog":
-      return { label: "Send reminder", kind: "reminder" };
-    default:
-      return r.owner ? { label: "Request evidence", kind: "evidence-request" } : { label: "Assign owner", kind: "assignment" };
-  }
-}
-
 /** Open, not-yet-compliant requirements due within the window (overdue included), soonest first. */
 export function atRisk(ctx: Context, windowDays = 14) {
   const limit = addDays(ctx.today, windowDays);

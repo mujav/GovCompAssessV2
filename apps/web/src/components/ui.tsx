@@ -11,7 +11,7 @@ export { cx };
 /* ---------- Surfaces ---------- */
 
 export function Card({ className, ...props }: ComponentProps<"section">) {
-  return <section className={cx("rounded-[14px] border border-line bg-white", className)} {...props} />;
+  return <section className={cx("rounded-[20px] border border-j-line bg-white", className)} {...props} />;
 }
 
 export function CardHeader({ title, aside, as = "h2" }: { title: ReactNode; aside?: ReactNode; as?: "h2" | "h3" }) {
@@ -38,14 +38,14 @@ type Variant = "primary" | "secondary" | "outlineBrand" | "chip" | "chipActive" 
 
 const VARIANT: Record<Variant, string> = {
   primary: "border-0 bg-brand font-semibold text-white hover:bg-brand-strong hover:text-white",
-  secondary: "border border-field bg-white text-ink hover:bg-surface-2 hover:text-ink",
-  outlineBrand: "border border-brand bg-white font-semibold text-brand hover:bg-brand-tint",
-  chip: "rounded-full border border-field bg-white text-[13px] text-ink hover:bg-surface-2",
-  chipActive: "rounded-full border border-brand bg-brand-soft text-[13px] font-semibold text-brand",
-  dark: "border-0 bg-nav-active text-[13px] text-white hover:text-white",
+  secondary: "border border-j-line bg-white font-semibold text-ink hover:bg-j-canvas hover:text-ink",
+  outlineBrand: "border border-cx-line bg-white font-semibold text-cx hover:bg-cx-tint",
+  chip: "rounded-full border border-j-line bg-white text-[13px] font-semibold text-ink-2 hover:bg-j-canvas",
+  chipActive: "rounded-full border border-j-ink bg-j-ink text-[13px] font-semibold text-white",
+  dark: "border-0 bg-j-ink text-[13px] font-semibold text-white hover:text-white",
 };
 
-const SIZE = { lg: "h-11 px-3.5 text-sm", md: "h-10 px-3 text-[13px]", sm: "h-9 px-3 text-[13px]" };
+const SIZE = { lg: "h-10 px-3.5 text-sm", md: "h-10 px-3 text-[13px]", sm: "h-[34px] px-3 text-[13px]" };
 
 export function Button({
   variant = "secondary",
@@ -57,7 +57,7 @@ export function Button({
     <button
       type="button"
       className={cx(
-        "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg no-underline disabled:cursor-not-allowed",
+        "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] no-underline disabled:cursor-not-allowed disabled:opacity-50",
         SIZE[size],
         VARIANT[variant],
         className,
@@ -76,7 +76,7 @@ export function ButtonLink({
   return (
     <Link
       className={cx(
-        "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg no-underline",
+        "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] no-underline",
         SIZE[size],
         VARIANT[variant],
         className,
@@ -128,7 +128,7 @@ export function Badge({
   const t = tone ? TONE[tone] : { bg: bg ?? "#ECEEEC", fg: fg ?? "#33403A" };
   return (
     <span
-      className={cx("inline-block rounded-md px-2 py-0.5 text-[11px] font-semibold", className)}
+      className={cx("inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold", className)}
       style={{ background: t.bg, color: t.fg }}
     >
       {children}
@@ -147,7 +147,7 @@ export function OutlineTag({ children, className }: { children: ReactNode; class
 
 export function AiTag({ children = "AI BRIEFING" }: { children?: ReactNode }) {
   return (
-    <span className="rounded-md bg-ai px-2 py-[3px] text-[11px] font-bold tracking-[0.08em] text-white">{children}</span>
+    <span className="rounded-full bg-ai px-2.5 py-[3px] text-[11px] font-bold tracking-[0.06em] text-white">{children}</span>
   );
 }
 
@@ -208,7 +208,7 @@ export function GridTable({
         <div
           role="row"
           className={cx(
-            "grid items-center gap-3 border-b border-line bg-surface-2 px-4 py-2.5 text-xs font-semibold text-muted",
+            "grid items-center gap-3 border-b border-j-line px-4 py-2.5 text-xs font-semibold text-muted",
             headerClassName,
           )}
           style={{ gridTemplateColumns: columns }}
@@ -274,8 +274,8 @@ export function TabBar({
             aria-selected={on}
             onClick={() => onSelect?.(i)}
             className={cx(
-              "h-11 cursor-pointer border-0 border-b-[3px] bg-transparent px-3.5 text-sm",
-              on ? "border-brand font-semibold text-brand" : "border-transparent text-ink-2",
+              "h-11 cursor-pointer border-0 border-b-2 bg-transparent px-3.5 text-sm",
+              on ? "border-cx font-semibold text-cx" : "border-transparent font-medium text-j-ink-3",
             )}
           >
             {t.label}

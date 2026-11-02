@@ -25,7 +25,7 @@ export default function EntitiesPage() {
   return (
     <div className="flex min-h-screen flex-col bg-j-canvas text-j-ink">
       <header className="flex items-center gap-3 border-b border-j-line bg-white px-8 py-3.5">
-        <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-brand text-white">
+        <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-mark text-white">
           <Icon name="shield" size={18} />
         </span>
         <span className="leading-[17px]">
@@ -92,9 +92,9 @@ export default function EntitiesPage() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-3.5">
           <Link
             href="/portfolio/onboard"
-            className="flex min-h-[196px] flex-col items-center justify-center gap-3 rounded-[20px] border-2 border-dashed border-[#9FC9B7] bg-[#F3FAF6] p-5 text-center text-brand no-underline hover:text-brand"
+            className="flex min-h-[196px] flex-col items-center justify-center gap-3 rounded-[20px] border-2 border-dashed border-cx-line bg-cx-tint p-5 text-center text-cx no-underline hover:border-cx hover:text-cx"
           >
-            <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-brand text-white">
+            <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-cx text-white">
               <Icon name="plus" size={22} />
             </span>
             <span>

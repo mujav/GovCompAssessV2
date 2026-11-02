@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Checks, DraftBar, LockNote } from "@/components/admin-ui";
-import { PageHeader } from "@/components/workspace-shell";
+import { PageHeader } from "@/components/journey/studio";
 import { Button, Eyebrow } from "@/components/ui";
 import { DEMO_TODAY, SAMPLE_ACTIONS } from "@/lib/admin/sample-data";
 import { stamp, useAdmin, working } from "@/lib/admin/store";
@@ -53,7 +53,7 @@ export default function AutomationStudioPage() {
 
   return (
     <>
-      <PageHeader crumb="Admin Studio / Rules & automation" title="Rule & automation studio" actions={<Button onClick={newRule}>New rule</Button>} />
+      <PageHeader crumb="Studio / Rules & automation" title="Rule & automation studio" actions={<Button onClick={newRule}>New rule</Button>} />
       <main className="box-border flex w-full max-w-[1360px] flex-wrap items-start gap-4 px-8 pb-12 pt-6">
         <section aria-label="Rules" className="min-w-0 flex-[1_1_300px] overflow-hidden rounded-[14px] border border-line bg-white">
           {state.rules.map((r) => {
@@ -67,7 +67,7 @@ export default function AutomationStudioPage() {
                 onClick={() => setSel(r.id)}
                 aria-pressed={on}
                 className="flex w-full cursor-pointer flex-col gap-[3px] border-0 border-b border-l-[3px] border-b-line-soft px-3.5 py-3 text-left text-ink"
-                style={{ background: on ? "#F2F8F5" : "#FFFFFF", borderLeftColor: on ? "#0E5A45" : "transparent" }}
+                style={{ background: on ? "#F3F7FC" : "#FFFFFF", borderLeftColor: on ? "#1E4E8C" : "transparent" }}
               >
                 <span className="flex justify-between gap-2">
                   <b className="font-mono text-xs">{r.id}</b>
@@ -194,7 +194,7 @@ export default function AutomationStudioPage() {
                     ))}
                   </select>
                 )}
-                <div className="flex flex-wrap justify-between gap-2 rounded-[10px] bg-nav px-3 py-2.5 text-[#E4ECE8]">
+                <div className="flex flex-wrap justify-between gap-2 rounded-[10px] bg-cx-deep px-3 py-2.5 text-white">
                   <span>
                     <b>Locked:</b> external communication requires authorized approval
                   </span>

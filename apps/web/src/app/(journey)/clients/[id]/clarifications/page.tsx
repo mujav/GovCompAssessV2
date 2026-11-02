@@ -242,7 +242,7 @@ export default function ClarificationsPage() {
                   <b>{reopenN} reopen</b> · {reopenN} update requests
                 </span>
                 <div className="flex gap-2">
-                  <JLink href="/admin/frameworks">Update guidance</JLink>
+                  <JLink href="/studio/frameworks">Update guidance</JLink>
                   {preview ? (
                     <>
                       <JButton variant="ghost" onClick={() => setPreview(false)}>

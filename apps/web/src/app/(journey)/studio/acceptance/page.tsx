@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Checks, DraftBar, LockNote } from "@/components/admin-ui";
-import { PageHeader } from "@/components/workspace-shell";
+import { PageHeader } from "@/components/journey/studio";
 import { Button } from "@/components/ui";
 import { DEFAULT_RIGHTS } from "@/lib/admin/seed";
 import { stamp, useAdmin, working } from "@/lib/admin/store";
@@ -64,7 +64,7 @@ export default function AcceptanceDesignerPage() {
   return (
     <>
       <PageHeader
-        crumb="Admin Studio / Acceptance policies"
+        crumb="Studio / Acceptance policies"
         title="Acceptance workflow designer"
         actions={<Button onClick={newPolicy}>New policy</Button>}
       />
@@ -80,7 +80,7 @@ export default function AcceptanceDesignerPage() {
                 onClick={() => setSel(pol.id)}
                 aria-pressed={pol.id === slotV.id}
                 className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-left text-ink"
-                style={{ border: pol.id === slotV.id ? "2px solid #0E5A45" : "1px solid #DCE2DE" }}
+                style={{ border: pol.id === slotV.id ? "2px solid #1E4E8C" : "1px solid #E6EBE8" }}
               >
                 <span className="flex justify-between gap-2">
                   <b className="font-mono text-[13px]">
@@ -118,7 +118,7 @@ export default function AcceptanceDesignerPage() {
                 recommendation only
               </div>
               {p.stages.map((s, i) => (
-                <div key={s.id} className="flex min-w-0 flex-[1_1_220px] flex-col gap-2 rounded-xl border-2 bg-white p-3.5" style={{ borderColor: s.mode === "final" ? "#0A3F31" : "#0E5A45" }}>
+                <div key={s.id} className="flex min-w-0 flex-[1_1_220px] flex-col gap-2 rounded-xl border-2 bg-white p-3.5" style={{ borderColor: s.mode === "final" ? "#0F1F36" : "#0E5A45" }}>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[11px] font-bold tracking-[0.08em] text-brand">STAGE {i + 1}</span>
                     <select
@@ -162,7 +162,7 @@ export default function AcceptanceDesignerPage() {
                           disabled={locked}
                           onClick={() => editStage(s.id, { rights: on ? s.rights.filter((x) => x !== r) : [...s.rights, r] })}
                           className="cursor-pointer rounded px-1.5 py-0.5 text-[11px] disabled:cursor-default"
-                          style={on ? { background: "#F1F4F2", color: "#33403A" } : { background: "transparent", color: "#8A958F", border: "1px dashed #CBD3CE" }}
+                          style={on ? { background: "#F1F4F2", color: "#33403A" } : { background: "transparent", color: "#8A958F", border: "1px dashed #C9D1CD" }}
                         >
                           {r}
                         </button>

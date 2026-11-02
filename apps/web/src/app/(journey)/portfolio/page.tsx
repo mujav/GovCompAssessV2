@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/journey/icon";
-import { ConsultantShell, JMain, LangButton } from "@/components/journey/shell";
+import { ConsultantShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { LOGO, clientHref, readyColor, type Model } from "@/lib/journey/portfolio";
@@ -50,10 +50,7 @@ export default function PortfolioPage() {
   ];
 
   return (
-    <ConsultantShell
-      search="Search clients and engagements"
-      headerExtra={<LangButton />}
-    >
+    <ConsultantShell search="Search clients and engagements">
       <JMain>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-1.5">

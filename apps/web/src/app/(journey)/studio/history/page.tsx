@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { PageHeader } from "@/components/workspace-shell";
+import { PageHeader } from "@/components/journey/studio";
 import { Button } from "@/components/ui";
 import { useAdmin } from "@/lib/admin/store";
 import type { ChangeRequest, ConfigKind, CrStatus } from "@/lib/admin/types";
@@ -15,10 +15,10 @@ const S: Record<CrStatus, [string, string, string]> = {
 };
 
 const EDITOR: Record<ConfigKind, string> = {
-  framework: "/admin/frameworks",
-  scoring: "/admin/scoring",
-  acceptance: "/admin/acceptance",
-  rule: "/admin/automation",
+  framework: "/studio/frameworks",
+  scoring: "/studio/scoring",
+  acceptance: "/studio/acceptance",
+  rule: "/studio/automation",
 };
 
 export default function ConfigHistoryPage() {
@@ -42,7 +42,7 @@ function ConfigHistory() {
   return (
     <>
       <PageHeader
-        crumb="Admin Studio / Configuration history"
+        crumb="Studio / Configuration history"
         title="Configuration history & approval"
         actions={
           <div className="flex items-center gap-2 text-[13px] text-muted">
@@ -70,7 +70,7 @@ function ConfigHistory() {
               onClick={() => setSel(c.id)}
               aria-pressed={c.id === cr?.id}
               className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-left text-ink"
-              style={{ border: c.id === cr?.id ? "2px solid #0E5A45" : "1px solid #DCE2DE" }}
+              style={{ border: c.id === cr?.id ? "2px solid #1E4E8C" : "1px solid #E6EBE8" }}
             >
               <span className="flex justify-between gap-2">
                 <b className="font-mono text-xs">{c.id}</b>
