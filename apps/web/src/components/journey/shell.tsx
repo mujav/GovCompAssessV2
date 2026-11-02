@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { cx } from "@/components/ui";
 import { CONSULTANT, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
 import { useAdmin } from "@/lib/admin/store";
+import { LanguageToggle } from "@/lib/i18n/locale";
 import { entityFrameworks } from "@/lib/journey/frameworks";
 import { useJourney } from "@/lib/journey/store";
 import { Icon, type IconName } from "./icon";
@@ -99,7 +100,7 @@ export function ConsultantShell({
     <div className="flex min-h-screen flex-wrap bg-j-canvas text-j-ink">
       <nav
         aria-label="Consultant portal"
-        className="box-border flex flex-[1_1_232px] flex-col gap-[18px] border-r border-[#E3E8EF] bg-white px-3 py-5 lg:max-w-[260px]"
+        className="box-border flex flex-[1_1_232px] flex-col gap-[18px] border-e border-[#E3E8EF] bg-white px-3 py-5 lg:max-w-[260px]"
       >
         <div className="flex items-center gap-2.5 px-2">
           <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-cx text-[13px] font-bold text-white">DA</span>
@@ -173,6 +174,7 @@ export function ConsultantShell({
           </label>
           <span className="flex-auto" />
           {headerExtra}
+          <LanguageToggle />
         </header>
         {children}
       </div>

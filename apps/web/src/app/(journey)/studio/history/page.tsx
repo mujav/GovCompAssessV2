@@ -69,7 +69,7 @@ function ConfigHistory() {
               type="button"
               onClick={() => setSel(c.id)}
               aria-pressed={c.id === cr?.id}
-              className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-left text-ink"
+              className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-start text-ink"
               style={{ border: c.id === cr?.id ? "2px solid #1E4E8C" : "1px solid #E6EBE8" }}
             >
               <span className="flex justify-between gap-2">

@@ -750,7 +750,7 @@ export default function RequirementWorkspacePage() {
                             role="radio"
                             aria-checked={on}
                             onClick={() => set((d) => void (d.dec = i))}
-                            className={cx("flex h-11 cursor-pointer items-center gap-2.5 rounded-xl border-[1.5px] px-3 text-left text-sm font-semibold text-j-ink", on ? "border-cx bg-cx-tint" : "border-j-line bg-white")}
+                            className={cx("flex h-11 cursor-pointer items-center gap-2.5 rounded-xl border-[1.5px] px-3 text-start text-sm font-semibold text-j-ink", on ? "border-cx bg-cx-tint" : "border-j-line bg-white")}
                           >
                             <span className={cx("h-4 w-4 rounded-full border-[1.5px]", on ? "border-cx bg-cx shadow-[inset_0_0_0_3px_#fff]" : "border-j-field bg-white")} />
                             {l}

@@ -33,7 +33,7 @@ export function Drawer({
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="fixed inset-y-0 right-0 left-auto m-0 h-full max-h-none w-[min(580px,100vw)] max-w-none border-0 border-l border-line bg-white p-0 text-ink backdrop:bg-[#0B1F18]/40"
+      className="fixed inset-y-0 end-0 left-auto m-0 h-full max-h-none w-[min(580px,100vw)] max-w-none border-0 border-s border-line bg-white p-0 text-ink backdrop:bg-[#0B1F18]/40"
     >
       {open && (
         <div className="flex h-full flex-col">
@@ -96,7 +96,7 @@ export function Popover({
       ref={ref}
       className={cx(
         "absolute top-[calc(100%+6px)] z-20 flex flex-col rounded-xl border border-line bg-white shadow-[0_12px_32px_rgba(11,31,24,0.14)]",
-        align === "right" ? "right-0" : "left-0",
+        align === "right" ? "end-0" : "start-0",
         className,
       )}
     >

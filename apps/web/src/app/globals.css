@@ -99,4 +99,9 @@
   [dir="rtl"] {
     font-family: var(--font-arabic);
   }
+
+  /* Arabic pages stay hidden until translated (removed by LocaleRoot, or after 4 s at most). */
+  html.i18n-pending body {
+    visibility: hidden;
+  }
 }

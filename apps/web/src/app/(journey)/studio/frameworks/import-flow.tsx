@@ -489,7 +489,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                   <span role="columnheader">Arabic label</span>
                   <span role="columnheader">Code pattern</span>
                   <span role="columnheader">Assessed here</span>
-                  <span role="columnheader" className="text-right">
+                  <span role="columnheader" className="text-end">
                     Nodes
                   </span>
                 </div>
@@ -524,7 +524,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                         ))}
                       </select>
                     </span>
-                    <span role="cell" className="text-right font-mono font-semibold">
+                    <span role="cell" className="text-end font-mono font-semibold">
                       {counts[i]}
                     </span>
                   </div>
@@ -620,7 +620,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
             <ul className="m-0 max-h-[640px] list-none overflow-y-auto p-0 text-[13px]" aria-label="Requirements">
               {visible.map(({ node: n, depth }) => (
                 <li key={n.id} id={`node-${n.id}`} className="border-b border-line-soft">
-                  <div className={cx("flex items-start gap-2 py-1.5 pr-4", byNode.has(n.id) && "bg-warn-soft/40", editing === n.id && "bg-brand-tint")} style={{ paddingLeft: 12 + depth * 22 }}>
+                  <div className={cx("flex items-start gap-2 py-1.5 pe-4", byNode.has(n.id) && "bg-warn-soft/40", editing === n.id && "bg-brand-tint")} style={{ paddingInlineStart: 12 + depth * 22 }}>
                     <button
                       type="button"
                       aria-label={collapsed.has(n.id) ? `Expand ${n.code}` : `Collapse ${n.code}`}
@@ -714,7 +714,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                 New version of an existing framework
               </label>
               {target === "version" && (
-                <select value={versionOf} onChange={(e) => setVersionOf(e.target.value)} aria-label="Framework" className={cx(inputCls, "ml-6 w-[calc(100%-24px)] bg-white text-[13px]")}>
+                <select value={versionOf} onChange={(e) => setVersionOf(e.target.value)} aria-label="Framework" className={cx(inputCls, "ms-6 w-[calc(100%-24px)] bg-white text-[13px]")}>
                   {state.frameworks.map((f) => {
                     const w = f.draft ?? f.live!;
                     return (
@@ -731,7 +731,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                 New framework or index (published right away)
               </label>
               {target === "new" && (
-                <div className="ml-6 grid grid-cols-[1fr_90px] gap-2">
+                <div className="ms-6 grid grid-cols-[1fr_90px] gap-2">
                   <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
                     Name
                     <input value={newName} onChange={(e) => setNewName(e.target.value)} className={cx(inputCls, "text-[13px] font-normal text-ink")} />
@@ -826,7 +826,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3 rounded-lg bg-surface-2 px-2.5 py-2">
       <span className="text-muted">{label}</span>
-      <b className="text-right">{value}</b>
+      <b className="text-end">{value}</b>
     </div>
   );
 }
@@ -1048,7 +1048,7 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
         {rows.map(({ r, depth }) => {
           const has = kids.has(r.code);
           return (
-            <li key={r.code} className="flex items-baseline gap-2 border-b border-line-soft py-1.5 pr-3" style={{ paddingLeft: 8 + depth * 20 }}>
+            <li key={r.code} className="flex items-baseline gap-2 border-b border-line-soft py-1.5 pe-3" style={{ paddingInlineStart: 8 + depth * 20 }}>
               <button
                 type="button"
                 disabled={!has || !!q}

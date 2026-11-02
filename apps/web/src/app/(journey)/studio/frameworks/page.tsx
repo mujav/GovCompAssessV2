@@ -419,7 +419,7 @@ function StartScreen({
           </ol>
           <fieldset className="m-0 flex flex-wrap items-center gap-2 border-0 p-0 text-[13px]">
             <legend className="sr-only">Extraction method</legend>
-            <span className="mr-1 text-xs font-semibold text-muted">Extract with</span>
+            <span className="me-1 text-xs font-semibold text-muted">Extract with</span>
             {(
               [
                 ["ai", "Claude (AI) · recommended for PDFs and Word"],
@@ -562,7 +562,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
                   </span>
                 </div>
                 {expanded && (
-                  <table className="mb-2.5 ml-5 w-[calc(100%-40px)] table-fixed border-collapse text-xs">
+                  <table className="mb-2.5 ms-5 w-[calc(100%-40px)] table-fixed border-collapse text-xs">
                     <colgroup>
                       <col className="w-[9%]" />
                       <col className="w-[12%]" />
@@ -574,7 +574,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
                       <col />
                     </colgroup>
                     <thead>
-                      <tr className="text-left text-muted">
+                      <tr className="text-start text-muted">
                         <th className="py-1 font-semibold">Version</th>
                         <th className="py-1 font-semibold">Status</th>
                         <th className="py-1 font-semibold">Effective</th>

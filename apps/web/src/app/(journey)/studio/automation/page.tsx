@@ -66,7 +66,7 @@ export default function AutomationStudioPage() {
                 type="button"
                 onClick={() => setSel(r.id)}
                 aria-pressed={on}
-                className="flex w-full cursor-pointer flex-col gap-[3px] border-0 border-b border-l-[3px] border-b-line-soft px-3.5 py-3 text-left text-ink"
+                className="flex w-full cursor-pointer flex-col gap-[3px] border-0 border-b border-s-[3px] border-b-line-soft px-3.5 py-3 text-start text-ink"
                 style={{ background: on ? "#F3F7FC" : "#FFFFFF", borderLeftColor: on ? "#1E4E8C" : "transparent" }}
               >
                 <span className="flex justify-between gap-2">

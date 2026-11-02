@@ -172,7 +172,7 @@ function RequirementsView() {
                   setStage(on ? null : s.key);
                   reset();
                 }}
-                className="flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[1.5px] bg-white px-4 py-3 text-left text-j-ink"
+                className="flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[1.5px] bg-white px-4 py-3 text-start text-j-ink"
                 style={{ borderColor: on ? s.color : "#E6EBE8" }}
               >
                 <span className="inline-flex items-center gap-1.5 text-[13px] text-j-ink-2">
@@ -201,7 +201,7 @@ function RequirementsView() {
             />
           </label>
           <select aria-label={topLevel} value={axis} onChange={(e) => (setAxis(e.target.value), reset())} className={cx(inputClass, "h-10")}>
-            <option value="all">All {topLevel.toLowerCase()}s</option>
+            <option value="all">All</option>
             {domains.map((d, i) => (
               <option key={d} value={d}>
                 {topLevel} {i + 1} · {d}

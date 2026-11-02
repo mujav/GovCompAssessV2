@@ -54,7 +54,11 @@ export const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
+/** Icons that point along the reading direction; they mirror in right-to-left layouts. */
+const DIRECTIONAL = new Set<string>(["chevR", "chevL", "arrowR", "arrowL"]);
+
 export function Icon({ name, d, size = 18, strokeWidth = 2, className }: { name?: IconName; d?: string; size?: number; strokeWidth?: number; className?: string }) {
+  const flip = name && DIRECTIONAL.has(name) ? "rtl:-scale-x-100" : "";
   return (
     <svg
       width={size}
@@ -66,7 +70,7 @@ export function Icon({ name, d, size = 18, strokeWidth = 2, className }: { name?
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={className}
+      className={[className, flip].filter(Boolean).join(" ") || undefined}
     >
       <path d={d ?? ICONS[name!]} />
     </svg>

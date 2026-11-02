@@ -79,7 +79,7 @@ export default function AcceptanceDesignerPage() {
                 type="button"
                 onClick={() => setSel(pol.id)}
                 aria-pressed={pol.id === slotV.id}
-                className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-left text-ink"
+                className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-start text-ink"
                 style={{ border: pol.id === slotV.id ? "2px solid #1E4E8C" : "1px solid #E6EBE8" }}
               >
                 <span className="flex justify-between gap-2">
@@ -177,7 +177,7 @@ export default function AcceptanceDesignerPage() {
                       <Button size="sm" disabled={i === p.stages.length - 1} onClick={() => edit((d) => void d.stages.splice(i + 1, 0, ...d.stages.splice(i, 1)))} aria-label={`Move stage ${i + 1} later`}>
                         →
                       </Button>
-                      <Button size="sm" className="ml-auto text-bad hover:text-bad" onClick={() => edit((d) => void (d.stages = d.stages.filter((x) => x.id !== s.id)))}>
+                      <Button size="sm" className="ms-auto text-bad hover:text-bad" onClick={() => edit((d) => void (d.stages = d.stages.filter((x) => x.id !== s.id)))}>
                         Remove
                       </Button>
                     </div>

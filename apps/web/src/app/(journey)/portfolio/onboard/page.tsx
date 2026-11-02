@@ -202,7 +202,7 @@ export default function OnboardPage() {
               disabled={done}
               onClick={() => go(i)}
               className={cx(
-                "flex min-h-[52px] w-full cursor-pointer items-center gap-3 rounded-xl border-0 px-3 text-left text-j-ink disabled:cursor-default",
+                "flex min-h-[52px] w-full cursor-pointer items-center gap-3 rounded-xl border-0 px-3 text-start text-j-ink disabled:cursor-default",
                 on ? "bg-cx-soft" : "bg-transparent hover:bg-white",
               )}
             >
@@ -308,7 +308,7 @@ export default function OnboardPage() {
                             disabled={exists}
                             onClick={() => setW((d) => void (d.refId = r.id))}
                             className={cx(
-                              "flex cursor-pointer items-center gap-3.5 rounded-[14px] border p-3.5 text-left text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
+                              "flex cursor-pointer items-center gap-3.5 rounded-[14px] border p-3.5 text-start text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
                               on && !exists ? "border-cx-soft bg-cx-soft" : "border-j-line bg-white hover:bg-j-canvas",
                             )}
                           >
@@ -382,7 +382,7 @@ export default function OnboardPage() {
                             disabled={locked}
                             onClick={() => toggle(f.id)}
                             className={cx(
-                              "flex cursor-pointer items-center gap-3 rounded-[14px] border-[1.5px] p-3.5 text-left text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
+                              "flex cursor-pointer items-center gap-3 rounded-[14px] border-[1.5px] p-3.5 text-start text-sm text-j-ink disabled:cursor-not-allowed disabled:opacity-60",
                               on ? "border-cx bg-cx-soft" : "border-[#E3E8EF] bg-white hover:bg-j-canvas",
                             )}
                           >

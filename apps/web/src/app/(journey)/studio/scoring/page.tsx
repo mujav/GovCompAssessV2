@@ -77,7 +77,7 @@ export default function ScoringDesignerPage() {
                     aria-checked={on}
                     disabled={locked}
                     onClick={() => edit((d) => void (d.method = key))}
-                    className="flex min-h-11 cursor-pointer flex-col gap-1 rounded-[10px] p-3 text-left text-ink disabled:cursor-default"
+                    className="flex min-h-11 cursor-pointer flex-col gap-1 rounded-[10px] p-3 text-start text-ink disabled:cursor-default"
                     style={{ border: on ? "2px solid #1E4E8C" : "1px solid #E6EBE8", background: on ? "#F3F7FC" : "#FFFFFF" }}
                   >
                     <b className="text-sm">{label}</b>
@@ -100,7 +100,7 @@ export default function ScoringDesignerPage() {
                       {st.en}
                     </span>
                   </span>
-                  <span role="cell" lang="ar" dir="rtl" className="text-left">
+                  <span role="cell" lang="ar" dir="rtl" className="text-start">
                     {st.ar}
                   </span>
                   <span role="cell">
@@ -125,7 +125,7 @@ export default function ScoringDesignerPage() {
                 <span role="cell">
                   <span className="inline-block rounded-full bg-na-soft px-2 py-0.5 text-xs font-semibold text-na-fg">Not applicable</span>
                 </span>
-                <span role="cell" lang="ar" dir="rtl" className="text-left">
+                <span role="cell" lang="ar" dir="rtl" className="text-start">
                   لا ينطبق
                 </span>
                 <span role="cell" className="font-mono text-xs">
@@ -200,7 +200,7 @@ export default function ScoringDesignerPage() {
                   ))}
                 </select>
                 {slotV.live && slotV.draft && slotV.live.blockingCap !== s.blockingCap && (
-                  <span className="ml-auto text-xs font-semibold text-warn">
+                  <span className="ms-auto text-xs font-semibold text-warn">
                     changed in v{s.version}: was &ldquo;{CAP_OPTS.find(([k]) => k === slotV.live!.blockingCap)?.[1]}&rdquo;
                   </span>
                 )}

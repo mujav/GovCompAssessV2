@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { cx } from "@/components/ui";
+import { readLocale, setLocale } from "@/lib/i18n/locale";
 
 // 01 · Sign in. Demo Advisory consultants use company SSO and land on the entity chooser.
 
@@ -53,14 +54,16 @@ const T = {
 };
 
 export default function LoginPage() {
+  // The page carries its own wording in both languages and follows the app-wide setting.
   const [lang, setLang] = useState<Lang>("en");
+  useEffect(() => setLang(readLocale()), []);
   const [step, setStep] = useState<"identify" | "redirect">("identify");
   const t = T[lang];
   const en = lang === "en";
 
 
   return (
-    <div dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen flex-wrap bg-white text-j-ink", !en && "font-arabic")}>
+    <div data-no-translate dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen flex-wrap bg-white text-j-ink", !en && "font-arabic")}>
       <section
         aria-label={t.brand}
         className="relative box-border flex min-h-[360px] flex-[1_1_560px] flex-col gap-8 overflow-hidden bg-cx-deep px-14 py-11 text-[#E3EAF4]"
@@ -97,7 +100,7 @@ export default function LoginPage() {
                 type="button"
                 lang={l}
                 aria-pressed={lang === l}
-                onClick={() => setLang(l)}
+                onClick={() => l !== lang && setLocale(l)}
                 className={cx("h-[34px] cursor-pointer rounded-lg border-0 px-3.5 text-[13px] font-semibold text-j-ink", lang === l ? "bg-white" : "bg-transparent", l === "ar" ? "font-arabic" : "font-sans")}
               >
                 {l === "en" ? "English" : "العربية"}

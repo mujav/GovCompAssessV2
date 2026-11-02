@@ -257,7 +257,7 @@ export default function Entity360Page() {
                 type="button"
                 onClick={() => setEditing(true)}
                 disabled={notEnrolled.length === 0}
-                className="flex cursor-pointer items-center gap-4 rounded-[20px] border-2 border-dashed border-cx-line bg-cx-tint p-[18px] text-left text-j-ink disabled:cursor-default"
+                className="flex cursor-pointer items-center gap-4 rounded-[20px] border-2 border-dashed border-cx-line bg-cx-tint p-[18px] text-start text-j-ink disabled:cursor-default"
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cx text-xl text-white">+</span>
                 <span className="flex flex-col text-sm">

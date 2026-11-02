@@ -308,7 +308,7 @@ export default function EvidencePage() {
                         <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[10px] font-bold" style={{ background: TYPE[d.type][0], color: TYPE[d.type][1] }}>
                           {d.type}
                         </span>
-                        <button type="button" onClick={() => setPicked(i)} className="flex min-w-0 cursor-pointer flex-col border-0 bg-transparent p-0 text-left text-j-ink">
+                        <button type="button" onClick={() => setPicked(i)} className="flex min-w-0 cursor-pointer flex-col border-0 bg-transparent p-0 text-start text-j-ink">
                           <span className="truncate font-semibold">{d.name}</span>
                           <span className="text-xs text-j-muted">
                             <span className="font-mono">{d.id}</span> · {d.lang}
