@@ -179,16 +179,18 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           const id = `fw-${state.seq + 1}`;
           mutate((s) => {
             s.seq += 1;
-            const draft: FrameworkVersion = {
+            const version: FrameworkVersion = {
               name: target.name.trim(),
               version: target.version.trim() || "1.0",
               authority: target.authority.trim() || "Internal",
-              effective: "—",
+              effective: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
               scoringNote: "Not configured",
               ...structuredClone(payload),
             };
-            s.frameworks.push({ id, usedByCycles: 0, draft });
-            pushAudit(s, who(s), `Created framework draft "${draft.name}" v${draft.version} from ${payload.importJob.file} (${n} requirement nodes).`);
+            // A brand-new framework is not used by any cycle yet, so the admin publishes it
+            // directly; later versions go through draft → change request → four-eyes approval.
+            s.frameworks.push({ id, usedByCycles: 0, live: version });
+            pushAudit(s, who(s), `Created and published framework "${version.name}" v${version.version} from ${payload.importJob.file} (${n} requirement nodes).`);
           });
           return { ok: true, id };
         }

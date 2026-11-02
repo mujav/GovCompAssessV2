@@ -1045,6 +1045,32 @@ export function deleteNode(ex: Extraction, id: string, keepChildren = false): Ex
   });
 }
 
+/** Next free code after a sibling's ("5.1.2-3" → "5.1.2-4"), or a first child code under the parent. */
+export function suggestChildCode(ex: Extraction, parentId: string | null): string {
+  const taken = new Set(ex.nodes.map((n) => key(n.code)));
+  const siblings = ex.nodes.filter((n) => (n.parentId ?? null) === parentId);
+  const parent = parentId ? ex.nodes.find((n) => n.id === parentId) : undefined;
+  const last = siblings.at(-1)?.code;
+  const bump = (c: string) => c.replace(/(\d+)(?!.*\d)/, (d) => String(Number(d) + 1));
+  let code = last && /\d/.test(last) ? bump(last) : parent ? `${parent.code}.1` : "1";
+  for (let i = 0; taken.has(key(code)) && i < 500; i++) code = bump(code);
+  return code;
+}
+
+/** Adds an empty node under a parent (or at the top level) and returns the new extraction and node id. */
+export function addNode(ex: Extraction, parentId: string | null, code = suggestChildCode(ex, parentId)): { ex: Extraction; id: string } {
+  const id = `n${ex.seq + 1}`;
+  const next = edit(ex, (e) => {
+    e.seq += 1;
+    const parent = parentId ? e.nodes.find((n) => n.id === parentId) : undefined;
+    const n: ExtractedNode = { id, code: normalizeCode(code), title: "", text: "", parentOverride: parent?.id ?? null, loc: parent?.loc ?? { file: e.files[0] ?? "manual" } };
+    const kids = descendants(e, parent?.id ?? "");
+    const lastIdx = parent ? Math.max(...e.nodes.map((x, i) => (kids.has(x.id) ? i : -1))) : e.nodes.length - 1;
+    e.nodes.splice(lastIdx + 1, 0, n);
+  });
+  return { ex: next, id };
+}
+
 /** Merges nodes into the first one: text and evidence are appended, children move over. */
 export function mergeNodes(ex: Extraction, keepId: string, dropIds: string[]): Extraction {
   return edit(ex, (e) => {

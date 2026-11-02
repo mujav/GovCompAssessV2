@@ -48,7 +48,7 @@ async function readPdf(buf: ArrayBuffer): Promise<PdfTextItem[][]> {
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    pages.push(content.items.flatMap((it) => ("str" in it ? [{ str: it.str, transform: it.transform, height: it.height }] : [])));
+    pages.push(content.items.flatMap((it) => ("str" in it ? [{ str: it.str, transform: it.transform, height: it.height, width: it.width }] : [])));
   }
   await doc.destroy();
   return pages;

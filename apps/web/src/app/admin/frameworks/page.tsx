@@ -8,9 +8,9 @@ import { requirementCounts } from "@/lib/admin/diff";
 import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
 import type { FrameworkPackage, FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
 import { readFiles } from "@/lib/import/read-files";
-import { ASSESSED, ImportReview, RequirementTree, UploadZone, inputCls, type ImportSession } from "./import-flow";
+import { ASSESSED, ImportFlow, RequirementTree, UploadZone, inputCls, type ExtractMethod, type ImportSession } from "./import-flow";
 
-const TABS = [{ label: "Hierarchy" }, { label: "Requirements import" }, { label: "Custom fields" }, { label: "Terminology" }];
+const TABS = [{ label: "Hierarchy" }, { label: "Requirements" }, { label: "Custom fields" }, { label: "Terminology" }];
 const LV_COLS = "44px 1.3fr 1.3fr 1fr 1.1fr 92px";
 
 function frameworkChecks(v: FrameworkVersion): CheckItem[] {
@@ -40,23 +40,15 @@ function frameworkChecks(v: FrameworkVersion): CheckItem[] {
 
 export default function FrameworkBuilderPage() {
   const { state, update, editDraft, user } = useAdmin();
-  const [sel, setSel] = useState("fw-qiyas");
+  // No framework selected = the start screen: upload a document first, then edit what was extracted.
+  const [sel, setSel] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
   const [session, setSession] = useState<ImportSession | null>(null);
   const [reading, setReading] = useState(false);
+  const [method, setMethod] = useState<ExtractMethod>("ai");
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
-  const pkg = state.frameworks.find((f) => f.id === sel) ?? state.frameworks[0];
-  const { value: fw, locked } = working(pkg);
-  if (!fw) return null;
-  const edit = (fn: (d: FrameworkVersion) => void) => editDraft<FrameworkVersion>("framework", pkg.id, fn);
-  const editLevel = (id: string, patch: Partial<HierarchyLevel>) =>
-    edit((d) => {
-      const l = d.levels.find((x) => x.id === id);
-      if (l) Object.assign(l, patch);
-    });
-  const checks = frameworkChecks(fw);
-
+  const pkg = state.frameworks.find((f) => f.id === sel);
   const newFramework = () => {
     const id = `fw-${state.seq + 1}`;
     update((s) => {
@@ -91,7 +83,7 @@ export default function FrameworkBuilderPage() {
         setNotice({ ok: false, text: read.files.map((f) => `${f.name}: ${f.error ?? "no readable content"}`).join(" · ") });
         return;
       }
-      setSession({ ...read, target });
+      setSession({ ...read, target, method });
     } catch (e) {
       setNotice({ ok: false, text: e instanceof Error ? e.message : "The files could not be read." });
     } finally {
@@ -102,9 +94,9 @@ export default function FrameworkBuilderPage() {
   if (session)
     return (
       <>
-        <PageHeader crumb="Admin Studio / Framework package / Import" title="Import framework from file" />
+        <PageHeader crumb="Admin Studio / Framework Builder / New from document" title="Create a framework from a document" />
         <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
-          <ImportReview
+          <ImportFlow
             session={session}
             onCancel={() => setSession(null)}
             onAccepted={(id, text) => {
@@ -118,18 +110,33 @@ export default function FrameworkBuilderPage() {
       </>
     );
 
+  if (!pkg) return <StartScreen method={method} setMethod={setMethod} reading={reading} notice={notice} onFiles={(files) => startImport(files, { kind: "new", name: "", authority: "", version: "" })} onOpen={(id) => { setSel(id); setTab(0); setNotice(null); }} onBlank={() => newFramework()} />;
+
+  const { value: fw, locked } = working(pkg);
+  if (!fw) return null;
+  const edit = (fn: (d: FrameworkVersion) => void) => editDraft<FrameworkVersion>("framework", pkg.id, fn);
+  const editLevel = (id: string, patch: Partial<HierarchyLevel>) =>
+    edit((d) => {
+      const l = d.levels.find((x) => x.id === id);
+      if (l) Object.assign(l, patch);
+    });
+  const checks = frameworkChecks(fw);
+
+
   return (
     <>
       <PageHeader
-        crumb="Admin Studio / Framework package"
-        title="Framework Builder"
+        crumb="Admin Studio / Framework Builder"
+        title={`${fw.name} · v${fw.version}`}
         actions={
-          <>
-            <Button onClick={() => setTab(-1)}>Import from file</Button>
-            <Button variant="primary" className="px-4" onClick={newFramework}>
-              New framework
-            </Button>
-          </>
+          <Button
+            onClick={() => {
+              setSel(null);
+              setNotice(null);
+            }}
+          >
+            ← All frameworks
+          </Button>
         }
       />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
@@ -138,49 +145,6 @@ export default function FrameworkBuilderPage() {
             {notice.text}
           </div>
         )}
-        {tab === -1 && (
-          <section aria-label="Import a new framework" className="flex flex-col gap-3 rounded-[14px] border border-line bg-white px-5 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="m-0 text-base font-semibold">New framework or index from a file</h2>
-              <Button size="md" onClick={() => setTab(0)}>
-                Close
-              </Button>
-            </div>
-            <UploadZone busy={reading} onFiles={(files) => startImport(files, { kind: "new", name: "", authority: "", version: "" })} note="You can switch to “new version of an existing framework” during review." />
-          </section>
-        )}
-        <section aria-label="Frameworks" className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-3">
-          {state.frameworks.map((f) => {
-            const w = f.draft ?? f.live!;
-            const status = f.pendingCr ? ["IN REVIEW", "#E8ECF3", "#3E4B63"] : f.draft ? ["DRAFT", "#FBEFD9", "#8A4B00"] : ["PUBLISHED", "#E3F1EA", "#11603F"];
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setSel(f.id)}
-                aria-pressed={f.id === pkg.id}
-                className="flex cursor-pointer flex-col gap-1.5 rounded-xl bg-white px-4 py-3.5 text-left text-ink"
-                style={{ border: f.id === pkg.id ? "2px solid #0E5A45" : "1px solid #DCE2DE" }}
-              >
-                <span className="flex items-center justify-between gap-2">
-                  <b className="text-[15px]">
-                    {w.name} · v{w.version}
-                  </b>
-                  <span className="rounded-md px-2 py-0.5 text-[11px] font-bold" style={{ background: status[1], color: status[2] }}>
-                    {status[0]}
-                  </span>
-                </span>
-                <span className="text-xs text-muted">
-                  {w.authority} · {f.live ? `v${f.live.version} live` : "never published"}
-                  {f.usedByCycles ? ` · used by ${f.usedByCycles} cycle` : ""}
-                </span>
-                <span className="font-mono text-xs text-ink-2">{w.levels.map((l) => l.en).join(" › ")}</span>
-                {!!w.requirements?.length && <span className="text-xs text-muted">{w.requirements.length} requirement nodes</span>}
-              </button>
-            );
-          })}
-        </section>
-
         <div className="flex flex-wrap items-start gap-4">
           <section className="min-w-0 flex-[999_1_560px] overflow-hidden rounded-[14px] border border-line bg-white">
             <div className="flex flex-col gap-3 border-b border-line-soft px-5 py-4">
@@ -378,5 +342,111 @@ function ResultRow({ label, value, bg, fg }: { label: string; value: string; bg:
       <span>{label}</span>
       <b>{value}</b>
     </div>
+  );
+}
+
+function StartScreen({
+  method,
+  setMethod,
+  reading,
+  notice,
+  onFiles,
+  onOpen,
+  onBlank,
+}: {
+  method: ExtractMethod;
+  setMethod: (m: ExtractMethod) => void;
+  reading: boolean;
+  notice: { ok: boolean; text: string } | null;
+  onFiles: (files: File[]) => void;
+  onOpen: (id: string) => void;
+  onBlank: () => void;
+}) {
+  const { state } = useAdmin();
+  return (
+    <>
+      <PageHeader crumb="Admin Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
+      <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
+        {notice && (
+          <div role="status" className={notice.ok ? "rounded-lg bg-good-soft px-3 py-2 text-[13px] text-good" : "rounded-lg bg-bad-soft px-3 py-2 text-[13px] text-bad"}>
+            {notice.text}
+          </div>
+        )}
+        <section aria-label="Create a framework from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
+          <div className="flex flex-col gap-1">
+            <h2 className="m-0 text-lg font-semibold">Create a framework from a document</h2>
+            <p className="m-0 text-[13px] leading-5 text-muted">
+              Upload the framework, index or standards document. The platform extracts its levels, standards, requirements and evidence, then you review and edit the result
+              and create the framework.
+            </p>
+          </div>
+          <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2 p-0 text-[13px]">
+            {[
+              ["Upload", "Drop the document (PDF, Word, Excel…)"],
+              ["Extract", method === "ai" ? "Claude reads it and proposes the tree" : "Codes and numbering build the tree"],
+              ["Review and edit", "Fix titles, text, evidence, levels"],
+              ["Create", "Published right away, no approval needed"],
+            ].map(([t, d], i) => (
+              <li key={t} className="flex gap-2.5 rounded-lg bg-surface-2 px-3 py-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">{i + 1}</span>
+                <span className="flex flex-col">
+                  <b>{t}</b>
+                  <span className="text-xs text-muted">{d}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <fieldset className="m-0 flex flex-wrap items-center gap-2 border-0 p-0 text-[13px]">
+            <legend className="sr-only">Extraction method</legend>
+            <span className="mr-1 text-xs font-semibold text-muted">Extract with</span>
+            {(
+              [
+                ["ai", "Claude (AI) · recommended for PDFs and Word"],
+                ["rules", "Rule-based · for coded spreadsheets"],
+              ] as const
+            ).map(([k, label]) => (
+              <label key={k} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 ${method === k ? "border-brand bg-brand-tint font-semibold" : "border-field"}`}>
+                <input type="radio" name="method" checked={method === k} onChange={() => setMethod(k)} className="sr-only" />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+          <UploadZone busy={reading} onFiles={onFiles} />
+        </section>
+
+        <section aria-label="Frameworks in the platform" className="flex flex-col gap-2.5">
+          <h2 className="m-0 text-base font-semibold">Frameworks in the platform · {state.frameworks.length}</h2>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+            {state.frameworks.map((f) => {
+              const w = f.draft ?? f.live!;
+              const status = f.pendingCr ? ["IN REVIEW", "#E8ECF3", "#3E4B63"] : f.draft ? ["DRAFT", "#FBEFD9", "#8A4B00"] : ["PUBLISHED", "#E3F1EA", "#11603F"];
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => onOpen(f.id)}
+                  className="flex cursor-pointer flex-col gap-1.5 rounded-xl border border-line bg-white px-4 py-3.5 text-left text-ink hover:border-brand"
+                >
+                  <span className="flex items-start justify-between gap-2">
+                    <b className="text-[15px]" dir="auto">
+                      {w.name} · v{w.version}
+                    </b>
+                    <span className="shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold" style={{ background: status[1], color: status[2] }}>
+                      {status[0]}
+                    </span>
+                  </span>
+                  <span className="text-xs text-muted">
+                    {w.authority} · {f.live ? `v${f.live.version} live` : "never published"}
+                    {f.usedByCycles ? ` · used by ${f.usedByCycles} cycle` : ""}
+                  </span>
+                  <span className="font-mono text-xs text-ink-2">{w.levels.map((l) => l.en).join(" › ")}</span>
+                  {!!w.requirements?.length && <span className="text-xs text-muted">{requirementCounts(w)}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </main>
+    </>
   );
 }

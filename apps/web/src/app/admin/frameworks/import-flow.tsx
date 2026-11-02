@@ -1,15 +1,18 @@
 "use client";
 
-// Framework Builder file import: upload → review the extracted hierarchy → accept into a
-// framework draft. Extraction is deterministic (src/lib/engine/extract.ts); nothing here
-// is published until the draft passes four-eyes approval.
+// Framework Builder file import: upload → extract (Claude, or the rule-based engine) →
+// review and edit the result → create the framework. Claude only proposes the tree; merging
+// and checks are deterministic (src/lib/engine), and the admin edits everything before it is
+// created. A new framework is published at once; a new version of an existing one becomes a
+// draft that goes through four-eyes approval.
 
-import { Fragment, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, cx } from "@/components/ui";
 import { diffRequirements, requirementSummary } from "@/lib/admin/diff";
 import { useAdmin, type ImportTarget } from "@/lib/admin/store";
 import type { FrameworkRequirement, LevelAssessment } from "@/lib/admin/types";
 import {
+  addNode,
   adoptOrphan,
   applyDefaultWeight,
   checkExtraction,
@@ -32,6 +35,7 @@ import {
   type WarningKind,
 } from "@/lib/engine/extract";
 import { ACCEPTED_EXTENSIONS } from "@/lib/engine/extract-sources";
+import { AiUnavailable, runAiExtraction, type AiProgress, type AiRun } from "@/lib/import/ai-import";
 import { shortHash, type ReadFile } from "@/lib/import/read-files";
 
 export const ASSESSED: Record<LevelAssessment, string> = {
@@ -94,8 +98,8 @@ export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files:
           disabled && "opacity-60",
         )}
       >
-        <b className="text-sm">{busy ? "Reading files…" : "Drop requirement files here"}</b>
-        <span className="text-muted">Excel or CSV, PDF, Word (.docx), text or Markdown, JSON. Several files are combined into one framework.</span>
+        <b className="text-sm">{busy ? "Reading files…" : "Drop the framework document here"}</b>
+        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one framework.</span>
         <input
           ref={input}
           type="file"
@@ -142,16 +146,159 @@ function prettyName(file: string) {
   return base ? base[0].toUpperCase() + base.slice(1) : "Imported framework";
 }
 
+export type ExtractMethod = "ai" | "rules";
+
 export interface ImportSession {
   files: ReadFile[];
   docs: SourceDoc[];
   target: ImportTarget;
+  method: ExtractMethod;
 }
 
-export function ImportReview({ session, onAccepted, onCancel }: { session: ImportSession; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
+const STEPS = ["Upload", "Extract", "Review and edit", "Create"];
+
+function Steps({ at }: { at: number }) {
+  return (
+    <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 text-[13px]">
+      {STEPS.map((s, i) => (
+        <li key={s} className="flex items-center gap-2">
+          <span className={cx("rounded-full px-2.5 py-1 font-semibold", i < at ? "bg-good-soft text-good" : i === at ? "bg-brand text-white" : "border border-field text-ink-2")}>
+            {i < at ? "✓ " : `${i + 1} · `}
+            {s}
+          </span>
+          {i < STEPS.length - 1 && <span aria-hidden="true">→</span>}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function FileChips({ files }: { files: ReadFile[] }) {
+  return (
+    <ul className="m-0 flex list-none flex-wrap gap-2 p-0 text-xs">
+      {files.map((f) => (
+        <li key={f.name + f.hash} className={cx("rounded-lg border px-2.5 py-1.5", f.error ? "border-bad-line bg-bad-soft text-bad" : "border-line bg-surface-2")}>
+          <b>{f.name}</b> · {FORMAT_LABEL[f.format ?? ""] ?? "unknown"} · {f.size > 1024 * 1024 ? `${(f.size / 1024 / 1024).toFixed(1)} MB` : `${(f.size / 1024).toFixed(1)} KB`}
+          {f.error ? ` · ${f.error}` : ` · SHA-256 ${shortHash(f.hash)}`}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+interface Extracted {
+  ex: Extraction;
+  method: ExtractMethod;
+  run?: AiRun;
+  note?: string;
+}
+
+function rulesResult(session: ImportSession, note?: string): Extracted {
+  return { ex: extractFramework(session.docs), method: "rules", note };
+}
+
+/** Runs the extraction for a session, shows progress, then hands the result to the review. */
+export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportSession; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
+  const [result, setResult] = useState<Extracted | null>(() => (session.method === "rules" ? rulesResult(session) : null));
+  const [progress, setProgress] = useState<AiProgress | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const started = useRef(Date.now());
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (result || failed) return;
+    const ctrl = new AbortController();
+    started.current = Date.now();
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    const files = session.files.filter((f) => !f.error).map((f) => f.name);
+    const records = session.docs.reduce((a, d) => a + (d.kind === "text" ? d.lines.length : d.kind === "table" ? d.rows.length : d.items.length), 0);
+    const sheets = session.docs.flatMap((d) => (d.kind === "table" && d.sheet ? [d.sheet] : []));
+    runAiExtraction(session.docs, { files, sheets, records }, setProgress, ctrl.signal)
+      .then(({ ex, run }) => setResult({ ex, method: "ai", run }))
+      .catch((e: unknown) => {
+        if (ctrl.signal.aborted) return;
+        if (e instanceof AiUnavailable) setResult(rulesResult(session, `${e.message} The rule-based engine was used instead.`));
+        else setFailed(e instanceof Error ? e.message : "The extraction failed.");
+      })
+      .finally(() => clearInterval(timer));
+    return () => {
+      ctrl.abort();
+      clearInterval(timer);
+    };
+  }, [session, result, failed, attempt]);
+
+  if (result) return <ImportReview session={session} extracted={result} onAccepted={onAccepted} onCancel={onCancel} />;
+
+  const pct = !progress ? 2 : progress.stage === "outline" ? 6 : progress.stage === "merge" ? 100 : 8 + Math.round((92 * progress.done) / Math.max(progress.total, 1));
+  const secs = Math.round((now - started.current) / 1000);
+  return (
+    <section aria-label="Extracting" className="flex flex-col gap-4 rounded-[14px] border border-line bg-white px-5 py-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Steps at={1} />
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
+      <FileChips files={session.files} />
+      {failed ? (
+        <div className="flex flex-col gap-3">
+          <div role="alert" className="rounded-lg bg-bad-soft px-3 py-2 text-[13px] text-bad">
+            Claude could not finish reading the file: {failed}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => {
+                setFailed(null);
+                setProgress(null);
+                setAttempt((a) => a + 1);
+              }}
+            >
+              Try again
+            </Button>
+            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine after the AI extraction failed."))}>
+              Use the rule-based engine
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3" aria-live="polite">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="m-0 text-base font-semibold">
+              {!progress || progress.stage === "outline"
+                ? "Claude is reading the table of contents and working out the hierarchy…"
+                : progress.stage === "chunks"
+                  ? `Claude is extracting standards, requirements and evidence from ${progress.total} parts…`
+                  : "Building the tree…"}
+            </h2>
+            <span className="font-mono text-xs text-muted">{secs}s</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Extraction progress">
+            <div className="h-full rounded-full bg-brand transition-all duration-500" style={{ width: `${pct}%` }} />
+          </div>
+          <div className="text-[13px] text-muted">
+            {progress?.stage === "chunks" ? `${progress.done} of ${progress.total} parts read · ${progress.nodes} nodes found so far. ` : ""}
+            Large documents take a few minutes. Parts are read in parallel; you review and edit everything before the framework is created.
+          </div>
+          {!!progress?.recent.length && (
+            <ul className="m-0 flex list-none flex-col gap-1 rounded-lg bg-surface-2 p-3 text-[13px]" dir="auto">
+              {progress.recent.map((r, i) => (
+                <li key={`${r}-${i}`} className="truncate" dir="auto">
+                  {r}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ImportReview({ session, extracted, onAccepted, onCancel }: { session: ImportSession; extracted: Extracted; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
   const { state, user, importFramework } = useAdmin();
   const [regex, setRegex] = useState("");
-  const [ex, setEx] = useState<Extraction>(() => extractFramework(session.docs));
+  const [ex, setEx] = useState<Extraction>(extracted.ex);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -164,6 +311,13 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
   const [newName, setNewName] = useState(session.target.kind === "new" && session.target.name ? session.target.name : (ex.meta.name ?? prettyName(firstFile)));
   const [newAuthority, setNewAuthority] = useState(ex.meta.authority ?? "Internal");
   const [newVersion, setNewVersion] = useState(ex.meta.version ?? "1.0");
+  const add = (parentId: string | null) => {
+    const r = addNode(ex, parentId);
+    apply(r.ex);
+    if (parentId) setCollapsed((c) => new Set([...c].filter((id) => id !== parentId)));
+    setEditing(r.id);
+    requestAnimationFrame(() => document.getElementById(`node-${r.id}`)?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  };
 
   const warnings = useMemo(() => checkExtraction(ex), [ex]);
   const counts = useMemo(() => levelCounts(ex), [ex]);
@@ -278,7 +432,12 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
     const t: ImportTarget = target === "version" ? { kind: "version", id: versionOf } : { kind: "new", name: newName, authority: newAuthority, version: newVersion };
     const r = importFramework(t, payload);
     if (!r.ok) return setError(r.error);
-    onAccepted(r.id!, `Imported ${draft.requirements.length} requirement nodes into the draft (${changed}). Check the validation, then submit for approval.`);
+    onAccepted(
+      r.id!,
+      target === "new"
+        ? `Created and published ${newName.trim()} v${newVersion.trim() || "1.0"} with ${draft.requirements.length} requirement nodes.`
+        : `Imported ${draft.requirements.length} requirement nodes into the draft (${changed}). Check the validation, then submit for approval.`,
+    );
   };
 
   const sel = [...selected].filter((id) => ex.nodes.some((n) => n.id === id));
@@ -288,37 +447,22 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
     <div className="flex flex-col gap-4">
       <section aria-label="Import progress" className="flex flex-col gap-3 rounded-[14px] border border-line bg-white px-5 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 text-[13px]">
-            {["Upload", "Review", "Accept into draft"].map((s, i) => (
-              <li key={s} className="flex items-center gap-2">
-                <span className={cx("rounded-full px-2.5 py-1 font-semibold", i === 0 ? "bg-good-soft text-good" : i === 1 ? "bg-brand text-white" : "border border-field text-ink-2")}>
-                  {i === 0 ? "✓ " : `${i + 1} · `}
-                  {s}
-                </span>
-                {i < 2 && <span aria-hidden="true">→</span>}
-              </li>
-            ))}
-          </ol>
+          <Steps at={2} />
           <Button onClick={onCancel}>Cancel import</Button>
         </div>
-        <ul className="m-0 flex list-none flex-wrap gap-2 p-0 text-xs">
-          {session.files.map((f) => (
-            <li key={f.name + f.hash} className={cx("rounded-lg border px-2.5 py-1.5", f.error ? "border-bad-line bg-bad-soft text-bad" : "border-line bg-surface-2")}>
-              <b>{f.name}</b> · {FORMAT_LABEL[f.format ?? ""] ?? "unknown"} · {(f.size / 1024).toFixed(1)} KB
-              {f.error ? ` · ${f.error}` : ` · SHA-256 ${shortHash(f.hash)}`}
-            </li>
-          ))}
-        </ul>
+        <FileChips files={session.files} />
         <div className="text-xs text-muted">
-          {ex.records} source rows or lines read{ex.sheets.length ? ` · sheets used: ${ex.sheets.join(", ")}` : ""} · {ex.nodes.length} nodes found. Detection is rule-based (codes, numbering,
-          column headers): the same file always gives the same result.
+          {extracted.method === "ai" && extracted.run
+            ? `Extracted by Claude (${extracted.run.model}) from ${extracted.run.pages} pages in ${extracted.run.chunks} parts · ${Math.round(extracted.run.ms / 1000)}s · ${ex.nodes.length} nodes. The tree, codes and parents are checked by the platform's rules; review the text against the document before creating.`
+            : `${ex.records} source rows or lines read${ex.sheets.length ? ` · sheets used: ${ex.sheets.join(", ")}` : ""} · ${ex.nodes.length} nodes found. Rule-based detection (codes, numbering, column headers): the same file always gives the same result.`}
         </div>
+        {extracted.note && <div className="rounded-lg bg-warn-soft px-3 py-2 text-[13px] text-warn">{extracted.note}</div>}
       </section>
 
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-4">
           <section aria-label="Detected levels" className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white px-5 py-4">
-            <h2 className="m-0 text-base font-semibold">Detected hierarchy</h2>
+            <h2 className="m-0 text-base font-semibold">Hierarchy levels</h2>
             <div className="overflow-x-auto">
               <div role="table" aria-label="Detected levels" className="min-w-[640px] text-[13px]">
                 <div role="row" className="grid gap-2.5 border-b border-line py-2 text-xs font-semibold text-muted" style={{ gridTemplateColumns: LEVEL_COLS }}>
@@ -373,6 +517,7 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
               In a code pattern <span className="font-mono">#</span> stands for a number, e.g. <span className="font-mono">#.#.#-#</span> or <span className="font-mono">ECC #-#-#</span>. Codes that
               do not match their level&apos;s pattern are listed as warnings.
             </div>
+            {extracted.method === "rules" && (
             <details className="text-[13px]">
               <summary className="cursor-pointer font-semibold">Requirement codes look different? Set the code expression</summary>
               <div className="mt-2 flex flex-wrap items-end gap-2">
@@ -386,6 +531,7 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
               </div>
               <div className="mt-1 text-xs text-muted">Leave empty for the built-in detector. Re-running starts the review again and discards edits.</div>
             </details>
+            )}
           </section>
 
           <section aria-label="Requirement tree" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
@@ -400,6 +546,9 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
                 </Button>
                 <Button size="sm" onClick={() => setCollapsed(new Set([...hasKids]))}>
                   Collapse all
+                </Button>
+                <Button size="sm" onClick={() => add(null)}>
+                  + Top-level node
                 </Button>
               </div>
             </div>
@@ -471,7 +620,9 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                         <b className="font-mono text-xs">{n.code}</b>
-                        <span className={cx("min-w-0", !n.title && "italic text-muted")}>{n.title || (n.placeholder ? "Missing parent: not in the file" : "No title")}</span>
+                        <span dir="auto" className={cx("min-w-0", !n.title && "italic text-muted")}>
+                          {n.title || (n.placeholder ? "Missing parent: not in the file" : n.text ? "" : "No title")}
+                        </span>
                         <Badge tone="gray">{ex.levels[depth]?.en ?? `Level ${depth + 1}`}</Badge>
                         {n.weight && <Badge tone="brand">{weightLabel(n.weight)}</Badge>}
                         {n.evidence && <Badge tone="na">Evidence</Badge>}
@@ -481,12 +632,19 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
                           </Badge>
                         ))}
                       </div>
-                      {n.text && editing !== n.id && <div className="line-clamp-2 whitespace-pre-line text-xs text-ink-2">{n.text}</div>}
+                      {n.text && editing !== n.id && (
+                        <div dir="auto" className={cx("whitespace-pre-line", n.title ? "line-clamp-2 text-xs text-ink-2" : "line-clamp-3 text-[13px] text-ink")}>
+                          {n.text}
+                        </div>
+                      )}
                       <div className="text-[11px] text-muted">{formatLoc(n.loc)}</div>
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <Button size="sm" className="h-8 px-2 text-xs" onClick={() => setEditing(editing === n.id ? null : n.id)} aria-label={`Edit ${n.code}`}>
                         Edit
+                      </Button>
+                      <Button size="sm" className="h-8 px-2 text-xs" onClick={() => add(n.id)} aria-label={`Add a child under ${n.code}`}>
+                        + Child
                       </Button>
                       <Button size="sm" className="h-8 px-2 text-xs text-bad" onClick={() => apply(deleteNode(ex, n.id))} aria-label={`Delete ${n.code}`}>
                         Delete
@@ -512,16 +670,8 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
         </div>
 
         <aside className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
-          <Warnings
-            ex={ex}
-            warnings={warnings}
-            firstByCode={firstByCode}
-            apply={apply}
-            focus={focus}
-          />
-
           <section aria-label="Accept" className="flex flex-col gap-3 rounded-[14px] border-2 border-brand bg-white p-[18px] text-[13px]">
-            <h2 className="m-0 text-base font-semibold">Accept into a draft</h2>
+            <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the framework" : "Save as a new version"}</h2>
             <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
               <legend className="mb-1 text-xs font-semibold text-muted">Import as</legend>
               <label className="flex items-center gap-2">
@@ -543,7 +693,7 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
               )}
               <label className="flex items-center gap-2">
                 <input type="radio" name="target" checked={target === "new"} onChange={() => setTarget("new")} />
-                New framework or index
+                New framework or index (published right away)
               </label>
               {target === "new" && (
                 <div className="ml-6 grid grid-cols-[1fr_90px] gap-2">
@@ -594,12 +744,22 @@ export function ImportReview({ session, onAccepted, onCancel }: { session: Impor
               </div>
             )}
             <Button variant="primary" className="px-4" disabled={blockers.length > 0} onClick={accept} aria-disabled={blockers.length > 0}>
-              Accept into draft
+              {target === "new" ? "Create framework" : "Save into draft"}
             </Button>
             <div className="text-xs leading-[18px] text-muted">
-              Accepting writes the levels and requirements to a draft only. It goes live after you submit it and another person with approval rights approves it.
+              {target === "new"
+                ? "A new framework is not used by any assessment cycle yet, so it is published as soon as you create it. Later changes are made in a new version, which goes through approval."
+                : "The live version may be in use by assessment cycles, so the new version is saved as a draft. It goes live after you submit it and another person with approval rights approves it."}
             </div>
           </section>
+          <Warnings
+            ex={ex}
+            warnings={warnings}
+            firstByCode={firstByCode}
+            apply={apply}
+            focus={focus}
+          />
+
         </aside>
       </div>
     </div>
@@ -638,7 +798,7 @@ function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (
       </label>
       <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
         Title
-        <input value={title} onChange={(e) => setTitle(e.target.value)} className={cx(inputCls, "text-[13px] font-normal text-ink")} />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} dir="auto" className={cx(inputCls, "text-[13px] font-normal text-ink")} />
       </label>
       <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
         Weight
@@ -649,13 +809,13 @@ function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (
           <option value="Low" />
         </datalist>
       </label>
-      <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
+      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
         Text
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal text-ink" />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={Math.min(8, Math.max(3, text.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
-      <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
-        Evidence
-        <textarea value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={2} className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal text-ink" />
+      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
+        Evidence required
+        <textarea value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={Math.min(6, Math.max(2, evidence.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
       <div className="col-span-3 flex gap-2">
         <Button type="submit" variant="primary" size="md">
@@ -847,7 +1007,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
                 {open.has(r.code) ? "▾" : "▸"}
               </button>
               <b className="shrink-0 font-mono text-xs">{r.code}</b>
-              <span className="min-w-0 flex-1">{r.title}</span>
+              <span className="min-w-0 flex-1" dir="auto">
+                {r.title || <span className="line-clamp-2">{r.text}</span>}
+                {(r.text || r.evidence) && (
+                  <details className="mt-0.5 text-xs text-ink-2">
+                    <summary className="cursor-pointer text-muted">Text{r.evidence ? " and evidence" : ""}</summary>
+                    {r.text && <div className="whitespace-pre-line">{r.text}</div>}
+                    {r.evidence && <div className="mt-1 whitespace-pre-line text-muted">Evidence: {r.evidence}</div>}
+                  </details>
+                )}
+              </span>
               <span className="shrink-0 text-[11px] text-muted">{levelName(r.level)}</span>
               {r.weight && <Badge tone="brand">{weightLabel(r.weight)}</Badge>}
             </li>

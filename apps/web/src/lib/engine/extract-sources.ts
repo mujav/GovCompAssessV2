@@ -233,33 +233,55 @@ export interface PdfTextItem {
   /** pdf.js transform matrix; [4] is x, [5] is y. */
   transform: number[];
   height?: number;
+  width?: number;
 }
 
-/** Groups pdf.js text items into reading-order lines, page by page. */
+const RTL_CHAR = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+const LTR_CHAR = /[A-Za-z0-9]/;
+
+/**
+ * Arabic PDFs often store one glyph per item, in presentation forms (U+FExx), placed right
+ * to left with mirrored brackets. Items are ordered by reading direction, joined only where
+ * there is a visible gap, then normalised (NFKC folds presentation forms to letters).
+ */
+function joinRow(parts: { x: number; w?: number; h: number; s: string }[]) {
+  const rtl = parts.filter((p) => RTL_CHAR.test(p.s)).length > parts.filter((p) => LTR_CHAR.test(p.s)).length;
+  const end = (p: (typeof parts)[number]) => p.x + (p.w ?? 0);
+  const sorted = [...parts].sort((a, b) => (rtl ? end(b) - end(a) : a.x - b.x));
+  let out = "";
+  let prev: (typeof parts)[number] | undefined;
+  for (const p of sorted) {
+    if (prev) {
+      const gap = prev.w === undefined || p.w === undefined ? Infinity : rtl ? prev.x - end(p) : p.x - end(prev);
+      if (gap > p.h * 0.18 && !out.endsWith(" ") && !p.s.startsWith(" ")) out += " ";
+    }
+    out += p.s;
+    prev = p;
+  }
+  out = out.normalize("NFKC").replace(/\u0640/g, "").replace(/\s+/g, " ").trim();
+  return rtl ? out.replace(/[()]/g, (c) => (c === "(" ? ")" : "(")) : out;
+}
+
 export function pdfItemsToDoc(file: string, pages: PdfTextItem[][]): TextDoc {
   const lines: TextDoc["lines"] = [];
   pages.forEach((items, p) => {
-    const rows: { y: number; parts: { x: number; s: string }[] }[] = [];
+    const rows: { y: number; parts: { x: number; w?: number; h: number; s: string }[] }[] = [];
     for (const it of items) {
       if (!it.str.trim()) continue;
       const y = it.transform[5];
-      const tol = Math.max(2, (it.height ?? 10) * 0.4);
+      const h = it.height || 10;
+      const tol = Math.max(2, h * 0.4);
       let row = rows.find((r) => Math.abs(r.y - y) <= tol);
       if (!row) {
         row = { y, parts: [] };
         rows.push(row);
       }
-      row.parts.push({ x: it.transform[4], s: it.str });
+      row.parts.push({ x: it.transform[4], w: it.width, h, s: it.str });
     }
     rows
       .sort((a, b) => b.y - a.y)
       .forEach((r, i) => {
-        const t = r.parts
-          .sort((a, b) => a.x - b.x)
-          .map((x) => x.s)
-          .join(" ")
-          .replace(/\s+/g, " ")
-          .trim();
+        const t = joinRow(r.parts);
         if (t) lines.push({ page: p + 1, line: i + 1, text: t });
       });
   });
