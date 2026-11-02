@@ -6,6 +6,7 @@ import { useAdmin } from "@/lib/admin/store";
 import type { WsRequirement } from "@/lib/workspace/data";
 import { useWorkspace } from "@/lib/workspace/store";
 import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceRecords, withAssignments, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
+import { DEMO_DIRECTORY, PEOPLE_KEY, type EntityPerson } from "./people";
 import { useJourney, useScreenState } from "./store";
 import { EMPTY_OVERLAY, stageOf, isReturned, type Stage, type WorkOverlay } from "./work";
 
@@ -25,6 +26,14 @@ export function useEntityFrameworks() {
   return { frameworks, active, current, setActive: (id: string) => setChoice((d) => void (d.id = id)) };
 }
 
+/** The entity's people (from onboarding or Entity 360); seeded demo clients start from the demo directory. */
+export function useEntityPeople() {
+  const client = useCurrentClient();
+  const { state } = useJourney();
+  const onboarded = state.added.some((a) => a.client.id === client.id);
+  return useScreenState<EntityPerson[]>(PEOPLE_KEY(client.id), onboarded ? [] : DEMO_DIRECTORY);
+}
+
 // The workspace framework keeps its original slice so earlier moves are not lost.
 const overlayKey = (clientId: string, fwId: string) => (fwId === WORKSPACE_FRAMEWORK_ID ? `work.${clientId}` : `work.${clientId}.${fwId}`);
 
@@ -34,9 +43,10 @@ export function frameworkRequirements(
   workspace: boolean,
   wsReqs: WsRequirement[],
   assignments: Record<string, { owner: string; due: string }> = {},
+  people: EntityPerson[] = [],
 ): ClientRequirement[] {
   const library = framework ? libraryRequirements(framework.live) : [];
-  if (!workspace) return framework ? withAssignments(framework.id, library, assignments) : library;
+  if (!workspace) return framework ? withAssignments(framework.id, library, assignments, people) : library;
   // Workspace records carry the work state; the library adds the official wording where codes match.
   const wording = new Map(library.map((r) => [r.code, r]));
   return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
@@ -48,14 +58,15 @@ export function useAllFrameworkWork() {
   const ws = useWorkspace();
   const { state } = useJourney();
   const { frameworks } = useEntityFrameworks();
+  const [people] = useEntityPeople();
   const onboarded = state.added.some((a) => a.client.id === client.id);
   return useMemo(
     () =>
       frameworks.map((f) => {
         const workspace = usesWorkspaceRecords(f.id, onboarded);
-        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+        return { framework: f, workspace, reqs: frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
       }),
-    [frameworks, onboarded, ws.ctx.reqs, ws.state.assignments, state.screens, client.id],
+    [frameworks, onboarded, ws.ctx.reqs, ws.state.assignments, people, state.screens, client.id],
   );
 }
 
@@ -67,8 +78,9 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   const onboarded = state.added.some((a) => a.client.id === client.id);
   const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
   const workspace = usesWorkspaceRecords(fwId, onboarded);
+  const [people] = useEntityPeople();
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
-  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments), [framework, workspace, ws.ctx.reqs, ws.state.assignments]);
+  const reqs = useMemo(() => frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people), [framework, workspace, ws.ctx.reqs, ws.state.assignments, people]);
 
   /** Assigns requirements to a person (their department follows), due in the given date. */
   const assign = (codes: string[], person: string, due: string) => {
@@ -113,6 +125,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
     move,
     ret,
     assign,
+    people,
     log,
   };
 }

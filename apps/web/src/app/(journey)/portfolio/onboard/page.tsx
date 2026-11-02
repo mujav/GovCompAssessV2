@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { PeopleEditor } from "@/components/journey/people-editor";
 import { ConsultantShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, Pill, Segmented, inputClass, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { useAdmin } from "@/lib/admin/store";
 import { shortName } from "@/lib/journey/frameworks";
 import { LOGO, clientHref, type Client, type Engagement } from "@/lib/journey/portfolio";
+import { PEOPLE_KEY, normalizePerson, type EntityPerson } from "@/lib/journey/people";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 
 // 04 · Onboard client. A six-step wizard; creating the entity makes it active straight away,
@@ -33,15 +35,9 @@ const REFERENCE: { id: string; ini: string; name: string; nameAr: string; type: 
   { id: "demo-stats", ini: "SA", name: "Demo Statistics Agency", nameAr: "وكالة الإحصاء التجريبية", type: "Agency", parent: "Demo Ministry of Planning", domain: "stats.example.sa", logo: 4 },
 ];
 
-const AV: [string, string][] = [["#FDECEA", "#B42318"], ["#FFF4DF", "#8A4B00"], ["#EAF1FA", "#1E4E8C"], ["#E7F3ED", "#0E5A45"]];
 
-interface Person {
-  av: string;
-  name: string;
-  roles: string[];
-  tone: number;
-  user: boolean;
-}
+/** Stakeholders as saved by older versions of the wizard (initials, tone, user flag) or as people with details. */
+type Person = Partial<EntityPerson> & { av?: string; user?: boolean };
 
 const PROVENANCE: Record<string, [string, PillTone]> = { reg: ["Regulator", "ok"], file: ["Client file", "cx"], est: ["Estimated", "warn"] };
 
@@ -101,11 +97,11 @@ const START: Wizard = {
   step: 0,
   refId: "demo-housing",
   people: [
-    { av: "AM", name: "Abdullah M.", roles: ["Index owner", "Approver"], tone: 0, user: true },
-    { av: "RZ", name: "Dr. Rania Z.", roles: ["Executive sponsor"], tone: 0, user: false },
-    { av: "NH", name: "Nawaf H.", roles: ["DGA liaison officer"], tone: 1, user: true },
-    { av: "HB", name: "Hessa B.", roles: ["IT head", "SPOC"], tone: 2, user: true },
-    { av: "TQ", name: "Turki Q.", roles: ["HR head"], tone: 3, user: false },
+    { id: "s-am", name: "Abdullah M.", email: "abdullah.m@housing.example.sa", department: "Strategy & Performance", title: "Director of strategy", roles: ["Index owner", "Approver"], access: "user" },
+    { id: "s-rz", name: "Dr. Rania Z.", email: "", department: "Executive office", title: "Deputy governor", roles: ["Executive sponsor"], access: "contact" },
+    { id: "s-nh", name: "Nawaf H.", email: "nawaf.h@housing.example.sa", department: "Digital Transformation", title: "Transformation lead", roles: ["DGA liaison officer"], access: "user" },
+    { id: "s-hb", name: "Hessa B.", email: "hessa.b@housing.example.sa", department: "IT Operations", title: "IT head", roles: ["SPOC"], access: "user" },
+    { id: "s-tq", name: "Turki Q.", email: "", department: "Human Capital", title: "HR head", roles: [], access: "contact" },
   ],
   frameworkIds: ["fw-qiyas"],
   choices: { model: "Co-managed", duration: "12 months", data: "Restricted", accept: "Client only" },
@@ -120,12 +116,12 @@ export default function OnboardPage() {
   const { state: admin } = useAdmin();
   const [w, setW] = useScreenState<Wizard>("onboard", START);
   const [search, setSearch] = useState("");
-  const [newName, setNewName] = useState("");
   const [historyFor, setHistoryFor] = useState<string | null>(null);
   const ref = REFERENCE.find((r) => r.id === w.refId) ?? REFERENCE[0];
   const created = w.created ?? w.sent ?? [];
   const done = created.includes(ref.id);
-  const users = w.people.filter((p) => p.user).length;
+  const people = w.people.map(normalizePerson);
+  const users = people.filter((p) => p.access === "user").length;
   const attestOk = w.attest.every(Boolean);
   const matches = REFERENCE.filter((r) => `${r.name} ${r.nameAr}`.toLowerCase().includes(search.trim().toLowerCase()));
   const months = w.choices.duration.startsWith("6") ? "6 mo" : "12 mo";
@@ -179,13 +175,15 @@ export default function OnboardPage() {
     }));
     update((s) => {
       s.added.push({ client, engagement: engagements[0], more: engagements.slice(1) });
+      // The people captured here are who requirements can be assigned to in the workspace.
+      s.screens[PEOPLE_KEY(ref.id)] = people;
       const wz = (s.screens.onboard as Wizard | undefined) ?? structuredClone(START);
       wz.created = [...(wz.created ?? wz.sent ?? []), ref.id];
       delete wz.sent;
       s.screens.onboard = wz;
     });
     log(`Created ${ref.name} with ${pickedFw.map((f) => shortName(f.name)).join(" + ")}`);
-    const invited = w.people.filter((p) => p.user).map((p) => p.name);
+    const invited = people.filter((p) => p.access === "user").map((p) => p.name);
     if (invited.length) log(`Invitations sent to ${invited.join(", ")} · ${ref.name}`);
   }
 
@@ -268,8 +266,9 @@ export default function OnboardPage() {
                     onClick={() =>
                       setW((d) => {
                         const next = REFERENCE.find((r) => !clients.some((c) => c.id === r.id) && r.id !== ref.id);
-                        d.step = 0;
-                        d.refId = next?.id ?? d.refId;
+                        // A new client starts with its own people, attestations and contract.
+                        Object.assign(d, structuredClone({ ...START, created: d.created ?? d.sent ?? [] }), { people: [], refId: next?.id ?? d.refId, step: 0 });
+                        delete d.sent;
                       })
                     }
                   >
@@ -349,61 +348,13 @@ export default function OnboardPage() {
 
                 {w.step === 1 && (
                   <div className="flex flex-col gap-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h2 className="m-0 text-xl">Key stakeholders</h2>
-                      <span className="text-xs text-j-muted">{users} of {w.people.length} get a user account</span>
+                    <div className="flex flex-col gap-1">
+                      <h2 className="m-0 text-xl">Key stakeholders and people</h2>
+                      <p className="m-0 text-sm text-j-ink-2">
+                        Everyone who will own or contribute to requirements. Type them in or import the client&apos;s staff list; requirements can be assigned to anyone here.
+                      </p>
                     </div>
-                    <div className="flex flex-col gap-2">
-                      {w.people.map((p, i) => (
-                        <div key={p.av + i} className="flex flex-wrap items-center gap-3 rounded-[14px] border border-j-line px-3.5 py-3">
-                          <Avatar initials={p.av} bg={AV[p.tone][0]} fg={AV[p.tone][1]} size={36} />
-                          <span className="flex min-w-0 flex-auto flex-col gap-1">
-                            <b className="text-sm">{p.name}</b>
-                            <span className="flex flex-wrap gap-1">
-                              {p.roles.map((r) => (
-                                <Pill key={r} round={false} className="py-0.5 text-[11px]">
-                                  {r}
-                                </Pill>
-                              ))}
-                            </span>
-                          </span>
-                          <Segmented
-                            size="sm"
-                            label={`Access type for ${p.name}`}
-                            value={p.user ? "user" : "contact"}
-                            options={[
-                              { value: "contact", label: "Contact" },
-                              { value: "user", label: "User" },
-                            ]}
-                            onChange={(v) => setW((d) => void (d.people[i].user = v === "user"))}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <form
-                      className="flex flex-wrap gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const name = newName.trim();
-                        if (!name) return;
-                        const av = name
-                          .split(/\s+/)
-                          .map((s) => s[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase();
-                        setW((d) => void d.people.push({ av, name, roles: ["Contributor"], tone: d.people.length % 4, user: false }));
-                        setNewName("");
-                      }}
-                    >
-                      <label className="flex-[1_1_240px]">
-                        <span className="sr-only">Name of the new person</span>
-                        <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Name of a new stakeholder" className={cx(inputClass, "w-full")} />
-                      </label>
-                      <JButton type="submit" variant="outline" size="lg" disabled={!newName.trim()}>
-                        + Add person
-                      </JButton>
-                    </form>
+                    <PeopleEditor people={people} onChange={(next) => setW((d) => void (d.people = next))} onLog={log} />
                   </div>
                 )}
 
@@ -580,7 +531,7 @@ export default function OnboardPage() {
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
                       {[
                         [picked.length, picked.length === 1 ? "framework" : "frameworks"],
-                        [w.people.length, "stakeholders"],
+                        [people.length, "people"],
                         [TEAM.length, "consultants"],
                         [months, "engagement term"],
                       ].map(([v, l]) => (

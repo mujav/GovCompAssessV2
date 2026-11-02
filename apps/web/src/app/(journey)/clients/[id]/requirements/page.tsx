@@ -9,7 +9,6 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
-import { PEOPLE } from "@/lib/journey/frameworks";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
@@ -36,7 +35,7 @@ export default function RequirementsPage() {
 
 function RequirementsView() {
   const params = useSearchParams();
-  const { client, ws, framework, reqs, overlay, move, assign } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move, assign, people } = useClientWork();
   const [stage, setStage] = useState<Stage | null>((params.get("stage") as Stage) || null);
   const [onlyReturned, setOnlyReturned] = useState(params.get("returned") === "1");
   const [q, setQ] = useState("");
@@ -194,7 +193,7 @@ function RequirementsView() {
           <select aria-label="Owner" value={owner} onChange={(e) => (setOwner(e.target.value), reset())} className={cx(inputClass, "h-10")}>
             <option value="all">All owners</option>
             <option value="none">Unassigned</option>
-            {PEOPLE.map((p) => (
+            {people.map((p) => (
               <option key={p.name} value={p.name}>
                 {p.name}
               </option>
@@ -291,10 +290,10 @@ function RequirementsView() {
                           className={cx("max-w-full cursor-pointer truncate rounded-md border-0 bg-transparent p-0 text-[13px] hover:underline", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
                         >
                           {!r.owner && <option value="">Assign…</option>}
-                          {!PEOPLE.some((p) => p.name === r.owner) && r.owner && <option value={r.owner}>{r.owner}</option>}
-                          {PEOPLE.map((p) => (
+                          {!people.some((p) => p.name === r.owner) && r.owner && <option value={r.owner}>{r.owner}</option>}
+                          {people.map((p) => (
                             <option key={p.name} value={p.name}>
-                              {p.name} · {p.dept}
+                              {p.name}{p.department ? ` · ${p.department}` : ""}
                             </option>
                           ))}
                         </select>
@@ -328,7 +327,17 @@ function RequirementsView() {
           </div>
           <div className="flex items-center justify-between px-[18px] py-3 text-[13px] text-j-muted">
             <span>
-              {rows.length ? `${cur * PAGE + 1}–${Math.min(rows.length, cur * PAGE + PAGE)}` : 0} of {rows.length} · pick an owner on a row, or tick several rows to assign them together
+              {rows.length ? `${cur * PAGE + 1}–${Math.min(rows.length, cur * PAGE + PAGE)}` : 0} of {rows.length} ·{" "}
+              {people.length ? (
+                "pick an owner on a row, or tick several rows to assign them together"
+              ) : (
+                <>
+                  no people to assign yet ·{" "}
+                  <Link href={clientHref(client.id, "/360?tab=people")} className="font-semibold text-cx">
+                    add the client&apos;s people
+                  </Link>
+                </>
+              )}
             </span>
             <span className="flex gap-1.5">
               <JButton size="sm" aria-label="Previous page" disabled={cur === 0} onClick={() => setPage(cur - 1)}>
@@ -359,9 +368,9 @@ function RequirementsView() {
                 </label>
                 <select id="assign-to" value={assignTo} onChange={(e) => setAssignTo(e.target.value)} className="h-[34px] rounded-lg border-0 px-2 text-[13px] text-j-ink">
                   <option value="">Choose a person</option>
-                  {PEOPLE.map((p) => (
+                  {people.map((p) => (
                     <option key={p.name} value={p.name}>
-                      {p.name} · {p.dept}
+                      {p.name}{p.department ? ` · ${p.department}` : ""}
                     </option>
                   ))}
                 </select>

@@ -7,7 +7,6 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { CLARIFICATIONS, addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
-import { PEOPLE } from "@/lib/journey/frameworks";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
 import { useClientWork } from "@/lib/journey/use-work";
@@ -45,7 +44,7 @@ interface ReqScreen {
 
 export default function RequirementWorkspacePage() {
   const { code } = useParams<{ code: string }>();
-  const { client, ws, framework, reqs, overlay, move, ret, assign, log } = useClientWork();
+  const { client, ws, framework, reqs, overlay, move, ret, assign, people, log } = useClientWork();
   const r = reqs.find((x) => x.code === code);
   const [tab, setTab] = useState<Tab>("rev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
@@ -189,10 +188,10 @@ export default function RequirementWorkspacePage() {
                   className={cx("h-8 cursor-pointer rounded-lg border border-j-line bg-white px-2 text-[13px]", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
                 >
                   {!r.owner && <option value="">Assign an owner…</option>}
-                  {r.owner && !PEOPLE.some((p) => p.name === r.owner) && <option value={r.owner}>{r.owner}</option>}
-                  {PEOPLE.map((p) => (
+                  {r.owner && !people.some((p) => p.name === r.owner) && <option value={r.owner}>{r.owner}</option>}
+                  {people.map((p) => (
                     <option key={p.name} value={p.name}>
-                      {p.name} · {p.dept}
+                      {p.name}{p.department ? ` · ${p.department}` : ""}
                     </option>
                   ))}
                 </select>

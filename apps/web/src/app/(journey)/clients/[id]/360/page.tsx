@@ -1,19 +1,21 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { PeopleEditor } from "@/components/journey/people-editor";
 import { ClientShell, JMain, useCurrentClient } from "@/components/journey/shell";
-import { Avatar, JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
+import { JButton, JLink, Panel, PanelHead, Pill, Ring } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { useAdmin } from "@/lib/admin/store";
 import { WORKSPACE_FRAMEWORK_ID, shortName } from "@/lib/journey/frameworks";
 import { LOGO, clientHref, completionColor } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
-import { useEntityFrameworks } from "@/lib/journey/use-work";
+import { useEntityFrameworks, useEntityPeople } from "@/lib/journey/use-work";
 
 // 05 · Entity 360. Profile, index enrollments, history and stakeholders for one client.
 
-const TABS = ["Overview", "Stakeholders · 9", "Index history", "Systems", "Activity"] as const;
+const TABS = ["Overview", "People", "Index history", "Systems", "Activity"] as const;
 
 const BARS: { y: string; v: number; src: "reg" | "file" | "live"; rank: string }[] = [
   { y: "2022", v: 58.2, src: "reg", rank: "#31" },
@@ -32,17 +34,6 @@ const FACTS: [string, string][] = [
   ["Data level", "Restricted"],
 ];
 
-const PERSPECTIVES = ["Strategy", "Services", "Technology", "People", "Data"];
-const RACI_TONE: Record<string, [string, string]> = { R: ["#FDECEA", "#B42318"], A: ["#E0ECF8", "#1E4E8C"], C: ["#EEEDFD", "#4F46E5"], I: ["#F5F7F9", "#47534D"], "": ["#FAFBFC", "#C9D1CD"] };
-const AV: [string, string][] = [["#FDECEA", "#B42318"], ["#FFF4DF", "#8A4B00"], ["#E0ECF8", "#1E4E8C"], ["#E7F3ED", "#0E5A45"], ["#F3E8F7", "#7A2E8C"]];
-const RACI: { av: string; tone: number; name: string; role: string; cells: string[]; user: boolean }[] = [
-  { av: "NA", tone: 3, name: "Noura A.", role: "Index owner · DGA liaison", cells: ["A", "A", "A", "A", "A"], user: true },
-  { av: "RZ", tone: 0, name: "Dr. Rami Z.", role: "Executive sponsor", cells: ["I", "I", "I", "I", "I"], user: false },
-  { av: "FK", tone: 2, name: "Faisal K.", role: "IT Operations head", cells: ["", "C", "R", "", "C"], user: true },
-  { av: "RS", tone: 4, name: "Reem S.", role: "Digital Transformation", cells: ["R", "R", "C", "", ""], user: true },
-  { av: "LT", tone: 1, name: "Lama T.", role: "Human Capital head", cells: ["", "", "", "R", ""], user: true },
-];
-
 const SYSTEMS: [string, string, string][] = [
   ["Unified sign-in", "National SSO", "Integrated"],
   ["ERP", "Finance & HR", "Integrated"],
@@ -59,7 +50,9 @@ export default function Entity360Page() {
   // Past cycles exist for the seeded clients' Qiyas only; a new entity or another framework starts with none.
   const hasHistory = current?.id === WORKSPACE_FRAMEWORK_ID && !state.added.some((a) => a.client.id === client.id);
   const notEnrolled = admin.frameworks.filter((f) => f.live && !frameworks.some((x) => x.id === f.id)).map((f) => shortName(f.live!.name));
-  const [tab, setTab] = useState(0);
+  const params = useSearchParams();
+  const [tab, setTab] = useState(params.get("tab") === "people" ? 1 : 0);
+  const [people, setPeople] = useEntityPeople();
   const [proposed, setProposed] = useScreenState<string[]>(`360.${client.id}.proposed`, []);
   const [lbg, lfg] = LOGO[client.logo];
   const pct = client.id === "demo-entity" ? 72.4 : client.pct;
@@ -153,48 +146,10 @@ export default function Entity360Page() {
     </Panel>
   );
 
-  const raci = (
+  const team = (
     <Panel className="flex flex-col gap-4 p-[22px]">
-      <PanelHead
-        title="Stakeholders · RACI by perspective"
-        aside={
-          <span className="text-xs text-j-muted">
-            <b>R</b> responsible <b>A</b> accountable <b>C</b> consulted <b>I</b> informed
-          </span>
-        }
-      />
-      <div className="overflow-x-auto">
-        <div role="table" aria-label="RACI" className="grid min-w-[760px] grid-cols-[2fr_repeat(5,1fr)_0.9fr] items-center gap-1.5 text-sm">
-          <span role="columnheader" />
-          {PERSPECTIVES.map((p) => (
-            <span key={p} role="columnheader" className="text-center text-xs font-semibold text-j-muted">
-              {p}
-            </span>
-          ))}
-          <span role="columnheader" className="text-center text-xs font-semibold text-j-muted">
-            Access
-          </span>
-          {RACI.map((r) => (
-            <div key={r.av} role="row" className="contents">
-              <span role="rowheader" className="flex items-center gap-2.5 py-1">
-                <Avatar initials={r.av} bg={AV[r.tone][0]} fg={AV[r.tone][1]} />
-                <span className="flex flex-col leading-[17px]">
-                  <b>{r.name}</b>
-                  <span className="text-xs text-j-muted">{r.role}</span>
-                </span>
-              </span>
-              {r.cells.map((v, i) => (
-                <span key={i} role="cell" className="flex h-9 items-center justify-center rounded-lg text-[13px] font-bold" style={{ background: RACI_TONE[v][0], color: RACI_TONE[v][1] }}>
-                  {v || "·"}
-                </span>
-              ))}
-              <span role="cell" className="text-center">
-                <Pill tone={r.user ? "ok" : "draft"}>{r.user ? "User" : "Contact"}</Pill>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <PanelHead title={`People · ${people.length}`} aside={<span className="text-xs text-j-muted">Requirements can be assigned to anyone on this list</span>} />
+      <PeopleEditor people={people} onChange={(next) => setPeople((d) => void d.splice(0, d.length, ...next))} onLog={log} />
     </Panel>
   );
 
@@ -246,7 +201,7 @@ export default function Entity360Page() {
                 tab === i ? "border-cx font-semibold text-cx" : "border-transparent font-medium text-j-ink-3 hover:text-j-ink",
               )}
             >
-              {t}
+              {t === "People" ? `People · ${people.length}` : t}
             </button>
           ))}
         </div>
@@ -292,10 +247,9 @@ export default function Entity360Page() {
               {history}
               {profile}
             </div>
-            {raci}
           </>
         )}
-        {tab === 1 && raci}
+        {tab === 1 && team}
         {tab === 2 && <div className="flex flex-wrap gap-3.5">{history}</div>}
         {tab === 3 && (
           <Panel className="overflow-hidden">

@@ -4,7 +4,8 @@
 
 import type { FrameworkPackage, FrameworkRequirement, FrameworkVersion } from "@/lib/admin/types";
 import { nameKey } from "@/lib/admin/library";
-import { DEPARTMENTS, SUBMISSION_DEADLINE, type WsRequirement } from "@/lib/workspace/data";
+import { SUBMISSION_DEADLINE, type WsRequirement } from "@/lib/workspace/data";
+import type { EntityPerson } from "./people";
 import type { Client } from "./portfolio";
 
 /** The framework the shared demo workspace records belong to. */
@@ -40,17 +41,14 @@ export function entityFrameworks(client: Client, library: FrameworkPackage[]): E
   });
 }
 
-/** Everyone requirements can be assigned to, with their department. */
-export const PEOPLE = Object.values(DEPARTMENTS).flatMap((d) => d.people.map((p) => ({ name: p, dept: d.name })));
-
 /** Assignments of library-framework requirements are stored per framework so equal codes never clash. */
 export const assignmentKey = (frameworkId: string, code: string) => `${frameworkId}:${code}`;
 
 /** Owner, department and due date from the consultant's assignments, for requirements that come from the library. */
-export function withAssignments(frameworkId: string, reqs: ClientRequirement[], assignments: Record<string, { owner: string; due: string }>): ClientRequirement[] {
+export function withAssignments(frameworkId: string, reqs: ClientRequirement[], assignments: Record<string, { owner: string; due: string }>, people: EntityPerson[]): ClientRequirement[] {
   return reqs.map((r) => {
     const a = assignments[assignmentKey(frameworkId, r.code)];
-    return a ? { ...r, owner: a.owner, due: a.due, department: PEOPLE.find((p) => p.name === a.owner)?.dept ?? r.department } : r;
+    return a ? { ...r, owner: a.owner, due: a.due, department: people.find((p) => p.name === a.owner)?.department ?? r.department } : r;
   });
 }
 
