@@ -9,6 +9,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, cx } from "@/components/ui";
 import { diffRequirements, requirementSummary } from "@/lib/admin/diff";
+import { findDuplicate, findVersionClash } from "@/lib/admin/library";
 import { useAdmin, type ImportTarget } from "@/lib/admin/store";
 import type { FrameworkRequirement, LevelAssessment } from "@/lib/admin/types";
 import {
@@ -398,6 +399,17 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
   }, [order, collapsed, query, ex.nodes]);
   const hasKids = useMemo(() => new Set(ex.nodes.map((n) => n.parentId).filter(Boolean) as string[]), [ex.nodes]);
 
+  const fileHashes = useMemo(() => session.files.filter((f) => !f.error && f.hash).map((f) => f.hash), [session.files]);
+  const duplicate = useMemo(
+    () =>
+      target === "new"
+        ? findDuplicate(state.frameworks, { name: newName, hashes: fileHashes })
+        : pkg
+          ? (findVersionClash(pkg, { hashes: fileHashes }) ?? findDuplicate(state.frameworks, { hashes: fileHashes, exceptId: pkg.id }))
+          : null,
+    [target, newName, pkg, state.frameworks, fileHashes],
+  );
+
   const levelsOk = ex.levels.every((l) => l.en.trim() && l.ar.trim() && l.pattern.trim());
   const acceptedOk = ex.levels.some((l) => l.assessed === "accepted");
   const blockers = [
@@ -407,6 +419,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
     !acceptedOk && 'Mark one level as "Accepted here"',
     target === "version" && pkg?.pendingCr && `${(pkg.draft ?? pkg.live)?.name} is waiting on ${pkg.pendingCr}`,
     target === "new" && !newName.trim() && "Name the new framework",
+    duplicate && "Already in the library",
   ].filter((x): x is string => !!x);
 
   const accept = () => {
@@ -428,6 +441,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
         changed,
         errors: session.files.filter((f) => f.error).length,
       },
+      fileHashes,
     };
     const t: ImportTarget = target === "version" ? { kind: "version", id: versionOf } : { kind: "new", name: newName, authority: newAuthority, version: newVersion };
     const r = importFramework(t, payload);
@@ -731,6 +745,24 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               </div>
             ) : null}
 
+            {duplicate && (
+              <div role="alert" className="flex flex-col gap-2 rounded-lg border border-warn-line bg-warn-soft px-3 py-2.5 text-[13px] text-ink">
+                <b className="text-warn">Already in the library</b>
+                <span dir="auto">{duplicate.message}</span>
+                {target === "new" && duplicate.reason === "same_name" && (
+                  <Button
+                    size="sm"
+                    className="self-start"
+                    onClick={() => {
+                      setTarget("version");
+                      setVersionOf(duplicate.pkgId);
+                    }}
+                  >
+                    Add as a new version of {duplicate.name}
+                  </Button>
+                )}
+              </div>
+            )}
             {blockers.length > 0 && (
               <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[13px] text-bad">
                 {blockers.map((b) => (
