@@ -57,11 +57,11 @@ export default function WorkplaceReportPage() {
   const fw = w.framework ? shortName(w.framework.name) : w.workplace.frameworkId;
 
   return (
-    <AppShell search="Search dashboards">
+    <AppShell clientId={id} search="Search dashboards">
       <JMain>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm text-j-muted">Dashboards › Workspace report</span>
+            <span className="text-sm text-j-muted">Reports › Workspace report</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">{w.entity.name}</h1>
             <span className="flex flex-wrap gap-1.5">
               <Pill tone="cx">
