@@ -22,7 +22,7 @@ const plexArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Compliance Intelligence",
+  title: "Compliance Workspace",
   description: "Configurable government compliance assessment platform · Qiyas pilot",
 };
 

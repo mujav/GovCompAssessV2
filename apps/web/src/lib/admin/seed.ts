@@ -127,7 +127,7 @@ const ncaPolicy: AcceptancePolicy = {
   ...policyBase,
   stages: [
     stage("st-1", { mode: "single", name: "Cybersecurity SME", reviewers: "Pool: NCA SMEs", poolSize: 3, rights: ["Approve", "Override", "Return"] }),
-    stage("st-2", { mode: "single", name: "Control owner", reviewers: "Role: control owner", onReject: "Back to stage 1", independence: "Not stage 1", rights: ["Approve", "Reject"] }),
+    stage("st-2", { mode: "single", name: "Control Owner", reviewers: "Role: Control Owner", onReject: "Back to stage 1", independence: "Not stage 1", rights: ["Approve", "Reject"] }),
     stage("st-3", { mode: "final", name: "CISO", reviewers: "Named: CISO", onReject: "Rejected Final", independence: "Not stages 1–2", rights: ["Accept", "Reject final"] }),
   ],
 };
@@ -182,7 +182,7 @@ export function createSeed(): AdminState {
     users: [
       { id: "u-majed", name: "Mohammed K.", role: "Studio editor", canApprove: false },
       { id: "u-noura", name: "Yasser T.", role: "Studio editor", canApprove: false },
-      { id: "u-huda", name: "Sami R.", role: "Platform admin", canApprove: true },
+      { id: "u-huda", name: "Sami R.", role: "Platform Admin", canApprove: true },
     ],
     frameworks: [
       {

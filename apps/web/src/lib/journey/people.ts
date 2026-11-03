@@ -66,7 +66,7 @@ const HEADERS: [keyof EntityPerson | "roles", RegExp][] = [
 export const TEMPLATE_HEADERS = ["Name", "Email", "Department", "Title", "Roles", "Access"];
 export const TEMPLATE_CSV = [
   TEMPLATE_HEADERS.join(","),
-  'Abdullah M.,abdullah@entity.gov.sa,Strategy & Performance,Director of strategy,"Index owner; Approver",User',
+  'Abdullah M.,abdullah@entity.gov.sa,Strategy & Performance,Director of strategy,"Index Owner; Approver",User',
   "Hessa B.,hessa@entity.gov.sa,IT Operations,IT head,SPOC,User",
   "Turki Q.,,Human Capital,HR head,,Contact",
 ].join("\n");

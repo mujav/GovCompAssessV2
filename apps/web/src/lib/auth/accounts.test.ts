@@ -32,7 +32,14 @@ describe("accounts", () => {
     expect(canOpen("owner", "/clients/demo-entity/requirements")).toBe(true);
     expect(canOpen("control", "/clients/demo-entity/requirements/1.1.2-3")).toBe(true);
     expect(canOpen("control", "/clients/demo-entity/requirements")).toBe(false);
-    expect(canOpen("viewer", "/clients/demo-entity")).toBe(false);
+    expect(homeFor("admin")).toBe("/admin/workspaces");
+    expect(canOpen("control", "/clients/demo-entity/controls/1.1.2")).toBe(true);
+    expect(canOpen("control", "/clients/demo-entity/review")).toBe(false);
+    expect(canOpen("control", "/messages")).toBe(true);
+    expect(canOpen("owner", "/admin/entities")).toBe(false);
+    expect(canOpen("viewer", "/clients/demo-entity")).toBe(true);
+    expect(canOpen("viewer", "/clients/demo-entity/analytics")).toBe(true);
+    expect(canOpen("viewer", "/clients/demo-entity/plan")).toBe(false);
     expect(canOpen("viewer", "/dashboards/demo-entity")).toBe(true);
   });
 });

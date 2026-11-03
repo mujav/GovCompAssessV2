@@ -13,6 +13,9 @@ const ROOT = new URL("../../src/", import.meta.url).pathname;
 const SCAN = [
   "app/(journey)",
   "components/journey",
+  "components/cycle",
+  "lib/cycle",
+  "lib/audit.ts",
   "components/ui.tsx",
   "components/admin-ui.tsx",
   "components/overlay.tsx",
@@ -24,7 +27,7 @@ const SCAN = [
   "lib/import",
   "lib/assessor/assessor.ts",
 ];
-const ATTRS = new Set(["placeholder", "aria-label", "title", "alt", "label", "eyebrow", "crumb", "search", "note", "aside", "description", "disabled"]);
+const ATTRS = new Set(["placeholder", "aria-label", "title", "alt", "label", "eyebrow", "crumb", "search", "note", "aside", "description", "disabled", "only", "sub"]);
 
 function files(p) {
   const abs = join(ROOT, p);

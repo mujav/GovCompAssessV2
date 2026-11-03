@@ -9,10 +9,10 @@ import { DEPARTMENTS } from "@/lib/workspace/data";
 export type Role = "admin" | "owner" | "control" | "viewer";
 
 export const ROLES: { key: Role; label: string; short: string; about: string }[] = [
-  { key: "admin", label: "Platform admin", short: "Admin", about: "Grants access, builds indices in the Framework Builder, runs Studio and sees every workplace." },
-  { key: "owner", label: "Index owner", short: "Index owner", about: "Runs their workplaces: manages the index, assigns requirements and reviews evidence." },
-  { key: "control", label: "Control owner", short: "Control owner", about: "Works on the requirements assigned to them and submits them for review." },
-  { key: "viewer", label: "Management viewer", short: "Viewer", about: "Sees dashboards and reports." },
+  { key: "admin", label: "Platform Admin", short: "Platform Admin", about: "Creates workspaces and grants Index Owners, keeps entities, users, the standard library, AI settings and the audit trail." },
+  { key: "owner", label: "Index Owner", short: "Index Owner", about: "Runs their workspaces: tailors the standard, plans the cycle, adds Control Owners and viewers, reviews every control and closes the cycle." },
+  { key: "control", label: "Control Owner", short: "Control Owner", about: "Writes one response per control they own and attaches the evidence each requirement asks for." },
+  { key: "viewer", label: "Management Viewer", short: "Viewer", about: "Sees the dashboard, analytics and reports of the workspaces they were granted." },
 ];
 
 export const ROLE_OF: Record<Role, (typeof ROLES)[number]> = Object.fromEntries(ROLES.map((r) => [r.key, r])) as never;
@@ -30,6 +30,14 @@ export interface User {
   passwordHash?: string;
   active: boolean;
   since: string;
+  /** Invited and has not signed in yet. */
+  invited?: boolean;
+  /** ISO time of the last sign-in. */
+  lastActive?: string;
+  /** Management Viewers granted only some workspaces; absent means every workspace. */
+  workspaceIds?: string[];
+  /** Signs in with a second factor. */
+  mfa?: boolean;
 }
 
 export type RequestStatus = "pending" | "approved" | "rejected";
@@ -88,9 +96,9 @@ const slug = (name: string) => name.toLowerCase().replace(/[^a-z]+/g, ".").repla
 /** Demo accounts: one admin, three index owners, a management viewer and Demo Entity's control owners. */
 export const SEED_USERS: StoredUser[] = [
   { id: "u-admin", name: "Aisha M.", email: `admin@${DEMO_DOMAIN}`, role: "admin", title: "Platform administrator", active: true, since: "Jan 2026" },
-  { id: "u-sami", name: "Sami R.", email: `sami.r@${DEMO_DOMAIN}`, role: "owner", title: "Index owner", active: true, since: "Jan 2026" },
-  { id: "u-mohammed", name: "Mohammed K.", email: `mohammed.k@${DEMO_DOMAIN}`, role: "owner", title: "Index owner", active: true, since: "Feb 2026" },
-  { id: "u-layla", name: "Layla A.", email: `layla.a@${DEMO_DOMAIN}`, role: "owner", title: "Index owner", active: true, since: "Mar 2026" },
+  { id: "u-sami", name: "Sami R.", email: `sami.r@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Jan 2026" },
+  { id: "u-mohammed", name: "Mohammed K.", email: `mohammed.k@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Feb 2026" },
+  { id: "u-layla", name: "Layla A.", email: `layla.a@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Mar 2026" },
   { id: "u-huda", name: "Huda S.", email: `huda.s@${DEMO_DOMAIN}`, role: "viewer", title: "Executive director", active: true, since: "Mar 2026" },
   ...Object.values(DEPARTMENTS).flatMap((d) =>
     d.people.map((name, i) => ({
@@ -124,17 +132,21 @@ export const SEED_REQUESTS: AccessRequest[] = [
 
 /** Where each role lands after signing in. */
 export function homeFor(role: Role) {
-  return role === "admin" ? "/workplaces" : role === "owner" ? "/workplaces" : role === "control" ? "/my-requirements" : "/dashboards";
+  return role === "admin" ? "/admin/workspaces" : role === "owner" ? "/workplaces" : role === "control" ? "/my-requirements" : "/dashboards";
 }
 
-/** Route areas each role may open. Admins open everything. */
+/** Control Owner pages: their home, controls, evidence and messages, and the controls and requirements they answer. */
+const CONTROL_AREAS = ["my-requirements", "my-controls", "my-evidence", "messages"];
+
+/** Route areas each role may open. Platform Admins open everything. */
 export function canOpen(role: Role, path: string) {
   if (role === "admin") return true;
   const area = path.split("/")[1] ?? "";
   if (area === "login" || area === "") return true;
   if (role === "owner") return (area === "workplaces" && !path.startsWith("/workplaces/new")) || area === "clients" || area === "dashboards";
-  if (role === "control") return area === "my-requirements" || /^\/clients\/[^/]+\/requirements\/[^/]+$/.test(path);
-  return area === "dashboards";
+  if (role === "control") return CONTROL_AREAS.includes(area) || /^\/clients\/[^/]+\/(requirements|controls)\/[^/]+$/.test(path);
+  // Management Viewers see the dashboard, analytics and reports of a workspace.
+  return area === "dashboards" || /^\/clients\/[^/]+(\/analytics)?$/.test(path);
 }
 
 /** Index owners and admins run a workplace; control owners only work their own requirements. */

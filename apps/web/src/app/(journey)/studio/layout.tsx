@@ -3,7 +3,7 @@ import { ActingAs, StudioNav } from "@/components/journey/studio";
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AppShell search="Search frameworks, rules and changes" headerExtra={<ActingAs />}>
+    <AppShell search="Search standards, rules and changes" headerExtra={<ActingAs />}>
       <StudioNav />
       {children}
     </AppShell>

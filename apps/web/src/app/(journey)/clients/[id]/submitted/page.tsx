@@ -39,7 +39,7 @@ export default function SubmittedPage() {
 
   const f = s.frozen ?? { total: ws.ctx.reqs.length, accepted: 0, files: 0 };
   const early = daysBetween(ws.ctx.today, SUBMISSION_DEADLINE);
-  const signer = s.signedBy ?? "Index owner";
+  const signer = s.signedBy ?? "Index Owner";
   const uploader = s.uploader ? `${signer} (delegated)` : signer;
   const trail: [string, string, string, string][] = [
     [initials(signer), "me", "Reviews completed", signer],
@@ -51,8 +51,8 @@ export default function SubmittedPage() {
   const next: { t: string; sub: string; icon: IconName; bg: string; fg: string; href: string }[] = [
     { t: "Prepare for verification", sub: "Open evidence register in read-only mode", icon: "rev", bg: "#EAF1FA", fg: "#1E4E8C", href: c("/evidence") },
     { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/requirements?view=cla") },
-    { t: "Workplace report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: `/dashboards/${client.id}` },
-    { t: "Back to workplaces", sub: "Every workplace you run", icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/workplaces" },
+    { t: "Workspace report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: `/dashboards/${client.id}` },
+    { t: "Back to workspaces", sub: "Every workspace you run", icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/workplaces" },
   ];
 
   const downloadReceipt = () => {

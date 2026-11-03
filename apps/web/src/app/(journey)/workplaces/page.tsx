@@ -79,24 +79,24 @@ export default function WorkplacesPage() {
   );
 
   return (
-    <AppShell search="Search workplaces">
+    <AppShell search="Search workspaces">
       <JMain max={1200}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex max-w-[640px] flex-col gap-2">
             <span className="text-xs font-semibold tracking-[0.06em] text-j-muted uppercase">
               {greeting()}, {user?.name.split(" ")[0]}
             </span>
-            <h1 className="m-0 text-[34px] leading-10 font-semibold tracking-[-0.01em]">{admin ? "All workplaces" : "Your workplaces"}</h1>
+            <h1 className="m-0 text-[34px] leading-10 font-semibold tracking-[-0.01em]">{admin ? "All workspaces" : "Your workspaces"}</h1>
             <p className="m-0 text-[15px] text-j-ink-3">
               {admin
-                ? "Every workplace on the platform. Each one is a single entity, index and review year."
-                : "You see only the workplaces the platform admin granted you. Each one is a single entity, index and review year."}
+                ? "Every workspace on the platform. Each one is a single entity, index and cycle year."
+                : "You see only the workspaces the Platform Admin granted you. Each one is a single entity, index and cycle year."}
             </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
             <label className="flex h-[42px] w-[260px] items-center gap-2 rounded-[10px] border border-j-line bg-white px-3 text-j-muted">
               <Icon name="search" size={16} />
-              <span className="sr-only">Search workplaces</span>
+              <span className="sr-only">Search workspaces</span>
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search entity or index" className="min-w-0 flex-auto border-0 bg-transparent text-sm text-j-ink outline-none" />
             </label>
             <select aria-label="Index" value={index} onChange={(e) => setIndex(e.target.value)} className={cx(inputClass, "h-[42px]")}>
@@ -110,7 +110,7 @@ export default function WorkplacesPage() {
             {admin && (
               <JLink href="/workplaces/new" variant="primary" className="h-[42px]">
                 <Icon name="plus" size={16} />
-                New workplace
+                New workspace
               </JLink>
             )}
           </div>
@@ -118,8 +118,8 @@ export default function WorkplacesPage() {
 
         {views.length === 0 ? (
           <Panel className="flex flex-col items-start gap-2 p-[26px]">
-            <h2 className="m-0 text-lg">No workplaces granted to you yet</h2>
-            <p className="m-0 text-sm text-j-ink-3">Ask the platform admin for one below. It appears here as soon as it is created.</p>
+            <h2 className="m-0 text-lg">No workspaces granted to you yet</h2>
+            <p className="m-0 text-sm text-j-ink-3">Ask the Platform Admin for one below. It appears here as soon as it is created.</p>
           </Panel>
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] items-stretch gap-5">
@@ -138,7 +138,7 @@ export default function WorkplacesPage() {
                           {w.framework ? shortName(w.framework.name) : w.workplace.frameworkId} {w.workplace.year}
                         </span>
                         <span className="inline-flex items-center rounded-full bg-j-canvas px-2.5 py-[3px] text-xs font-semibold text-j-ink-3">
-                          {admin ? (w.owners.length ? w.owners.map((o) => o.name).join(", ") : "No index owner") : ROLE_OF.owner.label}
+                          {admin ? (w.owners.length ? w.owners.map((o) => o.name).join(", ") : "No Index Owner") : ROLE_OF.owner.label}
                         </span>
                       </span>
                       <b className="mt-3 block text-[19px] leading-6 font-semibold">{w.entity.name}</b>
@@ -173,7 +173,7 @@ export default function WorkplacesPage() {
                 </Link>
               );
             })}
-            {cards.length === 0 && <p className="m-0 text-sm text-j-muted">No workplace matches the search.</p>}
+            {cards.length === 0 && <p className="m-0 text-sm text-j-muted">No workspace matches the search.</p>}
           </div>
         )}
 
@@ -213,16 +213,16 @@ function RequestWorkplace() {
       status: "pending",
     };
     update((s) => void (s.workplaceRequests ??= []).unshift(req));
-    log(`${user.name} requested a workplace: ${req.entityName} · ${year}`);
+    log(`${user.name} requested a workspace: ${req.entityName} · ${year}`);
     setSent(true);
   };
 
   return (
     <>
       <Panel className="flex flex-wrap items-center justify-between gap-4 bg-[#FAFBFC] px-6 py-5">
-        <p className="m-0 max-w-[760px] text-sm text-j-ink-3">Need another entity or index? Request a new workplace; the platform admin creates it and grants you access. Workplaces of past review years stay read-only and seed next year&apos;s workplace.</p>
+        <p className="m-0 max-w-[760px] text-sm text-j-ink-3">Need another entity or index? Request a new workspace; the Platform Admin creates it and grants you access. Workspaces of past cycles stay read-only and seed next year&apos;s workspace.</p>
         <JButton variant="primary" onClick={() => (setOpen(true), setSent(false))}>
-          Request new workplace
+          Request new workspace
         </JButton>
       </Panel>
       {open && (
@@ -230,9 +230,9 @@ function RequestWorkplace() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 id="rq" className="m-0 text-lg font-semibold">
-                Request a new workplace
+                Request a new workspace
               </h2>
-              <p className="m-0 mt-1 text-sm text-j-ink-3">Sent to the platform admin, who creates the workplace and grants you access as index owner.</p>
+              <p className="m-0 mt-1 text-sm text-j-ink-3">Sent to the Platform Admin, who creates the workspace and grants you access as Index Owner.</p>
             </div>
             <JButton size="sm" onClick={() => setOpen(false)} aria-label="Close request form">
               ✕
@@ -240,7 +240,7 @@ function RequestWorkplace() {
           </div>
           {sent ? (
             <p role="status" className="m-0 rounded-xl bg-cx-soft px-4 py-3.5 text-sm font-semibold text-cx">
-              Request sent. The platform admin has been notified; the workplace appears here once it is created.
+              Request sent. The Platform Admin has been notified; the workspace appears here once it is created.
             </p>
           ) : (
             <>
@@ -262,7 +262,7 @@ function RequestWorkplace() {
                     ))}
                   </select>
                 </Field>
-                <Field label="Review year">
+                <Field label="Cycle year">
                   <input inputMode="numeric" value={year} onChange={(e) => setYear(e.target.value.replace(/\D/g, "").slice(0, 4))} className={inputClass} />
                 </Field>
               </div>
@@ -312,9 +312,9 @@ function AdminRequests() {
         </span>
         <span>
           <b>
-            {pending.length} workplace request{pending.length === 1 ? "" : "s"}
+            {pending.length} workspace request{pending.length === 1 ? "" : "s"}
           </b>{" "}
-          from index owners waiting for you.
+          from Index Owners waiting for you.
         </span>
       </span>
       <JLink href="/workplaces/new" variant="primary">

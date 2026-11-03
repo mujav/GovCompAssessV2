@@ -100,8 +100,8 @@ export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files:
           disabled && "opacity-60",
         )}
       >
-        <b className="text-sm">{busy ? "Reading files…" : "Drop the framework document here"}</b>
-        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one framework.</span>
+        <b className="text-sm">{busy ? "Reading files…" : "Drop the standard document here"}</b>
+        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one standard.</span>
         <input
           ref={input}
           type="file"
@@ -145,7 +145,7 @@ const KIND_LABEL: Record<WarningKind, string> = {
 
 function prettyName(file: string) {
   const base = file.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
-  return base ? base[0].toUpperCase() + base.slice(1) : "Imported framework";
+  return base ? base[0].toUpperCase() + base.slice(1) : "Imported standard";
 }
 
 export type ExtractMethod = "ai" | "rules";
@@ -282,7 +282,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
           </div>
           <div className="text-[13px] text-muted">
             {progress?.stage === "chunks" ? `${progress.done} of ${progress.total} parts read · ${progress.nodes} nodes found so far. ` : ""}
-            Large documents take a few minutes. Parts are read in parallel; you review and edit everything before the framework is created.
+            Large documents take a few minutes. Parts are read in parallel; you review and edit everything before the standard is created.
           </div>
           {!!progress?.recent.length && (
             <ul className="m-0 flex list-none flex-col gap-1 rounded-lg bg-surface-2 p-3 text-[13px]" dir="auto">
@@ -421,7 +421,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
     !levelsOk && "Every level needs English and Arabic labels and a code pattern",
     !acceptedOk && 'Mark one level as "Accepted here"',
     target === "version" && pkg?.pendingCr && `${(pkg.draft ?? pkg.live)?.name} is waiting on ${pkg.pendingCr}`,
-    target === "new" && !newName.trim() && "Name the new framework",
+    target === "new" && !newName.trim() && "Name the new standard",
     duplicate && "Already in the library",
   ].filter((x): x is string => !!x);
 
@@ -537,7 +537,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               <label className="flex items-start gap-2">
                 <input type="radio" name="weighting" checked={ex.weighting === "none"} onChange={() => apply(setWeighting(ex, "none"))} className="mt-1" />
                 <span>
-                  <b>No weights</b>: the framework does not publish weights (Qiyas, for example); every requirement counts equally.
+                  <b>No weights</b>: the standard does not publish weights (Qiyas, for example); every requirement counts equally.
                 </span>
               </label>
               <label className="flex items-start gap-2">
@@ -706,12 +706,12 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
 
         <aside className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
           <section aria-label="Accept" className="flex flex-col gap-3 rounded-[14px] border-2 border-brand bg-white p-[18px] text-[13px]">
-            <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the framework" : "Save as a new version"}</h2>
+            <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the standard" : "Save as a new version"}</h2>
             <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
               <legend className="mb-1 text-xs font-semibold text-muted">Import as</legend>
               <label className="flex items-center gap-2">
                 <input type="radio" name="target" checked={target === "version"} onChange={() => setTarget("version")} />
-                New version of an existing framework
+                New version of an existing standard
               </label>
               {target === "version" && (
                 <select value={versionOf} onChange={(e) => setVersionOf(e.target.value)} aria-label="Framework" className={cx(inputCls, "ms-6 w-[calc(100%-24px)] bg-white text-[13px]")}>
@@ -728,7 +728,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               )}
               <label className="flex items-center gap-2">
                 <input type="radio" name="target" checked={target === "new"} onChange={() => setTarget("new")} />
-                New framework or index (published right away)
+                New standard or index (published right away)
               </label>
               {target === "new" && (
                 <div className="ms-6 grid grid-cols-[1fr_90px] gap-2">
@@ -798,11 +798,11 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               </div>
             )}
             <Button variant="primary" className="px-4" disabled={blockers.length > 0} onClick={accept} aria-disabled={blockers.length > 0}>
-              {target === "new" ? "Create framework" : "Save into draft"}
+              {target === "new" ? "Create standard" : "Save into draft"}
             </Button>
             <div className="text-xs leading-[18px] text-muted">
               {target === "new"
-                ? "A new framework is not used by any assessment cycle yet, so it is published as soon as you create it. Later changes are made in a new version, which goes through approval."
+                ? "A new standard is not used by any assessment cycle yet, so it is published as soon as you create it. Later changes are made in a new version, which goes through approval."
                 : "The live version may be in use by assessment cycles, so the new version is saved as a draft. It goes live after you submit it and another person with approval rights approves it."}
             </div>
           </section>

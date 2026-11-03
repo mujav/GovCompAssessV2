@@ -12,7 +12,7 @@ const AV: [string, string][] = [
   ["#EAF1FA", "#1E4E8C"],
   ["#E7F3ED", "#0E5A45"],
 ];
-const ROLES = ["Index owner", "Approver", "Executive sponsor", "DGA liaison officer", "SPOC", "Contributor"];
+const ROLES = ["Index Owner", "Approver", "Executive sponsor", "DGA liaison officer", "SPOC", "Contributor"];
 const EMPTY = { name: "", email: "", department: "", title: "" };
 
 /**

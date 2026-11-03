@@ -176,7 +176,7 @@ export default function AccessPage() {
                           <EntityPicker value={u.entityId} department={u.department} onChange={(entityId, department) => updateUser(u.id, (d) => ((d.entityId = entityId || undefined), (d.department = department || undefined)))} />
                         ) : u.role === "owner" ? (
                           <span className="block truncate" title={owned.map(wpLabel).join("\n")}>
-                            {owned.length ? `${owned.length} workplace${owned.length === 1 ? "" : "s"}: ${owned.map((v) => v.entity.name).join(", ")}` : "No workplaces yet"}
+                            {owned.length ? `${owned.length} workspace${owned.length === 1 ? "" : "s"}: ${owned.map((v) => v.entity.name).join(", ")}` : "No workspaces yet"}
                           </span>
                         ) : u.role === "admin" ? (
                           "Whole platform"
@@ -205,7 +205,7 @@ export default function AccessPage() {
                 })}
               </div>
             </div>
-            <p className="m-0 px-[22px] py-3 text-xs text-j-muted">Index owners get their workplaces under Workplaces › New workplace, or when their request is approved.</p>
+            <p className="m-0 px-[22px] py-3 text-xs text-j-muted">Index Owners get their workspaces under Workspaces › New workspace, or when their request is approved.</p>
           </Panel>
         )}
       </JMain>
@@ -290,7 +290,7 @@ function RequestCard({ r, views, onDone }: { r: AccessRequest; views: WorkplaceV
       </div>
       {role === "owner" && (
         <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-          <legend className="mb-2 text-[13px] font-semibold text-j-ink-2">Workplaces to run</legend>
+          <legend className="mb-2 text-[13px] font-semibold text-j-ink-2">Workspaces to run</legend>
           <div className="flex flex-wrap gap-1.5">
             {views.map((v) => {
               const on = owns.includes(v.workplace.id);
@@ -332,7 +332,7 @@ function RequestCard({ r, views, onDone }: { r: AccessRequest; views: WorkplaceV
           <JButton
             variant="primary"
             disabled={role === "control" && !entityId}
-            title={role === "control" && !entityId ? "Choose the control owner's entity" : undefined}
+            title={role === "control" && !entityId ? "Choose the Control Owner's entity" : undefined}
             onClick={() => {
               const id = approve(r.id, { role, entityId, department });
               for (const v of views.filter((x) => owns.includes(x.workplace.id))) saveWorkplace({ ...v.workplace, ownerIds: [...v.workplace.ownerIds, id] });

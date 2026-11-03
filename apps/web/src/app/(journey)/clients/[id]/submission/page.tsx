@@ -22,7 +22,7 @@ export default function SubmissionPage() {
   const router = useRouter();
   const { client, ws, framework, workspace, reqs, overlay, log } = useClientWork();
   const { user } = useAuth();
-  const me = user?.name ?? "Index owner";
+  const me = user?.name ?? "Index Owner";
   const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
   const [confirm, setConfirm] = useState(false);
   const c = (p: string) => clientHref(client.id, p);
@@ -44,7 +44,7 @@ export default function SubmissionPage() {
     const gate = (l: string, v: string, pct: number, ok: boolean) => ({ l, v, pct, ok });
     const gates = [
       gate("Accepted", `${n.acc} / ${total}`, pct(n.acc, total), n.acc === total),
-      gate("Submitted by control owners", `${submitted} / ${total}`, pct(submitted, total), submitted === total),
+      gate("Submitted by Control Owners", `${submitted} / ${total}`, pct(submitted, total), submitted === total),
       gate("Evidence valid", `${Math.round(pct(valid, expected))}%`, pct(valid, expected), pct(valid, expected) >= 95),
       gate("Mandatory items", `${mandatoryOk.length} / ${mandatory.length}`, pct(mandatoryOk.length, mandatory.length), mandatoryOk.length === mandatory.length),
       gate("Clarifications applied", `${cla} / ${cla}`, 100, true),
@@ -62,17 +62,17 @@ export default function SubmissionPage() {
       { ext: "PDF", t: "Evidence index", sub: `${files.toLocaleString("en-US")} files · cross-referenced`, st: ["Ready", "ok"] },
       { ext: "DOC", t: "Narratives · Arabic", sub: `${narratives} of ${total}`, st: narratives === total ? ["Ready", "ok"] : ["Building", "cx"] },
       { ext: "ZIP", t: "Evidence batches", sub: "12 batches · 3.2 GB", st: ["Ready", "ok"] },
-      { ext: "PDF", t: "Cover letter", sub: "Signed by the index owner", st: s.signed ? ["Ready", "ok"] : ["Waiting", "warn"] },
+      { ext: "PDF", t: "Cover letter", sub: "Signed by the Index Owner", st: s.signed ? ["Ready", "ok"] : ["Waiting", "warn"] },
     ];
     return { total, n, gates, blockers, pack, files };
   }, [reqs, overlay, ws, s.signed, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cur = s.submittedAt ? 5 : s.signed ? 3 : m.n.acc === m.total ? 2 : 1;
   const steps: [string, string][] = [
-    ["Prepare pack", "Index owner"],
-    ["Reviews complete", "Index owner"],
-    ["Sign-off", "Index owner"],
-    ["Portal upload", s.uploader === 0 ? "Index owner" : "Delegated"],
+    ["Prepare pack", "Index Owner"],
+    ["Reviews complete", "Index Owner"],
+    ["Sign-off", "Index Owner"],
+    ["Portal upload", s.uploader === 0 ? "Index Owner" : "Delegated"],
     ["Submitted", "DGA receipt"],
   ];
   const EXT: Record<string, [string, string]> = { XLS: ["#E7F3ED", "#0E5A45"], PDF: ["#FDECEA", "#B42318"], DOC: ["#EAF1FA", "#1E4E8C"], ZIP: ["#F5F7F6", "#33413B"] };
@@ -214,11 +214,11 @@ export default function SubmissionPage() {
                 <span className="flex-auto">
                   <b>{s.signedBy ?? me}</b>
                   <br />
-                  <span className="text-xs text-j-muted">Index owner</span>
+                  <span className="text-xs text-j-muted">Index Owner</span>
                 </span>
                 <span className={cx("text-xs font-semibold", s.signed ? "text-brand" : "text-j-muted")}>{s.signed ? "Signed" : "—"}</span>
               </div>
-              <span className="text-xs text-j-muted">The index owner&apos;s review is the only review layer; signing off confirms the pack is ready for the portal.</span>
+              <span className="text-xs text-j-muted">The Index Owner&apos;s review is the only review layer; signing off confirms the pack is ready for the portal.</span>
             </Panel>
             <Panel className="flex flex-col gap-3 p-[22px]">
               <h2 className="m-0 text-base">Portal upload</h2>
@@ -226,7 +226,7 @@ export default function SubmissionPage() {
                 label="Uploaded by"
                 value={String(s.uploader) as "0" | "1"}
                 options={[
-                  { value: "0", label: "Index owner uploads" },
+                  { value: "0", label: "Index Owner uploads" },
                   { value: "1", label: "Delegated upload" },
                 ]}
                 onChange={(v) => set((d) => void (d.uploader = v === "1" ? 1 : 0))}

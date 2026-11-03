@@ -17,9 +17,9 @@ import { Icon, type IconName } from "./icon";
 
 type NavItem = { label: string; icon: IconName; href: string; badge?: string; badgeBg?: string; exact?: boolean };
 
-/** Studio sections; the side nav shows one Studio entry and the studio pages show these as a sub-menu. */
+/** Standard library sections; the side nav shows one entry and the library pages show these as a sub-menu. */
 export const STUDIO: NavItem[] = [
-  { label: "Framework builder", icon: "layers", href: "/studio/frameworks" },
+  { label: "Editions", icon: "layers", href: "/studio/frameworks" },
   { label: "Scoring", icon: "trend", href: "/studio/scoring" },
   { label: "Automation", icon: "refresh", href: "/studio/automation" },
   { label: "Change log", icon: "history", href: "/studio/history" },
@@ -27,45 +27,76 @@ export const STUDIO: NavItem[] = [
 
 type Groups = [string, NavItem[]][];
 
-/** Side nav for a role, with the workplace's own pages when one is open. */
-function navFor(role: Role, wp: { id: string; name: string } | undefined, badges: { work?: string; studio?: string; access?: string; requests?: string }): Groups {
+interface Badges {
+  review?: string;
+  messages?: string;
+  workspaces?: string;
+  studio?: string;
+  users?: string;
+}
+
+/**
+ * Side nav for a role, in the design's groups. Each role sees only its own modules: Platform
+ * Admins the administration, Index Owners the workspace and index management, Control Owners
+ * their own work, Management Viewers the workspace's dashboard, analytics and reports.
+ */
+function navFor(role: Role, wp: { id: string } | undefined, badges: Badges): Groups {
   const c = (path: string) => clientHref(wp!.id, path);
-  const workplace: Groups = wp
+  const workspace: Groups = wp
     ? [
         [
-          wp.name.toUpperCase(),
+          "WORKSPACE",
           [
-            { label: "Overview", icon: "home", href: c(""), exact: true },
-            { label: "Requirements", icon: "req", href: c("/requirements") },
-            { label: "My work", icon: "act", href: c("/work"), badge: badges.work },
-            { label: "Evidence library", icon: "ev", href: c("/evidence") },
-            { label: "Submission", icon: "sub", href: c("/submission") },
-            { label: "Entity profile", icon: "ent", href: c("/360") },
+            { label: "Dashboard", icon: "home", href: c(""), exact: true },
+            { label: "Analytics", icon: "trend", href: c("/analytics") },
+            { label: "Reports", icon: "file", href: `/dashboards/${wp.id}` },
           ],
         ],
       ]
     : [];
-  const insights: Groups = [["INSIGHTS", [{ label: "Dashboards", icon: "trend", href: "/dashboards" }]]];
-  if (role === "control") return [["MY WORK", [{ label: "My requirements", icon: "req", href: "/my-requirements" }]]];
-  if (role === "viewer") return insights;
-  if (role === "owner") return [["WORKPLACES", [{ label: "My workplaces", icon: "grid", href: "/workplaces", exact: true }]], ...workplace, ...insights];
-  return [
-    [
-      "WORKPLACES",
+  const management: Groups = wp
+    ? [
+        [
+          "INDEX MANAGEMENT",
+          [
+            { label: "Review hub", icon: "rev", href: c("/review"), badge: badges.review },
+            { label: "Standard", icon: "layers", href: c("/standard") },
+            { label: "Plan", icon: "calendar", href: c("/plan") },
+            { label: "People and access", icon: "dep", href: c("/people") },
+            { label: "Cycle closure", icon: "flag", href: c("/closure") },
+          ],
+        ],
+      ]
+    : [];
+  if (role === "control")
+    return [
       [
-        { label: "All workplaces", icon: "grid", href: "/workplaces", exact: true },
-        { label: "New workplace", icon: "plus", href: "/workplaces/new", badge: badges.requests, badgeBg: "#C2410C" },
+        "MY WORK",
+        [
+          { label: "Home", icon: "home", href: "/my-requirements" },
+          { label: "My controls", icon: "req", href: "/my-controls" },
+          { label: "Evidence library", icon: "ev", href: "/my-evidence" },
+          { label: "Messages", icon: "cla", href: "/messages", badge: badges.messages },
+        ],
       ],
-    ],
-    ...workplace,
+    ];
+  if (role === "viewer") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/dashboards", exact: true }]], ...workspace];
+  if (role === "owner") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/workplaces", exact: true }]], ...workspace, ...management];
+  return [
     [
       "ADMINISTRATION",
       [
-        { label: "Access & users", icon: "key", href: "/admin/access", badge: badges.access, badgeBg: "#C2410C" },
-        { label: "Studio", icon: "layers", href: "/studio", badge: badges.studio, badgeBg: "#C2410C" },
+        { label: "Workspaces and access", icon: "key", href: "/admin/workspaces", badge: badges.workspaces, badgeBg: "#C2410C" },
+        { label: "Entities", icon: "ent", href: "/admin/entities" },
+        { label: "Users", icon: "user", href: "/admin/users", badge: badges.users, badgeBg: "#C2410C" },
+        { label: "Standard library", icon: "layers", href: "/studio", badge: badges.studio, badgeBg: "#C2410C" },
+        { label: "AI settings", icon: "ai", href: "/admin/ai" },
+        { label: "Audit trail", icon: "history", href: "/admin/audit" },
       ],
     ],
-    ...insights,
+    // A Platform Admin who opens a workspace (Manage) works in it like its Index Owner.
+    ...workspace,
+    ...management,
   ];
 }
 
@@ -106,18 +137,20 @@ export function AppShell({
   const pendingWp = (journey.workplaceRequests ?? []).filter((r) => r.status === "pending").length;
   if (!ready || !user) return <div className="min-h-screen bg-j-canvas" aria-busy="true" />;
 
-  const groups = navFor(user.role, current && user.role !== "control" ? { id: current.client.id, name: current.entity.name } : undefined, {
-    work: workBadge,
+  const groups = navFor(user.role, current && user.role !== "control" ? { id: current.client.id } : undefined, {
+    review: workBadge,
+    messages: workBadge,
+    workspaces: pendingWp ? String(pendingWp) : undefined,
     studio: pendingCr ? String(pendingCr) : undefined,
-    access: pendingAccess ? String(pendingAccess) : undefined,
-    requests: pendingWp ? String(pendingWp) : undefined,
+    users: pendingAccess ? String(pendingAccess) : undefined,
   });
   // Several items share a destination; highlight only the first match.
   let matched = false;
-  const manages = canManage(user.role);
   // Index owners open only the workplaces they run; control owners only their entity's.
   const outside =
-    !!current && ((user.role === "owner" && !current.workplace.ownerIds.includes(user.id)) || (user.role === "control" && !!user.entityId && current.workplace.entityId !== user.entityId));
+    !!current && ((user.role === "owner" && !current.workplace.ownerIds.includes(user.id)) ||
+      (user.role === "control" && !!user.entityId && current.workplace.entityId !== user.entityId) ||
+      (user.role === "viewer" && !!user.workspaceIds && !user.workspaceIds.includes(current.client.id)));
 
   return (
     <div className="flex min-h-screen flex-wrap bg-j-canvas text-j-ink">
@@ -127,13 +160,19 @@ export function AppShell({
             <Icon name="shield" size={17} />
           </span>
           <span className="leading-[17px]">
-            <b className="text-sm">Compliance Intelligence</b>
+            <b className="text-sm">Compliance Workspace</b>
             <br />
             <span className="text-xs text-j-muted">{ROLE_OF[user.role].label}</span>
           </span>
         </div>
-        {current && manages && (
-          <Link href="/workplaces" className="flex min-h-[52px] items-center gap-2.5 rounded-xl border border-cx-line bg-cx-tint px-3 text-j-ink no-underline hover:text-j-ink">
+        {!current && user.role === "admin" && (
+          <div className="rounded-xl border border-cx-line bg-cx-tint px-3 py-2 text-[13px] leading-[17px]">
+            <span className="block text-xs text-j-muted">Scope</span>
+            <b>All entities and workspaces</b>
+          </div>
+        )}
+        {current && user.role !== "control" && (
+          <Link href={user.role === "viewer" ? "/dashboards" : user.role === "admin" ? "/admin/workspaces" : "/workplaces"} className="flex min-h-[52px] items-center gap-2.5 rounded-xl border border-cx-line bg-cx-tint px-3 text-j-ink no-underline hover:text-j-ink">
             <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-lg text-[11px] font-bold" style={{ background: LOGO[current.entity.logo][0], color: LOGO[current.entity.logo][1] }}>
               {current.entity.ini}
             </span>
@@ -143,7 +182,7 @@ export function AppShell({
               <span className="text-xs text-j-muted">{workplaceLabel(current.framework?.name ?? current.client.frameworks[0], current.workplace.year)}</span>
             </span>
             <Icon name="switch" size={16} />
-            <span className="sr-only">Switch workplace</span>
+            <span className="sr-only">Switch workspace</span>
           </Link>
         )}
         {groups.map(([title, items]) => (
@@ -205,8 +244,8 @@ export function AppShell({
         </header>
         {outside ? (
           <main className="box-border flex w-full max-w-[720px] flex-col items-start gap-3 px-8 pt-10">
-            <h1 className="m-0 text-2xl">This workplace is not assigned to you</h1>
-            <p className="m-0 text-sm text-j-ink-3">Ask the platform admin to add you as an index owner of {current!.entity.name} if you need it.</p>
+            <h1 className="m-0 text-2xl">This workspace is not granted to you</h1>
+            <p className="m-0 text-sm text-j-ink-3">You see only the workspaces you were granted. Ask your Index Owner or the Platform Admin for access to {current!.entity.name}.</p>
             <Link href={homeFor(user.role)} className="font-semibold text-cx">
               Back to your home
             </Link>
@@ -261,7 +300,7 @@ export function ClientHeaderExtra() {
           href="/workplaces"
           className="inline-flex h-9 items-center rounded-[10px] border border-j-line px-3 text-[13px] font-semibold text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink"
         >
-          Switch workplace
+          Switch workspace
         </Link>
       )}
     </>

@@ -110,7 +110,7 @@ export function EntityEditor({ open, onClose, onPeople }: { open: boolean; onClo
         </section>
 
         <section className="flex flex-col gap-2">
-          <h3 className="m-0 text-sm">Frameworks managed for this entity</h3>
+          <h3 className="m-0 text-sm">Standards managed for this entity</h3>
           {library.map((f) => {
             const on = ids.includes(f.id);
             return (
@@ -123,7 +123,7 @@ export function EntityEditor({ open, onClose, onPeople }: { open: boolean; onClo
               </label>
             );
           })}
-          {ids.length === 0 && <p className="m-0 text-[13px] text-j-bad">Keep at least one framework.</p>}
+          {ids.length === 0 && <p className="m-0 text-[13px] text-j-bad">Keep at least one standard.</p>}
           {removed.length > 0 && (
             <p className="m-0 rounded-xl bg-j-warn-soft px-3 py-2 text-[13px] text-[#8A4B00]">
               Removing {removed.map((f) => shortName(f.name)).join(", ")} ends its engagement. Work already done on it is kept and comes back if you add it again.

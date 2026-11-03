@@ -7,20 +7,30 @@ import { cx } from "@/components/ui";
 import { DEMO_PASSWORD, ROLES, SEED_USERS, homeFor, type Role } from "@/lib/auth/accounts";
 import { useAuth } from "@/lib/auth/store";
 import { readLocale, setLocale } from "@/lib/i18n/locale";
+import { useScreenState } from "@/lib/journey/store";
+import { DEFAULT_PLATFORM, PLATFORM_KEY, type PlatformState } from "@/lib/cycle/platform";
 
-// 01 · Sign in with email and password. People without an account request access; the
+// S00 · Sign in with email and password. People without an account request access; the
 // platform admin approves or rejects the request and decides the role.
 
 type Lang = "en" | "ar";
 
 const T = {
   en: {
-    brand: "Compliance Intelligence",
-    brandSub: "Governance, risk and compliance workspace",
-    hero: "Every framework, standard and index. One workspace.",
+    brand: "Compliance Workspace",
+    brandSub: "EY · For authorised users only",
+    hero: "Prepare every national index submission in one place.",
+    heroSub: "Plan the cycle, collect evidence for every requirement, review it with AI support, and track readiness by dimension, department and owner.",
     trust: ["Hosted in Saudi Arabia", "NCA CCC aligned", "PDPL ready"],
     signIn: "Sign in",
-    lead: "Use your work email and password.",
+    lead: "Use the account your administrator invited.",
+    forgot: "Forgot password?",
+    remember: "Keep me signed in on this device",
+    access: "You will see only the workspaces you were granted. Ask your Index Owner or the platform administrator for access to another entity or index.",
+    forgotTitle: "Reset your password",
+    forgotLead: "Enter your work email. The platform administrator is asked to send you a reset link.",
+    forgotSend: "Ask for a reset link",
+    forgotSent: "If an account exists for this email, the platform administrator has been asked to reset it. You will get a link by email.",
     email: "Work email",
     password: "Password",
     submit: "Sign in",
@@ -28,7 +38,7 @@ const T = {
     noAccess: "Don't have access?",
     request: "Request access",
     reqTitle: "Request access",
-    reqLead: "The platform admin reviews every request and decides your role. You can sign in once it is approved.",
+    reqLead: "The Platform Admin reviews every request and decides your role. You can sign in once it is approved.",
     name: "Full name",
     org: "Organisation",
     jobTitle: "Job title",
@@ -40,7 +50,7 @@ const T = {
     sending: "Sending…",
     mismatch: "The passwords do not match.",
     sent: "Request sent",
-    sentLead: "The platform admin will review it. You will be able to sign in with this email once it is approved.",
+    sentLead: "The Platform Admin will review it. You will be able to sign in with this email once it is approved.",
     back: "← Back to sign in",
     haveAccess: "Already have access?",
     demo: "Demo accounts",
@@ -50,15 +60,23 @@ const T = {
     a11y: "Accessibility",
   },
   ar: {
-    brand: "ذكاء الامتثال",
-    brandSub: "مساحة عمل الحوكمة والمخاطر والامتثال",
-    hero: "كل إطار ومعيار ومؤشر. في مساحة عمل واحدة.",
+    brand: "مساحة الامتثال",
+    brandSub: "EY · للمستخدمين المصرّح لهم فقط",
+    hero: "جهّز مشاركتك في جميع المؤشرات الوطنية من مكان واحد.",
+    heroSub: "خطّط للدورة، واجمع مستندات الإثبات لكل متطلب، وراجعها بمساندة الذكاء الاصطناعي، وتابع الجاهزية حسب المنظور والإدارة والمسؤول.",
     trust: ["مستضافة في المملكة", "متوافقة مع ضوابط الحوسبة السحابية", "جاهزة لنظام حماية البيانات"],
     signIn: "تسجيل الدخول",
-    lead: "استخدم بريد العمل وكلمة المرور.",
-    email: "بريد العمل",
+    lead: "استخدم الحساب الذي دعاك إليه المسؤول.",
+    forgot: "نسيت كلمة المرور؟",
+    remember: "تذكرني على هذا الجهاز",
+    access: "ستظهر لك فقط مساحات العمل المصرّح لك بها. اطلب من مالك المؤشر أو مسؤول المنصة صلاحية الوصول إلى جهة أو مؤشر آخر.",
+    forgotTitle: "إعادة تعيين كلمة المرور",
+    forgotLead: "أدخل بريد العمل، وسيُطلب من مسؤول المنصة إرسال رابط إعادة التعيين إليك.",
+    forgotSend: "اطلب رابط إعادة التعيين",
+    forgotSent: "إذا كان هناك حساب بهذا البريد فقد طُلب من مسؤول المنصة إعادة تعيينه، وسيصلك رابط بالبريد.",
+    email: "البريد الإلكتروني للعمل",
     password: "كلمة المرور",
-    submit: "تسجيل الدخول",
+    submit: "دخول",
     busy: "جارٍ تسجيل الدخول…",
     noAccess: "لا تملك وصولًا؟",
     request: "اطلب الوصول",
@@ -86,7 +104,7 @@ const T = {
   },
 };
 
-const ROLE_AR: Record<Role, string> = { admin: "مسؤول المنصة", owner: "مالك المؤشر", control: "مالك الضابط", viewer: "مستعرض الإدارة" };
+const ROLE_AR: Record<Role, string> = { admin: "مسؤول المنصة", owner: "مالك المؤشر", control: "مالك المعيار", viewer: "مستعرض الإدارة" };
 
 /** One demo account per role, so each view can be tried. */
 const DEMO = ROLES.map((r) => SEED_USERS.find((u) => u.role === r.key)!).filter(Boolean);
@@ -111,7 +129,9 @@ export default function LoginPage() {
   const en = lang === "en";
   const router = useRouter();
   const { ready, user, signIn, requestAccess } = useAuth();
-  const [mode, setMode] = useState<"signin" | "request" | "sent">("signin");
+  const [mode, setMode] = useState<"signin" | "request" | "sent" | "forgot" | "forgotSent">("signin");
+  const [remember, setRemember] = useState(true);
+  const [, setPlatform] = useScreenState<PlatformState>(PLATFORM_KEY, DEFAULT_PLATFORM);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -127,7 +147,7 @@ export default function LoginPage() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const res = await signIn(email, password);
+    const res = await signIn(email, password, remember);
     setBusy(false);
     if (res.ok) router.push(res.home);
     else setError(res.error);
@@ -171,6 +191,7 @@ export default function LoginPage() {
           </span>
         </div>
         <h1 className="relative m-0 mt-auto max-w-[540px] text-[46px] leading-[56px] font-bold tracking-[-0.02em] text-white">{t.hero}</h1>
+        <p className="relative m-0 -mt-4 max-w-[520px] text-base leading-7 text-[#B9CCE6]">{t.heroSub}</p>
         <div className="relative flex flex-wrap gap-2">
           {t.trust.map((b) => (
             <span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#2A4468] px-3 py-1.5 text-xs font-semibold">
@@ -211,6 +232,15 @@ export default function LoginPage() {
                 <Field label={t.password}>
                   <input type="password" required autoComplete="current-password" dir="ltr" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
                 </Field>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                  <label className="flex items-center gap-2 text-j-ink-2">
+                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                    {t.remember}
+                  </label>
+                  <button type="button" onClick={() => switchTo("forgot")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                    {t.forgot}
+                  </button>
+                </div>
                 {error && (
                   <p role="alert" className="m-0 rounded-xl bg-j-bad-soft px-3.5 py-2.5 text-[13px] font-semibold text-j-bad">
                     {error}
@@ -220,6 +250,7 @@ export default function LoginPage() {
                   <Icon name="key" size={18} />
                   {busy ? t.busy : t.submit}
                 </button>
+                <p className="m-0 rounded-xl bg-j-canvas px-3.5 py-2.5 text-[13px] leading-5 text-j-ink-3">{t.access}</p>
                 <div className="flex justify-center gap-2 text-[13px] text-j-muted">
                   {t.noAccess}
                   <button type="button" onClick={() => switchTo("request")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
@@ -304,6 +335,41 @@ export default function LoginPage() {
                   </button>
                 </div>
               </form>
+            )}
+
+            {mode === "forgot" && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const at = new Date().toISOString();
+                  // The request reaches the Platform Admin under Users; nothing tells whether the email has an account.
+                  setPlatform((d) => void (d.resets = [...(d.resets ?? []).filter((r) => r.email !== email.trim().toLowerCase()), { email: email.trim().toLowerCase(), at }]));
+                  switchTo("forgotSent");
+                }}
+                className="flex flex-col gap-4"
+              >
+                <h2 className="m-0 text-[28px] leading-9 font-bold">{t.forgotTitle}</h2>
+                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.forgotLead}</p>
+                <Field label={t.email}>
+                  <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
+                </Field>
+                <button type="submit" className="h-[52px] w-full cursor-pointer rounded-xl border-0 bg-cx text-base font-semibold text-white hover:bg-cx-strong">
+                  {t.forgotSend}
+                </button>
+                <button type="button" onClick={() => switchTo("signin")} className="cursor-pointer self-center border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                  {t.back}
+                </button>
+              </form>
+            )}
+
+            {mode === "forgotSent" && (
+              <div role="status" className="flex flex-col items-start gap-4">
+                <h2 className="m-0 text-[28px] leading-9 font-bold">{t.forgotTitle}</h2>
+                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.forgotSent}</p>
+                <button type="button" onClick={() => switchTo("signin")} className="h-11 cursor-pointer rounded-xl border-0 bg-cx px-5 text-sm font-semibold text-white hover:bg-cx-strong">
+                  {t.back}
+                </button>
+              </div>
             )}
 
             {mode === "sent" && (

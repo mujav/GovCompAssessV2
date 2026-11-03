@@ -4,14 +4,19 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
-import { canOpen, checkPassword, hashPassword, homeFor, isEmail, normEmail, passwordProblem, SEED_REQUESTS, SEED_USERS, type AccessRequest, type Role, type StoredUser } from "./accounts";
+import { recordAudit } from "@/lib/audit";
+import { canOpen, checkPassword, hashPassword, homeFor, isEmail, normEmail, passwordProblem, ROLE_OF, SEED_REQUESTS, SEED_USERS, type AccessRequest, type Role, type StoredUser } from "./accounts";
 
 const STORAGE_KEY = "ci-auth-v1";
+/** Session kept only for this browser tab when "Keep me signed in" is off. */
+const TAB_SESSION_KEY = "ci-auth-tab-session";
 
 interface AuthState {
   users: StoredUser[];
   requests: AccessRequest[];
   session?: string;
+  /** False when the user chose not to stay signed in on this device. */
+  remember?: boolean;
 }
 
 const initial = (): AuthState => ({ users: structuredClone(SEED_USERS), requests: structuredClone(SEED_REQUESTS) });
@@ -45,13 +50,17 @@ interface AuthApi {
   user?: StoredUser;
   users: StoredUser[];
   requests: AccessRequest[];
-  signIn: (email: string, password: string) => Promise<{ ok: true; home: string } | { ok: false; error: string }>;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<{ ok: true; home: string } | { ok: false; error: string }>;
   signOut: () => void;
   requestAccess: (r: { name: string; email: string; organisation: string; title: string; reason: string; password: string }) => Promise<string | undefined>;
   /** Creates the account and returns its id. */
   approve: (requestId: string, a: Approval) => string;
   reject: (requestId: string, note?: string) => void;
   updateUser: (id: string, fn: (u: StoredUser) => void) => void;
+  /** Creates an invited account; returns an error message or the new id. */
+  invite: (u: { name: string; email: string; role: Role; entityId?: string; department?: string; title?: string; workspaceIds?: string[] }) => { error: string } | { id: string };
+  /** Puts the account back on the demo password and asks the user to set a new one. */
+  resetPassword: (id: string) => void;
 }
 
 const AuthContext = createContext<AuthApi | null>(null);
@@ -68,7 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const saved = JSON.parse(raw) as AuthState;
         // Demo accounts added in later versions join the saved ones.
         const users = [...saved.users, ...SEED_USERS.filter((u) => !saved.users.some((x) => x.id === u.id))];
-        dispatch({ type: "replace", state: { ...initial(), ...saved, users } });
+        const tab = sessionStorage.getItem(TAB_SESSION_KEY) ?? undefined;
+        dispatch({ type: "replace", state: { ...initial(), ...saved, users, session: saved.session ?? tab } });
       }
     } catch {
       // Corrupt or blocked storage: keep the demo accounts.
@@ -80,7 +90,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated.current) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Without "Keep me signed in" the session lives only as long as this tab.
+      const { session, ...rest } = state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.remember === false ? rest : state));
+      if (state.remember === false && session) sessionStorage.setItem(TAB_SESSION_KEY, session);
+      else sessionStorage.removeItem(TAB_SESSION_KEY);
     } catch {
       // Storage unavailable: state stays in memory.
     }
@@ -95,17 +109,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       users: state.users,
       requests: state.requests,
-      async signIn(email, password) {
+      async signIn(email, password, remember = true) {
         const u = state.users.find((x) => normEmail(x.email) === normEmail(email));
         const pending = state.requests.find((r) => normEmail(r.email) === normEmail(email) && r.status !== "approved");
         if (!u) {
-          if (pending?.status === "pending") return { ok: false, error: "Your access request is waiting for the platform admin." };
-          if (pending?.status === "rejected") return { ok: false, error: "Your access request was not approved. Contact the platform admin." };
+          if (pending?.status === "pending") return { ok: false, error: "Your access request is waiting for the Platform Admin." };
+          if (pending?.status === "rejected") return { ok: false, error: "Your access request was not approved. Contact the Platform Admin." };
           return { ok: false, error: "Email or password is not right." };
         }
         if (!(await checkPassword(u, password))) return { ok: false, error: "Email or password is not right." };
-        if (!u.active) return { ok: false, error: "This account is switched off. Contact the platform admin." };
-        update((s) => void (s.session = u.id));
+        if (!u.active) return { ok: false, error: "This account is switched off. Contact the Platform Admin." };
+        update((s) => {
+          s.session = u.id;
+          s.remember = remember;
+          const me = s.users.find((x) => x.id === u.id)!;
+          me.invited = false;
+          me.lastActive = new Date().toISOString();
+        });
+        recordAudit({ user: u.name, role: ROLE_OF[u.role].label, type: "Sign-in", action: remember ? "Signed in · kept signed in on this device" : "Signed in" });
         return { ok: true, home: homeFor(u.role) };
       },
       signOut: () => update((s) => void delete s.session),
@@ -164,6 +185,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         update((s) => {
           const u = s.users.find((x) => x.id === id);
           if (u) fn(u);
+        }),
+      invite(n) {
+        const email = normEmail(n.email);
+        if (!n.name.trim()) return { error: "Enter the full name." };
+        if (!isEmail(email)) return { error: "Enter a valid work email." };
+        if (state.users.some((u) => normEmail(u.email) === email)) return { error: "This email already has an account." };
+        const id = newId("u");
+        update((s) =>
+          void s.users.push({
+            id,
+            name: n.name.trim(),
+            email,
+            role: n.role,
+            entityId: n.entityId,
+            department: n.department || undefined,
+            title: n.title || undefined,
+            workspaceIds: n.workspaceIds,
+            invited: true,
+            active: true,
+            since: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+          }),
+        );
+        return { id };
+      },
+      resetPassword: (id) =>
+        update((s) => {
+          const u = s.users.find((x) => x.id === id);
+          if (!u) return;
+          delete u.passwordHash;
+          delete u.salt;
         }),
     };
   }, [state, ready, update]);

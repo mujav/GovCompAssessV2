@@ -15,12 +15,12 @@ import { codeKey, initials, stageOf } from "@/lib/journey/work";
 
 // 10 · My work. What the index owner must review and what is waiting on control owners.
 
-const TABS = ["Reviews", "With control owners", "Escalations"] as const;
-const RULES = ["Auto-remind every 3 days", "Escalate after 2 reminders", "Weekly summary to index owner"];
+const TABS = ["Reviews", "With Control Owners", "Escalations"] as const;
+const RULES = ["Auto-remind every 3 days", "Escalate after 2 reminders", "Weekly summary to Index Owner"];
 const PATH = [
-  ["Control owner", "Day 0"],
+  ["Control Owner", "Day 0"],
   ["Department head", "After 2 reminders"],
-  ["Index owner", "After 10 days"],
+  ["Index Owner", "After 10 days"],
 ];
 
 interface Row {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-ui";
 import { PageHeader } from "@/components/journey/studio";
+import { EditionUse } from "@/components/cycle/edition-use";
 import { Button, TabBar } from "@/components/ui";
 import { requirementCounts } from "@/lib/admin/diff";
 import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from "@/lib/admin/library";
@@ -33,7 +34,7 @@ function frameworkChecks(v: FrameworkVersion, others: FrameworkPackage[]): Check
       ]
     : [];
   return [
-    { ok: !dup, text: dup ? `Another framework in the library has this name: ${dup.name}` : "Name is unique in the library" },
+    { ok: !dup, text: dup ? `Another standard in the library has this name: ${dup.name}` : "Name is unique in the library" },
     { ok: v.levels.length > 0, text: v.levels.length ? `${v.levels.length} hierarchy levels` : "Add at least one hierarchy level" },
     { ok: labelsOk, text: labelsOk ? "Every level has English and Arabic labels" : "Every level needs English and Arabic labels" },
     { ok: patternsOk, text: patternsOk ? "Code patterns are unique" : "Code patterns must be filled in and unique" },
@@ -57,8 +58,8 @@ export default function FrameworkBuilderPage() {
   const newFramework = () => {
     const id = `fw-${state.seq + 1}`;
     const taken = new Set(state.frameworks.flatMap((f) => [f.live?.name, f.draft?.name]).filter(Boolean).map((n) => nameKey(n!)));
-    let name = "New framework";
-    for (let i = 2; taken.has(nameKey(name)); i++) name = `New framework ${i}`;
+    let name = "New standard";
+    for (let i = 2; taken.has(nameKey(name)); i++) name = `New standard ${i}`;
     update((s) => {
       s.seq += 1;
       s.frameworks.push({
@@ -77,7 +78,7 @@ export default function FrameworkBuilderPage() {
           ],
         },
       });
-      s.audit.unshift({ id: `ev-${s.seq}`, at: stamp(), who: user.name, text: `Created framework draft "${name}" v0.1.` });
+      s.audit.unshift({ id: `ev-${s.seq}`, at: stamp(), who: user.name, text: `Created standard draft "${name}" v0.1.` });
     });
     setSel(id);
     setTab(0);
@@ -113,7 +114,7 @@ export default function FrameworkBuilderPage() {
   if (session)
     return (
       <>
-        <PageHeader crumb="Studio / Framework Builder / New from document" title="Create a framework from a document" />
+        <PageHeader crumb="Platform Admin / Standard library / Draft from PDF with AI" title="Draft a standard from a document" />
         <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
           <ImportFlow
             session={session}
@@ -148,7 +149,7 @@ export default function FrameworkBuilderPage() {
   return (
     <>
       <PageHeader
-        crumb="Studio / Framework Builder"
+        crumb="Studio / Standard library"
         title={`${fw.name} · v${fw.version}`}
         actions={
           <Button
@@ -157,7 +158,7 @@ export default function FrameworkBuilderPage() {
               setNotice(null);
             }}
           >
-            ← All frameworks
+            ← All standards
           </Button>
         }
       />
@@ -174,7 +175,7 @@ export default function FrameworkBuilderPage() {
                     </h2>
                   ) : (
                     <label className="flex items-center gap-2 text-[13px] font-semibold">
-                      <span className="sr-only">Framework name</span>
+                      <span className="sr-only">Standard name</span>
                       <input value={fw.name} onChange={(e) => edit((d) => void (d.name = e.target.value))} className="h-10 rounded-lg border border-field px-2.5 text-[15px] font-semibold" />
                       <span className="font-mono text-muted">v{fw.version}</span>
                     </label>
@@ -192,13 +193,13 @@ export default function FrameworkBuilderPage() {
               </div>
               <DraftBar kind="framework" id={pkg.id} checks={checks} />
             </div>
-            <TabBar label="Framework sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
+            <TabBar label="Standard sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
             <div className="flex flex-col gap-2.5 px-5 py-4">
               <LockNote kind="framework" id={pkg.id} />
               {tab <= 0 && (
                 <>
                   <div className="text-[13px] text-muted">
-                    Hierarchy levels are names, not code. Another framework can use pillar / objective / control / sub-control with the same engine.
+                    Hierarchy levels are names, not code. Another standard can use pillar / objective / control / sub-control with the same engine.
                   </div>
                   <div role="table" aria-label="Hierarchy levels" className="text-[13px]">
                     <div role="row" className="grid gap-2.5 border-b border-line py-2 text-xs font-semibold text-muted" style={{ gridTemplateColumns: LV_COLS }}>
@@ -283,7 +284,7 @@ export default function FrameworkBuilderPage() {
             <Checks checks={checks} />
             <div className="border-t border-line-soft pt-3 text-xs leading-[18px] text-muted">
               Criteria drafted by the Requirement Decomposer stay &ldquo;Draft – SME approval required&rdquo; and cannot be used as assessment logic until a
-              framework SME signs them off.
+              standard SME signs them off.
             </div>
           </aside>
         </div>
@@ -390,15 +391,15 @@ function StartScreen({
   }, []);
   return (
     <>
-      <PageHeader crumb="Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
+      <PageHeader crumb="Platform Admin / Standard library" title="Standard library" actions={<Button onClick={onBlank}>+ New edition</Button>} />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
         {notice && <NoticeBar notice={notice} onOpen={onOpen} />}
-        <section aria-label="Create a framework from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
+        <section aria-label="Create a standard from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
           <div className="flex flex-col gap-1">
-            <h2 className="m-0 text-lg font-semibold">Create a framework from a document</h2>
+            <h2 className="m-0 text-lg font-semibold">Create a standard from a document</h2>
             <p className="m-0 text-[13px] leading-5 text-muted">
-              Upload the framework, index or standards document. The platform extracts its levels, standards, requirements and evidence, then you review and edit the result
-              and create the framework.
+              Upload the standard, index or standards document. The platform extracts its levels, standards, requirements and evidence, then you review and edit the result
+              and create the standard.
             </p>
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2 p-0 text-[13px]">
@@ -441,6 +442,7 @@ function StartScreen({
           <UploadZone busy={reading} onFiles={onFiles} />
         </section>
 
+        <EditionUse />
         <Library onOpen={onOpen} />
       </main>
     </>
@@ -490,18 +492,18 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
     .sort((a, b) => a.cur.name.localeCompare(b.cur.name));
 
   return (
-    <section aria-label="Framework library" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
+    <section aria-label="Standard library" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft px-5 py-3.5">
         <div className="flex flex-col">
-          <h2 className="m-0 text-base font-semibold">Framework library · {state.frameworks.length}</h2>
-          <span className="text-xs text-muted">One entry per framework or index. A document already in the library cannot be added again; upload a changed edition as a new version.</span>
+          <h2 className="m-0 text-base font-semibold">Standard library · {state.frameworks.length}</h2>
+          <span className="text-xs text-muted">One entry per standard or index. A document already in the library cannot be added again; upload a changed edition as a new version.</span>
         </div>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or authority" aria-label="Search the library" className="h-9 w-60 rounded-lg border border-field px-2.5 text-[13px]" />
       </div>
       <div className="overflow-x-auto">
-        <div role="table" aria-label="Framework library" className="min-w-[900px] text-[13px]">
+        <div role="table" aria-label="Standard library" className="min-w-[900px] text-[13px]">
           <div role="row" className="grid gap-3 border-b border-line bg-surface-2 px-5 py-2 text-xs font-semibold text-muted" style={{ gridTemplateColumns: LIB_COLS }}>
-            <span role="columnheader">Framework</span>
+            <span role="columnheader">Standard</span>
             <span role="columnheader">Live version</span>
             <span role="columnheader">Effective</span>
             <span role="columnheader">Published</span>
@@ -606,7 +608,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
               </div>
             );
           })}
-          {rows.length === 0 && <div className="px-5 py-6 text-muted">No framework matches the search.</div>}
+          {rows.length === 0 && <div className="px-5 py-6 text-muted">No standard matches the search.</div>}
         </div>
       </div>
     </section>

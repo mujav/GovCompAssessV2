@@ -92,7 +92,7 @@ export default function Entity360Page() {
       />
       {!hasHistory ? (
         <p className="m-0 text-sm text-j-muted">
-          No past cycles for {current?.name ?? "this framework"} on the platform yet. Import them from the onboarding wizard or start this cycle as the baseline.
+          No past cycles for {current?.name ?? "this standard"} on the platform yet. Import them from the onboarding wizard or start this cycle as the baseline.
         </p>
       ) : (
         <>
@@ -261,8 +261,8 @@ export default function Entity360Page() {
               >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cx text-xl text-white">+</span>
                 <span className="flex flex-col text-sm">
-                  <b className="text-base">Add a framework</b>
-                  <span className="text-[13px] text-j-muted">{notEnrolled.length ? `${notEnrolled.slice(0, 3).join(", ")} · from the library` : "Every library framework is already enrolled"}</span>
+                  <b className="text-base">Add a standard</b>
+                  <span className="text-[13px] text-j-muted">{notEnrolled.length ? `${notEnrolled.slice(0, 3).join(", ")} · from the library` : "Every library standard is already enrolled"}</span>
                 </span>
               </button>
             </section>

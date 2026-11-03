@@ -45,7 +45,7 @@ export default function WorkplaceReportPage() {
     return (
       <AppShell search="Search dashboards">
         <JMain>
-          <h1 className="m-0 text-2xl">This workplace is not available to you</h1>
+          <h1 className="m-0 text-2xl">This workspace is not available to you</h1>
           <JLink href="/dashboards">Back to dashboards</JLink>
         </JMain>
       </AppShell>
@@ -61,13 +61,13 @@ export default function WorkplaceReportPage() {
       <JMain>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm text-j-muted">Dashboards › Workplace report</span>
+            <span className="text-sm text-j-muted">Dashboards › Workspace report</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">{w.entity.name}</h1>
             <span className="flex flex-wrap gap-1.5">
               <Pill tone="cx">
                 {fw} · {w.workplace.year}
               </Pill>
-              <Pill>Index owners: {w.owners.map((o) => o.name).join(", ") || "none"}</Pill>
+              <Pill>Index Owners: {w.owners.map((o) => o.name).join(", ") || "none"}</Pill>
             </span>
           </div>
           <JButton onClick={() => window.print()}>Print report</JButton>
@@ -119,7 +119,7 @@ export default function WorkplaceReportPage() {
             ))}
           </Panel>
           <Panel className="flex min-w-0 flex-[2_1_340px] flex-col gap-2.5 p-[22px]">
-            <PanelHead title="Control owners" aside={<span className="text-xs text-j-muted">open · late</span>} />
+            <PanelHead title="Control Owners" aside={<span className="text-xs text-j-muted">open · late</span>} />
             {data.owners.slice(0, 12).map((o) => (
               <div key={o.o} className="flex items-center gap-3 text-sm">
                 <span className="min-w-0 flex-auto truncate">{o.o}</span>

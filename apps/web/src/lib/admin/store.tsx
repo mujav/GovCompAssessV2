@@ -189,7 +189,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       importFramework: (target, payload) => {
         const n = payload.requirements.length;
         if (target.kind === "new") {
-          if (!target.name.trim()) return { ok: false, error: "Give the new framework a name." };
+          if (!target.name.trim()) return { ok: false, error: "Give the new standard a name." };
           const dup = findDuplicate(state.frameworks, { name: target.name, hashes: payload.fileHashes });
           if (dup) return { ok: false, error: dup.message };
           const id = `fw-${state.seq + 1}`;
@@ -208,12 +208,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             // A brand-new framework is not used by any cycle yet, so the admin publishes it
             // directly; later versions go through draft → change request → four-eyes approval.
             s.frameworks.push({ id, usedByCycles: 0, live: version });
-            pushAudit(s, who(s), `Created and published framework "${version.name}" v${version.version} from ${payload.importJob.file} (${n} requirement nodes).`);
+            pushAudit(s, who(s), `Created and published standard "${version.name}" v${version.version} from ${payload.importJob.file} (${n} requirement nodes).`);
           });
           return { ok: true, id };
         }
         const v = state.frameworks.find((f) => f.id === target.id);
-        if (!v) return { ok: false, error: "Framework not found." };
+        if (!v) return { ok: false, error: "Standard not found." };
         if (v.pendingCr) return { ok: false, error: `The draft is waiting on ${v.pendingCr}. Decide it before importing again.` };
         const clash = findVersionClash(v, { hashes: payload.fileHashes }) ?? findDuplicate(state.frameworks, { hashes: payload.fileHashes, exceptId: v.id });
         if (clash) return { ok: false, error: clash.message };

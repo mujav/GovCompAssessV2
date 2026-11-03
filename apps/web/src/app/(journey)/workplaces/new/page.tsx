@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { AppShell, JMain } from "@/components/journey/shell";
 import { Avatar, Field, JButton, Panel, PanelHead, Pill, inputClass } from "@/components/journey/ui";
@@ -46,6 +46,12 @@ export default function NewWorkplacePage() {
   const [fromReq, setFromReq] = useState<string>();
   const requests = (state.workplaceRequests ?? []).filter((r) => r.status === "pending");
 
+  // "+ New workspace for this entity" on the Entities page opens with the entity chosen.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("entity");
+    if (id) setEntityId(id);
+  }, []);
+
   const prefill = (r: WorkplaceRequest) => {
     const ref = REFERENCE.find((x) => x.name.toLowerCase() === r.entityName.toLowerCase());
     setEntityId(r.entityId ?? ref?.id ?? entityId);
@@ -72,7 +78,7 @@ export default function NewWorkplacePage() {
   function create() {
     if (!entityId || !frameworkId || !fw) return setError("Choose an entity and an index.");
     if (dup) return setError(`${entityName} already has ${shortName(fw.name)} for ${year}.`);
-    if (!ownerIds.length) return setError("Choose at least one index owner.");
+    if (!ownerIds.length) return setError("Choose at least one Index Owner.");
     const ref = REFERENCE.find((r) => r.id === entityId);
     let id: string;
     if (ref && !clients.some((c) => c.id === ref.id)) {
@@ -90,22 +96,22 @@ export default function NewWorkplacePage() {
     const w: Workplace = { id, entityId, frameworkId, year, ownerIds, createdAt: new Date().toISOString() };
     saveWorkplace(w);
     if (fromReq) decide(fromReq, "created", id);
-    log(`Workplace opened: ${entityName} · ${shortName(fw.name)} · ${year}`);
+    log(`Workspace opened: ${entityName} · ${shortName(fw.name)} · ${year}`);
     router.push(clientHref(id));
   }
 
   return (
-    <AppShell search="Search workplaces">
+    <AppShell search="Search workspaces">
       <JMain max={1100}>
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm text-j-muted">Workplaces</span>
-          <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">New workplace</h1>
-          <p className="m-0 max-w-[640px] text-sm text-j-ink-3">A workplace is one entity working through one index for one review year. Its index owners run it; the entity&apos;s control owners work the requirements they are assigned.</p>
+          <span className="text-sm text-j-muted">Workspaces</span>
+          <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">New workspace</h1>
+          <p className="m-0 max-w-[640px] text-sm text-j-ink-3">A workspace is one entity working through one index for one cycle year. Its Index Owners run it; the entity&apos;s Control Owners work the requirements they are assigned.</p>
         </div>
 
         {requests.length > 0 && (
           <Panel className="flex flex-col p-0">
-            <PanelHead title="Requests from index owners" aside={<Pill tone="warn">{requests.length} waiting</Pill>} className="px-[22px] pt-[18px] pb-3" />
+            <PanelHead title="Requests from Index Owners" aside={<Pill tone="warn">{requests.length} waiting</Pill>} className="px-[22px] pt-[18px] pb-3" />
             {requests.map((r) => (
               <div key={r.id} className={cx("flex flex-wrap items-center gap-3 border-t border-j-line-soft px-[22px] py-3", fromReq === r.id && "bg-cx-tint")}>
                 <Avatar initials={initials(r.byName)} size={30} />
@@ -125,7 +131,7 @@ export default function NewWorkplacePage() {
                   onClick={() => {
                     decide(r.id, "declined");
                     if (fromReq === r.id) setFromReq(undefined);
-                    log(`Declined workplace request from ${r.byName} · ${r.entityName}`);
+                    log(`Declined workspace request from ${r.byName} · ${r.entityName}`);
                   }}
                 >
                   Decline
@@ -166,7 +172,7 @@ export default function NewWorkplacePage() {
                 ))}
               </select>
             </Field>
-            <Field label="Review year">
+            <Field label="Cycle year">
               <select value={year} onChange={(e) => (setYear(Number(e.target.value)), setError(""))} className={inputClass}>
                 {YEARS.map((y) => (
                   <option key={y} value={y}>
@@ -177,7 +183,7 @@ export default function NewWorkplacePage() {
             </Field>
           </div>
           <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-            <legend className="mb-2 text-[13px] font-semibold text-j-ink-2">Index owners</legend>
+            <legend className="mb-2 text-[13px] font-semibold text-j-ink-2">Index Owners</legend>
             <div className="flex flex-wrap gap-2">
               {owners.map((u) => {
                 const on = ownerIds.includes(u.id);
@@ -195,7 +201,7 @@ export default function NewWorkplacePage() {
                   </button>
                 );
               })}
-              {owners.length === 0 && <span className="text-sm text-j-muted">No index owners yet. Approve an access request with the Index owner role first.</span>}
+              {owners.length === 0 && <span className="text-sm text-j-muted">No Index Owners yet. Approve an access request with the Index Owner role first.</span>}
             </div>
           </fieldset>
           {dup && (
@@ -211,7 +217,7 @@ export default function NewWorkplacePage() {
           <div className="flex flex-wrap items-center gap-3">
             <JButton variant="primary" onClick={create} disabled={!!dup}>
               <Icon name="plus" size={15} />
-              Open workplace
+              Open workspace
             </JButton>
             {fw && (
               <span className="text-[13px] text-j-muted">
@@ -222,7 +228,7 @@ export default function NewWorkplacePage() {
         </Panel>
 
         <Panel className="flex flex-col p-0">
-          <PanelHead title="Index owners of every workplace" aside={<span className="text-xs text-j-muted">{views.length} workplaces</span>} className="px-[22px] pt-[18px] pb-3" />
+          <PanelHead title="Index Owners of every workspace" aside={<span className="text-xs text-j-muted">{views.length} workplaces</span>} className="px-[22px] pt-[18px] pb-3" />
           {sorted.map((v) => (
             <div key={v.workplace.id} className="flex flex-wrap items-center gap-3 border-t border-j-line-soft px-[22px] py-3">
               <span className="min-w-[220px] flex-auto text-sm">
@@ -243,7 +249,7 @@ export default function NewWorkplacePage() {
                       aria-label={`${u.name} owns ${v.entity.name} ${v.workplace.year}`}
                       onClick={() => {
                         saveWorkplace({ ...v.workplace, ownerIds: toggle(v.workplace.ownerIds, u.id) });
-                        log(`${on ? "Removed" : "Added"} ${u.name} as index owner · ${v.entity.name} ${v.workplace.year}`);
+                        log(`${on ? "Removed" : "Added"} ${u.name} as Index Owner · ${v.entity.name} ${v.workplace.year}`);
                       }}
                       className={cx("h-8 cursor-pointer rounded-full border px-3 text-xs font-semibold", on ? "border-cx bg-cx text-white" : "border-j-line bg-white text-j-ink-3 hover:text-j-ink")}
                     >

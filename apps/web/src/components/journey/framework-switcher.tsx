@@ -11,6 +11,6 @@ export function FrameworkSwitcher({ allowAll = false }: { allowAll?: boolean }) 
   const { frameworks, active, current, setActive } = useEntityFrameworks();
   if (frameworks.length < 2) return null;
   const value = allowAll ? active : (current?.id ?? "");
-  const options = [...(allowAll ? [{ value: ALL, label: "All frameworks" }] : []), ...frameworks.map((f) => ({ value: f.id, label: f.short }))];
+  const options = [...(allowAll ? [{ value: ALL, label: "All standards" }] : []), ...frameworks.map((f) => ({ value: f.id, label: f.short }))];
   return <Segmented label="Framework" value={value} options={options} onChange={setActive} />;
 }

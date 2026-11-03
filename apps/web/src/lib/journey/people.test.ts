@@ -12,7 +12,7 @@ describe("client people import", () => {
       ["Hessa B.", "IT Operations", "user"],
       ["Turki Q.", "Human Capital", "contact"],
     ]);
-    expect(r.people[0]).toMatchObject({ email: "abdullah@entity.gov.sa", title: "Director of strategy", roles: ["Index owner", "Approver"] });
+    expect(r.people[0]).toMatchObject({ email: "abdullah@entity.gov.sa", title: "Director of strategy", roles: ["Index Owner", "Approver"] });
   });
 
   it("finds the header below a title row, accepts Arabic headers and skips bad rows with a reason", () => {
@@ -52,7 +52,7 @@ describe("client people import", () => {
   });
 
   it("upgrades stakeholders saved by the older wizard and keeps the demo directory for seeded clients", () => {
-    expect(normalizePerson({ av: "AM", name: "Abdullah M.", roles: ["Index owner"], user: true })).toMatchObject({ name: "Abdullah M.", access: "user", department: "", email: "" });
+    expect(normalizePerson({ av: "AM", name: "Abdullah M.", roles: ["Index Owner"], user: true })).toMatchObject({ name: "Abdullah M.", access: "user", department: "", email: "" });
     expect(DEMO_DIRECTORY.find((p) => p.name === "Khalid M.")?.department).toBe("IT Operations");
   });
 });

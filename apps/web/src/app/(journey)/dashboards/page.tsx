@@ -58,8 +58,8 @@ export default function DashboardsPage() {
             <span className="text-sm text-j-muted">Insights</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Dashboards</h1>
           </div>
-          <select aria-label="Review year" value={year} onChange={(e) => setYear(e.target.value)} className={cx(inputClass, "h-10")}>
-            <option value="all">All review years</option>
+          <select aria-label="Cycle year" value={year} onChange={(e) => setYear(e.target.value)} className={cx(inputClass, "h-10")}>
+            <option value="all">All cycles</option>
             {years.map((y) => (
               <option key={y} value={y}>
                 {y}
@@ -74,7 +74,7 @@ export default function DashboardsPage() {
               <b className="text-2xl">{pct}%</b>
             </Ring>
             <span className="flex flex-col gap-1 text-sm">
-              <b className="text-base">Accepted across workplaces</b>
+              <b className="text-base">Accepted across workspaces</b>
               <span className="text-j-ink-3">
                 {sum.acc} of {sum.total} requirements in {rows.length} workplaces
               </span>
@@ -118,7 +118,7 @@ export default function DashboardsPage() {
                     <span role="cell" className="min-w-0">
                       <b className="block truncate">{w.entity.name}</b>
                       <span className="text-xs text-j-muted">
-                        {w.framework ? shortName(w.framework.name) : w.workplace.frameworkId} · {w.workplace.year} · {w.owners.map((o) => o.name).join(", ") || "no index owner"}
+                        {w.framework ? shortName(w.framework.name) : w.workplace.frameworkId} · {w.workplace.year} · {w.owners.map((o) => o.name).join(", ") || "no Index Owner"}
                       </span>
                     </span>
                     <span role="cell" className="flex flex-col gap-1">
@@ -135,7 +135,7 @@ export default function DashboardsPage() {
                     <Icon name="chevR" size={16} className="text-j-muted" />
                   </Link>
                 ))}
-                {rows.length === 0 && <p className="m-0 px-[22px] py-8 text-center text-sm text-j-muted">No workplaces for this year.</p>}
+                {rows.length === 0 && <p className="m-0 px-[22px] py-8 text-center text-sm text-j-muted">No workspaces for this year.</p>}
               </div>
             </div>
             <div className="flex flex-wrap gap-3 px-[22px] py-3 text-xs text-j-muted">

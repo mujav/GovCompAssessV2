@@ -4,12 +4,15 @@ import { useState } from "react";
 import { AssessorUnavailable, EMPTY_EVIDENCE, assessInput, evidenceKey, readEvidenceFile, requestAssessment, type EvidenceFile, type EvidenceState } from "./evidence";
 import type { ClientRequirement } from "./frameworks";
 import { useJourney, useScreenState } from "./store";
+import { usePlatform } from "@/lib/cycle/use-cycle";
+import { maskPersonal } from "@/lib/cycle/platform";
 
 /** Evidence uploaded on one requirement, read in the browser and assessed by the AI assessor as soon as it is in. */
 export function useRequirementEvidence(clientId: string, frameworkId: string, r: ClientRequirement | undefined) {
   const { log } = useJourney();
   const [ev, setEv] = useScreenState<EvidenceState>(evidenceKey(clientId, frameworkId, r?.code ?? "-"), EMPTY_EVIDENCE);
   const [busy, setBusy] = useState<null | "reading" | "assessing">(null);
+  const { platform } = usePlatform();
   const readable = ev.files.filter((f) => !f.error);
   // The verdict is out of date when files were added or removed after it was made.
   const stale = !!ev.run && (ev.run.fileIds.length !== readable.length || readable.some((f) => !ev.run!.fileIds.includes(f.id)));
@@ -18,9 +21,13 @@ export function useRequirementEvidence(clientId: string, frameworkId: string, r:
     if (!r) return;
     const ok = files.filter((f) => !f.error);
     if (!ok.length) return;
+    // AI settings: the Evidence Review agent can be switched off, and personal data is masked before sending.
+    if (!platform.ai.agents.review) return setEv((d) => void (d.error = "The Evidence Review agent is off in AI settings. The files are saved."));
     setBusy("assessing");
     try {
-      const run = await requestAssessment(assessInput(r, ok));
+      const input = assessInput(r, ok);
+      if (platform.ai.data.mask) input.evidence = input.evidence.map((d) => ({ ...d, pages: d.pages.map((p) => ({ ...p, text: maskPersonal(p.text) })) }));
+      const run = await requestAssessment(input);
       setEv((d) => {
         d.run = { ...run, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }), fileIds: ok.map((f) => f.id) };
         delete d.error;

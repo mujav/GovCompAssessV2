@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useCurrentClient } from "@/components/journey/shell";
 import { useAdmin } from "@/lib/admin/store";
-import type { WsRequirement } from "@/lib/workspace/data";
+import { SUBMISSION_DEADLINE, type WsRequirement } from "@/lib/workspace/data";
 import { useWorkspace } from "@/lib/workspace/store";
 import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceRecords, withAssignments, WORKSPACE_FRAMEWORK_ID, type ClientRequirement, type EntityFramework } from "./frameworks";
 import { evidenceKey, type EvidenceState } from "./evidence";
@@ -46,7 +46,7 @@ export function useAssignees(): EntityPerson[] {
   return useMemo(() => owners.map(asPerson), [owners]);
 }
 
-const asPerson = (u: StoredUser): EntityPerson => ({ id: u.id, name: u.name, email: u.email, department: u.department ?? "", title: u.title ?? "", roles: ["Control owner"], access: "user" });
+const asPerson = (u: StoredUser): EntityPerson => ({ id: u.id, name: u.name, email: u.email, department: u.department ?? "", title: u.title ?? "", roles: ["Control Owner"], access: "user" });
 
 /**
  * Seeded workplaces on the workspace framework share the demo records; a workplace the admin
@@ -79,6 +79,19 @@ export function frameworkRequirements(
 }
 
 export type WorkRequirement = ClientRequirement & { upload?: EvidenceSignal };
+
+/** Requirements the Index Owner added in the workspace's standard builder, as fresh work items. */
+function withTailoring(reqs: ClientRequirement[], cycle: unknown, assignments: Record<string, { owner: string; due: string }>, scope: string, workspace: boolean): ClientRequirement[] {
+  const added = (cycle as { standard?: { added?: Record<string, { title: string; dimension: string }> } } | undefined)?.standard?.added;
+  if (!added) return reqs;
+  const extra = Object.entries(added)
+    .filter(([code]) => !reqs.some((r) => r.code === code))
+    .map(([code, a]): ClientRequirement => {
+      const as = assignments[workspace ? code : assignmentKey(scope, code)];
+      return { code, title: a.title, domain: a.dimension, weight: "med", status: "nas", mandatoryFail: false, department: "", owner: as?.owner ?? "", work: "none", due: as?.due ?? SUBMISSION_DEADLINE, review: "none", evidence: { expected: 1, valid: 0, invalid: 0 } };
+    });
+  return [...reqs, ...extra];
+}
 
 /** Files uploaded on each requirement count as received evidence everywhere the requirement is shown, and move its stage on. */
 function withUploads(reqs: ClientRequirement[], clientId: string, fwId: string, screens: Record<string, unknown>): WorkRequirement[] {
@@ -124,12 +137,16 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
   const scope = assignScope(client, fwId);
   const reqs = useMemo(
-    () => withUploads(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), client.id, fwId, state.screens),
+    () => withUploads(withTailoring(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), state.screens[`cycle.${client.id}`], ws.state.assignments, scope, workspace), client.id, fwId, state.screens),
     [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope, client.id, fwId, state.screens],
   );
 
+  // A closed cycle is read-only: nothing moves, nothing is reassigned.
+  const closed = !!(state.screens[`cycle.${client.id}`] as { closure?: { closedAt?: string } } | undefined)?.closure?.closedAt;
+
   /** Assigns requirements to a control owner (their department follows), due on the given date. */
   const assign = (codes: string[], person: string, due: string) => {
+    if (closed) return;
     for (const c of codes) ws.assign(workspace ? c : assignmentKey(scope, c), person, due);
   };
 
@@ -140,7 +157,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   };
 
   const move = (codes: string[], to: Stage, text?: string) => {
-    if (!codes.length) return;
+    if (!codes.length || closed) return;
     setOverlay((o) => {
       for (const c of codes) o.stage[c] = to;
       o.returned = o.returned.filter((c) => !codes.includes(c));
@@ -150,6 +167,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   };
 
   const ret = (codes: string[], text?: string) => {
+    if (closed) return;
     setOverlay((o) => {
       for (const c of codes) {
         o.stage[c] = "prog";
@@ -181,6 +199,8 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
     assign,
     people,
     log,
+    /** The cycle was closed; the workspace is read-only. */
+    closed,
   };
 }
 

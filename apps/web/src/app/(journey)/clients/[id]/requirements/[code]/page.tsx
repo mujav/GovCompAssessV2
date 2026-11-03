@@ -39,7 +39,7 @@ function marksFor(r: WsRequirement): Mark[] {
   return ["part", "gap", "gap", "gap"];
 }
 
-const DECISIONS = ["Accept", "Return to the control owner"] as const;
+const DECISIONS = ["Accept", "Return to the Control Owner"] as const;
 const DECISION_CTA = ["Accept requirement", "Return with note"];
 
 interface ReqScreen {
@@ -79,7 +79,7 @@ export default function RequirementWorkspacePage() {
     return (
       <ClientShell>
         <JMain>
-          <h1 className="m-0 text-2xl">{r ? `Requirement ${code} is not assigned to you` : `Requirement ${code} is not in ${framework?.name ?? "this framework"}`}</h1>
+          <h1 className="m-0 text-2xl">{r ? `Requirement ${code} is not assigned to you` : `Requirement ${code} is not in ${framework?.name ?? "this standard"}`}</h1>
           <JLink href={listHref}>Back to requirements</JLink>
         </JMain>
       </ClientShell>
@@ -155,7 +155,7 @@ export default function RequirementWorkspacePage() {
       : { av: "AI", tone: "ai", what: `AI check: ${gaps ? "not ready to accept" : "ready to accept"} · ${confidence}%`, who: "Platform", when: "Today, 09:40" },
     ...(r.evidence.valid ? [{ av: initials(owner), tone: "cl", what: `Uploaded ${r.evidence.valid} evidence files`, who: owner, when: "Yesterday" }] : []),
     ...(r.owner ? [{ av: initials(owner), tone: "cl", what: "Drafted response", who: owner, when: "9 d ago" }] : []),
-    { av: "IO", tone: "me", what: `Assigned to ${r.owner || r.department || "nobody yet"}`, who: "Index owner", when: "12 d ago" },
+    { av: "IO", tone: "me", what: `Assigned to ${r.owner || r.department || "nobody yet"}`, who: "Index Owner", when: "12 d ago" },
   ];
   const ACT_TONE: Record<string, [string, string]> = { me: ["#EAF1FA", "#1E4E8C"], cl: ["#E7F3ED", "#0E5A45"], ai: ["#EEEDFD", "#4F46E5"] };
 
@@ -207,7 +207,7 @@ export default function RequirementWorkspacePage() {
                 {manages ? (
                   <>
                 <label className="sr-only" htmlFor="req-owner">
-                  Control owner
+                  Control Owner
                 </label>
                 <select
                   id="req-owner"
@@ -220,7 +220,7 @@ export default function RequirementWorkspacePage() {
                   }}
                   className={cx("h-8 cursor-pointer rounded-lg border border-j-line bg-white px-2 text-[13px]", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
                 >
-                  {!r.owner && <option value="">Assign a control owner…</option>}
+                  {!r.owner && <option value="">Assign a Control Owner…</option>}
                   {r.owner && !people.some((p) => p.name === r.owner) && <option value={r.owner}>{r.owner}</option>}
                   {people.map((p) => (
                     <option key={p.name} value={p.name}>
@@ -232,7 +232,7 @@ export default function RequirementWorkspacePage() {
                 ) : (
                   <b>{owner}</b>
                 )}
-                {r.department && <span>{r.department} · control owner</span>}
+                {r.department && <span>{r.department} · Control Owner</span>}
                 <span>· due {shortDate(r.due)}</span>
               </span>
             </div>
@@ -514,7 +514,7 @@ export default function RequirementWorkspacePage() {
                   )}
                   {manages && (
                     <JButton size="sm" variant="outline" onClick={() => setTab("fu")}>
-                      Request from control owner
+                      Request from Control Owner
                     </JButton>
                   )}
                 </span>
@@ -552,7 +552,7 @@ export default function RequirementWorkspacePage() {
 
         {tab === "fu" && (
           <div className="flex flex-col gap-3.5">
-            <h2 className="m-0 text-sm font-semibold text-j-muted">{manages ? "Waiting on the control owner" : "Asked of you"}</h2>
+            <h2 className="m-0 text-sm font-semibold text-j-muted">{manages ? "Waiting on the Control Owner" : "Asked of you"}</h2>
           <Panel className="flex flex-col gap-2 p-[22px]">
             <PanelHead
               title="Requests"
@@ -581,7 +581,7 @@ export default function RequirementWorkspacePage() {
                   <b>{h.t}</b>
                   <br />
                   <span className="text-xs text-j-muted">
-                    {owner} · control owner · sent {h.sent}
+                    {owner} · Control Owner · sent {h.sent}
                   </span>
                 </span>
                 <Pill tone={h.done ? "ok" : h.reminded ? "cx" : "bad"}>{h.done ? "Answered" : h.reminded ? "Reminded" : "Overdue"}</Pill>
@@ -605,7 +605,7 @@ export default function RequirementWorkspacePage() {
           </Panel>
             <h2 className="m-0 text-sm font-semibold text-j-muted">Fix plan</h2>
           <Panel className="flex flex-col gap-4 p-[22px]">
-            <PanelHead title="Gap and fix" aside={<Pill tone={gaps ? (s.remProposed ? "cx" : "warn") : "ok"}>{gaps ? (s.remProposed ? "Agreed with control owner" : "Open") : "No gap"}</Pill>} />
+            <PanelHead title="Gap and fix" aside={<Pill tone={gaps ? (s.remProposed ? "cx" : "warn") : "ok"}>{gaps ? (s.remProposed ? "Agreed with Control Owner" : "Open") : "No gap"}</Pill>} />
             {gaps ? (
               <>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 text-sm">
@@ -631,11 +631,11 @@ export default function RequirementWorkspacePage() {
                     onClick={() =>
                       send("remediation", [r.code], () => {
                         set((d) => void (d.remProposed = true));
-                        act("Proposed the fix to the control owner");
+                        act("Proposed the fix to the Control Owner");
                       })
                     }
                   >
-                    Propose to control owner
+                    Propose to Control Owner
                   </JButton>
                 </div>
                 )}
@@ -732,7 +732,7 @@ export default function RequirementWorkspacePage() {
               >
                 Save question
               </JButton>
-              <span className="text-xs text-j-muted">The index owner sends questions to the regulator; the answer is recorded here.</span>
+              <span className="text-xs text-j-muted">The Index Owner sends questions to the regulator; the answer is recorded here.</span>
             </Panel>
           </div>
         )}
@@ -783,7 +783,7 @@ export default function RequirementWorkspacePage() {
                     </div>
                     <textarea
                       aria-label="Note"
-                      placeholder={dec === 1 ? "What the control owner needs to fix" : "Note for the record"}
+                      placeholder={dec === 1 ? "What the Control Owner needs to fix" : "Note for the record"}
                       rows={3}
                       value={s.note ?? ""}
                       onChange={(e) => set((d) => void (d.note = e.target.value))}
@@ -796,11 +796,11 @@ export default function RequirementWorkspacePage() {
                 ) : (
                   <p className="m-0 text-sm text-j-ink-3">
                     {stage === "rev"
-                      ? "Submitted. The index owner reviews it next."
+                      ? "Submitted. The Index Owner reviews it next."
                       : stage === "acc"
-                        ? "Accepted by the index owner. It is in the submission pack."
+                        ? "Accepted by the Index Owner. It is in the submission pack."
                         : returned
-                          ? `Returned by the index owner${s.returnNote ? `: “${s.returnNote}”` : "."} Fix it and submit it again.`
+                          ? `Returned by the Index Owner${s.returnNote ? `: “${s.returnNote}”` : "."} Fix it and submit it again.`
                           : "Not submitted yet. Upload the evidence, write the response and submit it for review."}
                   </p>
                 )}
@@ -808,9 +808,9 @@ export default function RequirementWorkspacePage() {
               <Panel className="flex flex-col gap-2.5 p-[22px]">
                 <h2 className="m-0 text-base">Review path</h2>
                 {[
-                  [initials(owner), "Control owner", owner, stage === "start" || stage === "prog" ? "Now" : "Done", "gray", stage === "start" || stage === "prog"],
+                  [initials(owner), "Control Owner", owner, stage === "start" || stage === "prog" ? "Now" : "Done", "gray", stage === "start" || stage === "prog"],
                   ["AI", "AI check", "Platform", run || r.evidence.valid ? `${confidence}%` : "—", "ai", false],
-                  ["IO", "Index owner", "Review", stage === "rev" ? "Now" : stage === "acc" ? "Done" : "Next", "cx", stage === "rev"],
+                  ["IO", "Index Owner", "Review", stage === "rev" ? "Now" : stage === "acc" ? "Done" : "Next", "cx", stage === "rev"],
                 ].map(([av, l, who, st, tone, now]) => (
                   <div key={l as string} className={cx("flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-sm", now ? "border-cx" : "border-transparent")}>
                     <Avatar initials={av as string} size={28} bg={tone === "ai" ? "#EEEDFD" : tone === "cx" ? "#EAF1FA" : "#F5F7F6"} fg={tone === "ai" ? "#4F46E5" : tone === "cx" ? "#1E4E8C" : "#47534D"} />
