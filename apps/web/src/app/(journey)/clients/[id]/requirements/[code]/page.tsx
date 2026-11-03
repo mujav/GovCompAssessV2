@@ -16,10 +16,12 @@ import { useJourney, useScreenState } from "@/lib/journey/store";
 import { nextClarificationId, useClarifications } from "@/lib/journey/use-clarifications";
 import { useRequirementEvidence } from "@/lib/journey/use-evidence";
 import { useClientWork } from "@/lib/journey/use-work";
+import { canManage } from "@/lib/auth/accounts";
+import { useAuth } from "@/lib/auth/store";
 import { RESULT, STAGES, codeKey, initials, isReturned, stageOf } from "@/lib/journey/work";
 
-// 09 · Requirement workspace. Draft the response, check the AI assessment, make the L1
-// decision and chase the SPOC — all for one requirement.
+// 09 · Requirement workspace. The control owner uploads evidence, drafts the response and
+// submits it; the index owner reviews it once (accept or return) and follows up.
 
 type Tab = "req" | "ev" | "fu" | "act";
 type Mark = "met" | "gap" | "part";
@@ -37,8 +39,8 @@ function marksFor(r: WsRequirement): Mark[] {
   return ["part", "gap", "gap", "gap"];
 }
 
-const DECISIONS = ["Ready · send to client", "Needs more evidence", "Return to SPOC"] as const;
-const DECISION_CTA = ["Send to client", "Request evidence", "Return to SPOC"];
+const DECISIONS = ["Accept", "Return to the control owner"] as const;
+const DECISION_CTA = ["Accept requirement", "Return with note"];
 
 interface ReqScreen {
   draft?: string;
@@ -47,16 +49,21 @@ interface ReqScreen {
   requests: { t: string; sent: string; done: boolean; reminded: boolean }[];
   remProposed: boolean;
   claApplied: boolean;
-  activity: { what: string; when: string }[];
+  activity: { what: string; when: string; who?: string }[];
+  /** What the index owner asked to fix when returning it. */
+  returnNote?: string;
 }
 
 export default function RequirementWorkspacePage() {
   const { code } = useParams<{ code: string }>();
   const { client, ws, framework, workspace, reqs, overlay, move, ret, assign, people, log } = useClientWork();
+  const { user } = useAuth();
+  const manages = canManage(user?.role);
+  const me = user?.name ?? "You";
   const { send, drawer } = useDraftSender();
   const r = reqs.find((x) => x.code === code);
   const [tab, setTab] = useState<Tab>("ev");
-  const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 1, requests: [], remProposed: false, claApplied: false, activity: [] });
+  const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 0, requests: [], remProposed: false, claApplied: false, activity: [] });
   const c = (p: string) => clientHref(client.id, p);
   const { ev, readable, stale, busy, upload, assess, remove } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
   const [clar, setClar] = useClarifications(client.id, framework, workspace, reqs, ws);
@@ -65,15 +72,15 @@ export default function RequirementWorkspacePage() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
 
-  const sorted = useMemo(() => [...reqs].sort((a, b) => codeKey(a.code).localeCompare(codeKey(b.code))), [reqs]);
-  if (!r) {
+  // Control owners step through their own requirements only.
+  const sorted = useMemo(() => [...reqs].filter((x) => manages || x.owner === user?.name).sort((a, b) => codeKey(a.code).localeCompare(codeKey(b.code))), [reqs, manages, user?.name]);
+  const listHref = manages ? c("/requirements") : "/my-requirements";
+  if (!r || (!manages && r.owner !== user?.name)) {
     return (
       <ClientShell>
         <JMain>
-          <h1 className="m-0 text-2xl">
-            Requirement {code} is not in {framework?.name ?? "this framework"}
-          </h1>
-          <JLink href={c("/requirements")}>Back to requirements</JLink>
+          <h1 className="m-0 text-2xl">{r ? `Requirement ${code} is not assigned to you` : `Requirement ${code} is not in ${framework?.name ?? "this framework"}`}</h1>
+          <JLink href={listHref}>Back to requirements</JLink>
         </JMain>
       </ClientShell>
     );
@@ -113,21 +120,23 @@ export default function RequirementWorkspacePage() {
 
   const act = (what: string) =>
     set((d) => {
-      d.activity.unshift({ what, when: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) });
+      d.activity.unshift({ what, who: me, when: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) });
     });
 
+  // One review layer: the index owner accepts, or returns it to the control owner with a note.
+  const dec = s.dec === 0 ? 0 : 1;
   const decide = () => {
-    if (s.dec === 0) {
-      move([r.code], "cli", `L1 approved ${r.code} and sent to ${client.name}`);
-      act("L1 approved · sent to client");
-    } else if (s.dec === 1) {
-      move([r.code], "prog");
-      act("Asked for more evidence");
-      send("evidence-request", [r.code]);
+    if (dec === 0) {
+      move([r.code], "acc", `${me} accepted ${r.code}`);
+      act("Accepted");
     } else {
-      ret([r.code], `Returned ${r.code} to ${owner}`);
-      act(`Returned to ${owner}`);
+      ret([r.code], `Returned ${r.code} to ${owner}${s.note ? `: ${s.note}` : ""}`);
+      act(`Returned to ${owner}${s.note ? ` · “${s.note}”` : ""}`);
     }
+    set((d) => {
+      d.returnNote = dec === 1 ? d.note?.trim() || undefined : undefined;
+      d.note = "";
+    });
   };
 
   const openRequests = requests.filter((h) => !h.done).length;
@@ -138,15 +147,15 @@ export default function RequirementWorkspacePage() {
     ["act", "Activity"],
   ];
 
-  const nextAction = stage === "rev" ? "Complete L1 review" : stage === "cli" ? "Waiting for client" : stage === "acc" ? "Accepted" : stage === "start" ? "Start draft" : "Continue draft";
+  const nextAction = stage === "rev" ? (manages ? "Review now" : "Waiting for review") : stage === "acc" ? "Accepted" : stage === "start" ? "Start" : "Continue";
   const activity = [
-    ...s.activity.map((a) => ({ av: "SR", tone: "me", what: a.what, who: "Sami R.", when: `Today, ${a.when}` })),
+    ...s.activity.map((a) => ({ av: initials(a.who ?? me), tone: "me", what: a.what, who: a.who ?? me, when: `Today, ${a.when}` })),
     run
       ? { av: "AI", tone: "ai", what: `AI assessor: ${run.recommendation} · ${confidence}% · ${run.fileIds.length} files`, who: "Platform", when: run.at }
       : { av: "AI", tone: "ai", what: `AI check: ${gaps ? "not ready to accept" : "ready to accept"} · ${confidence}%`, who: "Platform", when: "Today, 09:40" },
     ...(r.evidence.valid ? [{ av: initials(owner), tone: "cl", what: `Uploaded ${r.evidence.valid} evidence files`, who: owner, when: "Yesterday" }] : []),
-    { av: "SR", tone: "me", what: "Drafted response", who: "Sami R.", when: "9 d ago" },
-    { av: "SR", tone: "me", what: `Assigned to ${r.department}`, who: "Sami R.", when: "12 d ago" },
+    ...(r.owner ? [{ av: initials(owner), tone: "cl", what: "Drafted response", who: owner, when: "9 d ago" }] : []),
+    { av: "IO", tone: "me", what: `Assigned to ${r.owner || r.department || "nobody yet"}`, who: "Index owner", when: "12 d ago" },
   ];
   const ACT_TONE: Record<string, [string, string]> = { me: ["#EAF1FA", "#1E4E8C"], cl: ["#E7F3ED", "#0E5A45"], ai: ["#EEEDFD", "#4F46E5"] };
 
@@ -155,8 +164,8 @@ export default function RequirementWorkspacePage() {
       <JMain>
         <div className="flex flex-wrap items-center justify-between gap-3 text-[13px]">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-j-muted">
-            <Link href={c("/requirements")} className="font-semibold text-cx">
-              Requirements
+            <Link href={listHref} className="font-semibold text-cx">
+              {manages ? "Requirements" : "My requirements"}
             </Link>
             <span>›</span>
             <span>
@@ -190,13 +199,15 @@ export default function RequirementWorkspacePage() {
                   Last result · DGA 2025: {res}
                 </span>
                 {r.weight === "high" && <Pill tone="bad">Mandatory</Pill>}
-                {returned && stage !== "acc" && <Pill tone="bad">Returned by client</Pill>}
+                {returned && stage !== "acc" && <Pill tone="bad">Returned</Pill>}
               </span>
               <h1 className="m-0 text-[26px] leading-[34px] font-bold tracking-[-0.01em]">{r.title}</h1>
               <span className="flex flex-wrap items-center gap-2 text-[13px] text-j-ink-2">
                 <Avatar initials={initials(r.owner)} size={26} bg={r.owner ? undefined : "#FDECEA"} fg={r.owner ? undefined : "#B42318"} />
+                {manages ? (
+                  <>
                 <label className="sr-only" htmlFor="req-owner">
-                  Owner
+                  Control owner
                 </label>
                 <select
                   id="req-owner"
@@ -209,7 +220,7 @@ export default function RequirementWorkspacePage() {
                   }}
                   className={cx("h-8 cursor-pointer rounded-lg border border-j-line bg-white px-2 text-[13px]", r.owner ? "text-j-ink" : "font-semibold text-j-bad")}
                 >
-                  {!r.owner && <option value="">Assign an owner…</option>}
+                  {!r.owner && <option value="">Assign a control owner…</option>}
                   {r.owner && !people.some((p) => p.name === r.owner) && <option value={r.owner}>{r.owner}</option>}
                   {people.map((p) => (
                     <option key={p.name} value={p.name}>
@@ -217,20 +228,24 @@ export default function RequirementWorkspacePage() {
                     </option>
                   ))}
                 </select>
-                {r.department && <span>{r.department} · SPOC</span>}
+                  </>
+                ) : (
+                  <b>{owner}</b>
+                )}
+                {r.department && <span>{r.department} · control owner</span>}
                 <span>· due {shortDate(r.due)}</span>
               </span>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <JButton variant="primary" disabled={stage === "cli" || stage === "acc"} onClick={() => setTab(stage === "rev" ? "ev" : "req")}>
+              <JButton variant="primary" disabled={stage === "acc" || (stage === "rev" && !manages)} onClick={() => setTab(stage === "rev" ? "ev" : "req")}>
                 {nextAction}
               </JButton>
               <span className="text-xs text-j-muted">
-                Submission pack: <b className="text-j-ink">{stage === "acc" ? "included" : "not yet · needs client acceptance"}</b>
+                Submission pack: <b className="text-j-ink">{stage === "acc" ? "included" : "not yet · needs acceptance"}</b>
               </span>
             </div>
           </div>
-          <ol aria-label="Stage" className="m-0 grid list-none grid-cols-5 gap-1.5 p-0">
+          <ol aria-label="Stage" className="m-0 grid list-none grid-cols-4 gap-1.5 p-0">
             {STAGES.map((st, i) => (
               <li key={st.key} aria-current={i === stageIdx ? "step" : undefined} className="flex flex-col gap-1.5">
                 <span className="h-1.5 rounded-[3px]" style={{ background: i < stageIdx ? "#1E4E8C" : i === stageIdx ? "#3A6FB8" : "#E6EBE8" }} />
@@ -290,12 +305,12 @@ export default function RequirementWorkspacePage() {
                   variant="primary"
                   disabled={stage !== "start" && stage !== "prog"}
                   onClick={() => {
-                    move([r.code], "rev", `Response for ${r.code} ready for L1 review`);
-                    act("Draft submitted for L1 review");
+                    move([r.code], "rev", `${me} submitted ${r.code} for review`);
+                    act("Submitted for review");
                     setTab("ev");
                   }}
                 >
-                  Submit for L1 review
+                  Submit for review
                 </JButton>
               </span>
             </Panel>
@@ -476,9 +491,9 @@ export default function RequirementWorkspacePage() {
                       {evidence[i] && (
                         <>
                           <br />
-                          <Link href={c("/evidence")} className="font-mono text-xs text-j-ai">
+                          <span className="font-mono text-xs text-j-ai">
                             {evidence[i].id} · p.{i + 2}
-                          </Link>
+                          </span>
                         </>
                       )}
                     </span>
@@ -492,12 +507,16 @@ export default function RequirementWorkspacePage() {
               title="Linked evidence"
               aside={
                 <span className="flex gap-2">
-                  <JLink size="sm" href={c("/evidence")}>
-                    Link from library
-                  </JLink>
-                  <JButton size="sm" variant="outline" onClick={() => setTab("fu")}>
-                    Request from SPOC
-                  </JButton>
+                  {manages && (
+                    <JLink size="sm" href={c("/evidence")}>
+                      Link from library
+                    </JLink>
+                  )}
+                  {manages && (
+                    <JButton size="sm" variant="outline" onClick={() => setTab("fu")}>
+                      Request from control owner
+                    </JButton>
+                  )}
                 </span>
               }
             />
@@ -533,11 +552,12 @@ export default function RequirementWorkspacePage() {
 
         {tab === "fu" && (
           <div className="flex flex-col gap-3.5">
-            <h2 className="m-0 text-sm font-semibold text-j-muted">Waiting on the SPOC</h2>
+            <h2 className="m-0 text-sm font-semibold text-j-muted">{manages ? "Waiting on the control owner" : "Asked of you"}</h2>
           <Panel className="flex flex-col gap-2 p-[22px]">
             <PanelHead
               title="Requests"
               aside={
+                manages && (
                 <JButton
                   size="sm"
                   variant="outline"
@@ -551,6 +571,7 @@ export default function RequirementWorkspacePage() {
                 >
                   New request
                 </JButton>
+                )
               }
             />
             {requests.map((h, i) => (
@@ -560,11 +581,11 @@ export default function RequirementWorkspacePage() {
                   <b>{h.t}</b>
                   <br />
                   <span className="text-xs text-j-muted">
-                    {owner} · SPOC · sent {h.sent}
+                    {owner} · control owner · sent {h.sent}
                   </span>
                 </span>
                 <Pill tone={h.done ? "ok" : h.reminded ? "cx" : "bad"}>{h.done ? "Answered" : h.reminded ? "Reminded" : "Overdue"}</Pill>
-                {!h.done && (
+                {!h.done && manages && (
                   <JButton
                     size="sm"
                     disabled={h.reminded}
@@ -582,9 +603,9 @@ export default function RequirementWorkspacePage() {
             ))}
             {requests.length === 0 && <p className="m-0 text-sm text-j-muted">No open requests.</p>}
           </Panel>
-            <h2 className="m-0 text-sm font-semibold text-j-muted">Fix with the client</h2>
+            <h2 className="m-0 text-sm font-semibold text-j-muted">Fix plan</h2>
           <Panel className="flex flex-col gap-4 p-[22px]">
-            <PanelHead title="Gap and fix" aside={<Pill tone={gaps ? (s.remProposed ? "cx" : "warn") : "ok"}>{gaps ? (s.remProposed ? "Proposed to client" : "Open") : "No gap"}</Pill>} />
+            <PanelHead title="Gap and fix" aside={<Pill tone={gaps ? (s.remProposed ? "cx" : "warn") : "ok"}>{gaps ? (s.remProposed ? "Agreed with control owner" : "Open") : "No gap"}</Pill>} />
             {gaps ? (
               <>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 text-sm">
@@ -601,6 +622,7 @@ export default function RequirementWorkspacePage() {
                     </span>
                   ))}
                 </div>
+                {manages && (
                 <div className="flex gap-2">
                   <JButton
                     size="sm"
@@ -609,13 +631,14 @@ export default function RequirementWorkspacePage() {
                     onClick={() =>
                       send("remediation", [r.code], () => {
                         set((d) => void (d.remProposed = true));
-                        act("Proposed remediation to client");
+                        act("Proposed the fix to the control owner");
                       })
                     }
                   >
-                    Propose to client
+                    Propose to control owner
                   </JButton>
                 </div>
+                )}
               </>
             ) : (
               <p className="m-0 text-sm text-j-muted">All criteria are met. Nothing to fix.</p>
@@ -624,7 +647,7 @@ export default function RequirementWorkspacePage() {
             <h2 className="m-0 text-sm font-semibold text-j-muted">Questions to {framework?.authority ?? "the regulator"}</h2>
             {related.map((x) => {
               const applied = x.status === "done" || !!x.appliedTo?.includes(r.code);
-              const [label, tone] = applied ? (["Applied", "ok"] as const) : x.status === "ans" ? (["Answered · not applied", "ai"] as const) : x.status === "sub" ? (["Awaiting DGA", "warn"] as const) : (["Draft · client sends", "draft"] as const);
+              const [label, tone] = applied ? (["Applied", "ok"] as const) : x.status === "ans" ? (["Answered · not applied", "ai"] as const) : x.status === "sub" ? (["Awaiting DGA", "warn"] as const) : (["Draft", "draft"] as const);
               return (
                 <Panel key={x.id} className="flex flex-col gap-2.5 p-[22px]">
                   <PanelHead
@@ -644,14 +667,14 @@ export default function RequirementWorkspacePage() {
                   <span className="text-xs text-j-muted">
                     {x.when} · affects {x.affects.length} requirement{x.affects.length === 1 ? "" : "s"}
                   </span>
-                  {x.status === "ans" && !applied && (
+                  {x.status === "ans" && !applied && manages && (
                     <JButton
                       size="sm"
                       variant="primary"
                       className="self-start"
                       onClick={() => {
                         // An answer that changes what counts as evidence reopens finished work on this requirement.
-                        move([r.code], stage === "acc" || stage === "cli" ? "prog" : "rev", `Applied ${x.id} to ${r.code}`);
+                        move([r.code], stage === "acc" ? "prog" : "rev", `Applied ${x.id} to ${r.code}`);
                         setClar((d) => {
                           const it = d.list.find((y) => y.id === x.id)!;
                           it.appliedTo = [...new Set([...(it.appliedTo ?? []), r.code])];
@@ -663,7 +686,7 @@ export default function RequirementWorkspacePage() {
                       Apply to this requirement
                     </JButton>
                   )}
-                  {x.status === "draft" && (
+                  {x.status === "draft" && manages && (
                     <JButton
                       size="sm"
                       className="self-start"
@@ -677,7 +700,7 @@ export default function RequirementWorkspacePage() {
                         log(`Clarification ${x.id} sent to ${framework?.authority ?? "the DGA"}`);
                       }}
                     >
-                      Mark as sent by the client
+                      Mark as sent
                     </JButton>
                   )}
                 </Panel>
@@ -701,7 +724,7 @@ export default function RequirementWorkspacePage() {
                 disabled={!question.trim()}
                 onClick={() => {
                   const id = nextClarificationId(clar.list);
-                  setClar((d) => void d.list.unshift({ id, status: "draft", q: question.trim(), affects: [r.code], when: "Draft · client sends" }));
+                  setClar((d) => void d.list.unshift({ id, status: "draft", q: question.trim(), affects: [r.code], when: "Draft" }));
                   act(`Drafted clarification ${id}`);
                   log(`Drafted clarification ${id} for ${r.code}`);
                   setQuestion("");
@@ -709,7 +732,7 @@ export default function RequirementWorkspacePage() {
               >
                 Save question
               </JButton>
-              <span className="text-xs text-j-muted">The client sends questions to the regulator; the answer is recorded here and on the Clarifications page.</span>
+              <span className="text-xs text-j-muted">The index owner sends questions to the regulator; the answer is recorded here.</span>
             </Panel>
           </div>
         )}
@@ -734,15 +757,15 @@ export default function RequirementWorkspacePage() {
           </Panel>
         )}
           </div>
-          {/* The L1 decision stays in view on every tab. */}
+          {/* The review decision stays in view on every tab. */}
           <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
               <Panel className="flex flex-col gap-3 p-[22px]">
-                <h2 className="m-0 text-base">Your L1 decision</h2>
-                {stage === "rev" ? (
+                <h2 className="m-0 text-base">{manages ? "Your review" : "Review"}</h2>
+                {stage === "rev" && manages ? (
                   <>
-                    <div role="radiogroup" aria-label="L1 decision" className="flex flex-col gap-1.5">
+                    <div role="radiogroup" aria-label="Review decision" className="flex flex-col gap-1.5">
                       {DECISIONS.map((l, i) => {
-                        const on = s.dec === i;
+                        const on = dec === i;
                         return (
                           <button
                             key={l}
@@ -760,29 +783,34 @@ export default function RequirementWorkspacePage() {
                     </div>
                     <textarea
                       aria-label="Note"
-                      placeholder="Note for the record"
+                      placeholder={dec === 1 ? "What the control owner needs to fix" : "Note for the record"}
                       rows={3}
                       value={s.note ?? ""}
                       onChange={(e) => set((d) => void (d.note = e.target.value))}
                       className="rounded-xl border border-j-line p-3 font-sans text-sm text-j-ink"
                     />
-                    <JButton variant="primary" onClick={decide}>
-                      {DECISION_CTA[s.dec]}
+                    <JButton variant="primary" onClick={decide} disabled={dec === 1 && !s.note?.trim()} title={dec === 1 && !s.note?.trim() ? "Say what needs fixing" : undefined}>
+                      {DECISION_CTA[dec]}
                     </JButton>
                   </>
                 ) : (
                   <p className="m-0 text-sm text-j-ink-3">
-                    {stage === "cli" ? "L1 done. Waiting for the client to accept." : stage === "acc" ? "Accepted by the client." : "Not in review yet. Submit the draft for L1 first."}
+                    {stage === "rev"
+                      ? "Submitted. The index owner reviews it next."
+                      : stage === "acc"
+                        ? "Accepted by the index owner. It is in the submission pack."
+                        : returned
+                          ? `Returned by the index owner${s.returnNote ? `: “${s.returnNote}”` : "."} Fix it and submit it again.`
+                          : "Not submitted yet. Upload the evidence, write the response and submit it for review."}
                   </p>
                 )}
               </Panel>
               <Panel className="flex flex-col gap-2.5 p-[22px]">
-                <h2 className="m-0 text-base">Approval chain</h2>
+                <h2 className="m-0 text-base">Review path</h2>
                 {[
-                  ["AI", "AI check", "Done", `${confidence}%`, "ai", true],
-                  ["SR", "L1", "You", stage === "rev" ? "Now" : stageIdx > 2 ? "Done" : "—", "cx", stage === "rev"],
-                  ["NA", "Client", "Noura A.", stage === "cli" ? "Now" : stage === "acc" ? "Done" : "Next", "gray", stage === "cli"],
-                  ["HS", "Final", "Huda S.", stage === "acc" ? "Done" : "—", "gray", false],
+                  [initials(owner), "Control owner", owner, stage === "start" || stage === "prog" ? "Now" : "Done", "gray", stage === "start" || stage === "prog"],
+                  ["AI", "AI check", "Platform", run || r.evidence.valid ? `${confidence}%` : "—", "ai", false],
+                  ["IO", "Index owner", "Review", stage === "rev" ? "Now" : stage === "acc" ? "Done" : "Next", "cx", stage === "rev"],
                 ].map(([av, l, who, st, tone, now]) => (
                   <div key={l as string} className={cx("flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-sm", now ? "border-cx" : "border-transparent")}>
                     <Avatar initials={av as string} size={28} bg={tone === "ai" ? "#EEEDFD" : tone === "cx" ? "#EAF1FA" : "#F5F7F6"} fg={tone === "ai" ? "#4F46E5" : tone === "cx" ? "#1E4E8C" : "#47534D"} />

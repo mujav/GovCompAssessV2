@@ -12,14 +12,17 @@ import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
 import { NO_SUBMISSION, submissionKey, type SubmissionState } from "@/lib/journey/submission";
 import { useClientWork } from "@/lib/journey/use-work";
-import { stageCounts, stageOf } from "@/lib/journey/work";
+import { initials, stageCounts, stageOf } from "@/lib/journey/work";
+import { useAuth } from "@/lib/auth/store";
 
-// 13 · Submission pack. Gates, blockers and contents of the pack; the client signs off and
-// uploads (or delegates the upload). The consultant never submits without sign-off.
+// 13 · Submission pack. Gates, blockers and contents of the pack; the index owner signs it off
+// and records the portal upload. Nothing is submitted without that sign-off.
 
 export default function SubmissionPage() {
   const router = useRouter();
   const { client, ws, framework, workspace, reqs, overlay, log } = useClientWork();
+  const { user } = useAuth();
+  const me = user?.name ?? "Index owner";
   const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
   const [confirm, setConfirm] = useState(false);
   const c = (p: string) => clientHref(client.id, p);
@@ -29,7 +32,7 @@ export default function SubmissionPage() {
   const m = useMemo(() => {
     const total = reqs.length;
     const n = stageCounts(reqs, overlay);
-    const reviewed = n.cli + n.acc;
+    const submitted = n.rev + n.acc;
     const expected = reqs.reduce((a, r) => a + r.evidence.expected, 0);
     const valid = reqs.reduce((a, r) => a + r.evidence.valid, 0);
     const mandatory = reqs.filter((r) => r.weight === "high" && r.status !== "na");
@@ -40,17 +43,17 @@ export default function SubmissionPage() {
     const notAccepted = total - n.acc;
     const gate = (l: string, v: string, pct: number, ok: boolean) => ({ l, v, pct, ok });
     const gates = [
-      gate("Client accepted", `${n.acc} / ${total}`, pct(n.acc, total), n.acc === total),
-      gate("L1 reviewed", `${reviewed} / ${total}`, pct(reviewed, total), reviewed === total),
+      gate("Accepted", `${n.acc} / ${total}`, pct(n.acc, total), n.acc === total),
+      gate("Submitted by control owners", `${submitted} / ${total}`, pct(submitted, total), submitted === total),
       gate("Evidence valid", `${Math.round(pct(valid, expected))}%`, pct(valid, expected), pct(valid, expected) >= 95),
       gate("Mandatory items", `${mandatoryOk.length} / ${mandatory.length}`, pct(mandatoryOk.length, mandatory.length), mandatoryOk.length === mandatory.length),
       gate("Clarifications applied", `${cla} / ${cla}`, 100, true),
     ];
     const blockers: { t: string; sub: string; c: string; cta: string; href: string }[] = [];
-    if (notAccepted) blockers.push({ t: `${notAccepted} requirements not yet accepted by client`, sub: `${n.cli} with client now`, c: "#D9442E", cta: "Hand-offs", href: c("/work") });
+    if (notAccepted) blockers.push({ t: `${notAccepted} requirements not yet accepted`, sub: `${n.rev} waiting for your review`, c: "#D9442E", cta: "My work", href: c("/work") });
     if (mandatoryMissing.length)
       blockers.push({ t: `${mandatoryMissing.length} mandatory items missing evidence`, sub: mandatoryMissing.slice(0, 3).map((r) => r.code).join(" · ") + (mandatoryMissing.length > 3 ? " …" : ""), c: "#D9442E", cta: "Evidence", href: c("/evidence") });
-    if (n.rev) blockers.push({ t: `${n.rev} L1 reviews open`, sub: "Oldest 4 days", c: "#E0A100", cta: "Reviews", href: c("/work") });
+    if (n.rev) blockers.push({ t: `${n.rev} reviews open`, sub: "Oldest 4 days", c: "#E0A100", cta: "Reviews", href: c("/work") });
     const narratives = reqs.filter((r) => stageOf(r, overlay) !== "start").length;
     if (narratives < total) blockers.push({ t: `${total - narratives} Arabic narratives not drafted`, sub: "Needed for the DGA template", c: "#E0A100", cta: "Requirements", href: c("/requirements?stage=start") });
     const files = valid * 4 + 20;
@@ -59,18 +62,17 @@ export default function SubmissionPage() {
       { ext: "PDF", t: "Evidence index", sub: `${files.toLocaleString("en-US")} files · cross-referenced`, st: ["Ready", "ok"] },
       { ext: "DOC", t: "Narratives · Arabic", sub: `${narratives} of ${total}`, st: narratives === total ? ["Ready", "ok"] : ["Building", "cx"] },
       { ext: "ZIP", t: "Evidence batches", sub: "12 batches · 3.2 GB", st: ["Ready", "ok"] },
-      { ext: "PDF", t: "Cover letter", sub: "Signed by the final approver", st: s.signed ? ["Ready", "ok"] : ["Waiting", "warn"] },
+      { ext: "PDF", t: "Cover letter", sub: "Signed by the index owner", st: s.signed ? ["Ready", "ok"] : ["Waiting", "warn"] },
     ];
     return { total, n, gates, blockers, pack, files };
   }, [reqs, overlay, ws, s.signed, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cur = s.submittedAt ? 6 : s.signed ? 4 : s.requested ? 3 : m.n.rev === 0 ? 2 : 1;
+  const cur = s.submittedAt ? 5 : s.signed ? 3 : m.n.acc === m.total ? 2 : 1;
   const steps: [string, string][] = [
-    ["Prepare pack", "Consultant"],
-    ["L1 complete", "Consultant"],
-    ["Client acceptance", "Client"],
-    ["Client sign-off", "Client"],
-    ["Portal upload", s.uploader === 0 ? "Client" : "Consultant"],
+    ["Prepare pack", "Index owner"],
+    ["Reviews complete", "Index owner"],
+    ["Sign-off", "Index owner"],
+    ["Portal upload", s.uploader === 0 ? "Index owner" : "Delegated"],
     ["Submitted", "DGA receipt"],
   ];
   const EXT: Record<string, [string, string]> = { XLS: ["#E7F3ED", "#0E5A45"], PDF: ["#FDECEA", "#B42318"], DOC: ["#EAF1FA", "#1E4E8C"], ZIP: ["#F5F7F6", "#33413B"] };
@@ -98,24 +100,28 @@ export default function SubmissionPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <JButton onClick={() => window.print()}>Preview pack</JButton>
-            {s.requested ? (
+            {s.signed ? (
               <JButton variant="primary" disabled aria-disabled="true">
                 <Icon name="check" size={15} />
-                Sign-off requested
+                Signed off
               </JButton>
             ) : confirm ? (
               <span className="flex flex-wrap items-center gap-2 rounded-xl border border-[#F0DDB0] bg-[#FFF8EA] px-3 py-1.5 text-[13px]">
-                {m.blockers.length ? `${m.blockers.length} blockers are still open. Request anyway?` : "Send the pack to Noura A. for sign-off?"}
+                {m.blockers.length ? `${m.blockers.length} blockers are still open. Sign off anyway?` : "Sign off the pack for submission?"}
                 <JButton
                   size="sm"
                   variant="primary"
                   onClick={() => {
-                    set((d) => void (d.requested = true));
+                    set((d) => {
+                      d.requested = true;
+                      d.signed = true;
+                      d.signedBy = me;
+                    });
                     setConfirm(false);
-                    log(`Sign-off requested from Noura A. · ${client.name}`);
+                    log(`${me} signed off the ${client.name} pack`);
                   }}
                 >
-                  Request
+                  Sign off
                 </JButton>
                 <JButton size="sm" variant="ghost" onClick={() => setConfirm(false)}>
                   Cancel
@@ -123,8 +129,8 @@ export default function SubmissionPage() {
               </span>
             ) : (
               <JButton variant="primary" onClick={() => setConfirm(true)}>
-                <Icon name="send" size={15} />
-                Request client sign-off
+                <Icon name="check" size={15} />
+                Sign off the pack
               </JButton>
             )}
           </div>
@@ -201,33 +207,18 @@ export default function SubmissionPage() {
           </div>
 
           <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
-            <Panel className={cx("flex flex-col gap-3 p-[22px]", s.requested && !s.signed && "border-j-warn")}>
-              <PanelHead title="Client sign-off" aside={<Pill tone={s.signed ? "ok" : s.requested ? "warn" : "gray"}>{s.signed ? "Signed" : s.requested ? "Requested" : "Not requested"}</Pill>} />
-              {[
-                ["NA", "Noura A.", "Index owner", s.signed ? "Signed" : s.requested ? "Reviewing" : "—"],
-                ["HS", "Huda S.", "Final approver", s.signed ? "Signed" : s.requested ? "After Noura" : "—"],
-              ].map(([av, n, role, st]) => (
-                <div key={av} className="flex items-center gap-2.5 text-sm">
-                  <Avatar initials={av} bg="#E7F3ED" fg="#0E5A45" />
-                  <span className="flex-auto">
-                    <b>{n}</b>
-                    <br />
-                    <span className="text-xs text-j-muted">{role}</span>
-                  </span>
-                  <span className={cx("text-xs font-semibold", st === "Signed" ? "text-brand" : st === "Reviewing" ? "text-[#8A4B00]" : "text-j-muted")}>{st}</span>
-                </div>
-              ))}
-              {s.requested && !s.signed && (
-                <JButton
-                  size="sm"
-                  onClick={() => {
-                    set((d) => void (d.signed = true));
-                    log(`Noura A. and Huda S. signed off the ${client.name} pack`);
-                  }}
-                >
-                  Record client sign-off
-                </JButton>
-              )}
+            <Panel className="flex flex-col gap-3 p-[22px]">
+              <PanelHead title="Sign-off" aside={<Pill tone={s.signed ? "ok" : "gray"}>{s.signed ? "Signed" : "Not signed"}</Pill>} />
+              <div className="flex items-center gap-2.5 text-sm">
+                <Avatar initials={initials(s.signedBy ?? me)} />
+                <span className="flex-auto">
+                  <b>{s.signedBy ?? me}</b>
+                  <br />
+                  <span className="text-xs text-j-muted">Index owner</span>
+                </span>
+                <span className={cx("text-xs font-semibold", s.signed ? "text-brand" : "text-j-muted")}>{s.signed ? "Signed" : "—"}</span>
+              </div>
+              <span className="text-xs text-j-muted">The index owner&apos;s review is the only review layer; signing off confirms the pack is ready for the portal.</span>
             </Panel>
             <Panel className="flex flex-col gap-3 p-[22px]">
               <h2 className="m-0 text-base">Portal upload</h2>
@@ -235,8 +226,8 @@ export default function SubmissionPage() {
                 label="Uploaded by"
                 value={String(s.uploader) as "0" | "1"}
                 options={[
-                  { value: "0", label: "Client uploads" },
-                  { value: "1", label: "Consultant (delegated)" },
+                  { value: "0", label: "Index owner uploads" },
+                  { value: "1", label: "Delegated upload" },
                 ]}
                 onChange={(v) => set((d) => void (d.uploader = v === "1" ? 1 : 0))}
               />
@@ -248,10 +239,10 @@ export default function SubmissionPage() {
                 <span className="text-j-muted">Delegation letter</span>
                 <b className={s.uploader ? "text-brand" : "text-j-muted"}>{s.uploader ? "Signed · 2 Nov" : "Not needed"}</b>
               </span>
-              <JButton variant="primary" disabled={!s.signed} onClick={record} title={s.signed ? undefined : "Needs client sign-off first"}>
+              <JButton variant="primary" disabled={!s.signed} onClick={record} title={s.signed ? undefined : "Needs sign-off first"}>
                 Record submission
               </JButton>
-              {!s.signed && <span className="text-xs text-j-muted">Available after client sign-off.</span>}
+              {!s.signed && <span className="text-xs text-j-muted">Available after sign-off.</span>}
               {s.submittedAt && (
                 <Link href={c("/submitted")} className="text-[13px] font-semibold text-cx">
                   View receipt →

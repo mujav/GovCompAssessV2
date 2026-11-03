@@ -3,7 +3,9 @@
 export interface SubmissionState {
   requested: boolean;
   signed: boolean;
-  /** 0 = client uploads, 1 = consultant uploads under a delegation letter. */
+  /** Index owner who signed the pack off. */
+  signedBy?: string;
+  /** 0 = the index owner uploads, 1 = someone else uploads under a delegation letter. */
   uploader: 0 | 1;
   submittedAt?: string;
   receipt?: string;

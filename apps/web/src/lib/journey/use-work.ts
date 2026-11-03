@@ -9,7 +9,11 @@ import { assignmentKey, entityFrameworks, libraryRequirements, usesWorkspaceReco
 import { evidenceKey, type EvidenceState } from "./evidence";
 import { DEMO_DIRECTORY, PEOPLE_KEY, type EntityPerson } from "./people";
 import { useJourney, useScreenState } from "./store";
-import { EMPTY_OVERLAY, stageOf, isReturned, type EvidenceSignal, type Stage, type WorkOverlay } from "./work";
+import { useControlOwners, type WorkplaceView } from "./use-workplaces";
+import { useAuth } from "@/lib/auth/store";
+import type { Workplace, WorkplaceClient } from "./workplaces";
+import type { StoredUser } from "@/lib/auth/accounts";
+import { EMPTY_OVERLAY, stageCounts, stageOf, isReturned, type EvidenceSignal, type Stage, type WorkOverlay } from "./work";
 
 export const ALL = "all";
 
@@ -31,9 +35,29 @@ export function useEntityFrameworks() {
 export function useEntityPeople() {
   const client = useCurrentClient();
   const { state } = useJourney();
-  const onboarded = state.added.some((a) => a.client.id === client.id);
-  return useScreenState<EntityPerson[]>(PEOPLE_KEY(client.id), onboarded ? [] : DEMO_DIRECTORY);
+  const onboarded = state.added.some((a) => a.client.id === client.entityId);
+  return useScreenState<EntityPerson[]>(PEOPLE_KEY(client.entityId), onboarded ? [] : DEMO_DIRECTORY);
 }
+
+/** Control owners of the workplace's entity, as the people requirements are assigned to. */
+export function useAssignees(): EntityPerson[] {
+  const client = useCurrentClient();
+  const owners = useControlOwners(client.entityId);
+  return useMemo(() => owners.map(asPerson), [owners]);
+}
+
+const asPerson = (u: StoredUser): EntityPerson => ({ id: u.id, name: u.name, email: u.email, department: u.department ?? "", title: u.title ?? "", roles: ["Control owner"], access: "user" });
+
+/**
+ * Seeded workplaces on the workspace framework share the demo records; a workplace the admin
+ * added and every newly onboarded entity start from the library.
+ */
+export function startsFresh(client: WorkplaceClient, workplace: Workplace | undefined, added: { client: { id: string } }[]) {
+  return !!workplace?.createdAt || added.some((a) => a.client.id === client.entityId);
+}
+
+/** Assignments of library requirements: an entity's first workplace keeps the original per-framework keys. */
+const assignScope = (client: WorkplaceClient, fwId: string) => (client.id === client.entityId ? fwId : `${client.id}|${fwId}`);
 
 // The workspace framework keeps its original slice so earlier moves are not lost.
 const overlayKey = (clientId: string, fwId: string) => (fwId === WORKSPACE_FRAMEWORK_ID ? `work.${clientId}` : `work.${clientId}.${fwId}`);
@@ -45,9 +69,10 @@ export function frameworkRequirements(
   wsReqs: WsRequirement[],
   assignments: Record<string, { owner: string; due: string }> = {},
   people: EntityPerson[] = [],
+  scope = framework?.id ?? "",
 ): ClientRequirement[] {
   const library = framework ? libraryRequirements(framework.live) : [];
-  if (!workspace) return framework ? withAssignments(framework.id, library, assignments, people) : library;
+  if (!workspace) return framework ? withAssignments(scope, library, assignments, people) : library;
   // Workspace records carry the work state; the library adds the official wording where codes match.
   const wording = new Map(library.map((r) => [r.code, r]));
   return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
@@ -75,15 +100,16 @@ export function useAllFrameworkWork() {
   const ws = useWorkspace();
   const { state } = useJourney();
   const { frameworks } = useEntityFrameworks();
-  const [people] = useEntityPeople();
-  const onboarded = state.added.some((a) => a.client.id === client.id);
+  const people = useAssignees();
+  const { workplaces } = useJourney();
+  const fresh = startsFresh(client, workplaces.find((w) => w.id === client.id), state.added);
   return useMemo(
     () =>
       frameworks.map((f) => {
-        const workspace = usesWorkspaceRecords(f.id, onboarded);
-        return { framework: f, workspace, reqs: withUploads(frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people), client.id, f.id, state.screens), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+        const workspace = usesWorkspaceRecords(f.id, fresh);
+        return { framework: f, workspace, reqs: withUploads(frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people, assignScope(client, f.id)), client.id, f.id, state.screens), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
       }),
-    [frameworks, onboarded, ws.ctx.reqs, ws.state.assignments, people, state.screens, client.id],
+    [frameworks, fresh, ws.ctx.reqs, ws.state.assignments, people, state.screens, client],
   );
 }
 
@@ -91,20 +117,20 @@ export function useAllFrameworkWork() {
 export function useFrameworkWork(framework: EntityFramework | undefined) {
   const client = useCurrentClient();
   const ws = useWorkspace();
-  const { state, log } = useJourney();
-  const onboarded = state.added.some((a) => a.client.id === client.id);
+  const { state, log, workplaces } = useJourney();
   const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
-  const workspace = usesWorkspaceRecords(fwId, onboarded);
-  const [people] = useEntityPeople();
+  const workspace = usesWorkspaceRecords(fwId, startsFresh(client, workplaces.find((w) => w.id === client.id), state.added));
+  const people = useAssignees();
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
+  const scope = assignScope(client, fwId);
   const reqs = useMemo(
-    () => withUploads(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people), client.id, fwId, state.screens),
-    [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, client.id, fwId, state.screens],
+    () => withUploads(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), client.id, fwId, state.screens),
+    [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope, client.id, fwId, state.screens],
   );
 
-  /** Assigns requirements to a person (their department follows), due in the given date. */
+  /** Assigns requirements to a control owner (their department follows), due on the given date. */
   const assign = (codes: string[], person: string, due: string) => {
-    for (const c of codes) ws.assign(workspace ? c : assignmentKey(fwId, c), person, due);
+    for (const c of codes) ws.assign(workspace ? c : assignmentKey(scope, c), person, due);
   };
 
   // A move holds against the evidence as it stands now; only evidence that changes afterwards moves it on.
@@ -162,4 +188,23 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
 export function useClientWork() {
   const { current } = useEntityFrameworks();
   return useFrameworkWork(current);
+}
+
+/** Requirements and stage moves of every workplace the user can see, for landing pages and dashboards. */
+export function useWorkplacesWork(views: WorkplaceView[]) {
+  const ws = useWorkspace();
+  const { state } = useJourney();
+  const { users } = useAuth();
+  return useMemo(
+    () =>
+      views.map((v) => {
+        const fwId = v.framework?.id ?? v.workplace.frameworkId;
+        const workspace = usesWorkspaceRecords(fwId, startsFresh(v.client, v.workplace, state.added));
+        const people = users.filter((u) => u.role === "control" && (!u.entityId || u.entityId === v.workplace.entityId)).map(asPerson);
+        const reqs = withUploads(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, assignScope(v.client, fwId)), v.client.id, fwId, state.screens);
+        const overlay = (state.screens[overlayKey(v.client.id, fwId)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY;
+        return { ...v, reqs, overlay, counts: stageCounts(reqs, overlay) };
+      }),
+    [views, ws.ctx.reqs, ws.state.assignments, users, state.added, state.screens],
+  );
 }

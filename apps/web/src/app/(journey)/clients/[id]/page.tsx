@@ -16,7 +16,7 @@ import { executiveUpdate } from "@/lib/workspace/drafts";
 import { PRIOR_CYCLE, SUBMISSION_DEADLINE, daysBetween, shortDate } from "@/lib/workspace/data";
 import type { useWorkspace } from "@/lib/workspace/store";
 
-// 07 · Client overview. Where the engagement stands and what the consultant does next, for
+// 07 · Workplace overview. Where the workplace stands and what the index owner does next, for
 // one framework or, when the entity has several, for all of them side by side.
 
 
@@ -55,7 +55,7 @@ function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: b
     ...(issues.length ? [{ k: "ev" as const, t: `${issues.length} files failed validation`, code: issues[0].id, due: "Today", late: true, cta: "Check", href: c("/evidence"), fw }] : []),
     ...drafting.slice(0, 1).map((r) => ({ k: "draft" as const, t: r.title, code: r.code, due: dueLabel(r.due), late: r.due < today, cta: "Draft", href: c(`/requirements/${r.code}`), fw })),
     ...clarifications.map((cl) => ({ k: "cla" as const, t: `Apply DGA answer to ${cl.affects.length} items`, code: cl.id, due: "2 d", late: false, cta: "Apply", href: c("/requirements?view=cla"), fw })),
-    ...(inReview.length ? [{ k: "send" as const, t: `${inReview.length} requirements waiting for L1 before the client`, code: "Batch", due: "2 d", late: false, cta: "Open", href: c("/work"), fw }] : []),
+    ...(inReview.length ? [{ k: "send" as const, t: `${inReview.length} requirements waiting for your review`, code: "Batch", due: "2 d", late: false, cta: "Open", href: c("/work"), fw }] : []),
   ];
   // SPOC hand-offs: requirements waiting on a department, grouped by department.
   const spocMap = new Map<string, { who: string; codes: string[]; oldest: string }>();
@@ -72,9 +72,8 @@ function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: b
     pct,
     delta: workspace ? Math.round((pct - PRIOR_CYCLE[PRIOR_CYCLE.length - 1]) * 10) / 10 : null,
     stats: [
-      { l: "Prepared", v: atLeast(["rev", "cli", "acc"]), bar: "#1E4E8C", href: c("/requirements") },
-      { l: "L1 reviewed", v: atLeast(["cli", "acc"]), bar: "#3A6FB8", href: c("/work") },
-      { l: "Client accepted", v: atLeast(["acc"]), bar: "#1F9D6E", href: c("/submission") },
+      { l: "Submitted", v: atLeast(["rev", "acc"]), bar: "#1E4E8C", href: c("/requirements") },
+      { l: "Accepted", v: atLeast(["acc"]), bar: "#1F9D6E", href: c("/submission") },
       { l: "Evidence valid", v: evValid, bar: "#5FBF93", href: c("/evidence") },
     ],
     bands,
@@ -87,9 +86,8 @@ function summarize(reqs: ClientRequirement[], overlay: WorkOverlay, workspace: b
 const PIPE: { key: keyof ReturnType<typeof pipelineBands>; l: string; color: string; path: string }[] = [
   { key: "start", l: "Not started", color: "#D5DCD8", path: "/requirements?stage=start" },
   { key: "draft", l: "Drafting", color: "#9AA6A0", path: "/requirements?stage=prog" },
-  { key: "spoc", l: "Waiting on SPOC", color: "#E0A100", path: "/work" },
-  { key: "rev", l: "L1 review", color: "#3A6FB8", path: "/requirements?stage=rev" },
-  { key: "cli", l: "With client", color: "#7E8FD9", path: "/requirements?stage=cli" },
+  { key: "spoc", l: "With control owner", color: "#E0A100", path: "/work" },
+  { key: "rev", l: "In review", color: "#3A6FB8", path: "/requirements?stage=rev" },
   { key: "acc", l: "Accepted", color: "#1F9D6E", path: "/submission" },
   { key: "ret", l: "Returned", color: "#D9442E", path: "/requirements?returned=1" },
 ];
@@ -158,7 +156,7 @@ export default function ClientOverviewPage() {
           <div className="flex flex-col gap-2">
             <span className="flex flex-wrap gap-1.5">
               {showAll ? <Pill tone="cx">{frameworks.length} frameworks</Pill> : <Pill tone="cx">{framework ? `${framework.name} v${framework.version}` : client.frameworks[0]}</Pill>}
-              <Pill>Self-assessment</Pill>
+              <Pill>Review year {client.year}</Pill>
               {(showAll ? all.some((x) => x.workspace) : workspace) && (
                 <Pill tone={daysLeft <= 7 ? "bad" : "warn"}>
                   Portal closes {shortDate(SUBMISSION_DEADLINE)} · {daysLeft} d
@@ -169,7 +167,7 @@ export default function ClientOverviewPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <FrameworkSwitcher allowAll />
-            <JButton onClick={() => setUpdate(true)}>Client update</JButton>
+            <JButton onClick={() => setUpdate(true)}>Status update</JButton>
             <JLink href={c("/submission")} variant="primary">
               Submission pack
             </JLink>
@@ -202,8 +200,8 @@ export default function ClientOverviewPage() {
                   </span>
                   <span className="grid grid-cols-3 gap-2 text-xs">
                     {[
-                      [x.stats[0].v, "prepared"],
-                      [x.stats[2].v, "accepted"],
+                      [x.stats[0].v, "submitted"],
+                      [x.stats[1].v, "accepted"],
                       [x.queueCount, "open tasks"],
                     ].map(([v, l]) => (
                       <span key={l}>
@@ -336,18 +334,18 @@ export default function ClientOverviewPage() {
         open={update}
         onClose={() => setUpdate(false)}
         eyebrow="Draft · you review before it is sent"
-        title={`Client update · ${client.name}`}
+        title={`Status update · ${client.name}`}
         footer={
           <>
             <JButton onClick={() => setUpdate(false)}>Close</JButton>
             <JButton
               variant="primary"
               onClick={() => {
-                log(`Client update sent to Noura A. · ${client.name}`);
+                log(`Status update sent to management · ${client.name}`);
                 setUpdate(false);
               }}
             >
-              Send to Noura A.
+              Send to management
             </JButton>
           </>
         }

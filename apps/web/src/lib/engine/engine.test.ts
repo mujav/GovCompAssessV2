@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createSeed } from "@/lib/admin/seed";
 import { diffConfig } from "@/lib/admin/diff";
 import { DEMO_TODAY, SAMPLE_ACTIONS, SAMPLE_REQUIREMENTS, type SampleRequirement } from "@/lib/admin/sample-data";
-import type { AcceptancePolicy, AutomationRule, ScoringScheme } from "@/lib/admin/types";
-import { SCENARIOS, simulate, validatePolicy } from "./acceptance";
+import type { AutomationRule, ScoringScheme } from "@/lib/admin/types";
 import { conditionMatches, resolveDate, testRule, validateRule } from "./rules";
 import { compareSchemes, effectiveStatus, score, validateScheme } from "./scoring";
 
@@ -77,30 +76,6 @@ describe("rule engine", () => {
   it("rejects empty or non-numeric values", () => {
     const rule = { ...(esc.live as AutomationRule), conditions: [{ id: "c", field: "reminders_sent" as const, op: "≥" as const, value: "two" }] };
     expect(validateRule(rule).some((c) => !c.ok)).toBe(true);
-  });
-});
-
-describe("acceptance engine", () => {
-  const crit = seed.policies.find((p) => p.id === "AP-QIYAS-CRIT")!.draft as AcceptancePolicy;
-
-  it("routes a material override through extra approval to acceptance", () => {
-    const steps = simulate(crit, SCENARIOS[0]);
-    expect(steps.some((s) => s.tone === "warn")).toBe(true);
-    expect(steps.at(-1)).toMatchObject({ tone: "good" });
-    expect(steps.at(-1)!.text).toContain("Accepted (Partial)");
-  });
-
-  it("stops at the rejecting stage", () => {
-    const steps = simulate(crit, SCENARIOS[2]);
-    expect(steps.at(-1)!.tone).toBe("bad");
-    expect(steps).toHaveLength(3);
-  });
-
-  it("requires a single final stage placed last", () => {
-    expect(validatePolicy(crit).every((c) => c.ok)).toBe(true);
-    const broken = { ...crit, stages: [...crit.stages].reverse() };
-    expect(validatePolicy(broken).some((c) => !c.ok)).toBe(true);
-    expect(validatePolicy({ ...crit, stages: [] })[0].ok).toBe(false);
   });
 });
 

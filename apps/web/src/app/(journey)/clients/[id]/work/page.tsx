@@ -13,12 +13,12 @@ import { useScreenState } from "@/lib/journey/store";
 import { useClientWork } from "@/lib/journey/use-work";
 import { codeKey, initials, stageOf } from "@/lib/journey/work";
 
-// 10 · My work. Everything the consultant has handed off or must act on, by counterpart.
+// 10 · My work. What the index owner must review and what is waiting on control owners.
 
-const TABS = ["Reviews", "To SPOCs", "To client", "Escalations"] as const;
+const TABS = ["Reviews", "With control owners", "Escalations"] as const;
 const RULES = ["Auto-remind every 3 days", "Escalate after 2 reminders", "Weekly summary to index owner"];
 const PATH = [
-  ["SPOC", "Day 0"],
+  ["Control owner", "Day 0"],
   ["Department head", "After 2 reminders"],
   ["Index owner", "After 10 days"],
 ];
@@ -45,7 +45,7 @@ interface WorkScreen {
 const ago = (d: number) => (d <= 0 ? "Today" : d === 1 ? "Yesterday" : `${d} d ago`);
 
 export default function MyWorkPage() {
-  const { client, ws, reqs, overlay, move, ret, log } = useClientWork();
+  const { client, ws, reqs, overlay, move, log } = useClientWork();
   const { send, drawer } = useDraftSender();
   const [tab, setTab] = useState(0);
   const [s, set] = useScreenState<WorkScreen>(`work-screen.${client.id}`, { rules: [true, true, false], reminded: {}, escalated: [] });
@@ -79,7 +79,10 @@ export default function MyWorkPage() {
         role: ai ? `${r.status === "comp" ? "Ready" : "Not ready"} · ${r.status === "comp" ? 94 : 86}%` : "New evidence",
         since: ago(Math.abs(daysBetween(r.due, today)) % 4),
         st: ["To review", "cx"],
-        actions: [{ label: "Review", href: c(`/requirements/${r.code}`), primary: true }],
+        actions: [
+          { label: "Review", href: c(`/requirements/${r.code}`), primary: true },
+          { label: "Accept", run: () => (move([r.code], "acc", `Accepted ${r.code}`), flash(`${r.code} accepted. It is now in the submission pack.`)) },
+        ],
       };
     });
     const open = ws.ctx.actions.filter((a) => {
@@ -122,28 +125,6 @@ export default function MyWorkPage() {
           ],
         };
       });
-    const client_: Row[] = byStage("cli").map((r) => ({
-      key: r.code,
-      t: r.title,
-      code: r.code,
-      href: c(`/requirements/${r.code}`),
-      av: "NA",
-      who: "Noura A.",
-      role: "Index owner",
-      since: ago(Math.abs(daysBetween(r.due, today)) % 9),
-      st: ["Reviewing", "warn"],
-      actions: [
-        {
-          label: "Record acceptance",
-          primary: true,
-          run: () => {
-            move([r.code], "acc", `Noura A. accepted ${r.code}`);
-            flash(`${r.code} accepted by the client. It is now in the submission pack.`);
-          },
-        },
-        { label: "Returned", run: () => ret([r.code], `Noura A. returned ${r.code}`) },
-      ],
-    }));
     const esc: Row[] = [
       ...s.escalated.map((e) => ({
         key: e.id,
@@ -160,10 +141,10 @@ export default function MyWorkPage() {
       { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c(""), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("") }] },
       { key: "ESC-01", t: "IT & Digital · catalogue", code: "ESC-01", href: c(""), av: "KA", who: "Khalid A.", role: "IT & Digital", since: "9 d ago", st: ["Answered", "ok"], actions: [{ label: "Open", href: c("") }] },
     ];
-    return { reviews, spoc, client: client_, esc, overdue: open.filter((a) => a.due < today) };
+    return { reviews, spoc, esc, overdue: open.filter((a) => a.due < today) };
   }, [reqs, overlay, ws, s, today, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const lists = [data.reviews, data.spoc, data.client, data.esc];
+  const lists = [data.reviews, data.spoc, data.esc];
   const rows = lists[tab];
 
   return (

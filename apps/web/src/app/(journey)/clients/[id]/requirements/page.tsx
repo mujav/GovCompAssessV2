@@ -16,11 +16,11 @@ import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
 
 // 08 · Requirements. Every requirement with its owner, last DGA result and stage; select
-// rows to request evidence, assign or send to the client in one go.
+// rows to request evidence, assign or accept the reviewed ones in one go.
 
 type SortKey = "num" | "owner" | "result" | "status" | "updated";
 const RESULT_ORDER = { non: 0, part: 1, comp: 2, na: 3, nas: 4 };
-const STAGE_ORDER: Record<Stage, number> = { start: 0, prog: 1, rev: 2, cli: 3, acc: 4 };
+const STAGE_ORDER: Record<Stage, number> = { start: 0, prog: 1, rev: 2, acc: 3 };
 const PAGE = 12;
 const COLS = "grid-cols-[36px_2.6fr_1.4fr_1.2fr_1.1fr_0.8fr]";
 
@@ -103,7 +103,7 @@ function RequirementsView() {
   }, [reqs, overlay, stage, onlyReturned, onlyCla, claByCode, axis, owner, result, q, sort, dir, today]);
 
   const counts = useMemo(() => {
-    const c: Record<Stage, number> = { start: 0, prog: 0, rev: 0, cli: 0, acc: 0 };
+    const c: Record<Stage, number> = { start: 0, prog: 0, rev: 0, acc: 0 };
     for (const r of reqs) c[stageOf(r, overlay)] += 1;
     return c;
   }, [reqs, overlay]);
@@ -477,15 +477,16 @@ function RequirementsView() {
                   size="sm"
                   variant="primary"
                   onClick={() => {
+                    // Only submitted requirements can be accepted; the rest stay with their control owner.
                     const ok = sel.filter((c) => {
                       const r = reqs.find((x) => x.code === c)!;
-                      return stageOf(r, overlay) !== "acc";
+                      return stageOf(r, overlay) === "rev";
                     });
-                    move(ok, "cli", `Sent ${ok.length} requirements to ${client.name} for acceptance`);
-                    flash(`Sent ${ok.length} requirements to the client for acceptance.`);
+                    move(ok, "acc", `Accepted ${ok.length} requirements · ${client.name}`);
+                    flash(ok.length ? `Accepted ${ok.length} requirements.${ok.length < sel.length ? ` ${sel.length - ok.length} not in review were left as they are.` : ""}` : "None of the selected requirements are in review yet.");
                   }}
                 >
-                  Send to client
+                  Accept reviewed
                 </JButton>
               </>
             )}

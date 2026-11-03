@@ -14,10 +14,11 @@ const S: Record<CrStatus, [string, string, string]> = {
   rejected: ["REJECTED", "#FBE4E1", "#A3261B"],
 };
 
-const EDITOR: Record<ConfigKind, string> = {
+// Review & acceptance was removed; its past changes stay in the log without an editor.
+const EDITOR: Record<ConfigKind, string | undefined> = {
   framework: "/studio/frameworks",
   scoring: "/studio/scoring",
-  acceptance: "/studio/acceptance",
+  acceptance: undefined,
   rule: "/studio/automation",
 };
 
@@ -129,7 +130,13 @@ function CrDetail({ cr, authorName }: { cr: ChangeRequest; authorName: string })
               {cr.id} · {cr.title}
             </h2>
             <div className="text-xs text-muted">
-              Author {authorName} · submitted {cr.submittedAt} · <Link href={EDITOR[cr.kind]}>open in editor</Link>
+              Author {authorName} · submitted {cr.submittedAt}
+              {EDITOR[cr.kind] && (
+                <>
+                  {" "}
+                  · <Link href={EDITOR[cr.kind]!}>open in editor</Link>
+                </>
+              )}
             </div>
           </div>
           <div role="group" aria-label="Environment promotion" className="flex items-center gap-1 text-xs">

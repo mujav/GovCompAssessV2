@@ -106,16 +106,6 @@ const critLive: AcceptancePolicy = {
   ],
 };
 
-const critDraft: AcceptancePolicy = {
-  ...critLive,
-  version: 2,
-  stages: [
-    stage("st-1", { mode: "parallel", name: "Two domain SMEs", reviewers: "Pool: Qiyas SMEs", minApprovals: 2, poolSize: 2, independence: "Not owner or submitter", rights: ["Approve", "Override", "Return", "Clarify"] }),
-    stage("st-2", { mode: "single", name: "Control owner", reviewers: "Role: control owner", onReject: "Back to stage 1", independence: "Not a stage 1 reviewer", rights: ["Approve", "Reject", "Escalate"] }),
-    stage("st-3", { mode: "final", name: "Compliance Lead", reviewers: "Named: Huda S.", onReject: "Rejected Final", independence: "Not stages 1–2", rights: ["Accept", "Reject final", "Return"] }),
-  ],
-};
-
 const lowPolicy: AcceptancePolicy = {
   code: "AP-LOW-SAMPLED",
   version: 1,
@@ -190,9 +180,9 @@ export function createSeed(): AdminState {
   return {
     currentUserId: "u-majed",
     users: [
-      { id: "u-majed", name: "Mohammed K.", role: "Consultant", canApprove: false },
-      { id: "u-noura", name: "Yasser T.", role: "Consultant", canApprove: false },
-      { id: "u-huda", name: "Sami R.", role: "Engagement Lead", canApprove: true },
+      { id: "u-majed", name: "Mohammed K.", role: "Studio editor", canApprove: false },
+      { id: "u-noura", name: "Yasser T.", role: "Studio editor", canApprove: false },
+      { id: "u-huda", name: "Sami R.", role: "Platform admin", canApprove: true },
     ],
     frameworks: [
       {
@@ -243,14 +233,13 @@ export function createSeed(): AdminState {
     scoring: { id: "QY-2026", live: scoringLive, draft: scoringDraft, pendingCr: "CR-041" },
     policies: [
       { id: "AP-QIYAS-STD", live: stdPolicy },
-      { id: "AP-QIYAS-CRIT", live: critLive, draft: critDraft, pendingCr: "CR-040" },
+      { id: "AP-QIYAS-CRIT", live: critLive },
       { id: "AP-LOW-SAMPLED", live: lowPolicy },
       { id: "AP-NCA-SEQ", live: ncaPolicy },
     ],
     rules,
     changeRequests: [
       { id: "CR-041", kind: "scoring", targetId: "QY-2026", title: "Scoring scheme QY-2026 v3 → v4", authorId: "u-majed", submittedAt: "27 Oct 16:20", status: "awaiting", material: true, diff: diffConfig("scoring", scoringLive, scoringDraft), impact: impactFor("scoring", scoringLive, scoringDraft) },
-      { id: "CR-040", kind: "acceptance", targetId: "AP-QIYAS-CRIT", title: "Acceptance policy AP-QIYAS-CRIT v1 → v2", authorId: "u-majed", submittedAt: "27 Oct 14:05", status: "awaiting", material: true, diff: diffConfig("acceptance", critLive, critDraft), impact: impactFor("acceptance", critLive, critDraft) },
       { id: "CR-039", kind: "rule", targetId: "ESC-02", title: "Rule ESC-02 v2 → v3 adds priority condition", authorId: "u-noura", submittedAt: "28 Oct 08:41", status: "awaiting", material: false, diff: diffConfig("rule", escLive, escDraft), impact: impactFor("rule", escLive, escDraft) },
       { id: "CR-038", kind: "framework", targetId: "fw-qiyas", title: "Arabic labels for hierarchy levels", authorId: "u-noura", submittedAt: "21 Oct 10:12", status: "published", material: false, diff: [{ label: "Arabic labels", before: "—", after: "المحور › المعيار › المتطلب › البند", changed: true }], impact: ["Cosmetic: no assessment results change"], decidedBy: "Sami R.", decidedAt: "21 Oct 15:30" },
       { id: "CR-036", kind: "acceptance", targetId: "AP-QIYAS-STD", title: "Allow bulk approval for medium risk", authorId: "u-noura", submittedAt: "14 Oct 09:00", status: "rejected", material: true, diff: [{ label: "Override governance", before: "rationale, material escalates", after: "rationale, material escalates, bulk allowed", changed: true }], impact: ["Bulk approval would cover 118 medium-risk requirements"], decidedBy: "Sami R.", decidedAt: "14 Oct 13:20", comment: "Keep bulk approval off until the pilot gate on AI–human agreement is met." },
@@ -259,7 +248,6 @@ export function createSeed(): AdminState {
       { id: "ev-6", at: "28 Oct 09:12", who: "System", text: "Impact analysis recalculated on live data for CR-041." },
       { id: "ev-5", at: "28 Oct 08:41", who: "Yasser T.", text: "Submitted CR-039 (ESC-02 v3) for approval." },
       { id: "ev-4", at: "27 Oct 16:20", who: "Mohammed K.", text: "Submitted CR-041 for approval (validation passed, 0 errors)." },
-      { id: "ev-3", at: "27 Oct 14:05", who: "Mohammed K.", text: "Submitted CR-040 (AP-QIYAS-CRIT v2) for approval." },
       { id: "ev-2", at: "27 Oct 11:04", who: "Mohammed K.", text: "Draft QY-2026 v4 created from published v3." },
       { id: "ev-1", at: "02 Sep 08:30", who: "Sami R.", text: "Approved and published QY-2026 v3 (CR-022), effective Cycle 1." },
     ],

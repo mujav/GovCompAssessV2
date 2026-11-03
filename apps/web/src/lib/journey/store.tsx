@@ -7,12 +7,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { shortName } from "./frameworks";
 import { CLIENTS, ENGAGEMENTS, asActive, type Client, type Engagement } from "./portfolio";
 import { PROFILE_KEY, applyProfile, engagementsFor, type EntityProfile } from "./profile";
+import { mergeWorkplaces, workplacesFromEngagements, type Workplace, type WorkplaceRequest } from "./workplaces";
 
 const STORAGE_KEY = "ci-journey-v1";
 
 export interface JourneyState {
   /** Clients onboarded in this demo, one engagement per framework they are enrolled in. */
   added: { client: Client; engagement: Engagement; more?: Engagement[] }[];
+  /** Workplaces the platform admin added or changed, by id; the rest come from the engagements. */
+  workplaces?: Record<string, Workplace>;
+  /** New workplaces index owners asked the platform admin for. */
+  workplaceRequests?: WorkplaceRequest[];
   /** Free-form per-screen state, keyed by screen. */
   screens: Record<string, unknown>;
   log: { at: string; text: string }[];
@@ -37,6 +42,9 @@ interface JourneyApi {
   state: JourneyState;
   clients: Client[];
   engagements: Engagement[];
+  /** Every workplace on the platform (one entity, one index, one review year). */
+  workplaces: Workplace[];
+  saveWorkplace: (w: Workplace) => void;
   update: (fn: (s: JourneyState) => void) => void;
   log: (text: string) => void;
   reset: () => void;
@@ -75,17 +83,20 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     const profile = (id: string) => state.screens[PROFILE_KEY(id)] as EntityProfile | undefined;
     const base = [...CLIENTS, ...state.added.map((a) => asActive(a).client)];
     const allEngagements = [...ENGAGEMENTS, ...state.added.flatMap((a) => [asActive(a).engagement, ...(a.more ?? [])])];
-    return {
-      state,
-      clients: base.map((c) => applyProfile(c, profile(c.id))),
-      engagements: base.flatMap((c) =>
+    const engagements = base.flatMap((c) =>
         engagementsFor(
           c,
           allEngagements.filter((e) => e.clientId === c.id),
           profile(c.id),
           shortName,
         ),
-      ),
+      );
+    return {
+      state,
+      clients: base.map((c) => applyProfile(c, profile(c.id))),
+      engagements,
+      workplaces: mergeWorkplaces(workplacesFromEngagements(engagements), state.workplaces),
+      saveWorkplace: (w) => update((s) => void ((s.workplaces ??= {})[w.id] = structuredClone(w))),
       update,
       log: (text) => update((s) => void s.log.unshift({ at: stamp(), text })),
       reset: () => {

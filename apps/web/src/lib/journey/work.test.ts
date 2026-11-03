@@ -15,10 +15,10 @@ describe("consultant work stages", () => {
     expect(Object.values(b).reduce((a, x) => a + x, 0)).toBe(WS_REQUIREMENTS.length);
   });
 
-  it("a consultant move overrides the base stage and clears a return", () => {
+  it("an index owner's move overrides the base stage and clears a return", () => {
     const r = WS_REQUIREMENTS.find((x) => baseStage(x) === "rev")!;
-    const o = { stage: { [r.code]: "cli" as const }, returned: [] };
-    expect(stageOf(r, o)).toBe("cli");
+    const o = { stage: { [r.code]: "acc" as const }, returned: [] };
+    expect(stageOf(r, o)).toBe("acc");
     expect(isReturned(r, o)).toBe(false);
     const back = { stage: { [r.code]: "prog" as const }, returned: [r.code] };
     expect(isReturned(r, back)).toBe(true);
@@ -44,6 +44,11 @@ describe("consultant work stages", () => {
     const fresh = { ...r, upload: { files: 2, assessed: true, sig: "a,b|R2" } };
     expect(stageOf(fresh, o)).toBe("rev");
     expect(isReturned(fresh, o)).toBe(false);
+  });
+
+  it("reads moves saved under the two-layer review as accepted", () => {
+    const r = WS_REQUIREMENTS.find((x) => baseStage(x) === "rev")!;
+    expect(stageOf(r, { stage: { [r.code]: "cli" } as never, returned: [] })).toBe("acc");
   });
 
   it("sorts codes naturally", () => {
