@@ -3,9 +3,33 @@
 // Accounts, access requests and the signed-in user, persisted to localStorage.
 
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { recordAudit } from "@/lib/audit";
-import { canOpen, checkPassword, hashPassword, homeFor, isEmail, normEmail, passwordProblem, ROLE_OF, SEED_REQUESTS, SEED_USERS, type AccessRequest, type Role, type StoredUser } from "./accounts";
+import {
+  canOpen,
+  checkPassword,
+  hashPassword,
+  homeFor,
+  isEmail,
+  normEmail,
+  passwordProblem,
+  ROLE_OF,
+  SEED_REQUESTS,
+  SEED_USERS,
+  type AccessRequest,
+  type Role,
+  type StoredUser,
+} from "./accounts";
 
 const STORAGE_KEY = "ci-auth-v1";
 /** Session kept only for this browser tab when "Keep me signed in" is off. */
@@ -19,9 +43,14 @@ interface AuthState {
   remember?: boolean;
 }
 
-const initial = (): AuthState => ({ users: structuredClone(SEED_USERS), requests: structuredClone(SEED_REQUESTS) });
+const initial = (): AuthState => ({
+  users: structuredClone(SEED_USERS),
+  requests: structuredClone(SEED_REQUESTS),
+});
 
-type Action = { type: "replace"; state: AuthState } | { type: "mutate"; fn: (s: AuthState) => void };
+type Action =
+  | { type: "replace"; state: AuthState }
+  | { type: "mutate"; fn: (s: AuthState) => void };
 
 function reducer(state: AuthState, action: Action): AuthState {
   if (action.type === "replace") return action.state;
@@ -36,7 +65,8 @@ const stamp = () => {
 };
 
 let seq = 0;
-const newId = (p: string) => `${p}-${Date.now().toString(36)}${(seq++).toString(36)}`;
+const newId = (p: string) =>
+  `${p}-${Date.now().toString(36)}${(seq++).toString(36)}`;
 
 export interface Approval {
   role: Role;
@@ -50,15 +80,34 @@ interface AuthApi {
   user?: StoredUser;
   users: StoredUser[];
   requests: AccessRequest[];
-  signIn: (email: string, password: string, remember?: boolean) => Promise<{ ok: true; home: string } | { ok: false; error: string }>;
+  signIn: (
+    email: string,
+    password: string,
+    remember?: boolean,
+  ) => Promise<{ ok: true; home: string } | { ok: false; error: string }>;
   signOut: () => void;
-  requestAccess: (r: { name: string; email: string; organisation: string; title: string; reason: string; password: string }) => Promise<string | undefined>;
+  requestAccess: (r: {
+    name: string;
+    email: string;
+    organisation: string;
+    title: string;
+    reason: string;
+    password: string;
+  }) => Promise<string | undefined>;
   /** Creates the account and returns its id. */
   approve: (requestId: string, a: Approval) => string;
   reject: (requestId: string, note?: string) => void;
   updateUser: (id: string, fn: (u: StoredUser) => void) => void;
   /** Creates an invited account; returns an error message or the new id. */
-  invite: (u: { name: string; email: string; role: Role; entityId?: string; department?: string; title?: string; workspaceIds?: string[] }) => { error: string } | { id: string };
+  invite: (u: {
+    name: string;
+    email: string;
+    role: Role;
+    entityId?: string;
+    department?: string;
+    title?: string;
+    workspaceIds?: string[];
+  }) => { error: string } | { id: string };
   /** Puts the account back on the demo password and asks the user to set a new one. */
   resetPassword: (id: string) => void;
 }
@@ -76,9 +125,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const saved = JSON.parse(raw) as AuthState;
         // Demo accounts added in later versions join the saved ones.
-        const users = [...saved.users, ...SEED_USERS.filter((u) => !saved.users.some((x) => x.id === u.id))];
+        const users = [
+          ...saved.users,
+          ...SEED_USERS.filter((u) => !saved.users.some((x) => x.id === u.id)),
+        ].map((u) =>
+          // Viewers see only the workspaces granted to them; older saves had "no limit" instead.
+          u.role === "viewer" && !u.workspaceIds
+            ? {
+                ...u,
+                workspaceIds:
+                  SEED_USERS.find((s) => s.id === u.id)?.workspaceIds ?? [],
+              }
+            : u,
+        );
         const tab = sessionStorage.getItem(TAB_SESSION_KEY) ?? undefined;
-        dispatch({ type: "replace", state: { ...initial(), ...saved, users, session: saved.session ?? tab } });
+        dispatch({
+          type: "replace",
+          state: {
+            ...initial(),
+            ...saved,
+            users,
+            session: saved.session ?? tab,
+          },
+        });
       }
     } catch {
       // Corrupt or blocked storage: keep the demo accounts.
@@ -92,15 +161,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Without "Keep me signed in" the session lives only as long as this tab.
       const { session, ...rest } = state;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.remember === false ? rest : state));
-      if (state.remember === false && session) sessionStorage.setItem(TAB_SESSION_KEY, session);
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(state.remember === false ? rest : state),
+      );
+      if (state.remember === false && session)
+        sessionStorage.setItem(TAB_SESSION_KEY, session);
       else sessionStorage.removeItem(TAB_SESSION_KEY);
     } catch {
       // Storage unavailable: state stays in memory.
     }
   }, [state]);
 
-  const update = useCallback((fn: (s: AuthState) => void) => dispatch({ type: "mutate", fn }), []);
+  const update = useCallback(
+    (fn: (s: AuthState) => void) => dispatch({ type: "mutate", fn }),
+    [],
+  );
 
   const api = useMemo<AuthApi>(() => {
     const user = state.users.find((u) => u.id === state.session && u.active);
@@ -110,15 +186,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       users: state.users,
       requests: state.requests,
       async signIn(email, password, remember = true) {
-        const u = state.users.find((x) => normEmail(x.email) === normEmail(email));
-        const pending = state.requests.find((r) => normEmail(r.email) === normEmail(email) && r.status !== "approved");
+        const u = state.users.find(
+          (x) => normEmail(x.email) === normEmail(email),
+        );
+        const pending = state.requests.find(
+          (r) =>
+            normEmail(r.email) === normEmail(email) && r.status !== "approved",
+        );
         if (!u) {
-          if (pending?.status === "pending") return { ok: false, error: "Your access request is waiting for the Platform Admin." };
-          if (pending?.status === "rejected") return { ok: false, error: "Your access request was not approved. Contact the Platform Admin." };
+          if (pending?.status === "pending")
+            return {
+              ok: false,
+              error: "Your access request is waiting for the Platform Admin.",
+            };
+          if (pending?.status === "rejected")
+            return {
+              ok: false,
+              error:
+                "Your access request was not approved. Contact the Platform Admin.",
+            };
           return { ok: false, error: "Email or password is not right." };
         }
-        if (!(await checkPassword(u, password))) return { ok: false, error: "Email or password is not right." };
-        if (!u.active) return { ok: false, error: "This account is switched off. Contact the Platform Admin." };
+        if (!(await checkPassword(u, password)))
+          return { ok: false, error: "Email or password is not right." };
+        if (!u.active)
+          return {
+            ok: false,
+            error: "This account is switched off. Contact the Platform Admin.",
+          };
         update((s) => {
           s.session = u.id;
           s.remember = remember;
@@ -126,7 +221,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           me.invited = false;
           me.lastActive = new Date().toISOString();
         });
-        recordAudit({ user: u.name, role: ROLE_OF[u.role].label, type: "Sign-in", action: remember ? "Signed in · kept signed in on this device" : "Signed in" });
+        recordAudit({
+          user: u.name,
+          role: ROLE_OF[u.role].label,
+          type: "Sign-in",
+          action: remember
+            ? "Signed in · kept signed in on this device"
+            : "Signed in",
+        });
         return { ok: true, home: homeFor(u.role) };
       },
       signOut: () => update((s) => void delete s.session),
@@ -137,12 +239,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!r.organisation.trim()) return "Enter your organisation.";
         const weak = passwordProblem(r.password);
         if (weak) return weak;
-        if (state.users.some((u) => normEmail(u.email) === email)) return "This email already has an account. Sign in instead.";
-        if (state.requests.some((x) => normEmail(x.email) === email && x.status === "pending")) return "A request for this email is already waiting for approval.";
+        if (state.users.some((u) => normEmail(u.email) === email))
+          return "This email already has an account. Sign in instead.";
+        if (
+          state.requests.some(
+            (x) => normEmail(x.email) === email && x.status === "pending",
+          )
+        )
+          return "A request for this email is already waiting for approval.";
         const id = newId("rq");
         const passwordHash = await hashPassword(id, r.password);
-        update((s) =>
-          void s.requests.unshift({ id, name: r.name.trim(), email, organisation: r.organisation.trim(), title: r.title.trim(), reason: r.reason.trim(), passwordHash, salt: id, at: stamp(), status: "pending" }),
+        update(
+          (s) =>
+            void s.requests.unshift({
+              id,
+              name: r.name.trim(),
+              email,
+              organisation: r.organisation.trim(),
+              title: r.title.trim(),
+              reason: r.reason.trim(),
+              passwordHash,
+              salt: id,
+              at: stamp(),
+              status: "pending",
+            }),
         );
         return undefined;
       },
@@ -164,9 +284,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             department: a.department || undefined,
             title: r.title || undefined,
             // A request without a password (seeded demo) signs in with the demo password.
-            ...(r.passwordHash ? { passwordHash: r.passwordHash, salt: r.salt } : {}),
+            ...(r.passwordHash
+              ? { passwordHash: r.passwordHash, salt: r.salt }
+              : {}),
             active: true,
-            since: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
+            since: new Date().toLocaleDateString("en-GB", {
+              month: "short",
+              year: "numeric",
+            }),
           });
         });
         return id;
@@ -190,22 +315,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const email = normEmail(n.email);
         if (!n.name.trim()) return { error: "Enter the full name." };
         if (!isEmail(email)) return { error: "Enter a valid work email." };
-        if (state.users.some((u) => normEmail(u.email) === email)) return { error: "This email already has an account." };
+        if (state.users.some((u) => normEmail(u.email) === email))
+          return { error: "This email already has an account." };
         const id = newId("u");
-        update((s) =>
-          void s.users.push({
-            id,
-            name: n.name.trim(),
-            email,
-            role: n.role,
-            entityId: n.entityId,
-            department: n.department || undefined,
-            title: n.title || undefined,
-            workspaceIds: n.workspaceIds,
-            invited: true,
-            active: true,
-            since: new Date().toLocaleDateString("en-GB", { month: "short", year: "numeric" }),
-          }),
+        update(
+          (s) =>
+            void s.users.push({
+              id,
+              name: n.name.trim(),
+              email,
+              role: n.role,
+              entityId: n.entityId,
+              department: n.department || undefined,
+              title: n.title || undefined,
+              workspaceIds: n.workspaceIds,
+              invited: true,
+              active: true,
+              since: new Date().toLocaleDateString("en-GB", {
+                month: "short",
+                year: "numeric",
+              }),
+            }),
         );
         return { id };
       },
@@ -245,6 +375,7 @@ export function useGuard() {
 /** Renders the page only for a signed-in user allowed to open it. */
 export function Guard({ children }: { children: ReactNode }) {
   const { ready } = useGuard();
-  if (!ready) return <div className="min-h-screen bg-j-canvas" aria-busy="true" />;
+  if (!ready)
+    return <div className="min-h-screen bg-j-canvas" aria-busy="true" />;
   return <>{children}</>;
 }

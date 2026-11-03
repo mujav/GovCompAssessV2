@@ -150,7 +150,7 @@ export function AppShell({
   const outside =
     !!current && ((user.role === "owner" && !current.workplace.ownerIds.includes(user.id)) ||
       (user.role === "control" && !!user.entityId && current.workplace.entityId !== user.entityId) ||
-      (user.role === "viewer" && !!user.workspaceIds && !user.workspaceIds.includes(current.client.id)));
+      (user.role === "viewer" && !(user.workspaceIds ?? []).includes(current.client.id)));
 
   return (
     <div className="flex min-h-screen flex-wrap bg-j-canvas text-j-ink">

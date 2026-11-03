@@ -35,7 +35,7 @@ export function useWorkplaces(): WorkplaceView[] {
   );
 }
 
-/** The workplaces the signed-in user works in: all for admins and viewers (or the ones a viewer was granted), their own for index owners, their entity's for control owners. */
+/** The workplaces the signed-in user works in: all for admins, the ones granted to a viewer, their own for index owners, their entity's for control owners. */
 export function useMyWorkplaces(): WorkplaceView[] {
   const all = useWorkplaces();
   const { user } = useAuth();
@@ -43,7 +43,7 @@ export function useMyWorkplaces(): WorkplaceView[] {
     if (!user) return [];
     if (user.role === "owner") return all.filter((v) => v.workplace.ownerIds.includes(user.id));
     if (user.role === "control") return all.filter((v) => !user.entityId || v.workplace.entityId === user.entityId);
-    if (user.role === "viewer" && user.workspaceIds) return all.filter((v) => user.workspaceIds!.includes(v.client.id));
+    if (user.role === "viewer") return all.filter((v) => (user.workspaceIds ?? []).includes(v.client.id));
     return all;
   }, [all, user]);
 }

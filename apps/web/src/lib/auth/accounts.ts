@@ -99,7 +99,7 @@ export const SEED_USERS: StoredUser[] = [
   { id: "u-sami", name: "Sami R.", email: `sami.r@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Jan 2026" },
   { id: "u-mohammed", name: "Mohammed K.", email: `mohammed.k@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Feb 2026" },
   { id: "u-layla", name: "Layla A.", email: `layla.a@${DEMO_DOMAIN}`, role: "owner", title: "Index Owner", active: true, since: "Mar 2026" },
-  { id: "u-huda", name: "Huda S.", email: `huda.s@${DEMO_DOMAIN}`, role: "viewer", title: "Executive director", active: true, since: "Mar 2026" },
+  { id: "u-huda", name: "Huda S.", email: `huda.s@${DEMO_DOMAIN}`, role: "viewer", title: "Executive director", active: true, since: "Mar 2026", workspaceIds: ["demo-entity", "demo-ministry"] },
   ...Object.values(DEPARTMENTS).flatMap((d) =>
     d.people.map((name, i) => ({
       id: `u-${slug(name)}`,

@@ -34,7 +34,7 @@ export default function PeoplePage() {
   const members: Member[] = useMemo(
     () => [
       ...users.filter((u) => u.role === "control" && (!u.entityId || u.entityId === client.entityId)).map((u) => ({ ...u, workspaceRole: "control" as const })),
-      ...users.filter((u) => u.role === "viewer" && (!u.workspaceIds || u.workspaceIds.includes(client.id))).map((u) => ({ ...u, workspaceRole: "viewer" as const })),
+      ...users.filter((u) => u.role === "viewer" && !!u.workspaceIds?.includes(client.id)).map((u) => ({ ...u, workspaceRole: "viewer" as const })),
     ],
     [users, client.entityId, client.id],
   );
@@ -158,7 +158,7 @@ export default function PeoplePage() {
             u.department = changes.department || undefined;
             if (changes.role !== current.workspaceRole) {
               u.role = changes.role;
-              if (changes.role === "viewer") u.workspaceIds = [client.id];
+              if (changes.role === "viewer") u.workspaceIds = [...new Set([...(u.workspaceIds ?? []), client.id])];
             }
           });
           const was = owned(current.name).map((c) => c.code);
