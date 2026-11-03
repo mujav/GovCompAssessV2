@@ -20,7 +20,6 @@ type NavItem = { label: string; icon: IconName; href: string; badge?: string; ba
 /** Standard library sections; the side nav shows one entry and the library pages show these as a sub-menu. */
 export const STUDIO: NavItem[] = [
   { label: "Editions", icon: "layers", href: "/studio/frameworks" },
-  { label: "Scoring", icon: "trend", href: "/studio/scoring" },
   { label: "Automation", icon: "refresh", href: "/studio/automation" },
   { label: "Change log", icon: "history", href: "/studio/history" },
 ];

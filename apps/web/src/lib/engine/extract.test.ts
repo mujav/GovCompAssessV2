@@ -119,7 +119,7 @@ describe("CSV", () => {
     expect(byCode(ex, "1.1.1-1").loc).toEqual({ file: "flat.csv", sheet: undefined, row: 7 });
   });
 
-  it("reports duplicates, missing parents, orphan rows and missing weights with their rows", () => {
+  it("reports duplicates, missing parents and orphan rows with their rows, never missing weights", () => {
     const w = checkExtraction(ex);
     const dup = w.find((x) => x.kind === "duplicate")!;
     expect(dup.message).toContain("1.1.1-2");
@@ -131,7 +131,7 @@ describe("CSV", () => {
     const orphan = w.find((x) => x.kind === "orphan")!;
     expect(orphan.loc?.row).toBe(11);
     expect(orphan.message).toContain("Stakeholder map maintained");
-    expect(w.filter((x) => x.kind === "missing_weight").map((x) => x.message)).toEqual(["Weight missing for 2.1.1-1"]);
+    expect(w.filter((x) => x.kind === "missing_weight")).toEqual([]);
   });
 
   it("counts nodes per level", () => {
@@ -177,7 +177,7 @@ describe("hierarchical spreadsheet columns", () => {
     expect(byCode(ex, "1").title).toBe("Strategy & Governance");
     expect(parentOf(ex, "1.1.1")).toBe("1");
     expect(parentOf(ex, "1.1.1-1-C2")).toBe("1.1.1-1");
-    expect(checkExtraction(ex).map((w) => w.message)).toEqual(["Weight missing for 2.2.1-2", "Weight missing for 3.1.2-2"]);
+    expect(checkExtraction(ex).map((w) => w.message)).toEqual([]);
   });
 });
 
@@ -228,7 +228,7 @@ describe("JSON, Word and PDF", () => {
       ["Standard", "المعيار", "#.#"],
     ]);
     expect(byCode(ex, "1.2").evidence).toBe("Screenshots\nAnalytics");
-    expect(checkExtraction(ex).map((w) => w.message)).toEqual(["Weight missing for 2.1"]);
+    expect(checkExtraction(ex).map((w) => w.message)).toEqual([]);
   });
 
   it("uses explicit JSON levels", () => {
@@ -284,7 +284,7 @@ describe("JSON, Word and PDF", () => {
     const ex = extractFramework([pdfItemsToDoc("css.pdf", pages)]);
     expect(ex.levels.map((l) => l.pattern)).toEqual(["CSS-#", "CSS-#.#"]);
     expect(byCode(ex, "CSS-2.3").loc.page).toBe(2);
-    expect(kinds(ex)).toEqual(["duplicate", "missing_weight"]);
+    expect(kinds(ex)).toEqual(["duplicate"]);
   });
 });
 
@@ -372,7 +372,7 @@ describe("accepting into Admin Studio", () => {
     expect(d.removed.map((r) => r.code)).toEqual(["2.1.2-2"]);
     expect(d.changed.map((c) => [c.after.code, c.fields])).toEqual([
       ["1.1.1-2", ["title"]],
-      ["3.2.1-2", ["weight", "evidence"]],
+      ["3.2.1-2", ["evidence"]],
     ]);
     const rows = diffConfig("framework", live, { ...live, version: "1.3", requirements });
     expect(rows.filter((r) => /^[+~−] /.test(r.label)).map((r) => r.label)).toEqual(["+ 1.2.1-2", "+ 2.1.1-1-C1", "+ 2.2.1-2", "+ 3.1.2-2", "~ 1.1.1-2", "~ 3.2.1-2", "− 2.1.2-2"]);

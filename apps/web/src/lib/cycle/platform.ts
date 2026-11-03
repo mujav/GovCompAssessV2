@@ -16,13 +16,12 @@ export interface EntityMeta {
   status?: "Active" | "Inactive";
 }
 
-export type AgentKey = "review" | "selfCheck" | "advisor" | "predictor" | "remediation" | "monitor" | "parser";
+export type AgentKey = "review" | "selfCheck" | "advisor" | "remediation" | "monitor" | "parser";
 
 export const AGENTS: { key: AgentKey; name: string; does: string; who: string; model: "Standard" | "Fast"; when: string }[] = [
   { key: "review", name: "Evidence Review", does: "Checks each file against its requirement: date, approval, samples, page reference", who: "Index Owner", model: "Standard", when: "On submit, on re-assess" },
   { key: "selfCheck", name: "Evidence Self-check", does: "Pass / needs attention hint per file, no criticality", who: "Control Owner", model: "Fast", when: "When the owner asks" },
   { key: "advisor", name: "Response Advisor", does: "Suggests missing coverage and page references in the response", who: "Index Owner", model: "Standard", when: "In the review console" },
-  { key: "predictor", name: "Readiness Predictor", does: "Predicted tier and compliance rate per control", who: "Index Owner", model: "Fast", when: "Nightly and on change" },
   { key: "remediation", name: "Remediation Planner", does: "Ranked correction actions by criticality", who: "Index Owner", model: "Standard", when: "After review" },
   { key: "monitor", name: "Delay and Attention Monitor", does: "Overdue, at-risk and stale items with drafted follow-ups", who: "Index Owner", model: "Fast", when: "Daily 07:00" },
   { key: "parser", name: "Standard Parser", does: "Drafts a standard tree from a PDF for human review", who: "Platform Admin", model: "Standard", when: "On upload" },
@@ -56,7 +55,7 @@ export const DEFAULT_AI: AiSettings = {
   cap: 1500,
   spend: 412,
   runs: 3482,
-  agents: { review: true, selfCheck: true, advisor: true, predictor: true, remediation: true, monitor: true, parser: false },
+  agents: { review: true, selfCheck: true, advisor: true, remediation: true, monitor: true, parser: false },
   models: Object.fromEntries(AGENTS.map((a) => [a.key, a.model])) as AiSettings["models"],
   thresholds: DEFAULT_THRESHOLDS,
   criticality: ["Missing approval or signature", "Wrong period or outdated", "Evidence missing", "Page reference missing"],

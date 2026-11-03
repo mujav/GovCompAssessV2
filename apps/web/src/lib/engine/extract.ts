@@ -943,7 +943,8 @@ export function extractFramework(docs: SourceDoc[], opts: ExtractOptions = {}): 
     nodes: b.nodes,
     orphans: b.orphans,
     seq: b.seq,
-    weighting: b.nodes.some((n) => n.weight) ? "weighted" : "none",
+    // Government indices do not publish weights: requirements always count equally.
+    weighting: "none",
   };
   resolveTree(ex);
   ex.levels = inferLevels(ex, docs.find((d) => d.levels?.length)?.levels);

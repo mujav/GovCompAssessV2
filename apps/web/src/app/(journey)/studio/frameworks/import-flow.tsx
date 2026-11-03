@@ -531,23 +531,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                 ))}
               </div>
             </div>
-            <fieldset className="m-0 flex flex-col gap-1.5 rounded-lg bg-surface-2 px-3 py-2.5 text-[13px]">
-              <legend className="sr-only">Weights</legend>
-              <span className="text-xs font-semibold text-muted">Weights</span>
-              <label className="flex items-start gap-2">
-                <input type="radio" name="weighting" checked={ex.weighting === "none"} onChange={() => apply(setWeighting(ex, "none"))} className="mt-1" />
-                <span>
-                  <b>No weights</b>: the standard does not publish weights (Qiyas, for example); every requirement counts equally.
-                </span>
-              </label>
-              <label className="flex items-start gap-2">
-                <input type="radio" name="weighting" checked={ex.weighting === "weighted"} onChange={() => apply(setWeighting(ex, "weighted"))} className="mt-1" />
-                <span>
-                  <b>Weighted</b>: requirements carry High / Medium / Low or numeric weights
-                  {ex.nodes.some((n) => n.weight) ? ` (${ex.nodes.filter((n) => n.weight).length} found in the document)` : "; each one needs a weight"}.
-                </span>
-              </label>
-            </fieldset>
             <div className="text-xs text-muted">
               In a code pattern <span className="font-mono">#</span> stands for a number, e.g. <span className="font-mono">#.#.#-#</span> or <span className="font-mono">ECC #-#-#</span>. Codes that
               do not match their level&apos;s pattern are listed as warnings.
@@ -659,7 +642,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                           {n.title || (n.placeholder ? "Missing parent: not in the file" : n.text ? "" : "No title")}
                         </span>
                         <Badge tone="gray">{ex.levels[depth]?.en ?? `Level ${depth + 1}`}</Badge>
-                        {n.weight && ex.weighting === "weighted" && <Badge tone="brand">{weightLabel(n.weight)}</Badge>}
                         {n.evidence && <Badge tone="na">Evidence</Badge>}
                         {byNode.get(n.id)?.map((w) => (
                           <Badge key={w.id} tone="warn">
@@ -751,7 +733,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
             <div className="flex flex-col gap-1.5">
               <SummaryRow label="Levels" value={ex.levels.map((l) => l.en || "?").join(" › ") || "—"} />
               <SummaryRow label="Requirement nodes" value={String(draft.requirements.length)} />
-              <SummaryRow label="Weights" value={ex.weighting === "none" ? "None (equal)" : "Weighted"} />
               {target === "version" && (
                 <SummaryRow
                   label={`vs live ${pkg?.live ? `v${pkg.live.version}` : "(none)"}`}
@@ -831,19 +812,18 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (patch: Partial<Pick<ExtractedNode, "code" | "title" | "text" | "weight" | "evidence">>) => void; onCancel: () => void }) {
+function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (patch: Partial<Pick<ExtractedNode, "code" | "title" | "text" | "evidence">>) => void; onCancel: () => void }) {
   const [code, setCode] = useState(node.code);
   const [title, setTitle] = useState(node.title);
   const [text, setText] = useState(node.text);
-  const [weight, setWeight] = useState(node.weight ?? "");
   const [evidence, setEvidence] = useState(node.evidence ?? "");
   return (
     <form
-      className="grid grid-cols-[140px_minmax(0,1fr)_120px] gap-2 border-t border-line-soft bg-brand-tint px-5 py-3"
+      className="grid grid-cols-[140px_minmax(0,1fr)] gap-2 border-t border-line-soft bg-brand-tint px-5 py-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (!code.trim()) return;
-        onSave({ code, title, text, weight, evidence });
+        onSave({ code, title, text, evidence });
       }}
     >
       <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
@@ -854,24 +834,15 @@ function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (
         Title
         <input value={title} onChange={(e) => setTitle(e.target.value)} dir="auto" className={cx(inputCls, "text-[13px] font-normal text-ink")} />
       </label>
-      <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
-        Weight
-        <input value={weight} onChange={(e) => setWeight(e.target.value)} list="weight-options" placeholder="High / Medium / Low" className={cx(inputCls, "text-[13px] font-normal text-ink")} />
-        <datalist id="weight-options">
-          <option value="High" />
-          <option value="Medium" />
-          <option value="Low" />
-        </datalist>
-      </label>
-      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
+      <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
         Text
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={Math.min(8, Math.max(3, text.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
-      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
+      <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
         Evidence required
         <textarea value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={Math.min(6, Math.max(2, evidence.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
-      <div className="col-span-3 flex gap-2">
+      <div className="col-span-2 flex gap-2">
         <Button type="submit" variant="primary" size="md">
           Save node
         </Button>
@@ -908,7 +879,7 @@ function Warnings({
         Warnings
         <Badge tone={warnings.length ? "warn" : "ok"}>{warnings.length ? `${warnings.length} open` : "none"}</Badge>
       </h2>
-      {warnings.length === 0 && <div className="text-good">✓ No duplicates, missing parents, orphan rows or missing weights.</div>}
+      {warnings.length === 0 && <div className="text-good">✓ No duplicates, missing parents or orphan rows.</div>}
       {groups.map(([kind, ws]) => (
         <div key={kind} className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1077,7 +1048,6 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
                 )}
               </span>
               <span className="shrink-0 text-[11px] text-muted">{levelName(r.level)}</span>
-              {r.weight && <Badge tone="brand">{weightLabel(r.weight)}</Badge>}
             </li>
           );
         })}

@@ -5,8 +5,8 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { inputClass, JButton, Panel, PanelHead } from "@/components/journey/ui";
 import { downloadCsv, Row, Table, TierPill } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
-import { tierOf, type Control } from "@/lib/cycle/model";
-import { predictedRate, useCycle } from "@/lib/cycle/use-cycle";
+import type { Control } from "@/lib/cycle/model";
+import { useCycle } from "@/lib/cycle/use-cycle";
 import { PRIOR_CYCLE } from "@/lib/workspace/data";
 import { recordAudit } from "@/lib/audit";
 
@@ -30,7 +30,7 @@ function previousRate(controls: Control[]) {
 
 export default function AnalyticsPage() {
   const cy = useCycle();
-  const { controls, cycle, summary, ai, client, label, me, role } = cy;
+  const { controls, cycle, summary, client, label, me, role } = cy;
   const [dim, setDim] = useState(ALL);
   const [dept, setDept] = useState(ALL);
   const [owner, setOwner] = useState(ALL);
@@ -98,9 +98,8 @@ export default function AnalyticsPage() {
     .filter((x) => x.reqs);
 
   const prior = client.id === client.entityId && client.frameworkId === "fw-qiyas" ? PRIOR_CYCLE.at(-1)! : null;
-  const predicted = predictedRate(live);
   const lastNon = live.filter((c) => c.previous === "Non");
-  const nowFull = lastNon.filter((c) => c.stage === "accepted" && tierOf(c.met, c.total, cycle.standard.partialFrom) === "Full");
+  const nowFull = lastNon.filter((c) => c.stage === "accepted" && c.met === c.total);
   const toggle = (k: string) => setOpen(open.includes(k) ? open.filter((x) => x !== k) : [...open, k]);
 
   const exportCsv = () => {
@@ -274,7 +273,6 @@ export default function AnalyticsPage() {
             {[
               ["Previous official score", prior == null ? null : prior, "#9AA5A0"],
               ["This cycle – confirmed", summary.rate, "#1E4E8C"],
-              ...(ai.agents.predictor ? [["This cycle – AI prediction", predicted, "#4F46E5"]] : []),
               ["Target", summary.dates.target, "#1F9D6E"],
             ].map(([l, v, color]) => (
               <div key={l as string} className="flex flex-col gap-1 text-sm">
@@ -288,7 +286,7 @@ export default function AnalyticsPage() {
               </div>
             ))}
             <p className="m-0 text-[13px] text-j-ink-3">
-              {nowFull.length} of last cycle&apos;s {lastNon.length} non-compliant controls are now accepted as Full.
+              {nowFull.length} of last cycle&apos;s {lastNon.length} non-compliant controls are now accepted with every requirement met.
             </p>
           </Panel>
         </div>

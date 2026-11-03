@@ -51,7 +51,7 @@ export default function SubmittedPage() {
   const next: { t: string; sub: string; icon: IconName; bg: string; fg: string; href: string }[] = [
     { t: "Prepare for verification", sub: "Open evidence register in read-only mode", icon: "rev", bg: "#EAF1FA", fg: "#1E4E8C", href: c("/evidence") },
     { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/requirements?view=cla") },
-    { t: "Workspace report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: `/dashboards/${client.id}` },
+    { t: "Workspace report", sub: "Submission summary and requirements accepted", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: `/dashboards/${client.id}` },
     { t: "Back to workspaces", sub: "Every workspace you run", icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/workplaces" },
   ];
 

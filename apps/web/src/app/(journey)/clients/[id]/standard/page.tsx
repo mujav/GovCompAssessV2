@@ -3,15 +3,12 @@
 import { useMemo, useRef, useState } from "react";
 import { ClientShell, JMain } from "@/components/journey/shell";
 import { Field, inputClass, JButton, JLink, Panel, PanelHead, Pill } from "@/components/journey/ui";
-import { ClosedBanner, Modal, Switch, useToast } from "@/components/cycle/ui";
+import { ClosedBanner, Modal, useToast } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
 import { useAuth } from "@/lib/auth/store";
 import { useAdmin } from "@/lib/admin/store";
 import { controlOf, reqLabel, sortByCode } from "@/lib/cycle/model";
-import { defaultSpecs, seededLists, useCycle, type ControlTailoring, type CycleControl, type DocType, type EvidenceSpec, type StandardState } from "@/lib/cycle/use-cycle";
-import type { AnnexList } from "@/lib/cycle/platform";
-
-const LISTS: AnnexList[] = ["A", "B", "C"];
+import { defaultSpecs, useCycle, type ControlTailoring, type CycleControl, type DocType, type EvidenceSpec, type StandardState } from "@/lib/cycle/use-cycle";
 const DOC_TYPES: DocType[] = ["Approved document", "Report", "Samples", "Screenshot", "Link"];
 
 export default function StandardPage() {
@@ -54,8 +51,8 @@ export default function StandardPage() {
     const reqs = controls.reduce((a, c) => a + c.reqs.length, 0);
     const ev = controls.reduce((a, c) => a + specsOf(c).length, 0);
     const noEv = controls.reduce((a, c) => a + c.reqs.filter((r) => !specsOf(c).some((s) => s.req === r.code)).length, 0);
-    const naFlags = controls.filter((c) => (tailor(c.code).lists ?? seededLists(c.code)) && tailor(c.code).applies !== "all").length + Object.keys(st.reqLists ?? {}).length;
-    return { dims: tree.length, domains: domains.size, controls: controls.length, reqs, ev, noEv, naFlags };
+    const na = controls.filter((c) => !c.applicable).length;
+    return { dims: tree.length, domains: domains.size, controls: controls.length, reqs, ev, noEv, na };
   }, [controls, tree, st]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const c = controls.find((x) => x.code === selected) ?? controls[0];
@@ -181,7 +178,7 @@ export default function StandardPage() {
           <span className={cx("flex min-w-[220px] flex-[2_1_220px] flex-col rounded-[14px] px-3.5 py-2.5", counts.noEv ? "bg-j-warn-soft" : "bg-[#E7F3ED]")}>
             <span className="text-xs text-j-muted">Checks</span>
             <b className="text-sm">
-              {counts.noEv} requirements without evidence · {counts.naFlags} N/A flags
+              {counts.noEv} requirements without evidence · {counts.na} not applicable
             </b>
           </span>
         </section>
@@ -216,20 +213,19 @@ export default function StandardPage() {
                             {mOpen &&
                               list.map((x) => {
                                 const gaps = x.reqs.filter((r) => !specsOf(x).some((s) => s.req === r.code)).length;
-                                const flagged = (tailor(x.code).lists ?? seededLists(x.code)) && tailor(x.code).applies !== "all";
                                 return (
                                   <button
                                     key={x.code}
                                     type="button"
                                     onClick={() => setSelected(x.code)}
-                                    className={cx("ms-5 flex cursor-pointer items-center gap-2 rounded-lg border-0 px-2 py-1.5 text-start", x.code === c?.code ? "bg-cx-soft text-cx" : "bg-transparent hover:bg-j-canvas")}
+                                    className={cx("ms-5 flex cursor-pointer items-center gap-2 rounded-lg border-0 px-2 py-1.5 text-start", x.code === c?.code ? "bg-cx-soft text-cx" : "bg-transparent hover:bg-j-canvas", !x.applicable && "text-j-muted")}
                                   >
                                     <span className="flex-auto">
                                       <span className="font-mono text-xs">{x.code}</span> {x.title}
                                     </span>
                                     <span className="text-xs text-j-muted">
                                       {x.reqs.length} req{gaps ? ` · ${gaps} gap` : ""}
-                                      {flagged ? " · N/A flags" : ""}
+                                      {!x.applicable ? " · N/A" : ""}
                                     </span>
                                   </button>
                                 );
@@ -279,7 +275,7 @@ export default function StandardPage() {
                   className="rounded-lg border border-transparent px-1 text-base text-j-ink-2 hover:border-j-line"
                 />
                 <span className="flex flex-wrap gap-1.5">
-                  <Pill tone={applies(tailor(c.code), c.code) === "all" ? "ok" : "warn"}>{appliesLabel(tailor(c.code), c.code)}</Pill>
+                  <Pill tone={c.applicable ? "ok" : "gray"}>{c.applicable ? "Applicable" : "Not applicable"}</Pill>
                   <Pill>
                     {c.reqs.length} requirements · {specsOf(c).length} evidence
                   </Pill>
@@ -310,35 +306,12 @@ export default function StandardPage() {
                 />
                 {c.reqs.map((r) => {
                   const list = specsOf(c).filter((s) => s.req === r.code);
-                  const rl = st.reqLists?.[r.code];
                   return (
                     <div key={r.code} className="flex flex-col gap-1.5 border-b border-j-line-soft py-3 last:border-0">
                       <span className="flex flex-wrap items-center gap-2 text-sm">
                         <b className="font-mono text-xs">{reqLabel(r.code)}</b>
                         <span className="flex-auto">{r.title}</span>
                         {!list.length && <Pill tone="warn">No evidence</Pill>}
-                        {tailor(c.code).applies === "perReq" && (
-                          <span className="flex items-center gap-1 text-xs text-j-muted">
-                            Applies to {rl?.length ? `lists ${rl.join("/")}` : "all"}
-                            {!closed && (
-                              <select
-                                aria-label={`Applicability of ${r.code}`}
-                                value={rl?.join("") ?? ""}
-                                onChange={(e) => edit((s) => {
-                                  s.reqLists ??= {};
-                                  if (e.target.value) s.reqLists[r.code] = e.target.value.split("") as AnnexList[];
-                                  else delete s.reqLists[r.code];
-                                })}
-                                className="h-7 rounded-md border border-j-line px-1 text-xs"
-                              >
-                                <option value="">Change · all</option>
-                                <option value="A">List A</option>
-                                <option value="AB">Lists A/B</option>
-                                <option value="BC">Lists B/C</option>
-                              </select>
-                            )}
-                          </span>
-                        )}
                       </span>
                       {list.map((s) => (
                         <button key={s.id} type="button" disabled={closed} onClick={() => setSpec({ control: c.code, spec: s, isNew: false })} className="ms-6 flex cursor-pointer flex-wrap items-center gap-2 rounded-lg border-0 bg-j-canvas px-2.5 py-1.5 text-start text-[13px] hover:bg-cx-tint">
@@ -369,54 +342,8 @@ export default function StandardPage() {
               <div className="flex flex-wrap items-start gap-3.5">
                 <Panel className="flex min-w-0 flex-[1_1_300px] flex-col gap-2 p-[22px]">
                   <PanelHead title="Applicability of this control" />
-                  {(
-                    [
-                      ["all", "All entities"],
-                      ["lists", "Only entity categories (lists A/B/C)"],
-                      ["perReq", "Not applicable to everyone – set per requirement"],
-                    ] as const
-                  ).map(([v, l]) => (
-                    <label key={v} className="flex items-center gap-2 text-sm">
-                      <input type="radio" disabled={closed} checked={applies(tailor(c.code), c.code) === v} onChange={() => editControl(c.code, (t) => void ((t.applies = v), v === "lists" && !t.lists && (t.lists = seededLists(c.code) ?? ["A"])))} /> {l}
-                    </label>
-                  ))}
-                  {applies(tailor(c.code), c.code) === "lists" && (
-                    <span className="flex gap-3 ps-6 text-sm">
-                      {LISTS.map((l) => {
-                        const cur = tailor(c.code).lists ?? seededLists(c.code) ?? [];
-                        return (
-                          <label key={l} className="flex items-center gap-1.5">
-                            <input type="checkbox" disabled={closed} checked={cur.includes(l)} onChange={(e) => editControl(c.code, (t) => void (t.lists = e.target.checked ? [...cur, l] : cur.filter((x) => x !== l)))} /> {l}
-                          </label>
-                        );
-                      })}
-                    </span>
-                  )}
-                  <p className="m-0 text-xs text-j-muted">Flags show on the control and each requirement. They pre-fill N/A in a workspace&apos;s plan for entities outside the scope.</p>
-                </Panel>
-                <Panel className="flex min-w-0 flex-[1_1_300px] flex-col gap-2.5 p-[22px]">
-                  <PanelHead title="Scoring" />
-                  <Field label="Scoring scheme">
-                    <select disabled={closed} value={st.scheme} onChange={(e) => edit((s) => void (s.scheme = e.target.value as StandardState["scheme"]))} className={inputClass}>
-                      <option value="tiers">Requirement count – tiers</option>
-                      <option value="maturity">Maturity levels</option>
-                      <option value="three">Implemented / partial / not</option>
-                    </select>
-                  </Field>
-                  {st.scheme === "tiers" && (
-                    <Field label="Partially compliant from (% of requirements met)">
-                      <input type="number" min={1} max={99} disabled={closed} value={st.partialFrom} onChange={(e) => edit((s) => void (s.partialFrom = Number(e.target.value)))} className={inputClass} />
-                    </Field>
-                  )}
-                  <p className="m-0 text-xs text-j-muted">Compliance rate = requirements met ÷ applicable requirements.</p>
-                  <span className="flex items-center justify-between gap-2 text-sm">
-                    <span>
-                      <b>Control weights (optional)</b>
-                      <br />
-                      <span className="text-xs text-j-muted">Turn on only when the governing body publishes weights.</span>
-                    </span>
-                    <Switch label="Control weights" on={st.weights} disabled={closed} onChange={(v) => edit((s) => void (s.weights = v))} />
-                  </span>
+                  <Applicability key={c.code} control={c} reason={cycle.plan[c.code]?.na?.reason} closed={closed} onChange={(na) => (cy.updatePlan([c.code], { na }, na ? "Not applicable in this workspace" : "Applicable again", 0), say(na ? `${c.code} is not applicable in this workspace` : `${c.code} is applicable again`))} />
+                  <p className="m-0 text-xs text-j-muted">Applies to this workspace only. A not applicable control is hidden from the plan, review hub, Control Owners and reports here; the edition in the Standard library does not change.</p>
                 </Panel>
               </div>
 
@@ -499,15 +426,27 @@ export default function StandardPage() {
   );
 }
 
-function applies(t: ControlTailoring, code: string) {
-  return t.applies ?? (seededLists(code) ? "lists" : "all");
-}
-
-function appliesLabel(t: ControlTailoring, code: string) {
-  const a = applies(t, code);
-  if (a === "all") return "Applies to all entities";
-  if (a === "perReq") return "Set per requirement";
-  return `Only lists ${(t.lists ?? seededLists(code) ?? []).join("/")}`;
+function Applicability({ control, reason, closed, onChange }: { control: CycleControl; reason?: string; closed: boolean; onChange: (na: string | null) => void }) {
+  const [na, setNa] = useState(!control.applicable);
+  const [why, setWhy] = useState(reason ?? "");
+  return (
+    <>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="radio" name={`app-${control.code}`} disabled={closed} checked={!na} onChange={() => (setNa(false), !control.applicable && onChange(null))} /> Applicable
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="radio" name={`app-${control.code}`} disabled={closed} checked={na} onChange={() => setNa(true)} /> Not applicable
+      </label>
+      {na && (
+        <span className="flex flex-col gap-1.5 ps-6">
+          <input aria-label="Reason" disabled={closed} value={why} onChange={(e) => setWhy(e.target.value)} placeholder="Reason, e.g. the entity does not run this service" className={cx(inputClass, "h-10")} />
+          <JButton size="sm" variant="primary" className="self-start" disabled={closed || !why.trim() || (!control.applicable && why.trim() === (reason ?? ""))} onClick={() => onChange(why.trim())}>
+            {control.applicable ? "Mark not applicable" : "Update reason"}
+          </JButton>
+        </span>
+      )}
+    </>
+  );
 }
 
 function SpecDialog({ value, isNew, onClose, onSave, onRemove }: { value: EvidenceSpec; isNew: boolean; onClose: () => void; onSave: (v: EvidenceSpec) => void; onRemove?: () => void }) {

@@ -9,7 +9,7 @@ import { AiBox, ClosedBanner, fmtWhen, LevelPill, Modal, TierPill, useToast } fr
 import { Comments } from "@/components/cycle/comments";
 import { cx } from "@/components/ui";
 import { clientHref } from "@/lib/journey/portfolio";
-import { findingsOf, reqLabel, responseGaps, tierOf, verdictOf, type AiVerdict } from "@/lib/cycle/model";
+import { findingsOf, reqLabel, responseGaps, verdictOf, type AiVerdict } from "@/lib/cycle/model";
 import { defaultSpecs, useCycle } from "@/lib/cycle/use-cycle";
 import { useControlEvidence } from "@/lib/cycle/use-control-evidence";
 
@@ -49,7 +49,6 @@ export default function ReviewConsolePage() {
   // A decision defaults to what the AI found until the Index Owner sets one.
   const decision = (code: string) => review.decisions[code] ?? (live.find((r) => r.code === code)?.stage === "accepted" ? "met" : verdict(code) === "satisfied" ? "met" : undefined);
   const met = live.filter((r) => decision(r.code) === "met").length;
-  const tier = tierOf(met, live.length, cycle.standard.partialFrom);
   const pct = live.length ? Math.round((met / live.length) * 100) : 0;
   const open = live.filter((r) => verdict(r.code) !== "satisfied");
   const clean = live.filter((r) => verdict(r.code) === "satisfied");
@@ -71,8 +70,8 @@ export default function ReviewConsolePage() {
       const rv = (d.reviews[c.code] ??= { decisions: {}, returns: 0 });
       for (const r of live) rv.decisions[r.code] ??= decision(r.code) ?? "not";
     });
-    cy.accept(c.code, tier);
-    say(`Control ${c.code} accepted · ${met}/${live.length} met · ${tier}`);
+    cy.accept(c.code);
+    say(`Control ${c.code} accepted · ${met}/${live.length} met`);
   };
 
   const reassess = async () => {
@@ -107,7 +106,6 @@ export default function ReviewConsolePage() {
               <b>
                 {met} / {live.length} met · {pct}%
               </b>
-              <TierPill tier={tier} />
               {c.previous && (
                 <span className="text-xs text-j-muted">
                   Previous result: <TierPill tier={c.previous} />
@@ -125,7 +123,7 @@ export default function ReviewConsolePage() {
           </div>
         </div>
         <ClosedBanner show={closed} />
-        {c.stage === "accepted" && <p className="m-0 rounded-xl bg-[#E7F3ED] px-4 py-3 text-sm font-semibold text-[#0E5A45]">Accepted {review.acceptedAt ?? ""} · {review.tier ?? tier}</p>}
+        {c.stage === "accepted" && <p className="m-0 rounded-xl bg-[#E7F3ED] px-4 py-3 text-sm font-semibold text-[#0E5A45]">Accepted {review.acceptedAt ?? ""} · {met} / {live.length} requirements met</p>}
         {(c.stage === "not" || c.stage === "draft") && <p className="m-0 rounded-xl bg-j-canvas px-4 py-3 text-sm">The Control Owner has not submitted this control yet. You can read it, but decisions open once it is submitted.</p>}
         {c.stage === "returned" && <p className="m-0 rounded-xl bg-[#FFF1E8] px-4 py-3 text-sm">Returned to {c.owner}. Decisions open again when they resubmit.</p>}
 

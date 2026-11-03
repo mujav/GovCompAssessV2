@@ -34,7 +34,6 @@ import {
   type PlanEntry,
   type ReviewRecord,
   type RiskItem,
-  type Tier,
 } from "./model";
 import { DEFAULT_PLATFORM, PLATFORM_KEY, sectorFrom, type AnnexList, type PlatformState } from "./platform";
 
@@ -306,23 +305,6 @@ export function cycleSummary(controls: Control[], cycle: CycleState, closing = S
   };
 }
 
-/** Predicted compliance rate: accepted requirements plus the share of open ones the evidence already supports. */
-export function predictedRate(controls: Control[]) {
-  let total = 0;
-  let likely = 0;
-  for (const c of controls) {
-    if (!c.applicable) continue;
-    for (const r of c.reqs) {
-      if (r.status === "na") continue;
-      total++;
-      if (r.stage === "accepted") likely++;
-      else if (r.evidence.valid >= r.evidence.expected && !r.mandatoryFail) likely += 0.85;
-      else if (r.evidence.valid > 0) likely += 0.4;
-    }
-  }
-  return total ? Math.round((likely / total) * 100) : 0;
-}
-
 /* ---------- The workspace in the URL ---------- */
 
 const nowIso = () => new Date().toISOString();
@@ -417,17 +399,16 @@ export function useCycle() {
       });
     },
 
-    accept(code: string, tier: Tier) {
+    accept(code: string) {
       const c = control(code);
       if (!c) return;
-      move(c.reqs.map((r) => r.code), "acc", `${me} accepted control ${code} · ${tier}`);
+      move(c.reqs.map((r) => r.code), "acc", `${me} accepted control ${code}`);
       setCycle((d) => {
         const r = (d.reviews[code] ??= { decisions: {}, returns: 0 });
         r.acceptedAt = day();
-        r.tier = tier;
         d.activity[code] = nowIso();
       });
-      audit("Review", `Accepted control ${code}`, { after: `${c.met}/${c.total} met · ${tier}` });
+      audit("Review", `Accepted control ${code}`, { after: `${c.met}/${c.total} met` });
     },
 
     /** Sends the requirements ruled not met back to the Control Owner with a note for each. */

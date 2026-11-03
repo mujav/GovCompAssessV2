@@ -46,11 +46,8 @@ const qiyasDraft: FrameworkVersion = {
     rows: 350,
     uploadedBy: "Mohammed K.",
     hash: "4b1e…90c2",
-    valid: 348,
-    warnings: [
-      { row: 117, field: "weight", message: "Weight missing for 3.6.2-1" },
-      { row: 284, field: "weight", message: "Weight missing for 5.14.1-3" },
-    ],
+    valid: 350,
+    warnings: [],
     changed: "37 wording · 31 new",
     errors: 0,
   },

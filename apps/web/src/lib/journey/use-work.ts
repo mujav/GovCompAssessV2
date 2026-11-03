@@ -93,6 +93,13 @@ function withTailoring(reqs: ClientRequirement[], cycle: unknown, assignments: R
   return [...reqs, ...extra];
 }
 
+/** Drops requirements of controls the Index Owner marked not applicable in this workspace. */
+function withoutNa<R extends { code: string }>(reqs: R[], cycle: unknown): R[] {
+  const plan = (cycle as { plan?: Record<string, { na?: unknown }> } | undefined)?.plan;
+  if (!plan) return reqs;
+  return reqs.filter((r) => !plan[r.code.split("-")[0]]?.na);
+}
+
 /** Files uploaded on each requirement count as received evidence everywhere the requirement is shown, and move its stage on. */
 function withUploads(reqs: ClientRequirement[], clientId: string, fwId: string, screens: Record<string, unknown>): WorkRequirement[] {
   return reqs.map((r) => {
@@ -221,7 +228,9 @@ export function useWorkplacesWork(views: WorkplaceView[]) {
         const fwId = v.framework?.id ?? v.workplace.frameworkId;
         const workspace = usesWorkspaceRecords(fwId, startsFresh(v.client, v.workplace, state.added));
         const people = users.filter((u) => u.role === "control" && (!u.entityId || u.entityId === v.workplace.entityId)).map(asPerson);
-        const reqs = withUploads(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, assignScope(v.client, fwId)), v.client.id, fwId, state.screens);
+        const scope = assignScope(v.client, fwId);
+        const cycle = state.screens[`cycle.${v.client.id}`];
+        const reqs = withoutNa(withUploads(withTailoring(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), cycle, ws.state.assignments, scope, workspace), v.client.id, fwId, state.screens), cycle);
         const overlay = (state.screens[overlayKey(v.client.id, fwId)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY;
         return { ...v, reqs, overlay, counts: stageCounts(reqs, overlay) };
       }),

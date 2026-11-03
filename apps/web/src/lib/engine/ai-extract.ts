@@ -308,5 +308,5 @@ export function aiToExtraction(
   if (outline.authority.trim()) meta.authority = outline.authority.trim();
   if (outline.version.trim()) meta.version = outline.version.trim();
 
-  return { files: ctx.files, sheets: ctx.sheets ?? [], records: ctx.records, meta, levels, nodes, orphans: [], seq: nodes.length, weighting: nodes.some((n) => n.weight) ? "weighted" : "none" };
+  return { files: ctx.files, sheets: ctx.sheets ?? [], records: ctx.records, meta, levels, nodes, orphans: [], seq: nodes.length, weighting: "none" };
 }

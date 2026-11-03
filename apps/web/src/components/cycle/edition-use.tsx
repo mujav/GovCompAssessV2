@@ -13,7 +13,7 @@ import { Row, Table } from "./ui";
 // edition. Sits above the editions list of the library.
 
 const STEPS: [string, string, string][] = [
-  ["1 · Platform Admin · here", "Maintain and publish the edition", "Levels, controls, requirements, required evidence, scoring scheme and applicability rules (all entities or annex lists A/B/C)."],
+  ["1 · Platform Admin · here", "Maintain and publish the edition", "Levels, controls, requirements, required evidence and applicability rules (all entities or annex lists A/B/C)."],
   ["2 · On workspace creation", "Copied into the workspace", "Applicability rules run against the entity's sector and annex list, pre-flagging not-applicable controls and requirements."],
   ["3 · Index Owner · Standard", "Tailor for the entity", "Confirm or add exemptions with proof, add special instructions. Library changes reach workspaces only as a new edition the Index Owner accepts."],
 ];
@@ -23,14 +23,14 @@ export function EditionUse() {
   const { state: journey } = useJourney();
   const { user } = useAuth();
   const views = useWorkplaces();
-  const cols = "1.8fr 1.4fr 1fr 1.8fr 0.8fr 0.9fr";
+  const cols = "1.8fr 1.6fr 2fr 0.8fr 0.9fr";
 
   const exportExcel = async (id: string) => {
     const pkg = state.frameworks.find((f) => f.id === id)?.live;
     if (!pkg) return;
     const XLSX = await import("xlsx");
     const levels = Object.fromEntries(pkg.levels.map((l) => [l.id, l.en]));
-    const rows = (pkg.requirements ?? []).map((r) => ({ Code: r.code, Level: levels[r.level] ?? r.level, Parent: r.parent ?? "", Title: r.title, Text: r.text ?? "", Weight: r.weight ?? "", "Required evidence": r.evidence ?? "" }));
+    const rows = (pkg.requirements ?? []).map((r) => ({ Code: r.code, Level: levels[r.level] ?? r.level, Parent: r.parent ?? "", Title: r.title, Text: r.text ?? "", "Required evidence": r.evidence ?? "" }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Standard");
     XLSX.writeFile(wb, `${pkg.name.replace(/[^\w]+/g, "-")}-${pkg.version}.xlsx`);
@@ -50,7 +50,7 @@ export function EditionUse() {
       </section>
       <Panel className="flex flex-col py-[18px]">
         <PanelHead className="px-[22px] pb-2" title="Editions" />
-        <Table label="Editions" min={900} cols={cols} head={["Index · edition", "Structure", "Scoring", "Used by", "Status", ""]}>
+        <Table label="Editions" min={900} cols={cols} head={["Index · edition", "Structure", "Used by", "Status", ""]}>
           {state.frameworks
             .filter((f) => f.live)
             .map((f) => {
@@ -72,7 +72,6 @@ export function EditionUse() {
                     Levels: {v.levels.map((l) => l.en).join(" › ")}
                     <span className="block text-xs text-j-muted">{v.requirements?.length ?? 0} nodes</span>
                   </span>
-                  <span className="text-[13px]">Scoring: {v.weighting === "none" ? "requirement count – tiers" : "weighted"}</span>
                   <span className="text-[13px]">
                     {using.length ? using.map((w) => `${w.entity.name} ${w.workplace.year}`).join(", ") : "No workspace yet"}
                     {behind.length > 0 && <span className="block text-xs text-[#8A4B00]">{behind.length} on an earlier edition – their Index Owner decides whether to adopt it</span>}

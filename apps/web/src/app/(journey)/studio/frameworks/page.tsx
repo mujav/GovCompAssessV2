@@ -181,8 +181,7 @@ export default function FrameworkBuilderPage() {
                     </label>
                   )}
                   <div className="text-xs text-muted">
-                    Issuing authority {fw.authority} · effective {fw.effective} · {fw.scoringNote} ·{" "}
-                    {fw.weighting === "none" ? "no weights (requirements count equally)" : "weighted requirements"}
+                    Issuing authority {fw.authority} · effective {fw.effective}
                   </div>
                 </div>
                 {pkg.live && pkg.usedByCycles > 0 && (

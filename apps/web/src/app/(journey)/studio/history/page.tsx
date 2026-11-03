@@ -17,7 +17,7 @@ const S: Record<CrStatus, [string, string, string]> = {
 // Review & acceptance was removed; its past changes stay in the log without an editor.
 const EDITOR: Record<ConfigKind, string | undefined> = {
   framework: "/studio/frameworks",
-  scoring: "/studio/scoring",
+  scoring: undefined,
   acceptance: undefined,
   rule: "/studio/automation",
 };

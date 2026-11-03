@@ -72,6 +72,6 @@ describe("command center metrics", () => {
     const codes = atRisk(ctx).slice(0, 2).map((r) => r.code);
     const d = composeDraft("evidence-request", codes, ctx);
     for (const c of codes) expect(d.body).toContain(c);
-    expect(executiveUpdate(ctx)).toContain(`${readiness(ctx).projected.pct}%`);
+    expect(executiveUpdate(ctx)).toContain("applicable requirements are accepted");
   });
 });
