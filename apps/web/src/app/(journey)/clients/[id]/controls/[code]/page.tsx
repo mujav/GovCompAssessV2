@@ -7,6 +7,7 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { ClosedBanner, fmtWhen, Kpi, StageBadge, useToast } from "@/components/cycle/ui";
 import { Comments } from "@/components/cycle/comments";
+import { FeedbackNote } from "@/components/cycle/ai-feedback";
 import { cx } from "@/components/ui";
 import { useAuth } from "@/lib/auth/store";
 import { clientHref } from "@/lib/journey/portfolio";
@@ -56,7 +57,7 @@ export default function ControlResponsePage() {
   const response = cycle.responses[c.code];
   const instruction = cycle.plan[c.code]?.instruction;
   const reqNotes = live.filter((r) => cycle.notes[r.code] || cycle.reqInstructions[r.code]);
-  const needs = live.filter((r) => r.stage === "returned" || cycle.notes[r.code] || (r.stage !== "accepted" && specs.filter((s) => s.req === r.code && !s.govVerified).some((s) => !filesFor(s).length)));
+  const needs = live.filter((r) => r.stage === "returned" || cycle.notes[r.code] || (r.stage !== "accepted" && ev.stateOf(r.code).feedback) || (r.stage !== "accepted" && specs.filter((s) => s.req === r.code && !s.govVerified).some((s) => !filesFor(s).length)));
   const shown = filter === "action" ? needs : live;
   const evAccepted = live.filter((r) => r.stage === "accepted").reduce((a, r) => a + specs.filter((s) => s.req === r.code).length, 0);
   const editable = !closed && c.stage !== "accepted" && c.stage !== "submitted" && c.stage !== "review";
@@ -227,6 +228,7 @@ export default function ControlResponsePage() {
                         {note}
                       </span>
                     )}
+                    {ev.stateOf(r.code).feedback && <FeedbackNote feedback={ev.stateOf(r.code).feedback!} />}
                     {r.stage !== "accepted" && (
                       <span className="flex flex-wrap items-center gap-1.5 text-xs">
                         Status

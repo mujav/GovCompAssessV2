@@ -7,7 +7,7 @@ import { useJourney, useScreenState } from "./store";
 import { usePlatform } from "@/lib/cycle/use-cycle";
 import { maskPersonal } from "@/lib/cycle/platform";
 
-/** Evidence uploaded on one requirement, read in the browser and assessed by the AI assessor as soon as it is in. */
+/** Evidence uploaded on one requirement, read in the browser. The Index Owner runs the AI assessor on demand. */
 export function useRequirementEvidence(clientId: string, frameworkId: string, r: ClientRequirement | undefined) {
   const { log } = useJourney();
   const [ev, setEv] = useScreenState<EvidenceState>(evidenceKey(clientId, frameworkId, r?.code ?? "-"), EMPTY_EVIDENCE);
@@ -47,10 +47,18 @@ export function useRequirementEvidence(clientId: string, frameworkId: string, r:
     const read = await Promise.all(list.map(readEvidenceFile));
     setEv((d) => void d.files.push(...read));
     log(`Uploaded ${read.length} evidence file${read.length > 1 ? "s" : ""} to ${r.code}`);
-    await assess([...ev.files, ...read]);
+    setBusy(null);
   };
 
   const remove = (id: string) => setEv((d) => void (d.files = d.files.filter((f) => f.id !== id)));
 
-  return { ev, readable, stale, busy, upload, assess, remove };
+  /** Shares the AI feedback with the Control Owner, as generated or edited by the Index Owner. */
+  const share = (text: string, edited: boolean, by: string) => {
+    if (!r || !ev.run) return;
+    const runId = ev.run.runId;
+    setEv((d) => void (d.feedback = { text, by, edited, runId, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) }));
+    log(`${by} shared AI feedback on ${r.code} with the Control Owner${edited ? " after editing it" : ""}`);
+  };
+
+  return { ev, readable, stale, busy, upload, assess, remove, share };
 }

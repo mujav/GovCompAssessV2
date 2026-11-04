@@ -6,11 +6,12 @@ import { useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
+import { FeedbackNote, ShareFeedback } from "@/components/cycle/ai-feedback";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { addDays, shortDate, type WsRequirement } from "@/lib/workspace/data";
 import type { CriterionVerdict, RequirementRecommendation } from "@/lib/assessor/assessor";
-import { GENERIC_CRITERIA, criteriaFor, libraryKey, type LibraryUpload } from "@/lib/journey/evidence";
+import { GENERIC_CRITERIA, criteriaFor, feedbackFrom, libraryKey, type LibraryUpload } from "@/lib/journey/evidence";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 import { nextClarificationId, useClarifications } from "@/lib/journey/use-clarifications";
@@ -65,7 +66,7 @@ export default function RequirementWorkspacePage() {
   const [tab, setTab] = useState<Tab>("ev");
   const [s, set] = useScreenState<ReqScreen>(`req.${client.id}.${code}`, { dec: 0, requests: [], remProposed: false, claApplied: false, activity: [] });
   const c = (p: string) => clientHref(client.id, p);
-  const { ev, readable, stale, busy, upload, assess, remove } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
+  const { ev, readable, stale, busy, upload, assess, remove, share } = useRequirementEvidence(client.id, framework?.id ?? "none", r);
   const [clar, setClar] = useClarifications(client.id, framework, workspace, reqs, ws);
   const { state: journey } = useJourney();
   const [question, setQuestion] = useState("");
@@ -98,6 +99,8 @@ export default function RequirementWorkspacePage() {
   const gaps = run ? run.criteria.filter((x) => x.verdict !== "satisfied").length : marks.filter((m) => m !== "met").length;
   const confidence = run ? Math.round(run.confidence * 100) : 98 - gaps * 6;
   const criteria = criteriaFor(r);
+  // The AI assessor is the Index Owner's, on demand, once the Control Owner has submitted.
+  const canAssess = manages && (stage === "rev" || stage === "acc");
   const fileName = (id: string) => ev.files.find((f) => f.id === id)?.name ?? id;
   const related = clar.list.filter((x) => x.affects.includes(r.code));
   // Files mapped to this requirement in the evidence library.
@@ -142,7 +145,7 @@ export default function RequirementWorkspacePage() {
   const openRequests = requests.filter((h) => !h.done).length;
   const tabs: [Tab, string, number?][] = [
     ["req", "Requirement"],
-    ["ev", "Evidence & assessment", evidence.length + ev.files.length + fromLibrary.length || undefined],
+    ["ev", manages ? "Evidence & assessment" : "Evidence", evidence.length + ev.files.length + fromLibrary.length || undefined],
     ["fu", "Follow-ups", openRequests + (gaps && !s.remProposed ? 1 : 0) + openCla || undefined],
     ["act", "Activity"],
   ];
@@ -150,9 +153,8 @@ export default function RequirementWorkspacePage() {
   const nextAction = stage === "rev" ? (manages ? "Review now" : "Waiting for review") : stage === "acc" ? "Accepted" : stage === "start" ? "Start" : "Continue";
   const activity = [
     ...s.activity.map((a) => ({ av: initials(a.who ?? me), tone: "me", what: a.what, who: a.who ?? me, when: `Today, ${a.when}` })),
-    run
-      ? { av: "AI", tone: "ai", what: `AI assessor: ${run.recommendation} · ${confidence}% · ${run.fileIds.length} files`, who: "Platform", when: run.at }
-      : { av: "AI", tone: "ai", what: `AI check: ${gaps ? "not ready to accept" : "ready to accept"} · ${confidence}%`, who: "Platform", when: "Today, 09:40" },
+    ...(manages && run ? [{ av: "AI", tone: "ai", what: `AI assessor: ${run.recommendation} · ${confidence}% · ${run.fileIds.length} files`, who: "Platform", when: run.at }] : []),
+    ...(ev.feedback ? [{ av: initials(ev.feedback.by), tone: "me", what: `Shared AI feedback with ${owner}${ev.feedback.edited ? " (edited)" : ""}`, who: ev.feedback.by, when: ev.feedback.at }] : []),
     ...(r.evidence.valid ? [{ av: initials(owner), tone: "cl", what: `Uploaded ${r.evidence.valid} evidence files`, who: owner, when: "Yesterday" }] : []),
     ...(r.owner ? [{ av: initials(owner), tone: "cl", what: "Drafted response", who: owner, when: "9 d ago" }] : []),
     { av: "IO", tone: "me", what: `Assigned to ${r.owner || r.department || "nobody yet"}`, who: "Index Owner", when: "12 d ago" },
@@ -333,7 +335,7 @@ export default function RequirementWorkspacePage() {
             <PanelHead
               title="Upload evidence"
               aside={
-                run && !stale ? (
+                manages && run && !stale ? (
                   <Pill tone={RECO_TONE[run.recommendation]}>
                     AI: {run.recommendation} · {confidence}%
                   </Pill>
@@ -358,8 +360,8 @@ export default function RequirementWorkspacePage() {
               }}
               className={cx("flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-5 py-6 text-center text-sm", drag ? "border-cx bg-cx-tint" : "border-j-line bg-j-canvas")}
             >
-              <b>{busy === "reading" ? "Reading files…" : busy === "assessing" ? "AI assessor is reviewing the evidence…" : "Drop evidence files here"}</b>
-              <span className="text-[13px] text-j-muted">PDF, Word, Excel, CSV or text. The AI assessor checks them against each criterion as soon as they are in.</span>
+              <b>{busy === "reading" ? "Reading files…" : "Drop evidence files here"}</b>
+              <span className="text-[13px] text-j-muted">PDF, Word, Excel, CSV or text.{manages ? "" : " Your Index Owner reviews them after you submit."}</span>
               <input
                 ref={fileInput}
                 type="file"
@@ -387,7 +389,7 @@ export default function RequirementWorkspacePage() {
                     <span className="font-mono">{f.id}</span> · {f.uploadedAt} · {f.error ?? `${f.pages.length} pages read${f.truncated ? " (long file: first part assessed)" : ""}`}
                   </span>
                 </span>
-                {!f.error && run && !stale && run.fileIds.includes(f.id) && <Pill tone="ai">Assessed</Pill>}
+                {manages && !f.error && run && !stale && run.fileIds.includes(f.id) && <Pill tone="ai">Assessed</Pill>}
                 <JButton size="sm" variant="ghost" className="text-j-bad" onClick={() => remove(f.id)} aria-label={`Remove ${f.name}`}>
                   Remove
                 </JButton>
@@ -398,19 +400,24 @@ export default function RequirementWorkspacePage() {
                 {ev.error}
               </p>
             )}
-            {readable.length > 0 && (stale || !run || ev.error) && (
-              <JButton size="sm" className="self-start" disabled={!!busy} onClick={() => void assess()}>
-                <Icon name="ai" size={14} />
-                {busy === "assessing" ? "Assessing…" : run ? "Re-assess with the current files" : "Assess with AI"}
-              </JButton>
-            )}
-            {run && !stale && (
-              <JButton size="sm" variant="outline" className="self-start" onClick={() => setTab("ev")}>
-                See the AI assessment
-              </JButton>
+            {manages && readable.length > 0 && (
+              <span className="flex flex-wrap items-center gap-2">
+                <JButton size="sm" className="self-start" disabled={!!busy || !canAssess} title={canAssess ? undefined : "Opens once the Control Owner submits the evidence"} onClick={() => void assess()}>
+                  <Icon name="ai" size={14} />
+                  {busy === "assessing" ? "Assessing…" : run && !stale ? "Assess again with AI" : run ? "Re-assess with the current files" : "Assess with AI"}
+                </JButton>
+                <span className="text-xs text-j-muted">{canAssess ? "On demand. Only you see the result until you share it." : "Available once the Control Owner submits."}</span>
+              </span>
             )}
           </Panel>
-            {run ? (
+            {!manages ? (
+              ev.feedback && (
+                <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
+                  <PanelHead title="Feedback on your evidence" />
+                  <FeedbackNote feedback={ev.feedback} />
+                </Panel>
+              )
+            ) : run ? (
               <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
                 <PanelHead
                   title="AI assessment"
@@ -457,12 +464,14 @@ export default function RequirementWorkspacePage() {
                     </div>
                   );
                 })}
+                <ShareFeedback key={run.runId} draft={feedbackFrom(run, criteria)} shared={ev.feedback?.runId === run.runId ? ev.feedback : undefined} owner={owner} disabled={stale} onShare={(text, edited) => share(text, edited, me)} />
+                {ev.feedback && ev.feedback.runId !== run.runId && <span className="text-xs text-j-muted">Earlier feedback was shared {ev.feedback.at}; share again to send this assessment.</span>}
               </Panel>
             ) : r.status === "nas" && !r.evidence.valid ? (
               <Panel className="flex min-w-0 flex-col items-start gap-3 p-[22px]">
                 <PanelHead title="AI assessment" />
                 <p className="m-0 text-sm text-j-ink-2">
-                  {busy === "assessing" ? "The AI assessor is reviewing the uploaded evidence…" : `No assessment yet. Upload evidence and the AI assessor checks it against ${criteria.length} criteria.`}
+                  {busy === "assessing" ? "The AI assessor is reviewing the uploaded evidence…" : `No assessment yet. Once the Control Owner submits evidence, assess it with AI against ${criteria.length} criteria.`}
                 </p>
                 <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[13px] text-j-ink-3">
                   {criteria.map((k) => (
@@ -471,14 +480,11 @@ export default function RequirementWorkspacePage() {
                     </li>
                   ))}
                 </ul>
-                <JButton size="sm" variant="primary" onClick={() => setTab("ev")}>
-                  Upload evidence
-                </JButton>
               </Panel>
             ) : (
               <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
-                <PanelHead title="AI check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"} · {confidence}%</Pill>} />
-                <p className="m-0 text-xs text-j-muted">AI recommends; you decide. Nothing changes until you record a decision.</p>
+                <PanelHead title="Register check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"}</Pill>} />
+                <p className="m-0 text-xs text-j-muted">From the evidence register. Assess the uploaded files with AI for a full check; nothing changes until you record a decision.</p>
                 {CRITERIA.map((t, i) => (
                   <div key={t} className="flex items-start gap-3 border-b border-j-line-soft py-3 last:border-0">
                     <span className="pt-0.5 font-mono text-xs text-j-muted">C{i + 1}</span>
@@ -809,8 +815,8 @@ export default function RequirementWorkspacePage() {
                 <h2 className="m-0 text-base">Review path</h2>
                 {[
                   [initials(owner), "Control Owner", owner, stage === "start" || stage === "prog" ? "Now" : "Done", "gray", stage === "start" || stage === "prog"],
-                  ["AI", "AI check", "Platform", run || r.evidence.valid ? `${confidence}%` : "—", "ai", false],
                   ["IO", "Index Owner", "Review", stage === "rev" ? "Now" : stage === "acc" ? "Done" : "Next", "cx", stage === "rev"],
+                  ...(manages ? [["AI", "AI assessment", "On demand", run ? `${confidence}%` : "—", "ai", false]] : []),
                 ].map(([av, l, who, st, tone, now]) => (
                   <div key={l as string} className={cx("flex items-center gap-2.5 rounded-xl border px-2.5 py-2 text-sm", now ? "border-cx" : "border-transparent")}>
                     <Avatar initials={av as string} size={28} bg={tone === "ai" ? "#EEEDFD" : tone === "cx" ? "#EAF1FA" : "#F5F7F6"} fg={tone === "ai" ? "#4F46E5" : tone === "cx" ? "#1E4E8C" : "#47534D"} />

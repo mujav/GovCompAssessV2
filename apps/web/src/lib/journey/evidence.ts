@@ -28,6 +28,29 @@ export interface EvidenceState {
   /** The latest assessment and the files it looked at. */
   run?: AssessRun & { at: string; fileIds: string[] };
   error?: string;
+  /** AI feedback the Index Owner shared with the Control Owner, as generated or after editing. */
+  feedback?: SharedFeedback;
+}
+
+export interface SharedFeedback {
+  text: string;
+  by: string;
+  at: string;
+  edited: boolean;
+  runId: string;
+}
+
+/** Plain-language feedback drafted from an AI run, for the Index Owner to share as is or edit. */
+export function feedbackFrom(run: Pick<AssessRun, "summary" | "criteria">, criteria: AssessCriterion[] = []): string {
+  const gaps = run.criteria.filter((x) => x.verdict !== "satisfied");
+  const name = (id: string) => criteria.find((k) => k.id === id)?.text ?? id;
+  return [
+    run.summary,
+    ...(gaps.length ? ["", "What to fix:", ...gaps.map((x) => `• ${name(x.criterion_id)}: ${x.gap || x.rationale}`)] : ["", "The evidence covers every criterion."]),
+  ]
+    .filter((l, i) => l || i > 0)
+    .join("\n")
+    .trim();
 }
 
 export const EMPTY_EVIDENCE: EvidenceState = { files: [] };

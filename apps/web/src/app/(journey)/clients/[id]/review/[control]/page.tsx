@@ -7,11 +7,13 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Field, inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { AiBox, ClosedBanner, fmtWhen, LevelPill, Modal, TierPill, useToast } from "@/components/cycle/ui";
 import { Comments } from "@/components/cycle/comments";
+import { ShareFeedback } from "@/components/cycle/ai-feedback";
 import { cx } from "@/components/ui";
 import { clientHref } from "@/lib/journey/portfolio";
 import { findingsOf, reqLabel, responseGaps, verdictOf, type AiVerdict } from "@/lib/cycle/model";
 import { defaultSpecs, useCycle } from "@/lib/cycle/use-cycle";
 import { useControlEvidence } from "@/lib/cycle/use-control-evidence";
+import { criteriaFor, feedbackFrom, type EvidenceFile, type EvidenceState } from "@/lib/journey/evidence";
 
 const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
@@ -62,6 +64,21 @@ export default function ReviewConsolePage() {
   // Decisions open once the owner submits and close when the control is accepted or back with its owner.
   const decidable = !closed && (c.stage === "submitted" || c.stage === "review");
   const viewing = files.find((f) => f.id === fileSel) ?? files[0];
+  // The AI assessor runs on demand, per requirement, once the owner has submitted the evidence.
+  const assessable = !closed && (c.stage === "submitted" || c.stage === "review" || c.stage === "accepted");
+  const aiFor = (code: string) => (
+    <ReqAi
+      files={ev.filesOf(code).filter((f) => !f.error && !ev.replacedOf(code).has(f.id))}
+      state={ev.stateOf(code)}
+      owner={c.owner}
+      enabled={assessable && ai.agents.review}
+      busy={ev.busy === `assess:${code}`}
+      blocked={!!ev.busy}
+      draft={(run) => feedbackFrom(run, criteriaFor(fullReq(code)))}
+      onAssess={() => void ev.assess(fullReq(code)).then((ok) => ok && say(`AI assessed ${reqLabel(code)}`))}
+      onShare={(text, edited) => (ev.share(code, text, edited), say(`Feedback on ${reqLabel(code)} shared with ${c.owner}`))}
+    />
+  );
   const fullReq = (code: string) => allReqs.find((r) => r.code === code)!;
 
   const markAll = () => setCycle((d) => void clean.forEach((r) => ((d.reviews[c.code] ??= { decisions: {}, returns: 0 }).decisions[r.code] = "met")));
@@ -140,11 +157,14 @@ export default function ReviewConsolePage() {
                     <b>
                       {reqLabel(r.code)} · {r.title}
                     </b>
-                    <Pill tone={VERDICT_TONE[v]}>AI: {v}</Pill>
+                    <Pill tone={VERDICT_TONE[v]}>
+                      {runs[r.code] ? "AI" : "Register"}: {v}
+                    </Pill>
                   </span>
                   <span className="text-xs text-j-ink-3">
                     {fs.length ? fs.map((f) => `${cycle.fileSpec[f.id] ?? f.id} ${f.name}`).join(" · ") : `${r.evidence.valid} of ${r.evidence.expected} evidence items in the register`}
                   </span>
+                  {aiFor(r.code)}
                   <Decide value={d} disabled={!decidable} onChange={(v) => cy.decide(c.code, r.code, v)} />
                 </div>
               );
@@ -152,7 +172,7 @@ export default function ReviewConsolePage() {
             {clean.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 py-3 text-sm">
                 <span className="flex-auto">
-                  <b>{clean.map((r) => reqLabel(r.code)).join(", ")}</b> <Pill tone="ok">AI: satisfied</Pill>
+                  <b>{clean.map((r) => reqLabel(r.code)).join(", ")}</b> <Pill tone="ok">Satisfied</Pill>
                   <br />
                   <span className="text-xs text-j-ink-3">
                     {clean.length} requirements · {clean.reduce((a, r) => a + r.evidence.valid, 0)} evidence items
@@ -161,6 +181,21 @@ export default function ReviewConsolePage() {
                 <JButton size="sm" variant="outline" disabled={!decidable} onClick={markAll}>
                   Mark all {clean.length} met
                 </JButton>
+                {clean
+                  .filter((r) => ev.filesOf(r.code).some((f) => !f.error))
+                  .map((r) => (
+                    <div key={r.code} className="flex w-full flex-col gap-1.5 border-t border-j-line-soft pt-2">
+                      <span className="text-xs text-j-ink-3">
+                        <b className="text-j-ink">{reqLabel(r.code)}</b> ·{" "}
+                        {ev
+                          .filesOf(r.code)
+                          .filter((f) => !f.error)
+                          .map((f) => `${cycle.fileSpec[f.id] ?? f.id} ${f.name}`)
+                          .join(" · ")}
+                      </span>
+                      {aiFor(r.code)}
+                    </div>
+                  ))}
               </div>
             )}
           </Panel>
@@ -378,5 +413,32 @@ function ReturnDialog({ open, onClose, reqs, owner, onSend }: { open: boolean; o
         <textarea rows={2} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Two items left. The signed charter is the blocker – can you get it by Monday?" className="rounded-xl border border-j-line p-3 font-sans text-sm font-normal" />
       </Field>
     </Modal>
+  );
+}
+
+/** On-demand AI assessment under a requirement's attachments, and the feedback the Index Owner can share. */
+function ReqAi({ files, state, owner, enabled, busy, blocked, draft, onAssess, onShare }: { files: EvidenceFile[]; state: EvidenceState; owner: string; enabled: boolean; busy: boolean; blocked: boolean; draft: (run: NonNullable<EvidenceState["run"]>) => string; onAssess: () => void; onShare: (text: string, edited: boolean) => void }) {
+  if (!files.length) return null;
+  const run = state.run;
+  const stale = !!run && (run.fileIds.length !== files.length || files.some((f) => !run.fileIds.includes(f.id)));
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="flex flex-wrap items-center gap-2">
+        <JButton size="sm" variant="outline" disabled={!enabled || blocked} title={enabled ? undefined : "Opens once the Control Owner submits the evidence"} onClick={onAssess}>
+          {busy ? "Assessing…" : run && !stale ? "Assess again with AI" : run ? "Re-assess with the current files" : "Assess with AI"}
+        </JButton>
+        {run && (
+          <span className="text-xs text-j-ai">
+            {run.recommendation} · {Math.round(run.confidence * 100)}% · {run.at}
+            {stale && <b className="text-[#8A4B00]"> · files changed since</b>}
+          </span>
+        )}
+      </span>
+      {run && (
+        <AiBox title="AI assessment" only="Index Owner only">
+          <ShareFeedback key={run.runId} draft={draft(run)} shared={state.feedback?.runId === run.runId ? state.feedback : undefined} owner={owner} disabled={stale} onShare={onShare} />
+        </AiBox>
+      )}
+    </div>
   );
 }

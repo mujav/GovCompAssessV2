@@ -70,7 +70,19 @@ export function useControlEvidence(clientId: string, fwId: string, workspace: st
     }
   };
 
+  /** Shares a requirement's AI feedback with its Control Owner, as generated or edited. */
+  const share = (code: string, text: string, edited: boolean) => {
+    const run = stateOf(code).run;
+    if (!run) return;
+    update((s) => {
+      const st = (s.screens[key(code)] as EvidenceState | undefined) ?? { files: [] };
+      st.feedback = { text, by: user, edited, runId: run.runId, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) };
+      s.screens[key(code)] = st;
+    });
+    recordAudit({ user, type: "Review", action: `Shared AI feedback on ${code} with the Control Owner${edited ? " (edited)" : " (as generated)"}`, workspace, after: text.slice(0, 120) });
+  };
+
   const replacedOf = (code: string) => new Set(Object.keys((stateOf(code) as EvidenceState & { replaced?: Record<string, string> }).replaced ?? {}));
 
-  return { filesOf, stateOf, previous, upload, assess, replacedOf, busy, error };
+  return { filesOf, stateOf, previous, upload, assess, share, replacedOf, busy, error };
 }

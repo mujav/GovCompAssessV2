@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkOutput } from "@/lib/assessor/assessor";
-import { GENERIC_CRITERIA, assessInput, criteriaFor, type EvidenceFile } from "./evidence";
+import { GENERIC_CRITERIA, assessInput, criteriaFor, feedbackFrom, type EvidenceFile } from "./evidence";
 import type { ClientRequirement } from "./frameworks";
 
 const req = (extra: Partial<ClientRequirement>): ClientRequirement => ({
@@ -64,5 +64,14 @@ describe("requirement evidence for the AI assessor", () => {
     expect(out.recommendation).toBe("Partial");
     expect(out.criteria.map((c) => c.citations.map((q) => q.resolved))).toEqual([[true], [false]]);
     expect(out.checks).toMatchObject({ citationsResolved: 1, citationsTotal: 2 });
+  });
+
+  it("drafts feedback for the Control Owner from the gaps the AI found", () => {
+    const sat = { criterion_id: "C1", verdict: "satisfied", rationale: "Approved.", gap: "", gap_kind: "none", citations: [] };
+    const gap = { criterion_id: "C2", verdict: "partial", rationale: "Only one unit.", gap: "Show it in use in every unit", gap_kind: "missing", citations: [] };
+    const criteria = [{ id: "C1", text: "Approved", mandatory: true }, { id: "C2", text: "In place across the entity", mandatory: false }];
+    const text = feedbackFrom({ summary: "Partly evidenced.", criteria: [sat, gap] } as never, criteria as never);
+    expect(text).toBe("Partly evidenced.\n\nWhat to fix:\n• In place across the entity: Show it in use in every unit");
+    expect(feedbackFrom({ summary: "", criteria: [sat] } as never)).toBe("The evidence covers every criterion.");
   });
 });
