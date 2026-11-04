@@ -238,6 +238,12 @@ export function AppShell({
             <input type="search" placeholder={search} className="min-w-0 flex-auto border-0 bg-transparent text-sm text-j-ink outline-none" />
           </label>
           <span className="flex-auto" />
+          {current && user.role === "admin" && (
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#FFF4E5] px-3 text-xs font-semibold text-[#8A4B00]">
+              <Icon name="key" size={14} />
+              Index Owner view · as Platform Admin
+            </span>
+          )}
           {!outside && headerExtra}
           <LanguageToggle />
         </header>

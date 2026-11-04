@@ -1,19 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AppShell, JMain } from "@/components/journey/shell";
-import { inputClass, JButton, JLink, Panel, PanelHead, Pill } from "@/components/journey/ui";
-import { Row, Table, useToast } from "@/components/cycle/ui";
+import { inputClass, JLink, Panel, PanelHead, Pill } from "@/components/journey/ui";
+import { Row, Table } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
-import { ROLES } from "@/lib/auth/accounts";
-import { useAuth } from "@/lib/auth/store";
-import { recordAudit } from "@/lib/audit";
 import { shortName } from "@/lib/journey/frameworks";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useJourney } from "@/lib/journey/store";
 import { useWorkplacesWork } from "@/lib/journey/use-work";
 import { useWorkplaces } from "@/lib/journey/use-workplaces";
-import { workplaceLabel } from "@/lib/journey/workplaces";
 import { cycleKey, type CycleState } from "@/lib/cycle/use-cycle";
 
 const ALL = "all";
@@ -23,15 +20,10 @@ const ALL = "all";
 export default function AdminWorkspacesPage() {
   const views = useWorkplaces();
   const work = useWorkplacesWork(views);
-  const { users, user } = useAuth();
-  const { state, saveWorkplace } = useJourney();
-  const { say, toast } = useToast();
+  const { state } = useJourney();
   const [entity, setEntity] = useState(ALL);
   const [index, setIndex] = useState(ALL);
-  const [grantUser, setGrantUser] = useState("");
-  const [grantWs, setGrantWs] = useState("");
   const pending = (state.workplaceRequests ?? []).filter((r) => r.status === "pending");
-  const owners = users.filter((u) => u.role === "owner" && u.active);
 
   const rows = useMemo(
     () =>
@@ -49,17 +41,7 @@ export default function AdminWorkspacesPage() {
   const indices = [...new Set(rows.map((r) => r.index))].sort();
   const shown = rows.filter((r) => (entity === ALL || r.w.entity.id === entity) && (index === ALL || r.index === index));
   const entities = [...new Map(rows.map((r) => [r.w.entity.id, r.w.entity.name])).entries()];
-  const cols = "1.6fr 1fr 1.8fr 0.9fr 0.8fr";
-
-  const grant = () => {
-    const v = views.find((x) => x.client.id === grantWs);
-    const u = users.find((x) => x.id === grantUser);
-    if (!v || !u) return;
-    saveWorkplace({ ...v.workplace, ownerIds: [...new Set([...v.workplace.ownerIds, u.id])] });
-    recordAudit({ user: user?.name ?? "", role: "Platform Admin", type: "Grant", action: `Granted Index Owner ${u.name}`, workspace: `${v.entity.name} · ${workplaceLabel(v.framework?.name ?? "", v.workplace.year)}`, after: "Index Owner" });
-    say(`${u.name} is now Index Owner of ${v.entity.name} · ${workplaceLabel(v.framework?.name ?? "", v.workplace.year)}`);
-    setGrantUser("");
-  };
+  const cols = "1.6fr 1fr 1.8fr 0.9fr 1.1fr";
 
   return (
     <AppShell search="Search workspaces">
@@ -114,69 +96,30 @@ export default function AdminWorkspacesPage() {
           <Table label="Workspaces" cols={cols} head={["Entity", "Index · cycle", "Index Owners", "Status", "Actions"]}>
             {shown.map(({ w, status, index }) => (
               <Row key={w.client.id} cols={cols}>
-                <b>{w.entity.name}</b>
+                <Link href={clientHref(w.client.id)} className="font-bold text-j-ink no-underline hover:text-cx hover:underline">
+                  {w.entity.name}
+                </Link>
                 <span>
                   {index} · {w.workplace.year}
                 </span>
                 <span className="text-[13px]">{w.owners.map((o) => o.name).join(", ") || <i className="text-j-bad">No Index Owner</i>}</span>
                 <Pill tone={status === "Active" ? "ok" : status === "Set-up" ? "warn" : "gray"}>{status}</Pill>
-                <JLink size="sm" href={status.startsWith("Closed") ? clientHref(w.client.id) : clientHref(w.client.id, "/people")}>
-                  {status.startsWith("Closed") ? "View" : "Manage"}
-                </JLink>
+                <span className="flex flex-wrap gap-1.5">
+                  <JLink size="sm" variant="primary" href={clientHref(w.client.id)}>
+                    Open
+                  </JLink>
+                  {!status.startsWith("Closed") && (
+                    <JLink size="sm" href={clientHref(w.client.id, "/people")}>
+                      Access
+                    </JLink>
+                  )}
+                </span>
               </Row>
             ))}
           </Table>
         </Panel>
 
-        <div className="flex flex-wrap items-start gap-3.5">
-          <Panel className="flex min-w-0 flex-[1_1_420px] flex-col gap-3 p-[22px]">
-            <PanelHead title="Add an Index Owner to an existing workspace" />
-            <div className="flex flex-wrap gap-2">
-              <select aria-label="User" value={grantUser} onChange={(e) => setGrantUser(e.target.value)} className={cx(inputClass, "min-w-[200px] flex-auto")}>
-                <option value="">User…</option>
-                {owners.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} · {u.email}
-                  </option>
-                ))}
-              </select>
-              <select aria-label="Workspace" value={grantWs} onChange={(e) => setGrantWs(e.target.value)} className={cx(inputClass, "min-w-[220px] flex-auto")}>
-                <option value="">Workspace…</option>
-                {rows.map(({ w, index }) => (
-                  <option key={w.client.id} value={w.client.id}>
-                    {w.entity.name} · {index} {w.workplace.year}
-                  </option>
-                ))}
-              </select>
-              <JButton variant="primary" disabled={!grantUser || !grantWs} onClick={grant}>
-                Add
-              </JButton>
-            </div>
-            <p className="m-0 text-xs text-j-muted">To give someone the Index Owner role first, change their role under Users.</p>
-          </Panel>
-          <Panel className="flex min-w-0 flex-[1_1_420px] flex-col gap-2 p-[22px]">
-            <PanelHead title="Who can see what" />
-            {ROLES.map((r) => {
-              const n = users.filter((u) => u.role === r.key && u.active);
-              return (
-                <div key={r.key} className="flex flex-col gap-0.5 border-b border-j-line-soft py-2 text-sm last:border-0">
-                  <span className="flex justify-between">
-                    <b>{r.label}</b>
-                    <span className="text-xs text-j-muted">{n.length} active</span>
-                  </span>
-                  <span className="text-[13px] text-j-ink-3">{r.about}</span>
-                  {r.key === "owner" && (
-                    <span className="text-xs text-j-muted">
-                      {owners.map((o) => `${o.name} · ${o.email} · ${views.filter((v) => v.workplace.ownerIds.includes(o.id)).length} workspaces`).join(" | ")}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </Panel>
-        </div>
       </JMain>
-      {toast}
     </AppShell>
   );
 }
