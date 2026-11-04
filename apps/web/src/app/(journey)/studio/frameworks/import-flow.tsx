@@ -977,9 +977,14 @@ function Fix({ children, onClick, type = "button" }: { children: React.ReactNode
 
 /* ---------- Read-only tree of a saved version ---------- */
 
-export function RequirementTree({ requirements, levels }: { requirements: FrameworkRequirement[]; levels: { id: string; en: string }[] }) {
+export function RequirementTree({ requirements, levels }: { requirements: FrameworkRequirement[]; levels: { id: string; en: string; ar?: string }[] }) {
   const [open, setOpen] = useState<Set<string>>(() => new Set(requirements.filter((r) => !r.parent).map((r) => r.code)));
   const [query, setQuery] = useState("");
+  // Standards published in both languages can be read in either; the codes are the same.
+  const bilingual = requirements.some((r) => r.titleAr || r.textAr);
+  // A standard published only in Arabic opens in Arabic.
+  const [lang, setLang] = useState<"en" | "ar">(() => (requirements.some((r) => r.title || r.text) ? "en" : "ar"));
+  const ar = bilingual && lang === "ar";
   const kids = useMemo(() => {
     const m = new Map<string | undefined, FrameworkRequirement[]>();
     const codes = new Set(requirements.map((r) => r.code));
@@ -989,13 +994,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
     }
     return m;
   }, [requirements]);
-  const levelName = (id: string) => levels.find((l) => l.id === id)?.en ?? "—";
+  const levelName = (id: string) => {
+    const l = levels.find((x) => x.id === id);
+    return (ar ? l?.ar : l?.en) ?? l?.en ?? "—";
+  };
   const q = query.trim().toLowerCase();
 
   const rows: { r: FrameworkRequirement; depth: number }[] = [];
   const walk = (p: string | undefined, depth: number) => {
     for (const r of kids.get(p) ?? []) {
-      if (!q || `${r.code} ${r.title}`.toLowerCase().includes(q)) rows.push({ r, depth: q ? 0 : depth });
+      if (!q || `${r.code} ${r.title} ${r.titleAr ?? ""} ${r.text ?? ""} ${r.textAr ?? ""}`.toLowerCase().includes(q)) rows.push({ r, depth: q ? 0 : depth });
       if (q || open.has(r.code)) walk(r.code, depth + 1);
     }
   };
@@ -1005,7 +1013,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
     <div className="flex flex-col overflow-hidden rounded-[10px] border border-line">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft bg-surface-2 px-3 py-2">
         <b className="text-[13px]">Requirements in this version · {requirements.length}</b>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
+          {bilingual && (
+            <span role="radiogroup" aria-label="Language of the standard" className="flex overflow-hidden rounded-md border border-field">
+              {(["en", "ar"] as const).map((l) => (
+                <button key={l} type="button" role="radio" aria-checked={lang === l} onClick={() => setLang(l)} className={cx("h-8 cursor-pointer border-0 px-2.5 text-xs font-semibold", lang === l ? "bg-ink text-white" : "bg-white text-ink-2")} data-no-translate>
+                  {l === "en" ? "English" : "العربية"}
+                </button>
+              ))}
+            </span>
+          )}
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" aria-label="Search requirements in this version" className="h-8 w-40 rounded-md border border-field bg-white px-2 text-xs" />
           <Button size="sm" className="h-8 text-xs" onClick={() => setOpen(new Set(requirements.map((r) => r.code)))}>
             Expand all
@@ -1015,9 +1032,14 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
           </Button>
         </div>
       </div>
-      <ul className="m-0 max-h-[420px] list-none overflow-y-auto p-0 text-[13px]">
+      <ul className="m-0 max-h-[420px] list-none overflow-y-auto p-0 text-[13px]" dir={ar ? "rtl" : undefined} lang={ar ? "ar" : undefined}>
         {rows.map(({ r, depth }) => {
           const has = kids.has(r.code);
+          const title = ar ? r.titleAr || r.title : r.title;
+          const text = ar ? r.textAr : r.text;
+          const evidence = ar ? r.evidenceAr : r.evidence;
+          const only = !ar && !r.title && !r.text && r.titleAr;
+          const note = r.source?.includes(" · ") ? r.source.slice(r.source.indexOf(" · ") + 3) : undefined;
           return (
             <li key={r.code} className="flex items-baseline gap-2 border-b border-line-soft py-1.5 pe-3" style={{ paddingInlineStart: 8 + depth * 20 }}>
               <button
@@ -1036,14 +1058,21 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
               >
                 {open.has(r.code) ? "▾" : "▸"}
               </button>
-              <b className="shrink-0 font-mono text-xs">{r.code}</b>
-              <span className="min-w-0 flex-1" dir="auto">
-                {r.title || <span className="line-clamp-2">{r.text}</span>}
-                {(r.text || r.evidence) && (
+              <b className="shrink-0 font-mono text-xs" dir="ltr">{r.code}</b>
+              <span className="min-w-0 flex-1" dir="auto" data-no-translate={bilingual || undefined}>
+                {only ? (
+                  <span className="block" dir="rtl" lang="ar">
+                    {r.titleAr}
+                  </span>
+                ) : (
+                  title || <span className="line-clamp-2">{text}</span>
+                )}
+                {note && <span className="block text-[11px] text-muted">{note}</span>}
+                {((title && text) || evidence) && (
                   <details className="mt-0.5 text-xs text-ink-2">
-                    <summary className="cursor-pointer text-muted">Text{r.evidence ? " and evidence" : ""}</summary>
-                    {r.text && <div className="whitespace-pre-line">{r.text}</div>}
-                    {r.evidence && <div className="mt-1 whitespace-pre-line text-muted">Evidence: {r.evidence}</div>}
+                    <summary className="cursor-pointer text-muted">{ar ? (evidence ? "النص ومستندات الإثبات" : "النص") : `Text${evidence ? " and evidence" : ""}`}</summary>
+                    {title && text && <div className="whitespace-pre-line">{text}</div>}
+                    {evidence && <div className="mt-1 whitespace-pre-line text-muted">{ar ? "مستندات الإثبات:" : "Evidence:"} {evidence}</div>}
                   </details>
                 )}
               </span>

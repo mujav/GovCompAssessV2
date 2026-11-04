@@ -55,6 +55,10 @@ export interface FrameworkRequirement {
   parent?: string;
   title: string;
   text?: string;
+  /** Arabic wording, when the standard is published in Arabic too. */
+  titleAr?: string;
+  textAr?: string;
+  evidenceAr?: string;
   /** "high" | "med" | "low" or a numeric weight as written in the source. */
   weight?: string;
   evidence?: string;
@@ -64,6 +68,8 @@ export interface FrameworkRequirement {
 
 export interface FrameworkVersion {
   name: string;
+  /** The standard's Arabic name. */
+  nameAr?: string;
   version: string;
   authority: string;
   effective: string;

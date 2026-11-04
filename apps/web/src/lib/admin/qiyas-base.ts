@@ -1,6 +1,6 @@
-// Requirements tree of the published Qiyas 2026 v1.2 package (dummy wording). Also read by
-// scripts/make-framework-samples.mjs, which derives the v1.3 sample workbook from it, so
-// importing that workbook shows real added / changed / removed requirements.
+// A small dummy Qiyas tree, kept only as the source of the sample import workbook:
+// scripts/make-framework-samples.mjs derives qiyas-2026-v1.3.xlsx from it. The library's
+// Qiyas standard is DGA's published text in qiyas-v5.ts.
 
 import type { FrameworkRequirement } from "./types";
 

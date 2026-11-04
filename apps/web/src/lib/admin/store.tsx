@@ -123,6 +123,11 @@ function withSeedLibrary(saved: AdminState): AdminState {
     const mine = saved.frameworks.find((x) => x.id === f.id);
     if (!mine && !saved.deletedFrameworks?.includes(f.id)) saved.frameworks.push(f);
     else if (mine?.live && !mine.live.requirements?.length && f.live?.requirements?.length) mine.live.requirements = f.live.requirements;
+    // A seeded standard whose dummy text was replaced by the published text: take the published version.
+    else if (mine?.live && f.live?.requirements?.some((r) => r.titleAr) && !mine.live.requirements?.some((r) => r.titleAr)) {
+      if (mine.live.version === f.live.version) Object.assign(mine.live, { requirements: f.live.requirements, levels: f.live.levels, nameAr: f.live.nameAr });
+      else Object.assign(mine, { live: f.live, history: f.history, draft: mine.pendingCr ? mine.draft : undefined });
+    }
   }
   return saved;
 }

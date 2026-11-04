@@ -72,22 +72,22 @@ export function libraryRequirements(v: FrameworkVersion): ClientRequirement[] {
     .filter((r) => r.level === accepted)
     .map((r) => {
       const children = kids(r.code);
-      const evidence = [r.evidence, ...children.map((c) => c.evidence)].filter(Boolean).join("\n");
+      const evidence = [r.evidence ?? r.evidenceAr, ...children.map((c) => c.evidence ?? c.evidenceAr)].filter(Boolean).join("\n");
       const weight = r.weight === "high" || r.weight === "low" ? r.weight : "med";
       return {
         code: r.code,
-        domain: top(r).title || top(r).code,
+        domain: top(r).title || top(r).titleAr || top(r).code,
         weight,
         status: "nas" as const,
         mandatoryFail: false,
-        title: r.title || (r.text ?? "").slice(0, 120) || r.code,
+        title: r.title || r.titleAr || (r.text ?? "").slice(0, 120) || r.code,
         department: "",
         owner: "",
         work: "none" as const,
         due: SUBMISSION_DEADLINE,
         review: "none" as const,
         evidence: { expected: Math.max(1, children.length || (r.evidence ? 1 : 0)), valid: 0, invalid: 0 },
-        text: [r.text, ...children.map((c) => `${c.code} ${c.title || c.text || ""}`.trim())].filter(Boolean).join("\n"),
+        text: [r.text ?? r.textAr, ...children.map((c) => `${c.code} ${c.title || c.titleAr || c.text || ""}`.trim())].filter(Boolean).join("\n"),
         evidenceText: evidence || undefined,
       };
     });

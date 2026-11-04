@@ -10,7 +10,7 @@ describe("entity frameworks from the library", () => {
     for (const c of CLIENTS) expect(entityFrameworks(c, library).map((f) => f.name)).toEqual(c.frameworks);
     const ministry = CLIENTS.find((c) => c.id === "demo-ministry")!;
     expect(entityFrameworks(ministry, library).map((f) => [f.id, f.short, f.version])).toEqual([
-      ["fw-qiyas", "Qiyas", "1.2"],
+      ["fw-qiyas", "Qiyas", "5.0"],
       ["fw-nca", "NCA ECC", "2024"],
     ]);
   });
@@ -28,8 +28,11 @@ describe("entity frameworks from the library", () => {
   it("lists the requirements at the assessed level as fresh work items", () => {
     const nca = library.find((f) => f.id === "fw-nca")!.live!;
     const reqs = libraryRequirements(nca);
-    expect(reqs.map((r) => r.code)).toEqual(["1-1-1", "1-1-2", "1-2-1", "1-2-2", "2-1-1", "2-2-1", "2-2-2", "2-3-1", "3-1-1", "4-1-1", "4-1-2"]);
-    expect(reqs[0]).toMatchObject({ domain: "Cybersecurity Governance", work: "none", owner: "", status: "nas", evidenceText: "Approved cybersecurity strategy" });
+    expect(reqs).toHaveLength(110);
+    expect(reqs.slice(0, 3).map((r) => r.code)).toEqual(["1-1-1", "1-1-2", "1-1-3"]);
+    expect(reqs[0]).toMatchObject({ domain: "Cybersecurity Governance", work: "none", owner: "", status: "nas" });
+    // A control's subcontrols become part of its text.
+    expect(reqs.find((r) => r.code === "1-9-3")?.text).toContain("1-9-3-1");
   });
 
   it("uses the shared workspace records only for seeded clients' Qiyas", () => {

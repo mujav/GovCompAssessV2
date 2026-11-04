@@ -29,9 +29,12 @@ const SCAN = [
 ];
 const ATTRS = new Set(["placeholder", "aria-label", "title", "alt", "label", "eyebrow", "crumb", "search", "note", "aside", "description", "disabled", "only", "sub"]);
 
+// Data that ships its own published Arabic text, so it needs no translation.
+const BILINGUAL = new Set(["lib/admin/ecc-2024.ts", "lib/admin/qiyas-v5.ts"]);
+
 function files(p) {
   const abs = join(ROOT, p);
-  if (statSync(abs).isFile()) return [abs];
+  if (statSync(abs).isFile()) return BILINGUAL.has(p) ? [] : [abs];
   return readdirSync(abs).flatMap((f) => files(join(p, f)));
 }
 

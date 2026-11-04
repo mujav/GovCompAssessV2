@@ -2,55 +2,31 @@
 
 import { diffConfig } from "./diff";
 import { impactFor } from "./impact";
-import { NCA_LIVE_LEVELS, NCA_REQUIREMENTS, NDMO_LIVE } from "./library-seed";
-import { QIYAS_V12_REQUIREMENTS } from "./qiyas-base";
+import { ECC_LEVELS, ECC_REQUIREMENTS } from "./ecc-2024";
+import { NDMO_LIVE } from "./library-seed";
+import { QIYAS_V5_LEVELS, QIYAS_V5_REQUIREMENTS } from "./qiyas-v5";
 import type {
   AcceptancePolicy,
   AdminState,
   AutomationRule,
   FrameworkVersion,
-  HierarchyLevel,
   ReviewStage,
   ScoringScheme,
 } from "./types";
 
-const QIYAS_LEVELS: HierarchyLevel[] = [
-  { id: "lv-1", en: "Axis", ar: "المحور", pattern: "#", assessed: "rollup" },
-  { id: "lv-2", en: "Standard", ar: "المعيار", pattern: "#.#.#", assessed: "rollup" },
-  { id: "lv-3", en: "Requirement", ar: "المتطلب", pattern: "#.#.#-#", assessed: "accepted" },
-  { id: "lv-4", en: "Criterion", ar: "البند", pattern: "#.#.#-#-C#", assessed: "ai_reviewer" },
-];
-
+// The standards Qiyas measures, as DGA published them (Arabic only).
 const qiyasLive: FrameworkVersion = {
   name: "Qiyas 2026",
-  version: "1.2",
+  nameAr: "المعايير الأساسية للتحول الرقمي",
+  version: "5.0",
   authority: "DGA",
-  effective: "01 Jan 2026",
-  scoringNote: "Compliant / partial / non · weighted",
-  levels: QIYAS_LEVELS,
-  requirements: QIYAS_V12_REQUIREMENTS,
-  createdAt: "18 Nov 2025",
-  publishedAt: "15 Dec 2025",
-};
-
-const qiyasDraft: FrameworkVersion = {
-  ...qiyasLive,
-  version: "1.3",
-  effective: "01 Dec 2026 · Cycle 2",
-  createdAt: "20 Oct 2026",
-  publishedAt: undefined,
-  levels: QIYAS_LEVELS.map((l) => (l.id === "lv-4" ? { ...l, ar: "المعيار الفرعي" } : l)),
-  importJob: {
-    file: "qiyas-2026.xlsx",
-    tab: "03_Requirements",
-    rows: 350,
-    uploadedBy: "Mohammed K.",
-    hash: "4b1e…90c2",
-    valid: 350,
-    warnings: [],
-    changed: "37 wording · 31 new",
-    errors: 0,
-  },
+  effective: "Apr 2026",
+  scoringNote: "Full / partial / non-compliance per standard",
+  weighting: "none",
+  levels: QIYAS_V5_LEVELS,
+  requirements: QIYAS_V5_REQUIREMENTS,
+  createdAt: "Apr 2026",
+  publishedAt: "Apr 2026",
 };
 
 const scoringLive: ScoringScheme = {
@@ -185,12 +161,7 @@ export function createSeed(): AdminState {
       {
         id: "fw-qiyas",
         live: qiyasLive,
-        draft: qiyasDraft,
         usedByCycles: 1,
-        history: [
-          { version: "1.1", effective: "01 Jul 2025", publishedAt: "12 Jun 2025", supersededAt: "15 Dec 2025", nodes: 31 },
-          { version: "1.0", effective: "01 Jan 2025", publishedAt: "05 Dec 2024", supersededAt: "12 Jun 2025", nodes: 28 },
-        ],
       },
       {
         id: "fw-nca",
@@ -198,6 +169,7 @@ export function createSeed(): AdminState {
         history: [{ version: "2018", effective: "01 Oct 2018", publishedAt: "15 Sep 2018", supersededAt: "20 Feb 2024", nodes: 0 }],
         live: {
           name: "NCA ECC",
+          nameAr: "الضوابط الأساسية للأمن السيبراني",
           version: "2024",
           authority: "NCA",
           effective: "01 Mar 2024",
@@ -205,8 +177,8 @@ export function createSeed(): AdminState {
           publishedAt: "20 Feb 2024",
           scoringNote: "Maturity 0–5 · minimum by domain",
           weighting: "none",
-          levels: NCA_LIVE_LEVELS,
-          requirements: NCA_REQUIREMENTS,
+          levels: ECC_LEVELS,
+          requirements: ECC_REQUIREMENTS,
         },
       },
       { id: "fw-ndmo", usedByCycles: 2, live: NDMO_LIVE },

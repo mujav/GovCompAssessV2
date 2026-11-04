@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
 import mammoth from "mammoth";
+import { QIYAS_V12_REQUIREMENTS } from "@/lib/admin/qiyas-base";
 import { createSeed } from "@/lib/admin/seed";
 import { diffConfig, diffRequirements } from "@/lib/admin/diff";
 import type { FrameworkVersion } from "@/lib/admin/types";
@@ -352,7 +353,8 @@ describe("review edits", () => {
 
 describe("accepting into Admin Studio", () => {
   const seed = createSeed();
-  const live = seed.frameworks[0].live as FrameworkVersion;
+  // The sample workbook is derived from the dummy v1.2 tree, so it is diffed against that.
+  const live = { ...(seed.frameworks[0].live as FrameworkVersion), version: "1.2", requirements: QIYAS_V12_REQUIREMENTS };
   const ex = applyDefaultWeight(extractFramework(workbookDocs("qiyas-2026-v1.3.xlsx")));
 
   it("produces levels and requirements in tree order with parent codes", () => {

@@ -201,13 +201,24 @@ export default function FrameworkBuilderPage() {
                   {locked ? (
                     <h2 className="m-0 text-[17px] font-semibold">
                       {fw.name} · v{fw.version}
+                      {fw.nameAr && (
+                        <span className="ms-2 font-normal text-ink-2" dir="rtl" lang="ar" data-no-translate>
+                          {fw.nameAr}
+                        </span>
+                      )}
                     </h2>
                   ) : (
-                    <label className="flex items-center gap-2 text-[13px] font-semibold">
-                      <span className="sr-only">Standard name</span>
-                      <input value={fw.name} onChange={(e) => edit((d) => void (d.name = e.target.value))} className="h-10 rounded-lg border border-field px-2.5 text-[15px] font-semibold" />
-                      <span className="font-mono text-muted">v{fw.version}</span>
-                    </label>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <label className="flex items-center gap-2 text-[13px] font-semibold">
+                        <span className="sr-only">Standard name</span>
+                        <input value={fw.name} onChange={(e) => edit((d) => void (d.name = e.target.value))} className="h-10 rounded-lg border border-field px-2.5 text-[15px] font-semibold" />
+                        <span className="font-mono text-muted">v{fw.version}</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-[13px] font-semibold">
+                        <span className="sr-only">Arabic name</span>
+                        <input value={fw.nameAr ?? ""} placeholder="الاسم بالعربية" dir="rtl" lang="ar" onChange={(e) => edit((d) => void (d.nameAr = e.target.value || undefined))} className="h-10 rounded-lg border border-field px-2.5 text-[15px]" />
+                      </label>
+                    </span>
                   )}
                   <div className="text-xs text-muted">
                     Issuing authority {fw.authority} · effective {fw.effective}
