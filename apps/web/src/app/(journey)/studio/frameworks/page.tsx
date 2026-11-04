@@ -8,6 +8,7 @@ import { Button, TabBar } from "@/components/ui";
 import { requirementCounts } from "@/lib/admin/diff";
 import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from "@/lib/admin/library";
 import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
+import { useJourney } from "@/lib/journey/store";
 import type { FrameworkPackage, FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
 import { readFiles } from "@/lib/import/read-files";
 import { ASSESSED, ImportFlow, RequirementTree, UploadZone, inputCls, type ExtractMethod, type ImportSession } from "./import-flow";
@@ -45,7 +46,9 @@ function frameworkChecks(v: FrameworkVersion, others: FrameworkPackage[]): Check
 }
 
 export default function FrameworkBuilderPage() {
-  const { state, update, editDraft, user } = useAdmin();
+  const { state, update, editDraft, user, removeFramework } = useAdmin();
+  const { workplaces } = useJourney();
+  const [deleting, setDeleting] = useState(false);
   // No framework selected = the start screen: upload a document first, then edit what was extracted.
   const [sel, setSel] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
@@ -140,6 +143,16 @@ export default function FrameworkBuilderPage() {
       const l = d.levels.find((x) => x.id === id);
       if (l) Object.assign(l, patch);
     });
+  // A standard a workspace or cycle uses cannot be deleted; retire it with a new version instead.
+  const inUse = workplaces.filter((w) => w.frameworkId === pkg.id).length;
+  const deleteBlock = pkg.pendingCr ? `Decide ${pkg.pendingCr} first` : inUse ? `Used by ${inUse} workspace${inUse === 1 ? "" : "s"}` : pkg.usedByCycles > 0 ? `Used by ${pkg.usedByCycles} cycle${pkg.usedByCycles === 1 ? "" : "s"}` : "";
+  const onDelete = () => {
+    const r = removeFramework(pkg.id);
+    setDeleting(false);
+    if (!r.ok) return setNotice({ ok: false, text: r.error });
+    setSel(null);
+    setNotice({ ok: true, text: `Deleted ${fw.name} from the library.` });
+  };
   const checks = frameworkChecks(
     fw,
     state.frameworks.filter((f) => f.id !== pkg.id),
@@ -152,14 +165,30 @@ export default function FrameworkBuilderPage() {
         crumb="Studio / Standard library"
         title={`${fw.name} · v${fw.version}`}
         actions={
-          <Button
-            onClick={() => {
-              setSel(null);
-              setNotice(null);
-            }}
-          >
-            ← All standards
-          </Button>
+          <span className="flex flex-wrap items-center gap-2">
+            {deleting ? (
+              <>
+                <span className="text-[13px] font-semibold">Delete {fw.name}? This cannot be undone.</span>
+                <Button className="border-bad text-bad" onClick={onDelete}>
+                  Delete standard
+                </Button>
+                <Button onClick={() => setDeleting(false)}>Cancel</Button>
+              </>
+            ) : (
+              <Button className="text-bad" disabled={!!deleteBlock} title={deleteBlock ? `${deleteBlock}; it cannot be deleted.` : undefined} onClick={() => setDeleting(true)}>
+                Delete
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setSel(null);
+                setDeleting(false);
+                setNotice(null);
+              }}
+            >
+              ← All standards
+            </Button>
+          </span>
         }
       />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
@@ -190,7 +219,7 @@ export default function FrameworkBuilderPage() {
                   </span>
                 )}
               </div>
-              <DraftBar kind="framework" id={pkg.id} checks={checks} />
+              <DraftBar kind="framework" id={pkg.id} checks={checks} direct />
             </div>
             <TabBar label="Standard sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
             <div className="flex flex-col gap-2.5 px-5 py-4">

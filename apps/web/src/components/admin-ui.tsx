@@ -11,9 +11,10 @@ export type CheckItem = { ok: boolean; text: string };
 /**
  * Lifecycle controls for one configuration object: shows live/draft/pending state and
  * offers Create draft, Discard and Submit. Submit is blocked while any check fails.
+ * `direct` replaces Submit with Update, which applies the draft without an approval step.
  */
-export function DraftBar({ kind, id, checks = [] }: { kind: ConfigKind; id: string; checks?: CheckItem[] }) {
-  const { state, startDraft, discardDraft, submit } = useAdmin();
+export function DraftBar({ kind, id, checks = [], direct }: { kind: ConfigKind; id: string; checks?: CheckItem[]; direct?: boolean }) {
+  const { state, startDraft, discardDraft, submit, publish } = useAdmin();
   const [msg, setMsg] = useState<{ ok: boolean; text: string; cr?: string } | null>(null);
   const v = slot(state, kind, id);
   if (!v) return null;
@@ -21,8 +22,8 @@ export function DraftBar({ kind, id, checks = [] }: { kind: ConfigKind; id: stri
 
   const onSubmit = () => {
     if (failing.length) return setMsg({ ok: false, text: `Fix ${failing.length} validation issue${failing.length > 1 ? "s" : ""} first.` });
-    const r = submit(kind, id);
-    setMsg(r.ok ? { ok: true, text: `Submitted as ${r.id}.`, cr: r.id } : { ok: false, text: r.error });
+    const r = direct ? publish(kind, id) : submit(kind, id);
+    setMsg(r.ok ? { ok: true, text: direct ? `${v.live ? "Updated" : "Published"} ${versionLabel(kind, v.draft)}.` : `Submitted as ${r.id}.`, cr: r.id } : { ok: false, text: r.error });
   };
 
   return (
@@ -45,7 +46,7 @@ export function DraftBar({ kind, id, checks = [] }: { kind: ConfigKind; id: stri
         <>
           {!!v.live && <Button onClick={() => (setMsg(null), discardDraft(kind, id))}>Discard draft</Button>}
           <Button variant="primary" className="px-4" onClick={onSubmit}>
-            Submit for approval
+            {direct ? (v.live ? "Update" : "Publish") : "Submit for approval"}
           </Button>
         </>
       )}

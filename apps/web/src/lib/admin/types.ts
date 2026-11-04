@@ -224,6 +224,8 @@ export interface AdminState {
   currentUserId: string;
   users: AdminUser[];
   frameworks: FrameworkPackage[];
+  /** Seeded standards the admin deleted, so loading saved state does not add them back. */
+  deletedFrameworks?: string[];
   scoring: Versioned<ScoringScheme>;
   policies: Versioned<AcceptancePolicy>[];
   rules: Versioned<AutomationRule>[];

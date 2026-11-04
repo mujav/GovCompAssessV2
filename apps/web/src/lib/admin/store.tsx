@@ -97,6 +97,10 @@ interface AdminApi {
   /** Edit a draft in place; ignored while the draft is waiting on a change request. */
   editDraft: <T>(kind: ConfigKind, id: string, fn: (draft: T) => void) => void;
   submit: (kind: ConfigKind, id: string) => Result;
+  /** Applies the draft as the new live version straight away, recorded as a published change. */
+  publish: (kind: ConfigKind, id: string) => Result;
+  /** Deletes a standard from the library; refused while a change request is open on it. */
+  removeFramework: (id: string) => Result;
   decide: (crId: string, decision: "approve" | "reject", comment: string, effectiveFrom?: string) => Result;
   log: (text: string) => void;
   /** Writes a reviewed file import into a framework draft (creating the draft or package if needed). */
@@ -117,8 +121,8 @@ function withSeedLibrary(saved: AdminState): AdminState {
   const seed = createSeed();
   for (const f of seed.frameworks) {
     const mine = saved.frameworks.find((x) => x.id === f.id);
-    if (!mine) saved.frameworks.push(f);
-    else if (mine.live && !mine.live.requirements?.length && f.live?.requirements?.length) mine.live.requirements = f.live.requirements;
+    if (!mine && !saved.deletedFrameworks?.includes(f.id)) saved.frameworks.push(f);
+    else if (mine?.live && !mine.live.requirements?.length && f.live?.requirements?.length) mine.live.requirements = f.live.requirements;
   }
   return saved;
 }
@@ -258,6 +262,50 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           pushAudit(s, who(s), `Submitted ${crId} for approval${material ? " (material change)" : ""}.`);
         });
         return { ok: true, id: crId };
+      },
+      publish: (kind, id) => {
+        const v = slot(state, kind, id);
+        if (!v?.draft) return { ok: false, error: "There is no draft to update from." };
+        if (v.pendingCr) return { ok: false, error: `Waiting on ${v.pendingCr}.` };
+        const diff = diffConfig(kind, v.live, v.draft);
+        if (v.live && !diff.some((d) => d.changed)) return { ok: false, error: "The draft is identical to the live version." };
+        const crId = `CR-${state.seq + 1}`;
+        mutate((s) => {
+          s.seq += 1;
+          const target = slot(s, kind, id)!;
+          s.changeRequests.unshift({
+            id: crId,
+            kind,
+            targetId: id,
+            title: `${KIND_LABEL[kind]} ${displayName(kind, id, target.draft)} ${versionLabel(kind, target.live)} → ${versionLabel(kind, target.draft)}`,
+            authorId: s.currentUserId,
+            submittedAt: stamp(),
+            status: "published",
+            material: kind !== "rule" && diff.some((d) => d.changed && d.label !== "Arabic labels" && d.label !== "Name"),
+            diff,
+            impact: impactFor(kind, target.live, target.draft),
+            decidedBy: who(s),
+            decidedAt: stamp(),
+            comment: "Updated directly from the library.",
+          });
+          const had = target.live;
+          if (kind === "framework") retireLive(target as FrameworkPackage);
+          target.live = target.draft;
+          target.draft = undefined;
+          pushAudit(s, who(s), `${had ? "Updated" : "Published"} ${displayName(kind, id, target.live)} to ${versionLabel(kind, target.live)} (${crId}).`);
+        });
+        return { ok: true, id: crId };
+      },
+      removeFramework: (id) => {
+        const f = state.frameworks.find((x) => x.id === id);
+        if (!f) return { ok: false, error: "Standard not found." };
+        if (f.pendingCr) return { ok: false, error: `Decide ${f.pendingCr} before deleting this standard.` };
+        mutate((s) => {
+          s.frameworks = s.frameworks.filter((x) => x.id !== id);
+          (s.deletedFrameworks ??= []).push(id);
+          pushAudit(s, who(s), `Deleted standard "${(f.live ?? f.draft)?.name ?? id}" from the library.`);
+        });
+        return { ok: true };
       },
       decide: (crId, decision, comment, effectiveFrom) => {
         const cr = state.changeRequests.find((c) => c.id === crId);
