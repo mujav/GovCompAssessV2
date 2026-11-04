@@ -62,7 +62,6 @@ export default function UsersPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Users</h1>
-            <p className="m-0 max-w-[760px] text-sm text-j-ink-3">Everyone with an account, their roles in each workspace, and sign-in status. Index Owners add Control Owners and viewers inside their own workspaces.</p>
           </div>
           <span className="flex gap-2">
             <JLink href="/admin/access">
@@ -356,7 +355,6 @@ function InviteUser({ open, onClose, views, entities, onInvite }: { open: boolea
       open={open}
       onClose={onClose}
       title="Invite user"
-      sub="They get an email invitation and set their password on first sign-in."
       footer={
         <>
           <JButton onClick={onClose}>Cancel</JButton>

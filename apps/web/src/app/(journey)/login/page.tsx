@@ -18,17 +18,10 @@ type Lang = "en" | "ar";
 const T = {
   en: {
     brand: "Compliance Workspace",
-    brandSub: "EY · For authorised users only",
-    hero: "Prepare every national index submission in one place.",
-    heroSub: "Plan the cycle, collect evidence for every requirement, review it with AI support, and track readiness by dimension, department and owner.",
-    trust: ["Hosted in Saudi Arabia", "NCA CCC aligned", "PDPL ready"],
     signIn: "Sign in",
-    lead: "Use the account your administrator invited.",
     forgot: "Forgot password?",
     remember: "Keep me signed in on this device",
-    access: "You will see only the workspaces you were granted. Ask your Index Owner or the platform administrator for access to another entity or index.",
     forgotTitle: "Reset your password",
-    forgotLead: "Enter your work email. The platform administrator is asked to send you a reset link.",
     forgotSend: "Ask for a reset link",
     forgotSent: "If an account exists for this email, the platform administrator has been asked to reset it. You will get a link by email.",
     email: "Work email",
@@ -38,7 +31,6 @@ const T = {
     noAccess: "Don't have access?",
     request: "Request access",
     reqTitle: "Request access",
-    reqLead: "The Platform Admin reviews every request and decides your role. You can sign in once it is approved.",
     name: "Full name",
     org: "Organisation",
     jobTitle: "Job title",
@@ -61,17 +53,10 @@ const T = {
   },
   ar: {
     brand: "مساحة الامتثال",
-    brandSub: "EY · للمستخدمين المصرّح لهم فقط",
-    hero: "جهّز مشاركتك في جميع المؤشرات الوطنية من مكان واحد.",
-    heroSub: "خطّط للدورة، واجمع مستندات الإثبات لكل متطلب، وراجعها بمساندة الذكاء الاصطناعي، وتابع الجاهزية حسب المنظور والإدارة والمسؤول.",
-    trust: ["مستضافة في المملكة", "متوافقة مع ضوابط الحوسبة السحابية", "جاهزة لنظام حماية البيانات"],
     signIn: "تسجيل الدخول",
-    lead: "استخدم الحساب الذي دعاك إليه المسؤول.",
     forgot: "نسيت كلمة المرور؟",
     remember: "تذكرني على هذا الجهاز",
-    access: "ستظهر لك فقط مساحات العمل المصرّح لك بها. اطلب من مالك المؤشر أو مسؤول المنصة صلاحية الوصول إلى جهة أو مؤشر آخر.",
     forgotTitle: "إعادة تعيين كلمة المرور",
-    forgotLead: "أدخل بريد العمل، وسيُطلب من مسؤول المنصة إرسال رابط إعادة التعيين إليك.",
     forgotSend: "اطلب رابط إعادة التعيين",
     forgotSent: "إذا كان هناك حساب بهذا البريد فقد طُلب من مسؤول المنصة إعادة تعيينه، وسيصلك رابط بالبريد.",
     email: "البريد الإلكتروني للعمل",
@@ -81,7 +66,6 @@ const T = {
     noAccess: "لا تملك وصولًا؟",
     request: "اطلب الوصول",
     reqTitle: "طلب الوصول",
-    reqLead: "يراجع مسؤول المنصة كل طلب ويحدد دورك. يمكنك تسجيل الدخول بعد الموافقة.",
     name: "الاسم الكامل",
     org: "الجهة",
     jobTitle: "المسمى الوظيفي",
@@ -173,36 +157,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div data-no-translate dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen flex-wrap bg-white text-j-ink", !en && "font-arabic")}>
-      <section
-        aria-label={t.brand}
-        className="relative box-border flex min-h-[360px] flex-[1_1_560px] flex-col gap-8 overflow-hidden bg-cx-deep px-14 py-11 text-[#E3EAF4]"
-      >
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-[300px] -end-[260px] h-[720px] w-[720px] rounded-full border-[90px] border-[#1B3354] opacity-55" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-[120px] -end-20 h-[380px] w-[380px] rounded-full border-[50px] border-[#1B3354] opacity-80" />
-        <div className="relative flex items-center gap-3">
-          <span className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-mark text-white">
-            <Icon name="shield" size={20} />
-          </span>
-          <span className="leading-5">
-            <b className="text-base text-white">{t.brand}</b>
-            <br />
-            <span className="text-[13px] text-[#B9CCE6]">{t.brandSub}</span>
-          </span>
-        </div>
-        <h1 className="relative m-0 mt-auto max-w-[540px] text-[46px] leading-[56px] font-bold tracking-[-0.02em] text-white">{t.hero}</h1>
-        <p className="relative m-0 -mt-4 max-w-[520px] text-base leading-7 text-[#B9CCE6]">{t.heroSub}</p>
-        <div className="relative flex flex-wrap gap-2">
-          {t.trust.map((b) => (
-            <span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#2A4468] px-3 py-1.5 text-xs font-semibold">
-              <Icon name="check" size={13} />
-              {b}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="box-border flex flex-[1_1_520px] flex-col px-10 py-7">
+    <div data-no-translate dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen bg-white text-j-ink", !en && "font-arabic")}>
+      <section className="box-border flex flex-1 flex-col px-6 py-7 sm:px-10">
         <div className="flex justify-end">
           <div role="group" aria-label="Language" className="flex rounded-[10px] bg-[#F2F5F3] p-[3px]">
             {(["en", "ar"] as Lang[]).map((l) => (
@@ -222,10 +178,15 @@ export default function LoginPage() {
 
         <div className="flex flex-auto items-center justify-center py-7">
           <div className="w-full max-w-[420px]">
+            <div className="mb-8 flex items-center justify-center gap-3">
+              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-mark text-white">
+                <Icon name="shield" size={20} />
+              </span>
+              <b className="text-lg">{t.brand}</b>
+            </div>
             {mode === "signin" && (
               <form onSubmit={submit} className="flex flex-col gap-4">
                 <h2 className="m-0 text-[32px] leading-10 font-bold tracking-[-0.01em]">{t.signIn}</h2>
-                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.lead}</p>
                 <Field label={t.email}>
                   <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
                 </Field>
@@ -250,7 +211,6 @@ export default function LoginPage() {
                   <Icon name="key" size={18} />
                   {busy ? t.busy : t.submit}
                 </button>
-                <p className="m-0 rounded-xl bg-j-canvas px-3.5 py-2.5 text-[13px] leading-5 text-j-ink-3">{t.access}</p>
                 <div className="flex justify-center gap-2 text-[13px] text-j-muted">
                   {t.noAccess}
                   <button type="button" onClick={() => switchTo("request")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
@@ -292,7 +252,6 @@ export default function LoginPage() {
                   {t.back}
                 </button>
                 <h2 className="m-0 text-[28px] leading-9 font-bold tracking-[-0.01em]">{t.reqTitle}</h2>
-                <p className="m-0 text-sm leading-6 text-j-ink-3">{t.reqLead}</p>
                 <Field label={t.name}>
                   <input required autoComplete="name" value={req.name} onChange={(e) => setReq({ ...req, name: e.target.value })} className={field} />
                 </Field>
@@ -349,7 +308,6 @@ export default function LoginPage() {
                 className="flex flex-col gap-4"
               >
                 <h2 className="m-0 text-[28px] leading-9 font-bold">{t.forgotTitle}</h2>
-                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.forgotLead}</p>
                 <Field label={t.email}>
                   <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
                 </Field>

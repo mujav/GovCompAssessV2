@@ -22,7 +22,7 @@ export default function MyControlsPage() {
         <div className="flex flex-col gap-1.5">
           <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">My controls</h1>
           <p className="m-0 text-sm text-j-ink-3">
-            {mine.length} controls · {mine.filter((m) => m.c.stage !== "accepted" && m.c.due < TODAY).length} overdue. Open a control to write its response and attach the required evidence.
+            {mine.length} controls · {mine.filter((m) => m.c.stage !== "accepted" && m.c.due < TODAY).length} overdue
           </p>
         </div>
         <Chips

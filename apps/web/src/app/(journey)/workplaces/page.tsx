@@ -87,11 +87,6 @@ export default function WorkplacesPage() {
               {greeting()}, {user?.name.split(" ")[0]}
             </span>
             <h1 className="m-0 text-[34px] leading-10 font-semibold tracking-[-0.01em]">{admin ? "All workspaces" : "Your workspaces"}</h1>
-            <p className="m-0 text-[15px] text-j-ink-3">
-              {admin
-                ? "Every workspace on the platform. Each one is a single entity, index and cycle year."
-                : "You see only the workspaces the Platform Admin granted you. Each one is a single entity, index and cycle year."}
-            </p>
           </div>
           <div className="flex flex-wrap gap-2.5">
             <label className="flex h-[42px] w-[260px] items-center gap-2 rounded-[10px] border border-j-line bg-white px-3 text-j-muted">
@@ -232,7 +227,6 @@ function RequestWorkplace() {
               <h2 id="rq" className="m-0 text-lg font-semibold">
                 Request a new workspace
               </h2>
-              <p className="m-0 mt-1 text-sm text-j-ink-3">Sent to the Platform Admin, who creates the workspace and grants you access as Index Owner.</p>
             </div>
             <JButton size="sm" onClick={() => setOpen(false)} aria-label="Close request form">
               ✕

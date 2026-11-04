@@ -68,7 +68,6 @@ export default function AdminWorkspacesPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Workspaces and access</h1>
-            <p className="m-0 max-w-[760px] text-sm text-j-ink-3">Grant Index Owners access to one entity and one index at a time. Index Owners then add their own Control Owners and viewers.</p>
           </div>
           <JLink variant="primary" href="/workplaces/new">
             + New workspace

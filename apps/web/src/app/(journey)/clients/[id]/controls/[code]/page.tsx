@@ -170,7 +170,6 @@ export default function ControlResponsePage() {
           <div className="flex min-w-0 flex-[1.3_1_480px] flex-col gap-3.5">
             <Panel className="flex flex-col gap-2 p-[22px]">
               <PanelHead title="Control response" aside={<span className="text-xs text-j-muted">{saved || response ? `Saved ${fmtWhen(saved || response!.savedAt)}` : "Not saved yet"}</span>} />
-              <p className="m-0 text-[13px] text-j-ink-3">Explain how the entity meets this control. Refer to evidence and pages for each requirement.</p>
               <span className="flex flex-wrap gap-1.5">
                 <JButton size="sm" variant="ghost" disabled={!editable} onClick={() => insert("**bold**")}>
                   <b>B</b>
@@ -298,7 +297,6 @@ export default function ControlResponsePage() {
             {ai.agents.selfCheck && (
               <Panel className="flex flex-col gap-2 p-[22px]">
                 <PanelHead title="Check my evidence" />
-                <p className="m-0 text-[13px] text-j-ink-3">A quick self-check of your files – dates, approvals, samples and page references – before you submit. Your Index Owner does the full review.</p>
                 {check && (
                   <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[13px]">
                     {check.map((x, i) => (

@@ -436,10 +436,6 @@ function StartScreen({
         <section aria-label="Create a standard from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
           <div className="flex flex-col gap-1">
             <h2 className="m-0 text-lg font-semibold">Create a standard from a document</h2>
-            <p className="m-0 text-[13px] leading-5 text-muted">
-              Upload the standard, index or standards document. The platform extracts its levels, standards, requirements and evidence, then you review and edit the result
-              and create the standard.
-            </p>
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2 p-0 text-[13px]">
             {[

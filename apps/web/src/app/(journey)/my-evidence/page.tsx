@@ -32,7 +32,6 @@ export default function MyEvidencePage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Evidence library</h1>
-            <p className="m-0 text-sm text-j-ink-3">Every file you attached to your controls. Upload new files from the control, against the required evidence they answer.</p>
           </div>
           <input aria-label="Search evidence" placeholder="Search evidence" value={q} onChange={(e) => setQ(e.target.value)} className={cx(inputClass, "h-10 w-[260px]")} />
         </div>

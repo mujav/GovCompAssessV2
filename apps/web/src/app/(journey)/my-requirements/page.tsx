@@ -44,7 +44,7 @@ export default function HomePage() {
             </Pill>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Welcome back, {user?.name}</h1>
             <p className="m-0 text-sm text-j-ink-3">
-              You own {owned.length} controls and contribute to {mine.length - owned.length}. Write one response per control and attach the evidence each requirement asks for.
+              You own {owned.length} controls and contribute to {mine.length - owned.length}.
             </p>
           </div>
           {last && (

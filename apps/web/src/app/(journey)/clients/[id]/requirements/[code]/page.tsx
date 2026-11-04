@@ -484,7 +484,6 @@ export default function RequirementWorkspacePage() {
             ) : (
               <Panel className="flex min-w-0 flex-col gap-2 p-[22px]">
                 <PanelHead title="Register check" aside={<Pill tone={gaps ? "warn" : "ok"}>{gaps ? "Not ready to accept" : "Ready to accept"}</Pill>} />
-                <p className="m-0 text-xs text-j-muted">From the evidence register. Assess the uploaded files with AI for a full check; nothing changes until you record a decision.</p>
                 {CRITERIA.map((t, i) => (
                   <div key={t} className="flex items-start gap-3 border-b border-j-line-soft py-3 last:border-0">
                     <span className="pt-0.5 font-mono text-xs text-j-muted">C{i + 1}</span>

@@ -343,7 +343,6 @@ export default function StandardPage() {
                 <Panel className="flex min-w-0 flex-[1_1_300px] flex-col gap-2 p-[22px]">
                   <PanelHead title="Applicability of this control" />
                   <Applicability key={c.code} control={c} reason={cycle.plan[c.code]?.na?.reason} closed={closed} onChange={(na) => (cy.updatePlan([c.code], { na }, na ? "Not applicable in this workspace" : "Applicable again", 0), say(na ? `${c.code} is not applicable in this workspace` : `${c.code} is applicable again`))} />
-                  <p className="m-0 text-xs text-j-muted">Applies to this workspace only. A not applicable control is hidden from the plan, review hub, Control Owners and reports here; the edition in the Standard library does not change.</p>
                 </Panel>
               </div>
 

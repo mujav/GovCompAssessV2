@@ -106,7 +106,6 @@ export default function NewWorkplacePage() {
         <div className="flex flex-col gap-1.5">
           <span className="text-sm text-j-muted">Workspaces</span>
           <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">New workspace</h1>
-          <p className="m-0 max-w-[640px] text-sm text-j-ink-3">A workspace is one entity working through one index for one cycle year. Its Index Owners run it; the entity&apos;s Control Owners work the requirements they are assigned.</p>
         </div>
 
         {requests.length > 0 && (

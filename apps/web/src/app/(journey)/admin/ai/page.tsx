@@ -55,7 +55,6 @@ export default function AiSettingsPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">AI settings</h1>
-            <p className="m-0 max-w-[820px] text-sm text-j-ink-3">Model connection, the agents and what they may do, review thresholds and data handling. Applies to every workspace unless a workspace overrides a threshold.</p>
           </div>
           <JButton variant="primary" disabled={!dirty} onClick={save}>
             Save settings
@@ -132,7 +131,6 @@ export default function AiSettingsPage() {
 
         <Panel className="flex flex-col py-[18px]">
           <PanelHead className="px-[22px] pb-1" title="Agents" />
-          <p className="m-0 px-[22px] pb-2 text-[13px] text-j-ink-3">Turn an agent off to stop it everywhere; its earlier findings stay in the record.</p>
           <Table label="Agents" min={900} cols="1.3fr 2.4fr 1fr 0.9fr 1.2fr 60px" head={["Agent", "What it does", "Who sees the output", "Model", "Runs when", "On"]}>
             {AGENTS.map((a) => (
               <Row key={a.key} cols="1.3fr 2.4fr 1fr 0.9fr 1.2fr 60px" className={cx(!s.agents[a.key] && "opacity-60")}>

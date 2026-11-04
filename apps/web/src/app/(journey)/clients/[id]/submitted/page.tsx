@@ -27,7 +27,6 @@ export default function SubmittedPage() {
         <JMain>
           <Panel className="flex flex-col items-start gap-3 p-[26px]">
             <h1 className="m-0 text-2xl">Not submitted yet</h1>
-            <p className="m-0 text-sm text-j-ink-3">The receipt appears here once the pack is signed off and the upload is recorded.</p>
             <JLink href={c("/submission")} variant="primary">
               Open submission pack
             </JLink>

@@ -359,7 +359,6 @@ function SetUp({ cy, say }: { cy: Cy; say: (t: string) => void }) {
 
       <Panel className="flex flex-col gap-2 p-[22px]">
         <PanelHead title="Not applicable – from the standard" aside={<span className="text-xs text-j-muted">Entity annex list {entityMeta.annex}</span>} />
-        <p className="m-0 text-[13px] text-j-ink-3">Retrieved from the control and requirement flags in the standard builder; confirmed with proof.</p>
         {flagged.map((c) => (
           <div key={c.code} className="flex flex-wrap items-center gap-2.5 border-b border-j-line-soft py-2.5 text-sm last:border-0">
             <span className="min-w-[240px] flex-auto">

@@ -64,9 +64,6 @@ export default function ClosurePage() {
         <div className="flex flex-col gap-1.5">
           <span className="text-sm text-j-muted">After the governing body&apos;s final assessment</span>
           <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Record the official results and close the cycle</h1>
-          <p className="m-0 max-w-[820px] text-sm text-j-ink-3">
-            Enter the final score, then add only the controls the governing body rated partially compliant or non-compliant. Every other applicable control is recorded as fully compliant.
-          </p>
         </div>
         {closed && (
           <p className="m-0 rounded-xl bg-[#E7F3ED] px-4 py-3 text-sm font-semibold text-[#0E5A45]">

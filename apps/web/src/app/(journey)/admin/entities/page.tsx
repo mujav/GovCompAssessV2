@@ -48,7 +48,6 @@ export default function EntitiesPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Entities</h1>
-            <p className="m-0 max-w-[760px] text-sm text-j-ink-3">Government entities served on the platform. Sector and annex list drive which controls apply when a workspace is created.</p>
           </div>
           <JButton variant="primary" onClick={() => setAdding(true)}>
             + Add entity

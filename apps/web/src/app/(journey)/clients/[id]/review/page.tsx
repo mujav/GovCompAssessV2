@@ -52,7 +52,6 @@ export default function ReviewHubPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Index Owner · {cy.label}</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Review hub</h1>
-            <p className="m-0 text-sm text-j-ink-3">Everything that needs your decision or follow-up, in one place.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <JLink size="sm" variant="ghost" href={c("/requirements")}>

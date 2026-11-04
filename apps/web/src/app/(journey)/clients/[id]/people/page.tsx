@@ -53,9 +53,6 @@ export default function PeoplePage() {
               This workspace only
             </Pill>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">People and access</h1>
-            <p className="m-0 max-w-[820px] text-sm text-j-ink-3">
-              Everyone here sees {client.name}&apos;s {cy.workspace} workspace only. Index Owners add Control Owners and Management Viewers; the Platform Admin adds Index Owners.
-            </p>
           </div>
           <JButton variant="primary" disabled={closed} onClick={() => setInviting(true)}>
             + Invite person
@@ -298,7 +295,6 @@ function InviteDialog({ open, onClose, departments, controls, onInvite }: { open
       open={open}
       onClose={onClose}
       title="Invite person"
-      sub="They get an email invitation and see only this workspace."
       wide
       footer={
         <>

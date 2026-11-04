@@ -48,7 +48,6 @@ export default function AuditPage() {
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Audit trail</h1>
-            <p className="m-0 max-w-[820px] text-sm text-j-ink-3">Every sign-in, grant, standard and plan change, review decision, AI run and export. Entries cannot be edited or deleted.</p>
           </div>
           <span className="flex items-center gap-2">
             <Pill tone={intact ? "ok" : "bad"}>{intact ? "Hash chain intact" : "Hash chain broken"}</Pill>
