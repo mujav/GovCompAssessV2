@@ -17,7 +17,7 @@ type Lang = "en" | "ar";
 
 const T = {
   en: {
-    brand: "Compliance Workspace",
+    brand: "ComplAI",
     signIn: "Sign in",
     forgot: "Forgot password?",
     remember: "Keep me signed in on this device",
@@ -52,7 +52,7 @@ const T = {
     a11y: "Accessibility",
   },
   ar: {
-    brand: "مساحة الامتثال",
+    brand: "ComplAI",
     signIn: "تسجيل الدخول",
     forgot: "نسيت كلمة المرور؟",
     remember: "تذكرني على هذا الجهاز",

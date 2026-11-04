@@ -159,7 +159,7 @@ export function AppShell({
             <Icon name="shield" size={17} />
           </span>
           <span className="leading-[17px]">
-            <b className="text-sm">Compliance Workspace</b>
+            <b className="text-sm">ComplAI</b>
             <br />
             <span className="text-xs text-j-muted">{ROLE_OF[user.role].label}</span>
           </span>
