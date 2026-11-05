@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { LOCALE_BOOT, LocaleRoot } from "@/lib/i18n/locale";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -21,15 +22,19 @@ const plexArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Compliance Intelligence",
+  title: "ComplAI",
   description: "Configurable government compliance assessment platform · Qiyas pilot",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: LOCALE_BOOT }} />
+      </head>
       <body className={`${plexSans.variable} ${plexMono.variable} ${plexArabic.variable} antialiased`}>
         {children}
+        <LocaleRoot />
       </body>
     </html>
   );

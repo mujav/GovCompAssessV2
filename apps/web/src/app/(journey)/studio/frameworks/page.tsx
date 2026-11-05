@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-ui";
 import { PageHeader } from "@/components/journey/studio";
+import { EditionUse } from "@/components/cycle/edition-use";
 import { Button, TabBar } from "@/components/ui";
 import { requirementCounts } from "@/lib/admin/diff";
 import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from "@/lib/admin/library";
 import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
+import { useJourney } from "@/lib/journey/store";
 import type { FrameworkPackage, FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
 import { readFiles } from "@/lib/import/read-files";
 import { ASSESSED, ImportFlow, RequirementTree, UploadZone, inputCls, type ExtractMethod, type ImportSession } from "./import-flow";
@@ -33,7 +35,7 @@ function frameworkChecks(v: FrameworkVersion, others: FrameworkPackage[]): Check
       ]
     : [];
   return [
-    { ok: !dup, text: dup ? `Another framework in the library has this name: ${dup.name}` : "Name is unique in the library" },
+    { ok: !dup, text: dup ? `Another standard in the library has this name: ${dup.name}` : "Name is unique in the library" },
     { ok: v.levels.length > 0, text: v.levels.length ? `${v.levels.length} hierarchy levels` : "Add at least one hierarchy level" },
     { ok: labelsOk, text: labelsOk ? "Every level has English and Arabic labels" : "Every level needs English and Arabic labels" },
     { ok: patternsOk, text: patternsOk ? "Code patterns are unique" : "Code patterns must be filled in and unique" },
@@ -44,7 +46,9 @@ function frameworkChecks(v: FrameworkVersion, others: FrameworkPackage[]): Check
 }
 
 export default function FrameworkBuilderPage() {
-  const { state, update, editDraft, user } = useAdmin();
+  const { state, update, editDraft, user, removeFramework } = useAdmin();
+  const { workplaces } = useJourney();
+  const [deleting, setDeleting] = useState(false);
   // No framework selected = the start screen: upload a document first, then edit what was extracted.
   const [sel, setSel] = useState<string | null>(null);
   const [tab, setTab] = useState(0);
@@ -57,8 +61,8 @@ export default function FrameworkBuilderPage() {
   const newFramework = () => {
     const id = `fw-${state.seq + 1}`;
     const taken = new Set(state.frameworks.flatMap((f) => [f.live?.name, f.draft?.name]).filter(Boolean).map((n) => nameKey(n!)));
-    let name = "New framework";
-    for (let i = 2; taken.has(nameKey(name)); i++) name = `New framework ${i}`;
+    let name = "New standard";
+    for (let i = 2; taken.has(nameKey(name)); i++) name = `New standard ${i}`;
     update((s) => {
       s.seq += 1;
       s.frameworks.push({
@@ -77,7 +81,7 @@ export default function FrameworkBuilderPage() {
           ],
         },
       });
-      s.audit.unshift({ id: `ev-${s.seq}`, at: stamp(), who: user.name, text: `Created framework draft "${name}" v0.1.` });
+      s.audit.unshift({ id: `ev-${s.seq}`, at: stamp(), who: user.name, text: `Created standard draft "${name}" v0.1.` });
     });
     setSel(id);
     setTab(0);
@@ -113,7 +117,7 @@ export default function FrameworkBuilderPage() {
   if (session)
     return (
       <>
-        <PageHeader crumb="Studio / Framework Builder / New from document" title="Create a framework from a document" />
+        <PageHeader crumb="Platform Admin / Standard library / Draft from PDF with AI" title="Draft a standard from a document" />
         <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
           <ImportFlow
             session={session}
@@ -139,6 +143,16 @@ export default function FrameworkBuilderPage() {
       const l = d.levels.find((x) => x.id === id);
       if (l) Object.assign(l, patch);
     });
+  // A standard a workspace or cycle uses cannot be deleted; retire it with a new version instead.
+  const inUse = workplaces.filter((w) => w.frameworkId === pkg.id).length;
+  const deleteBlock = pkg.pendingCr ? `Decide ${pkg.pendingCr} first` : inUse ? `Used by ${inUse} workspace${inUse === 1 ? "" : "s"}` : pkg.usedByCycles > 0 ? `Used by ${pkg.usedByCycles} cycle${pkg.usedByCycles === 1 ? "" : "s"}` : "";
+  const onDelete = () => {
+    const r = removeFramework(pkg.id);
+    setDeleting(false);
+    if (!r.ok) return setNotice({ ok: false, text: r.error });
+    setSel(null);
+    setNotice({ ok: true, text: `Deleted ${fw.name} from the library.` });
+  };
   const checks = frameworkChecks(
     fw,
     state.frameworks.filter((f) => f.id !== pkg.id),
@@ -148,17 +162,33 @@ export default function FrameworkBuilderPage() {
   return (
     <>
       <PageHeader
-        crumb="Studio / Framework Builder"
+        crumb="Studio / Standard library"
         title={`${fw.name} · v${fw.version}`}
         actions={
-          <Button
-            onClick={() => {
-              setSel(null);
-              setNotice(null);
-            }}
-          >
-            ← All frameworks
-          </Button>
+          <span className="flex flex-wrap items-center gap-2">
+            {deleting ? (
+              <>
+                <span className="text-[13px] font-semibold">Delete {fw.name}? This cannot be undone.</span>
+                <Button className="border-bad text-bad" onClick={onDelete}>
+                  Delete standard
+                </Button>
+                <Button onClick={() => setDeleting(false)}>Cancel</Button>
+              </>
+            ) : (
+              <Button className="text-bad" disabled={!!deleteBlock} title={deleteBlock ? `${deleteBlock}; it cannot be deleted.` : undefined} onClick={() => setDeleting(true)}>
+                Delete
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setSel(null);
+                setDeleting(false);
+                setNotice(null);
+              }}
+            >
+              ← All standards
+            </Button>
+          </span>
         }
       />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
@@ -171,16 +201,27 @@ export default function FrameworkBuilderPage() {
                   {locked ? (
                     <h2 className="m-0 text-[17px] font-semibold">
                       {fw.name} · v{fw.version}
+                      {fw.nameAr && (
+                        <span className="ms-2 font-normal text-ink-2" dir="rtl" lang="ar" data-no-translate>
+                          {fw.nameAr}
+                        </span>
+                      )}
                     </h2>
                   ) : (
-                    <label className="flex items-center gap-2 text-[13px] font-semibold">
-                      <span className="sr-only">Framework name</span>
-                      <input value={fw.name} onChange={(e) => edit((d) => void (d.name = e.target.value))} className="h-10 rounded-lg border border-field px-2.5 text-[15px] font-semibold" />
-                      <span className="font-mono text-muted">v{fw.version}</span>
-                    </label>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <label className="flex items-center gap-2 text-[13px] font-semibold">
+                        <span className="sr-only">Standard name</span>
+                        <input value={fw.name} onChange={(e) => edit((d) => void (d.name = e.target.value))} className="h-10 rounded-lg border border-field px-2.5 text-[15px] font-semibold" />
+                        <span className="font-mono text-muted">v{fw.version}</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-[13px] font-semibold">
+                        <span className="sr-only">Arabic name</span>
+                        <input value={fw.nameAr ?? ""} placeholder="الاسم بالعربية" dir="rtl" lang="ar" onChange={(e) => edit((d) => void (d.nameAr = e.target.value || undefined))} className="h-10 rounded-lg border border-field px-2.5 text-[15px]" />
+                      </label>
+                    </span>
                   )}
                   <div className="text-xs text-muted">
-                    Issuing authority {fw.authority} · effective {fw.effective} · {fw.scoringNote}
+                    Issuing authority {fw.authority} · effective {fw.effective}
                   </div>
                 </div>
                 {pkg.live && pkg.usedByCycles > 0 && (
@@ -189,15 +230,15 @@ export default function FrameworkBuilderPage() {
                   </span>
                 )}
               </div>
-              <DraftBar kind="framework" id={pkg.id} checks={checks} />
+              <DraftBar kind="framework" id={pkg.id} checks={checks} direct />
             </div>
-            <TabBar label="Framework sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
+            <TabBar label="Standard sections" tabs={TABS} active={Math.max(tab, 0)} onSelect={setTab} className="border-b border-line-soft px-4 [&>button]:px-3" />
             <div className="flex flex-col gap-2.5 px-5 py-4">
               <LockNote kind="framework" id={pkg.id} />
               {tab <= 0 && (
                 <>
                   <div className="text-[13px] text-muted">
-                    Hierarchy levels are names, not code. Another framework can use pillar / objective / control / sub-control with the same engine.
+                    Hierarchy levels are names, not code. Another standard can use pillar / objective / control / sub-control with the same engine.
                   </div>
                   <div role="table" aria-label="Hierarchy levels" className="text-[13px]">
                     <div role="row" className="grid gap-2.5 border-b border-line py-2 text-xs font-semibold text-muted" style={{ gridTemplateColumns: LV_COLS }}>
@@ -282,7 +323,7 @@ export default function FrameworkBuilderPage() {
             <Checks checks={checks} />
             <div className="border-t border-line-soft pt-3 text-xs leading-[18px] text-muted">
               Criteria drafted by the Requirement Decomposer stay &ldquo;Draft – SME approval required&rdquo; and cannot be used as assessment logic until a
-              framework SME signs them off.
+              standard SME signs them off.
             </div>
           </aside>
         </div>
@@ -380,18 +421,21 @@ function StartScreen({
   onOpen: (id: string) => void;
   onBlank: () => void;
 }) {
+  const [ai, setAi] = useState<{ available: boolean } | null>(null);
+  useEffect(() => {
+    fetch("/api/frameworks/extract")
+      .then((r) => r.json())
+      .then(setAi)
+      .catch(() => setAi({ available: false }));
+  }, []);
   return (
     <>
-      <PageHeader crumb="Studio / Framework Builder" title="Framework Builder" actions={<Button onClick={onBlank}>Start from a blank framework</Button>} />
+      <PageHeader crumb="Platform Admin / Standard library" title="Standard library" actions={<Button onClick={onBlank}>+ New edition</Button>} />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
         {notice && <NoticeBar notice={notice} onOpen={onOpen} />}
-        <section aria-label="Create a framework from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
+        <section aria-label="Create a standard from a document" className="flex flex-col gap-4 rounded-[14px] border-2 border-brand bg-white px-6 py-5">
           <div className="flex flex-col gap-1">
-            <h2 className="m-0 text-lg font-semibold">Create a framework from a document</h2>
-            <p className="m-0 text-[13px] leading-5 text-muted">
-              Upload the framework, index or standards document. The platform extracts its levels, standards, requirements and evidence, then you review and edit the result
-              and create the framework.
-            </p>
+            <h2 className="m-0 text-lg font-semibold">Create a standard from a document</h2>
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2 p-0 text-[13px]">
             {[
@@ -411,7 +455,7 @@ function StartScreen({
           </ol>
           <fieldset className="m-0 flex flex-wrap items-center gap-2 border-0 p-0 text-[13px]">
             <legend className="sr-only">Extraction method</legend>
-            <span className="mr-1 text-xs font-semibold text-muted">Extract with</span>
+            <span className="me-1 text-xs font-semibold text-muted">Extract with</span>
             {(
               [
                 ["ai", "Claude (AI) · recommended for PDFs and Word"],
@@ -424,9 +468,16 @@ function StartScreen({
               </label>
             ))}
           </fieldset>
+          {method === "ai" && ai && !ai.available && (
+            <div role="alert" className="rounded-lg bg-warn-soft px-3 py-2 text-[13px] text-warn">
+              AI extraction is not configured on this server (ANTHROPIC_API_KEY is missing in apps/web/.env), so Claude cannot read documents yet. Set the key and
+              restart, or use the rule-based engine for documents with clear requirement codes.
+            </div>
+          )}
           <UploadZone busy={reading} onFiles={onFiles} />
         </section>
 
+        <EditionUse />
         <Library onOpen={onOpen} />
       </main>
     </>
@@ -476,18 +527,18 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
     .sort((a, b) => a.cur.name.localeCompare(b.cur.name));
 
   return (
-    <section aria-label="Framework library" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
+    <section aria-label="Standard library" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft px-5 py-3.5">
         <div className="flex flex-col">
-          <h2 className="m-0 text-base font-semibold">Framework library · {state.frameworks.length}</h2>
-          <span className="text-xs text-muted">One entry per framework or index. A document already in the library cannot be added again; upload a changed edition as a new version.</span>
+          <h2 className="m-0 text-base font-semibold">Standard library · {state.frameworks.length}</h2>
+          <span className="text-xs text-muted">One entry per standard or index. A document already in the library cannot be added again; upload a changed edition as a new version.</span>
         </div>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or authority" aria-label="Search the library" className="h-9 w-60 rounded-lg border border-field px-2.5 text-[13px]" />
       </div>
       <div className="overflow-x-auto">
-        <div role="table" aria-label="Framework library" className="min-w-[900px] text-[13px]">
+        <div role="table" aria-label="Standard library" className="min-w-[900px] text-[13px]">
           <div role="row" className="grid gap-3 border-b border-line bg-surface-2 px-5 py-2 text-xs font-semibold text-muted" style={{ gridTemplateColumns: LIB_COLS }}>
-            <span role="columnheader">Framework</span>
+            <span role="columnheader">Standard</span>
             <span role="columnheader">Live version</span>
             <span role="columnheader">Effective</span>
             <span role="columnheader">Published</span>
@@ -548,7 +599,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
                   </span>
                 </div>
                 {expanded && (
-                  <table className="mb-2.5 ml-5 w-[calc(100%-40px)] table-fixed border-collapse text-xs">
+                  <table className="mb-2.5 ms-5 w-[calc(100%-40px)] table-fixed border-collapse text-xs">
                     <colgroup>
                       <col className="w-[9%]" />
                       <col className="w-[12%]" />
@@ -560,7 +611,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
                       <col />
                     </colgroup>
                     <thead>
-                      <tr className="text-left text-muted">
+                      <tr className="text-start text-muted">
                         <th className="py-1 font-semibold">Version</th>
                         <th className="py-1 font-semibold">Status</th>
                         <th className="py-1 font-semibold">Effective</th>
@@ -592,7 +643,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
               </div>
             );
           })}
-          {rows.length === 0 && <div className="px-5 py-6 text-muted">No framework matches the search.</div>}
+          {rows.length === 0 && <div className="px-5 py-6 text-muted">No standard matches the search.</div>}
         </div>
       </div>
     </section>

@@ -17,7 +17,7 @@ const req = (p: Partial<WsRequirement>): WsRequirement => ({
 describe("command center metrics", () => {
   it("counts every requirement once in the status mix", () => {
     const mix = statusMix(ctx);
-    expect(Object.values(mix).reduce((n, c) => n + c.length, 0)).toBe(350);
+    expect(Object.values(mix).reduce((n, c) => n + c.length, 0)).toBe(ctx.reqs.length);
   });
 
   it("official readiness only counts accepted results", () => {
@@ -72,6 +72,6 @@ describe("command center metrics", () => {
     const codes = atRisk(ctx).slice(0, 2).map((r) => r.code);
     const d = composeDraft("evidence-request", codes, ctx);
     for (const c of codes) expect(d.body).toContain(c);
-    expect(executiveUpdate(ctx)).toContain(`${readiness(ctx).projected.pct}%`);
+    expect(executiveUpdate(ctx)).toContain("applicable requirements are accepted");
   });
 });

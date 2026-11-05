@@ -60,25 +60,23 @@ describe("framework library", () => {
   });
 
   it("lists every version of a framework newest first, with dates", () => {
-    const qiyas = frameworks.find((f) => f.id === "fw-qiyas")!;
-    expect(versionsOf(qiyas).map((v) => [v.version, v.status, v.publishedAt ?? "—"])).toEqual([
-      ["1.3", "draft", "—"],
-      ["1.2", "live", "15 Dec 2025"],
-      ["1.1", "superseded", "12 Jun 2025"],
-      ["1.0", "superseded", "05 Dec 2024"],
+    const nca = frameworks.find((f) => f.id === "fw-nca")!;
+    expect(versionsOf({ ...nca, draft: { ...nca.live!, version: "2025", publishedAt: undefined } }).map((v) => [v.version, v.status, v.publishedAt ?? "—"])).toEqual([
+      ["2025", "draft", "—"],
+      ["2024", "live", "20 Feb 2024"],
+      ["2018", "superseded", "15 Sep 2018"],
     ]);
   });
 
   it("moves the outgoing live version into the history when a new one is published", () => {
     const qiyas = structuredClone(frameworks.find((f) => f.id === "fw-qiyas")!);
+    qiyas.draft = { ...qiyas.live!, version: "5.1", publishedAt: undefined };
     retireLive(qiyas, "03 Nov 2026");
     qiyas.live = qiyas.draft;
     qiyas.draft = undefined;
     expect(versionsOf(qiyas).map((v) => [v.version, v.status, v.publishedAt ?? "—", v.supersededAt ?? "—"])).toEqual([
-      ["1.3", "live", "03 Nov 2026", "—"],
-      ["1.2", "superseded", "15 Dec 2025", "03 Nov 2026"],
-      ["1.1", "superseded", "12 Jun 2025", "15 Dec 2025"],
-      ["1.0", "superseded", "05 Dec 2024", "12 Jun 2025"],
+      ["5.1", "live", "03 Nov 2026", "—"],
+      ["5.0", "superseded", "Apr 2026", "03 Nov 2026"],
     ]);
   });
 });

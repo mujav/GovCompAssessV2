@@ -55,6 +55,10 @@ export interface FrameworkRequirement {
   parent?: string;
   title: string;
   text?: string;
+  /** Arabic wording, when the standard is published in Arabic too. */
+  titleAr?: string;
+  textAr?: string;
+  evidenceAr?: string;
   /** "high" | "med" | "low" or a numeric weight as written in the source. */
   weight?: string;
   evidence?: string;
@@ -64,6 +68,8 @@ export interface FrameworkRequirement {
 
 export interface FrameworkVersion {
   name: string;
+  /** The standard's Arabic name. */
+  nameAr?: string;
   version: string;
   authority: string;
   effective: string;
@@ -71,6 +77,8 @@ export interface FrameworkVersion {
   levels: HierarchyLevel[];
   importJob?: ImportJob;
   requirements?: FrameworkRequirement[];
+  /** "none" when the framework publishes no weights and every requirement counts equally. */
+  weighting?: "weighted" | "none";
   /** Full SHA-256 of the source documents, so the same file cannot be added twice. */
   fileHashes?: string[];
   /** Date the version was created (draft) and went live, e.g. "02 Nov 2026". */
@@ -222,6 +230,8 @@ export interface AdminState {
   currentUserId: string;
   users: AdminUser[];
   frameworks: FrameworkPackage[];
+  /** Seeded standards the admin deleted, so loading saved state does not add them back. */
+  deletedFrameworks?: string[];
   scoring: Versioned<ScoringScheme>;
   policies: Versioned<AcceptancePolicy>[];
   rules: Versioned<AutomationRule>[];

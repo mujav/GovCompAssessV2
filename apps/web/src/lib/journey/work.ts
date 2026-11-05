@@ -1,27 +1,49 @@
-// Consultant view of the workspace records: where each requirement sits in the consultant's
-// pipeline, derived from its work and review state, plus the moves the consultant makes.
+// Where each requirement sits in its workplace's pipeline, derived from its work and review
+// state and its evidence, plus the moves the index owner makes. There is one review layer:
+// the control owner submits, the index owner accepts or returns.
 
 import type { ComplianceStatus } from "@/lib/admin/types";
 import type { WsRequirement } from "@/lib/workspace/data";
 
-export type Stage = "start" | "prog" | "rev" | "cli" | "acc";
+export type Stage = "start" | "prog" | "rev" | "acc";
 
 export const STAGES: { key: Stage; label: string; color: string }[] = [
   { key: "start", label: "Not started", color: "#C9D1CD" },
   { key: "prog", label: "In progress", color: "#E0A100" },
   { key: "rev", label: "In review", color: "#3A6FB8" },
-  { key: "cli", label: "With client", color: "#7E8FD9" },
   { key: "acc", label: "Accepted", color: "#1F9D6E" },
 ];
 
 export const STAGE_OF: Record<Stage, (typeof STAGES)[number]> = Object.fromEntries(STAGES.map((s) => [s.key, s])) as never;
 
+const RANK: Record<Stage, number> = { start: 0, prog: 1, rev: 2, acc: 3 };
+const later = (a: Stage, b: Stage) => (RANK[b] > RANK[a] ? b : a);
+
+/** What the uploaded evidence says about a requirement: files in hand, and whether the AI assessor has reviewed all of them. */
+export interface EvidenceSignal {
+  files: number;
+  assessed: boolean;
+  /** Changes whenever a file is added or removed or a new assessment runs. */
+  sig: string;
+}
+
+/** Requirement as the stage model sees it: the shared record plus its uploaded evidence. */
+export type StagedRequirement = WsRequirement & { upload?: EvidenceSignal };
+
+/** Lowest stage the evidence justifies: files uploaded → in progress; all of them assessed by AI → ready for L1 review. */
+export function evidenceStage(u: EvidenceSignal | undefined): Stage | undefined {
+  if (!u || !u.files) return undefined;
+  return u.assessed ? "rev" : "prog";
+}
+
 /** Consultant moves recorded on top of the base records. */
 export interface WorkOverlay {
-  /** Stage set by the consultant (L1 approve, send to client, client accept). */
+  /** Stage set by the index owner (accept, return) or the control owner (submit for review). */
   stage: Record<string, Stage>;
   /** Requirements the client returned; cleared when the consultant re-sends. */
   returned: string[];
+  /** Evidence signature when the consultant last moved each requirement. Newer evidence can move it on again. */
+  seen?: Record<string, string>;
 }
 
 export const EMPTY_OVERLAY: WorkOverlay = { stage: {}, returned: [] };
@@ -30,28 +52,40 @@ export const EMPTY_OVERLAY: WorkOverlay = { stage: {}, returned: [] };
 export function baseStage(r: WsRequirement): Stage {
   if (r.review === "accepted" || r.work === "closed" || r.work === "sub" || r.work === "ready") return "acc";
   if (r.work === "none" || r.work === "start") return "start";
-  if (r.review === "l2" || r.review === "override") return "cli";
+  // Records approved under the earlier two-layer review count as accepted.
+  if (r.review === "l2" || r.review === "override") return "acc";
   if (r.work === "review" || r.work === "evsub" || r.review === "l1") return "rev";
   return "prog";
 }
 
-export function stageOf(r: WsRequirement, o: WorkOverlay): Stage {
-  return o.stage[r.code] ?? baseStage(r);
+/**
+ * Where the requirement sits now. A consultant move holds until new evidence arrives after it;
+ * evidence only ever moves a requirement forward, never back.
+ */
+export function stageOf(r: StagedRequirement, o: WorkOverlay): Stage {
+  const floor = evidenceStage(r.upload);
+  // Moves saved as "with client" under the earlier two-layer review were index-owner approvals.
+  const saved = o.stage[r.code] as Stage | "cli" | undefined;
+  const moved: Stage | undefined = saved === "cli" ? "acc" : saved;
+  if (moved) return floor && r.upload!.sig !== (o.seen?.[r.code] ?? "") ? later(moved, floor) : moved;
+  return floor ? later(baseStage(r), floor) : baseStage(r);
 }
 
-export function isReturned(r: WsRequirement, o: WorkOverlay) {
+/** Returned by the client and not yet back in review. */
+export function isReturned(r: StagedRequirement, o: WorkOverlay) {
+  if (RANK[stageOf(r, o)] >= RANK.rev) return false;
   return o.returned.includes(r.code) || (r.work === "returned" && !(r.code in o.stage));
 }
 
-export function stageCounts(reqs: WsRequirement[], o: WorkOverlay): Record<Stage, number> {
-  const out: Record<Stage, number> = { start: 0, prog: 0, rev: 0, cli: 0, acc: 0 };
+export function stageCounts(reqs: StagedRequirement[], o: WorkOverlay): Record<Stage, number> {
+  const out: Record<Stage, number> = { start: 0, prog: 0, rev: 0, acc: 0 };
   for (const r of reqs) out[stageOf(r, o)] += 1;
   return out;
 }
 
 /** Overview pipeline: the five stages with "Waiting on SPOC" and "Returned" split out. */
-export function pipelineBands(reqs: WsRequirement[], o: WorkOverlay) {
-  const bands = { start: 0, draft: 0, spoc: 0, rev: 0, cli: 0, acc: 0, ret: 0 };
+export function pipelineBands(reqs: StagedRequirement[], o: WorkOverlay) {
+  const bands = { start: 0, draft: 0, spoc: 0, rev: 0, acc: 0, ret: 0 };
   for (const r of reqs) {
     const s = stageOf(r, o);
     if (isReturned(r, o) && s !== "acc") bands.ret += 1;

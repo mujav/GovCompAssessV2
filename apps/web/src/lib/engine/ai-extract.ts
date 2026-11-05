@@ -148,7 +148,7 @@ Return:
 - The framework name, issuing authority and version as stated.
 - The hierarchy levels from the top down (for example Perspective › Axis › Standard › Requirement, or Domain › Control › Sub-control), each with an English and an Arabic name. If the document lists numbered implementation requirements or controls inside each standard, include them as the deepest level.
 - Which level compliance is judged at.
-- The page range that holds requirement content in the main file, using the page numbers of the <page> tags (tables of contents usually give it). Use 0 when you cannot tell.
+- The page range that holds the assessable content (the chapter of standards, controls or requirements) in the main file, using the page numbers of the <page> tags; tables of contents usually give it. Leave out introductions, objectives, methodology, scope, definitions, annexes, measurement mechanisms, FAQs and lists of entities. Use 0 when you cannot tell.
 - The upper levels of the tree as far as these pages show them, with codes and titles. Use the document's codes exactly; give an unnumbered structural level short invented codes (P1, P2…) and keep them stable.
 
 ${DATA_RULE}`;
@@ -160,8 +160,8 @@ Rules:
 - Copy text in the document's own language and words. Repair only PDF extraction damage: letters split by stray spaces, reversed brackets, broken lines. Keep sub-items (أ. ب. / a. b.) on their own lines.
 - Standards or controls: title is the name; text is the objective or description, then a line with the scope if one is stated.
 - When a standard lists numbered implementation requirements, make each one a child node coded <standard code>-<n> (for example 5.1.2-3) and put the matching numbered evidence item in its evidence field. Evidence that belongs to the standard as a whole goes on the standard.
-- weight: only if the document states a weight, priority or score for the node.
-- Do not output glossary entries, annex text, page headers or footers, or tables of contents.
+- weight: only if the document states a weight, priority or score for that node. Many frameworks (Qiyas, for example) publish none: then leave it empty. Never guess one.
+- Output only what an entity is assessed against: the hierarchy nodes, their objective or description, the requirements and the evidence asked for. Leave out everything else even if it appears in these pages: introductions, methodology, how the measurement cycle runs, compliance levels, definitions and glossaries, annexes, FAQs, lists of entities, related decrees and circulars, page headers and footers, tables of contents and figures.
 - The first page may repeat the end of the previous run: include a node from it only if it starts there or continues past it.
 
 ${DATA_RULE}`;
@@ -308,5 +308,5 @@ export function aiToExtraction(
   if (outline.authority.trim()) meta.authority = outline.authority.trim();
   if (outline.version.trim()) meta.version = outline.version.trim();
 
-  return { files: ctx.files, sheets: ctx.sheets ?? [], records: ctx.records, meta, levels, nodes, orphans: [], seq: nodes.length };
+  return { files: ctx.files, sheets: ctx.sheets ?? [], records: ctx.records, meta, levels, nodes, orphans: [], seq: nodes.length, weighting: "none" };
 }

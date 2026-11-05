@@ -1,7 +1,7 @@
 // Draft wording for Command Center actions. Drafts are prepared from records; nothing is
 // sent, escalated or re-opened until an authorized user approves the draft.
 
-import { atRisk, domainReadiness, kpis, opportunities, readiness, type Context, type DraftKind } from "@/lib/engine/metrics";
+import { atRisk, kpis, opportunities, type Context, type DraftKind } from "@/lib/engine/metrics";
 import { daysBetween, shortDate, SUBMISSION_DEADLINE } from "./data";
 
 export interface Draft {
@@ -141,32 +141,29 @@ export function composeDraft(kind: DraftKind, codes: string[], ctx: Context): Pi
 }
 
 export function executiveUpdate(ctx: Context): string {
-  const { projected, official } = readiness(ctx);
+  // Requirement counts only: government indices do not publish weights, so no score is computed.
   const k = Object.fromEntries(kpis(ctx).map((x) => [x.id, x]));
-  const weak = domainReadiness(ctx).filter((d) => d.rag !== "green").sort((a, b) => a.pct - b.pct);
+  const live = ctx.reqs.filter((r) => r.status !== "na");
+  const share = (list: typeof live) => (list.length ? Math.round((list.filter((r) => r.review === "accepted").length / list.length) * 100) : 0);
+  const domains = [...new Set(live.map((r) => r.domain))].map((d) => ({ domain: d, pct: share(live.filter((r) => r.domain === d)) })).sort((a, b) => a.pct - b.pct);
   const risks = atRisk(ctx).slice(0, 3);
-  const opps = opportunities(ctx, 3);
   return [
     `Qiyas 2026 · Cycle 1 readiness, ${shortDate(ctx.today)}`,
     "",
-    `Projected readiness is ${projected.pct}% against the ${ctx.scheme.target}% target; ${official.pct}% is already accepted.`,
+    `${live.filter((r) => r.review === "accepted").length} of ${live.length} applicable requirements are accepted (${share(live)}%).`,
     `${daysBetween(ctx.today, SUBMISSION_DEADLINE)} days remain to submission.`,
     "",
     "Headlines",
-    `• ${k.accepted.value} requirements accepted compliant (${k.accepted.note}).`,
     `• Evidence readiness ${k.evidence.value}, ${k.evidence.note}.`,
     `• ${k.overdue.value} overdue actions (${k.overdue.note}); ${k.blockers.value} critical blockers.`,
     "",
-    "Domains below green",
-    ...(weak.length ? weak.map((d) => `• ${d.domain}: ${d.pct}%`) : ["• None"]),
+    "Domains with the fewest accepted requirements",
+    ...domains.slice(0, 3).map((d) => `• ${d.domain}: ${d.pct}%`),
     "",
     "Most urgent",
     ...risks.map((r) => `• ${r.code} ${r.title}, ${r.department}, due ${shortDate(r.due)}`),
     "",
-    "Biggest opportunities",
-    ...opps.map((o) => `• ${o.code} ${o.title}: +${o.impact} pts`),
-    "",
-    `Scores calculated by scoring scheme ${ctx.scheme.code} v${ctx.scheme.version}. AI drafted this summary; figures come from the scoring engine.`,
+    "AI drafted this summary; figures are requirement counts from the workspace.",
   ].join("\n");
 }
 

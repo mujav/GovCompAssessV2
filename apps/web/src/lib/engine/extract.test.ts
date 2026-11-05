@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
 import mammoth from "mammoth";
+import { QIYAS_V12_REQUIREMENTS } from "@/lib/admin/qiyas-base";
 import { createSeed } from "@/lib/admin/seed";
 import { diffConfig, diffRequirements } from "@/lib/admin/diff";
 import type { FrameworkVersion } from "@/lib/admin/types";
@@ -11,6 +12,7 @@ import {
   checkExtraction,
   deleteNode,
   dismissOrphan,
+  dropContentsPages,
   extractFramework,
   levelCounts,
   mergeDuplicates,
@@ -18,6 +20,7 @@ import {
   normalizeWeight,
   parentCode,
   patternOf,
+  setWeighting,
   splitCode,
   codeMatcher,
   toFrameworkDraft,
@@ -117,7 +120,7 @@ describe("CSV", () => {
     expect(byCode(ex, "1.1.1-1").loc).toEqual({ file: "flat.csv", sheet: undefined, row: 7 });
   });
 
-  it("reports duplicates, missing parents, orphan rows and missing weights with their rows", () => {
+  it("reports duplicates, missing parents and orphan rows with their rows, never missing weights", () => {
     const w = checkExtraction(ex);
     const dup = w.find((x) => x.kind === "duplicate")!;
     expect(dup.message).toContain("1.1.1-2");
@@ -129,7 +132,7 @@ describe("CSV", () => {
     const orphan = w.find((x) => x.kind === "orphan")!;
     expect(orphan.loc?.row).toBe(11);
     expect(orphan.message).toContain("Stakeholder map maintained");
-    expect(w.filter((x) => x.kind === "missing_weight").map((x) => x.message)).toEqual(["Weight missing for 2.1.1-1"]);
+    expect(w.filter((x) => x.kind === "missing_weight")).toEqual([]);
   });
 
   it("counts nodes per level", () => {
@@ -148,7 +151,22 @@ describe("hierarchical spreadsheet columns", () => {
     expect(ex.levels[2].assessed).toBe("accepted");
     expect(parentOf(ex, "ECC 1-1-2")).toBe("ECC 1-1");
     expect(byCode(ex, "ECC 1-1-1").text).toMatch(/^A cybersecurity strategy/);
-    expect(kinds(ex)).toEqual(expect.arrayContaining(["duplicate", "orphan", "missing_weight"]));
+    // The file has no weights, so the framework starts unweighted and nothing is flagged.
+    expect(ex.weighting).toBe("none");
+    expect(kinds(ex)).toEqual(["duplicate", "orphan"]);
+    const weighted = setWeighting(ex, "weighted");
+    expect(kinds(weighted)).toEqual(expect.arrayContaining(["duplicate", "orphan", "missing_weight"]));
+    expect(toFrameworkDraft(applyDefaultWeight(weighted)).requirements.some((r) => r.weight)).toBe(true);
+    expect(toFrameworkDraft(setWeighting(applyDefaultWeight(weighted), "none")).requirements.some((r) => r.weight)).toBe(false);
+  });
+
+  it("skips table-of-contents pages in paged documents", () => {
+    const toc = ["5. Standards 11", "5.1 Planning 11", "5.2 Governance 14", "5.3 Architecture 18", "5.4 Culture 23", "6. Definitions 126"].map((text, i) => ({ page: 2, line: i + 1, text }));
+    const body = ["5.1 Planning", "5.1.1 Strategic plan", "5.2 Governance", "5.2.1 Governance framework approved by the board in 2024"].map((text, i) => ({ page: 11, line: i + 1, text }));
+    expect(dropContentsPages([...toc, ...body])).toEqual(body);
+    const ex = extractFramework([{ kind: "text", file: "std.pdf", lines: [...toc, ...body] }]);
+    expect(kinds(ex)).toEqual([]);
+    expect(ex.nodes.map((n) => n.code)).toEqual(["5.1", "5.1.1", "5.2", "5.2.1"]);
   });
 
   it("reads the Qiyas workbook, skips the prose sheet and finds criteria (xlsx)", () => {
@@ -160,7 +178,7 @@ describe("hierarchical spreadsheet columns", () => {
     expect(byCode(ex, "1").title).toBe("Strategy & Governance");
     expect(parentOf(ex, "1.1.1")).toBe("1");
     expect(parentOf(ex, "1.1.1-1-C2")).toBe("1.1.1-1");
-    expect(checkExtraction(ex).map((w) => w.message)).toEqual(["Weight missing for 2.2.1-2", "Weight missing for 3.1.2-2"]);
+    expect(checkExtraction(ex).map((w) => w.message)).toEqual([]);
   });
 });
 
@@ -211,7 +229,7 @@ describe("JSON, Word and PDF", () => {
       ["Standard", "المعيار", "#.#"],
     ]);
     expect(byCode(ex, "1.2").evidence).toBe("Screenshots\nAnalytics");
-    expect(checkExtraction(ex).map((w) => w.message)).toEqual(["Weight missing for 2.1"]);
+    expect(checkExtraction(ex).map((w) => w.message)).toEqual([]);
   });
 
   it("uses explicit JSON levels", () => {
@@ -267,7 +285,7 @@ describe("JSON, Word and PDF", () => {
     const ex = extractFramework([pdfItemsToDoc("css.pdf", pages)]);
     expect(ex.levels.map((l) => l.pattern)).toEqual(["CSS-#", "CSS-#.#"]);
     expect(byCode(ex, "CSS-2.3").loc.page).toBe(2);
-    expect(kinds(ex)).toEqual(["duplicate", "missing_weight"]);
+    expect(kinds(ex)).toEqual(["duplicate"]);
   });
 });
 
@@ -335,7 +353,8 @@ describe("review edits", () => {
 
 describe("accepting into Admin Studio", () => {
   const seed = createSeed();
-  const live = seed.frameworks[0].live as FrameworkVersion;
+  // The sample workbook is derived from the dummy v1.2 tree, so it is diffed against that.
+  const live = { ...(seed.frameworks[0].live as FrameworkVersion), version: "1.2", requirements: QIYAS_V12_REQUIREMENTS };
   const ex = applyDefaultWeight(extractFramework(workbookDocs("qiyas-2026-v1.3.xlsx")));
 
   it("produces levels and requirements in tree order with parent codes", () => {
@@ -355,7 +374,7 @@ describe("accepting into Admin Studio", () => {
     expect(d.removed.map((r) => r.code)).toEqual(["2.1.2-2"]);
     expect(d.changed.map((c) => [c.after.code, c.fields])).toEqual([
       ["1.1.1-2", ["title"]],
-      ["3.2.1-2", ["weight", "evidence"]],
+      ["3.2.1-2", ["evidence"]],
     ]);
     const rows = diffConfig("framework", live, { ...live, version: "1.3", requirements });
     expect(rows.filter((r) => /^[+~−] /.test(r.label)).map((r) => r.label)).toEqual(["+ 1.2.1-2", "+ 2.1.1-1-C1", "+ 2.2.1-2", "+ 3.1.2-2", "~ 1.1.1-2", "~ 3.2.1-2", "− 2.1.2-2"]);

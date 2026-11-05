@@ -3,23 +3,26 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
+import { LevelCellView } from "@/components/journey/levels";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { daysBetween } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
+import { useIndexLevels } from "@/lib/journey/use-levels";
 import { useClientWork } from "@/lib/journey/use-work";
 import { codeKey, initials, stageOf } from "@/lib/journey/work";
 
-// 10 · My work. Everything the consultant has handed off or must act on, by counterpart.
+// 10 · My work. What the index owner must review and what is waiting on control owners.
 
-const TABS = ["Reviews", "To SPOCs", "To client", "Escalations"] as const;
-const RULES = ["Auto-remind every 3 days", "Escalate after 2 reminders", "Weekly summary to index owner"];
+const TABS = ["Reviews", "With Control Owners", "Escalations"] as const;
+const RULES = ["Auto-remind every 3 days", "Escalate after 2 reminders", "Weekly summary to Index Owner"];
 const PATH = [
-  ["SPOC", "Day 0"],
+  ["Control Owner", "Day 0"],
   ["Department head", "After 2 reminders"],
-  ["Index owner", "After 10 days"],
+  ["Index Owner", "After 10 days"],
 ];
 
 interface Row {
@@ -44,7 +47,9 @@ interface WorkScreen {
 const ago = (d: number) => (d <= 0 ? "Today" : d === 1 ? "Yesterday" : `${d} d ago`);
 
 export default function MyWorkPage() {
-  const { client, ws, reqs, overlay, move, ret, log } = useClientWork();
+  const { client, ws, reqs, overlay, move, log, framework, workspace } = useClientWork();
+  const levels = useIndexLevels(framework, workspace, reqs, client.id);
+  const { send, drawer } = useDraftSender();
   const [tab, setTab] = useState(0);
   const [s, set] = useScreenState<WorkScreen>(`work-screen.${client.id}`, { rules: [true, true, false], reminded: {}, escalated: [] });
   const [toast, setToast] = useState("");
@@ -77,7 +82,10 @@ export default function MyWorkPage() {
         role: ai ? `${r.status === "comp" ? "Ready" : "Not ready"} · ${r.status === "comp" ? 94 : 86}%` : "New evidence",
         since: ago(Math.abs(daysBetween(r.due, today)) % 4),
         st: ["To review", "cx"],
-        actions: [{ label: "Review", href: c(`/requirements/${r.code}`), primary: true }],
+        actions: [
+          { label: "Review", href: c(`/requirements/${r.code}`), primary: true },
+          { label: "Accept", run: () => (move([r.code], "acc", `Accepted ${r.code}`), flash(`${r.code} accepted. It is now in the submission pack.`)) },
+        ],
       };
     });
     const open = ws.ctx.actions.filter((a) => {
@@ -109,10 +117,10 @@ export default function MyWorkPage() {
                   {
                     label: "Escalate",
                     run: () => {
-                      ws.createDraft("escalation", [a.code]);
-                      set((d) => void d.escalated.unshift({ id: `ESC-${10 + d.escalated.length}`, dept: a.department, who: "Department head", codes: [a.code] }));
-                      log(`Escalated ${a.code} to the ${a.department} head`);
-                      flash(`Escalation drafted for ${a.code}. Review it in Outbox before it is sent.`);
+                      send("escalation", [a.code], () => {
+                        set((d) => void d.escalated.unshift({ id: `ESC-${10 + d.escalated.length}`, dept: a.department, who: "Department head", codes: [a.code] }));
+                        flash(`Escalation sent to the ${a.department} head for ${a.code}.`);
+                      });
                     },
                   },
                 ]
@@ -120,28 +128,6 @@ export default function MyWorkPage() {
           ],
         };
       });
-    const client_: Row[] = byStage("cli").map((r) => ({
-      key: r.code,
-      t: r.title,
-      code: r.code,
-      href: c(`/requirements/${r.code}`),
-      av: "NA",
-      who: "Noura A.",
-      role: "Index owner",
-      since: ago(Math.abs(daysBetween(r.due, today)) % 9),
-      st: ["Reviewing", "warn"],
-      actions: [
-        {
-          label: "Record acceptance",
-          primary: true,
-          run: () => {
-            move([r.code], "acc", `Noura A. accepted ${r.code}`);
-            flash(`${r.code} accepted by the client. It is now in the submission pack.`);
-          },
-        },
-        { label: "Returned", run: () => ret([r.code], `Noura A. returned ${r.code}`) },
-      ],
-    }));
     const esc: Row[] = [
       ...s.escalated.map((e) => ({
         key: e.id,
@@ -152,16 +138,16 @@ export default function MyWorkPage() {
         who: e.who,
         role: e.dept,
         since: "Today",
-        st: ["Draft · in Outbox", "ai"] as [string, PillTone],
+        st: ["Sent", "cx"] as [string, PillTone],
         actions: [{ label: "Open", href: c(`/requirements/${e.codes[0]}`) }],
       })),
-      { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c("/departments"), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("/departments") }] },
-      { key: "ESC-01", t: "IT & Digital · catalogue", code: "ESC-01", href: c("/departments"), av: "KA", who: "Khalid A.", role: "IT & Digital", since: "9 d ago", st: ["Answered", "ok"], actions: [{ label: "Open", href: c("/departments") }] },
+      { key: "ESC-02", t: "Human Capital · 9 overdue", code: "ESC-02", href: c(""), av: "HD", who: "Hamad D.", role: "Exec. Director, HC", since: "1 d ago", st: ["Opened", "cx"], actions: [{ label: "Open", href: c("") }] },
+      { key: "ESC-01", t: "IT & Digital · catalogue", code: "ESC-01", href: c(""), av: "KA", who: "Khalid A.", role: "IT & Digital", since: "9 d ago", st: ["Answered", "ok"], actions: [{ label: "Open", href: c("") }] },
     ];
-    return { reviews, spoc, client: client_, esc, overdue: open.filter((a) => a.due < today) };
+    return { reviews, spoc, esc, overdue: open.filter((a) => a.due < today) };
   }, [reqs, overlay, ws, s, today, client.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const lists = [data.reviews, data.spoc, data.client, data.esc];
+  const lists = [data.reviews, data.spoc, data.esc];
   const rows = lists[tab];
 
   return (
@@ -209,22 +195,30 @@ export default function MyWorkPage() {
         <div className="flex flex-wrap items-start gap-3.5">
           <Panel className="min-w-0 flex-[3_1_640px] overflow-hidden">
             <div className="overflow-x-auto">
-              <div role="table" aria-label={TABS[tab]} className="min-w-[760px] text-sm">
-                <div role="row" className="grid grid-cols-[2.2fr_1.5fr_0.8fr_1fr_1.4fr] gap-3 border-b border-j-line px-[18px] py-2.5 text-xs font-semibold text-j-muted">
-                  {["Requirement", "With", "Since", "Status", ""].map((h, i) => (
+              <div role="table" aria-label={TABS[tab]} className="min-w-[1180px] text-sm">
+                <div role="row" className="grid grid-cols-[1fr_1fr_1.3fr_2fr_1.5fr_0.8fr_1fr_1.4fr] gap-3 border-b border-j-line px-[18px] py-2.5 text-xs font-semibold text-j-muted">
+                  {[...levels.labels, "With", "Since", "Status", ""].map((h, i) => (
                     <span key={i} role="columnheader">
                       {h}
                     </span>
                   ))}
                 </div>
                 {rows.slice(0, 40).map((r) => (
-                  <div key={r.key} role="row" className="grid grid-cols-[2.2fr_1.5fr_0.8fr_1fr_1.4fr] items-center gap-3 border-b border-j-line-soft px-[18px] py-3">
-                    <span role="cell" className="min-w-0">
-                      <Link href={r.href} className="block truncate font-semibold text-j-ink hover:text-cx">
-                        {r.t}
-                      </Link>
-                      <span className="font-mono text-xs text-j-muted">{r.code}</span>
-                    </span>
+                  <div key={r.key} role="row" className="grid grid-cols-[1fr_1fr_1.3fr_2fr_1.5fr_0.8fr_1fr_1.4fr] items-center gap-3 border-b border-j-line-soft px-[18px] py-3">
+                    {(reqs.some((x) => x.code === r.code) ? levels.pathOf(r.code, r.t) : levels.labels.map(() => ({ code: "", name: "" }))).map((cell, i) =>
+                      i === levels.rowLevel ? (
+                        <span key={i} role="cell" className="min-w-0">
+                          <Link href={r.href} className="block truncate font-semibold text-j-ink hover:text-cx">
+                            {r.t}
+                          </Link>
+                          <span className="font-mono text-xs text-j-muted">{r.code}</span>
+                        </span>
+                      ) : (
+                        <span key={i} role="cell" className="min-w-0">
+                          <LevelCellView cell={cell} />
+                        </span>
+                      ),
+                    )}
                     <span role="cell" className="flex min-w-0 items-center gap-2">
                       <Avatar initials={r.av} size={30} bg={r.av === "AI" ? "#EEEDFD" : undefined} fg={r.av === "AI" ? "#4F46E5" : undefined} />
                       <span className="min-w-0 leading-[17px]">
@@ -298,6 +292,7 @@ export default function MyWorkPage() {
           </aside>
         </div>
       </JMain>
+    {drawer}
     </ClientShell>
   );
 }

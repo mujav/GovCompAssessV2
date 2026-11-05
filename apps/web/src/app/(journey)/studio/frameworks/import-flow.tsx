@@ -24,6 +24,7 @@ import {
   levelCounts,
   mergeDuplicates,
   mergeNodes,
+  setWeighting,
   toFrameworkDraft,
   treeOrder,
   updateLevel,
@@ -99,8 +100,8 @@ export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files:
           disabled && "opacity-60",
         )}
       >
-        <b className="text-sm">{busy ? "Reading files…" : "Drop the framework document here"}</b>
-        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one framework.</span>
+        <b className="text-sm">{busy ? "Reading files…" : "Drop the standard document here"}</b>
+        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one standard.</span>
         <input
           ref={input}
           type="file"
@@ -144,7 +145,7 @@ const KIND_LABEL: Record<WarningKind, string> = {
 
 function prettyName(file: string) {
   const base = file.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
-  return base ? base[0].toUpperCase() + base.slice(1) : "Imported framework";
+  return base ? base[0].toUpperCase() + base.slice(1) : "Imported standard";
 }
 
 export type ExtractMethod = "ai" | "rules";
@@ -219,7 +220,9 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
       .then(({ ex, run }) => setResult({ ex, method: "ai", run }))
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
-        if (e instanceof AiUnavailable) setResult(rulesResult(session, `${e.message} The rule-based engine was used instead.`));
+        // No silent fallback: on a long document the rule-based engine also picks up contents
+        // pages, annexes and glossaries, so the admin chooses it knowingly.
+        if (e instanceof AiUnavailable) setFailed(`${e.message} Ask the platform administrator to set the Claude API key, or use the rule-based engine for documents with clear requirement codes.`);
         else setFailed(e instanceof Error ? e.message : "The extraction failed.");
       })
       .finally(() => clearInterval(timer));
@@ -243,7 +246,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
       {failed ? (
         <div className="flex flex-col gap-3">
           <div role="alert" className="rounded-lg bg-bad-soft px-3 py-2 text-[13px] text-bad">
-            Claude could not finish reading the file: {failed}
+            Claude could not read the file: {failed}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -257,7 +260,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
             >
               Try again
             </Button>
-            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine after the AI extraction failed."))}>
+            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine: check for contents, annex or glossary entries and delete them."))}>
               Use the rule-based engine
             </Button>
           </div>
@@ -279,7 +282,7 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
           </div>
           <div className="text-[13px] text-muted">
             {progress?.stage === "chunks" ? `${progress.done} of ${progress.total} parts read · ${progress.nodes} nodes found so far. ` : ""}
-            Large documents take a few minutes. Parts are read in parallel; you review and edit everything before the framework is created.
+            Large documents take a few minutes. Parts are read in parallel; you review and edit everything before the standard is created.
           </div>
           {!!progress?.recent.length && (
             <ul className="m-0 flex list-none flex-col gap-1 rounded-lg bg-surface-2 p-3 text-[13px]" dir="auto">
@@ -418,7 +421,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
     !levelsOk && "Every level needs English and Arabic labels and a code pattern",
     !acceptedOk && 'Mark one level as "Accepted here"',
     target === "version" && pkg?.pendingCr && `${(pkg.draft ?? pkg.live)?.name} is waiting on ${pkg.pendingCr}`,
-    target === "new" && !newName.trim() && "Name the new framework",
+    target === "new" && !newName.trim() && "Name the new standard",
     duplicate && "Already in the library",
   ].filter((x): x is string => !!x);
 
@@ -430,6 +433,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
     const payload = {
       levels: draft.levels,
       requirements: draft.requirements,
+      weighting: draft.weighting,
       importJob: {
         file: readable.map((f) => f.name).join(", "),
         tab: ex.sheets.join(", ") || [...new Set(readable.map((f) => FORMAT_LABEL[f.format ?? ""] ?? "file"))].join(", "),
@@ -485,7 +489,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                   <span role="columnheader">Arabic label</span>
                   <span role="columnheader">Code pattern</span>
                   <span role="columnheader">Assessed here</span>
-                  <span role="columnheader" className="text-right">
+                  <span role="columnheader" className="text-end">
                     Nodes
                   </span>
                 </div>
@@ -520,7 +524,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                         ))}
                       </select>
                     </span>
-                    <span role="cell" className="text-right font-mono font-semibold">
+                    <span role="cell" className="text-end font-mono font-semibold">
                       {counts[i]}
                     </span>
                   </div>
@@ -599,7 +603,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
             <ul className="m-0 max-h-[640px] list-none overflow-y-auto p-0 text-[13px]" aria-label="Requirements">
               {visible.map(({ node: n, depth }) => (
                 <li key={n.id} id={`node-${n.id}`} className="border-b border-line-soft">
-                  <div className={cx("flex items-start gap-2 py-1.5 pr-4", byNode.has(n.id) && "bg-warn-soft/40", editing === n.id && "bg-brand-tint")} style={{ paddingLeft: 12 + depth * 22 }}>
+                  <div className={cx("flex items-start gap-2 py-1.5 pe-4", byNode.has(n.id) && "bg-warn-soft/40", editing === n.id && "bg-brand-tint")} style={{ paddingInlineStart: 12 + depth * 22 }}>
                     <button
                       type="button"
                       aria-label={collapsed.has(n.id) ? `Expand ${n.code}` : `Collapse ${n.code}`}
@@ -638,7 +642,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
                           {n.title || (n.placeholder ? "Missing parent: not in the file" : n.text ? "" : "No title")}
                         </span>
                         <Badge tone="gray">{ex.levels[depth]?.en ?? `Level ${depth + 1}`}</Badge>
-                        {n.weight && <Badge tone="brand">{weightLabel(n.weight)}</Badge>}
                         {n.evidence && <Badge tone="na">Evidence</Badge>}
                         {byNode.get(n.id)?.map((w) => (
                           <Badge key={w.id} tone="warn">
@@ -685,15 +688,15 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
 
         <aside className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
           <section aria-label="Accept" className="flex flex-col gap-3 rounded-[14px] border-2 border-brand bg-white p-[18px] text-[13px]">
-            <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the framework" : "Save as a new version"}</h2>
+            <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the standard" : "Save as a new version"}</h2>
             <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
               <legend className="mb-1 text-xs font-semibold text-muted">Import as</legend>
               <label className="flex items-center gap-2">
                 <input type="radio" name="target" checked={target === "version"} onChange={() => setTarget("version")} />
-                New version of an existing framework
+                New version of an existing standard
               </label>
               {target === "version" && (
-                <select value={versionOf} onChange={(e) => setVersionOf(e.target.value)} aria-label="Framework" className={cx(inputCls, "ml-6 w-[calc(100%-24px)] bg-white text-[13px]")}>
+                <select value={versionOf} onChange={(e) => setVersionOf(e.target.value)} aria-label="Framework" className={cx(inputCls, "ms-6 w-[calc(100%-24px)] bg-white text-[13px]")}>
                   {state.frameworks.map((f) => {
                     const w = f.draft ?? f.live!;
                     return (
@@ -707,10 +710,10 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               )}
               <label className="flex items-center gap-2">
                 <input type="radio" name="target" checked={target === "new"} onChange={() => setTarget("new")} />
-                New framework or index (published right away)
+                New standard or index (published right away)
               </label>
               {target === "new" && (
-                <div className="ml-6 grid grid-cols-[1fr_90px] gap-2">
+                <div className="ms-6 grid grid-cols-[1fr_90px] gap-2">
                   <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
                     Name
                     <input value={newName} onChange={(e) => setNewName(e.target.value)} className={cx(inputCls, "text-[13px] font-normal text-ink")} />
@@ -776,11 +779,11 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               </div>
             )}
             <Button variant="primary" className="px-4" disabled={blockers.length > 0} onClick={accept} aria-disabled={blockers.length > 0}>
-              {target === "new" ? "Create framework" : "Save into draft"}
+              {target === "new" ? "Create standard" : "Save into draft"}
             </Button>
             <div className="text-xs leading-[18px] text-muted">
               {target === "new"
-                ? "A new framework is not used by any assessment cycle yet, so it is published as soon as you create it. Later changes are made in a new version, which goes through approval."
+                ? "A new standard is not used by any assessment cycle yet, so it is published as soon as you create it. Later changes are made in a new version, which goes through approval."
                 : "The live version may be in use by assessment cycles, so the new version is saved as a draft. It goes live after you submit it and another person with approval rights approves it."}
             </div>
           </section>
@@ -804,24 +807,23 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3 rounded-lg bg-surface-2 px-2.5 py-2">
       <span className="text-muted">{label}</span>
-      <b className="text-right">{value}</b>
+      <b className="text-end">{value}</b>
     </div>
   );
 }
 
-function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (patch: Partial<Pick<ExtractedNode, "code" | "title" | "text" | "weight" | "evidence">>) => void; onCancel: () => void }) {
+function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (patch: Partial<Pick<ExtractedNode, "code" | "title" | "text" | "evidence">>) => void; onCancel: () => void }) {
   const [code, setCode] = useState(node.code);
   const [title, setTitle] = useState(node.title);
   const [text, setText] = useState(node.text);
-  const [weight, setWeight] = useState(node.weight ?? "");
   const [evidence, setEvidence] = useState(node.evidence ?? "");
   return (
     <form
-      className="grid grid-cols-[140px_minmax(0,1fr)_120px] gap-2 border-t border-line-soft bg-brand-tint px-5 py-3"
+      className="grid grid-cols-[140px_minmax(0,1fr)] gap-2 border-t border-line-soft bg-brand-tint px-5 py-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (!code.trim()) return;
-        onSave({ code, title, text, weight, evidence });
+        onSave({ code, title, text, evidence });
       }}
     >
       <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
@@ -832,24 +834,15 @@ function NodeEditor({ node, onSave, onCancel }: { node: ExtractedNode; onSave: (
         Title
         <input value={title} onChange={(e) => setTitle(e.target.value)} dir="auto" className={cx(inputCls, "text-[13px] font-normal text-ink")} />
       </label>
-      <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
-        Weight
-        <input value={weight} onChange={(e) => setWeight(e.target.value)} list="weight-options" placeholder="High / Medium / Low" className={cx(inputCls, "text-[13px] font-normal text-ink")} />
-        <datalist id="weight-options">
-          <option value="High" />
-          <option value="Medium" />
-          <option value="Low" />
-        </datalist>
-      </label>
-      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
+      <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
         Text
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={Math.min(8, Math.max(3, text.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
-      <label className="col-span-3 flex flex-col gap-1 text-xs font-semibold text-muted">
+      <label className="col-span-2 flex flex-col gap-1 text-xs font-semibold text-muted">
         Evidence required
         <textarea value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={Math.min(6, Math.max(2, evidence.split("\n").length + 1))} dir="auto" className="resize-y rounded-lg border border-field p-2 text-[13px] font-normal leading-5 text-ink" />
       </label>
-      <div className="col-span-3 flex gap-2">
+      <div className="col-span-2 flex gap-2">
         <Button type="submit" variant="primary" size="md">
           Save node
         </Button>
@@ -886,7 +879,7 @@ function Warnings({
         Warnings
         <Badge tone={warnings.length ? "warn" : "ok"}>{warnings.length ? `${warnings.length} open` : "none"}</Badge>
       </h2>
-      {warnings.length === 0 && <div className="text-good">✓ No duplicates, missing parents, orphan rows or missing weights.</div>}
+      {warnings.length === 0 && <div className="text-good">✓ No duplicates, missing parents or orphan rows.</div>}
       {groups.map(([kind, ws]) => (
         <div key={kind} className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -912,9 +905,14 @@ function Warnings({
               </Button>
             )}
             {kind === "missing_weight" && (
-              <Button size="sm" className="h-8 text-xs" onClick={() => apply(applyDefaultWeight(ex))}>
-                Apply Medium to {ws.length === 1 && !ws[0].nodeId ? "all" : ws.length}
-              </Button>
+              <span className="flex gap-1.5">
+                <Button size="sm" className="h-8 text-xs" onClick={() => apply(applyDefaultWeight(ex))}>
+                  Apply Medium to {ws.length === 1 && !ws[0].nodeId ? "all" : ws.length}
+                </Button>
+                <Button size="sm" className="h-8 text-xs" onClick={() => apply(setWeighting(ex, "none"))}>
+                  No weights
+                </Button>
+              </span>
             )}
           </div>
           <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
@@ -979,9 +977,14 @@ function Fix({ children, onClick, type = "button" }: { children: React.ReactNode
 
 /* ---------- Read-only tree of a saved version ---------- */
 
-export function RequirementTree({ requirements, levels }: { requirements: FrameworkRequirement[]; levels: { id: string; en: string }[] }) {
+export function RequirementTree({ requirements, levels }: { requirements: FrameworkRequirement[]; levels: { id: string; en: string; ar?: string }[] }) {
   const [open, setOpen] = useState<Set<string>>(() => new Set(requirements.filter((r) => !r.parent).map((r) => r.code)));
   const [query, setQuery] = useState("");
+  // Standards published in both languages can be read in either; the codes are the same.
+  const bilingual = requirements.some((r) => r.titleAr || r.textAr);
+  // A standard published only in Arabic opens in Arabic.
+  const [lang, setLang] = useState<"en" | "ar">(() => (requirements.some((r) => r.title || r.text) ? "en" : "ar"));
+  const ar = bilingual && lang === "ar";
   const kids = useMemo(() => {
     const m = new Map<string | undefined, FrameworkRequirement[]>();
     const codes = new Set(requirements.map((r) => r.code));
@@ -991,13 +994,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
     }
     return m;
   }, [requirements]);
-  const levelName = (id: string) => levels.find((l) => l.id === id)?.en ?? "—";
+  const levelName = (id: string) => {
+    const l = levels.find((x) => x.id === id);
+    return (ar ? l?.ar : l?.en) ?? l?.en ?? "—";
+  };
   const q = query.trim().toLowerCase();
 
   const rows: { r: FrameworkRequirement; depth: number }[] = [];
   const walk = (p: string | undefined, depth: number) => {
     for (const r of kids.get(p) ?? []) {
-      if (!q || `${r.code} ${r.title}`.toLowerCase().includes(q)) rows.push({ r, depth: q ? 0 : depth });
+      if (!q || `${r.code} ${r.title} ${r.titleAr ?? ""} ${r.text ?? ""} ${r.textAr ?? ""}`.toLowerCase().includes(q)) rows.push({ r, depth: q ? 0 : depth });
       if (q || open.has(r.code)) walk(r.code, depth + 1);
     }
   };
@@ -1007,7 +1013,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
     <div className="flex flex-col overflow-hidden rounded-[10px] border border-line">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft bg-surface-2 px-3 py-2">
         <b className="text-[13px]">Requirements in this version · {requirements.length}</b>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
+          {bilingual && (
+            <span role="radiogroup" aria-label="Language of the standard" className="flex overflow-hidden rounded-md border border-field">
+              {(["en", "ar"] as const).map((l) => (
+                <button key={l} type="button" role="radio" aria-checked={lang === l} onClick={() => setLang(l)} className={cx("h-8 cursor-pointer border-0 px-2.5 text-xs font-semibold", lang === l ? "bg-ink text-white" : "bg-white text-ink-2")} data-no-translate>
+                  {l === "en" ? "English" : "العربية"}
+                </button>
+              ))}
+            </span>
+          )}
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" aria-label="Search requirements in this version" className="h-8 w-40 rounded-md border border-field bg-white px-2 text-xs" />
           <Button size="sm" className="h-8 text-xs" onClick={() => setOpen(new Set(requirements.map((r) => r.code)))}>
             Expand all
@@ -1017,11 +1032,16 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
           </Button>
         </div>
       </div>
-      <ul className="m-0 max-h-[420px] list-none overflow-y-auto p-0 text-[13px]">
+      <ul className="m-0 max-h-[420px] list-none overflow-y-auto p-0 text-[13px]" dir={ar ? "rtl" : undefined} lang={ar ? "ar" : undefined}>
         {rows.map(({ r, depth }) => {
           const has = kids.has(r.code);
+          const title = ar ? r.titleAr || r.title : r.title;
+          const text = ar ? r.textAr : r.text;
+          const evidence = ar ? r.evidenceAr : r.evidence;
+          const only = !ar && !r.title && !r.text && r.titleAr;
+          const note = r.source?.includes(" · ") ? r.source.slice(r.source.indexOf(" · ") + 3) : undefined;
           return (
-            <li key={r.code} className="flex items-baseline gap-2 border-b border-line-soft py-1.5 pr-3" style={{ paddingLeft: 8 + depth * 20 }}>
+            <li key={r.code} className="flex items-baseline gap-2 border-b border-line-soft py-1.5 pe-3" style={{ paddingInlineStart: 8 + depth * 20 }}>
               <button
                 type="button"
                 disabled={!has || !!q}
@@ -1038,19 +1058,25 @@ export function RequirementTree({ requirements, levels }: { requirements: Framew
               >
                 {open.has(r.code) ? "▾" : "▸"}
               </button>
-              <b className="shrink-0 font-mono text-xs">{r.code}</b>
-              <span className="min-w-0 flex-1" dir="auto">
-                {r.title || <span className="line-clamp-2">{r.text}</span>}
-                {(r.text || r.evidence) && (
+              <b className="shrink-0 font-mono text-xs" dir="ltr">{r.code}</b>
+              <span className="min-w-0 flex-1" dir="auto" data-no-translate={bilingual || undefined}>
+                {only ? (
+                  <span className="block" dir="rtl" lang="ar">
+                    {r.titleAr}
+                  </span>
+                ) : (
+                  title || <span className="line-clamp-2">{text}</span>
+                )}
+                {note && <span className="block text-[11px] text-muted">{note}</span>}
+                {((title && text) || evidence) && (
                   <details className="mt-0.5 text-xs text-ink-2">
-                    <summary className="cursor-pointer text-muted">Text{r.evidence ? " and evidence" : ""}</summary>
-                    {r.text && <div className="whitespace-pre-line">{r.text}</div>}
-                    {r.evidence && <div className="mt-1 whitespace-pre-line text-muted">Evidence: {r.evidence}</div>}
+                    <summary className="cursor-pointer text-muted">{ar ? (evidence ? "النص ومستندات الإثبات" : "النص") : `Text${evidence ? " and evidence" : ""}`}</summary>
+                    {title && text && <div className="whitespace-pre-line">{text}</div>}
+                    {evidence && <div className="mt-1 whitespace-pre-line text-muted">{ar ? "مستندات الإثبات:" : "Evidence:"} {evidence}</div>}
                   </details>
                 )}
               </span>
               <span className="shrink-0 text-[11px] text-muted">{levelName(r.level)}</span>
-              {r.weight && <Badge tone="brand">{weightLabel(r.weight)}</Badge>}
             </li>
           );
         })}

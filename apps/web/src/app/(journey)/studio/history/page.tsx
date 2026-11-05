@@ -14,10 +14,11 @@ const S: Record<CrStatus, [string, string, string]> = {
   rejected: ["REJECTED", "#FBE4E1", "#A3261B"],
 };
 
-const EDITOR: Record<ConfigKind, string> = {
+// Review & acceptance was removed; its past changes stay in the log without an editor.
+const EDITOR: Record<ConfigKind, string | undefined> = {
   framework: "/studio/frameworks",
-  scoring: "/studio/scoring",
-  acceptance: "/studio/acceptance",
+  scoring: undefined,
+  acceptance: undefined,
   rule: "/studio/automation",
 };
 
@@ -69,7 +70,7 @@ function ConfigHistory() {
               type="button"
               onClick={() => setSel(c.id)}
               aria-pressed={c.id === cr?.id}
-              className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-left text-ink"
+              className="flex cursor-pointer flex-col gap-1 rounded-xl bg-white px-3.5 py-3 text-start text-ink"
               style={{ border: c.id === cr?.id ? "2px solid #1E4E8C" : "1px solid #E6EBE8" }}
             >
               <span className="flex justify-between gap-2">
@@ -129,7 +130,13 @@ function CrDetail({ cr, authorName }: { cr: ChangeRequest; authorName: string })
               {cr.id} · {cr.title}
             </h2>
             <div className="text-xs text-muted">
-              Author {authorName} · submitted {cr.submittedAt} · <Link href={EDITOR[cr.kind]}>open in editor</Link>
+              Author {authorName} · submitted {cr.submittedAt}
+              {EDITOR[cr.kind] && (
+                <>
+                  {" "}
+                  · <Link href={EDITOR[cr.kind]!}>open in editor</Link>
+                </>
+              )}
             </div>
           </div>
           <div role="group" aria-label="Environment promotion" className="flex items-center gap-1 text-xs">

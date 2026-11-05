@@ -99,4 +99,15 @@
   [dir="rtl"] {
     font-family: var(--font-arabic);
   }
+
+  /* Data in either language (dir="auto") keeps its own reading order but lines up with the page,
+     so Arabic standard text in an English table starts where the English beside it does. */
+  [dir="auto"] {
+    text-align: match-parent;
+  }
+
+  /* Arabic pages stay hidden until translated (removed by LocaleRoot, or after 4 s at most). */
+  html.i18n-pending body {
+    visibility: hidden;
+  }
 }

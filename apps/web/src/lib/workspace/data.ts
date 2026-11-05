@@ -1,7 +1,12 @@
-// Operational dummy records behind the workspace screens. Built from the same 350 sample
-// requirements the Admin Studio previews, so a published scoring change moves these numbers.
+// Operational demo records behind the workspace screens, built from the published standards in
+// the library: DGA's Qiyas V5.0 and NCA's ECC-2:2024. Each record is one requirement of the real
+// standard with its own wording and evidence list; only the progress on it (owner, dates, stage,
+// last result) is demo data.
 
-import { DEMO_TODAY, SAMPLE_REQUIREMENTS, type SampleRequirement } from "@/lib/admin/sample-data";
+import { DEMO_TODAY, type SampleRequirement } from "@/lib/admin/sample-data";
+import { ECC_REQUIREMENTS } from "@/lib/admin/ecc-2024";
+import { QIYAS_V5_REQUIREMENTS } from "@/lib/admin/qiyas-v5";
+import type { FrameworkRequirement } from "@/lib/admin/types";
 import type { WorkKey } from "@/lib/status";
 
 /** Where a result sits in the human acceptance pipeline. Only "accepted" is official. */
@@ -16,6 +21,15 @@ export interface WsRequirement extends SampleRequirement {
   due: string;
   review: ReviewStage;
   evidence: { expected: number; valid: number; invalid: number };
+  /** Library framework the record belongs to. */
+  frameworkId?: string;
+  /** Codes of the control, domain and dimension the requirement sits under in its standard; read off the code when absent. */
+  controlCode?: string;
+  domainCode?: string;
+  dimensionCode?: string;
+  /** The requirement's detail in the standard, and the evidence items it asks for, one per line. */
+  text?: string;
+  evidenceText?: string;
 }
 
 export interface WsAction {
@@ -52,17 +66,25 @@ export const DEPARTMENTS: Record<string, { name: string; people: string[] }> = {
   "Beneficiary experience": { name: "Customer Experience", people: ["Rana J.", "Tariq W."] },
 };
 
-const TOPICS: Record<string, string[]> = {
-  "Strategy & governance": ["Digital strategy approved", "Governance committee charter", "Annual roadmap reviewed", "KPIs linked to strategy", "Risk register maintained"],
-  "Digital services": ["Digital services catalogue", "Service-level KPIs published", "Services available end-to-end", "Unified sign-in adopted", "Service journeys documented"],
-  "Technology & integration": ["Integration register approved", "End-to-end integration samples", "Architecture repository current", "Cloud adoption plan", "Shared platforms reused"],
-  "Human capital": ["Digital capability plan", "Digital roles in org structure", "Training needs analysis", "Digital competency framework", "Succession plan for digital roles"],
-  "Data & analytics": ["Data governance committee", "Data catalogue published", "Open data released", "Data quality measured", "Master data defined"],
-  "Beneficiary experience": ["Feedback closes the loop", "Satisfaction measured", "Accessibility tested", "Complaints analysed", "Channels integrated"],
+/** Which department area answers each top-level part of a standard. */
+const AREA: Record<string, keyof typeof DEPARTMENTS> = {
+  // Qiyas V5.0 perspectives
+  P1: "Strategy & governance",
+  P2: "Human capital",
+  P3: "Digital services",
+  P4: "Strategy & governance",
+  P5: "Technology & integration",
+  P6: "Data & analytics",
+  P7: "Digital services",
+  P8: "Beneficiary experience",
+  P9: "Beneficiary experience",
+  P10: "Data & analytics",
+  // NCA ECC-2:2024 main domains
+  "1": "Strategy & governance",
+  "2": "Technology & integration",
+  "3": "Technology & integration",
+  "4": "Data & analytics",
 };
-
-// Each standard has four requirements, one per aspect.
-const ASPECTS = ["defined", "in place", "in use", "reviewed"];
 
 function mulberry32(seed: number) {
   return () => {
@@ -100,35 +122,124 @@ function pickReview(status: SampleRequirement["status"], r: number): ReviewStage
   return r < 0.72 ? "accepted" : r < 0.82 ? "l1" : r < 0.9 ? "l2" : r < 0.95 ? "override" : "ai";
 }
 
-export function buildRequirements(source = SAMPLE_REQUIREMENTS): WsRequirement[] {
-  const rand = mulberry32(4317);
-  const topicIndex: Record<string, number> = {};
-  return source.map((s) => {
-    const dept = DEPARTMENTS[s.domain];
-    const topics = TOPICS[s.domain];
-    const n = (topicIndex[s.domain] = (topicIndex[s.domain] ?? -1) + 1);
-    const work = pickWork(s.status, rand());
+function pickStatus(r: number): SampleRequirement["status"] {
+  return r < 0.56 ? "comp" : r < 0.75 ? "part" : r < 0.85 ? "non" : r < 0.97 ? "nas" : "na";
+}
+
+/** A requirement as the standard defines it, before any progress on it. */
+export interface StandardUnit {
+  code: string;
+  title: string;
+  text?: string;
+  /** Evidence items the standard asks for. */
+  evidence: string[];
+  controlCode: string;
+  domainCode: string;
+  dimensionCode: string;
+  dimensionName: string;
+}
+
+const nodeTitle = (n: FrameworkRequirement) => n.title || n.titleAr || n.code;
+
+/** "1) Attach …\n2) …" → ["Attach …", "…"]. */
+function evidenceItems(text: string | undefined) {
+  return (text ?? "")
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter((l) => /^\d+\s*[).]/.test(l))
+    .map((l) => l.replace(/^\d+\s*[).]\s*/, ""));
+}
+
+/**
+ * The assessed units of a standard: each implementation requirement or subcontrol under its
+ * control, or the control itself when it has none. The control's evidence list is shared out in
+ * order, one item per requirement, as Qiyas lists them; the last requirement takes any extra.
+ */
+export function standardUnits(nodes: FrameworkRequirement[], fallbackEvidence: (n: FrameworkRequirement, control: FrameworkRequirement) => string[] = () => []): StandardUnit[] {
+  const byCode = new Map(nodes.map((n) => [n.code, n]));
+  const top = (n: FrameworkRequirement) => {
+    let cur = n;
+    for (let g = 0; cur.parent && byCode.has(cur.parent) && g < 8; g++) cur = byCode.get(cur.parent)!;
+    return cur;
+  };
+  return nodes
+    .filter((n) => n.level === "lv-3")
+    .flatMap((control) => {
+      const subs = nodes.filter((k) => k.parent === control.code && k.level === "lv-4");
+      const list = subs.length ? subs : [control];
+      const items = evidenceItems(control.evidenceAr ?? control.evidence);
+      const dim = top(control);
+      return list.map((n, i) => {
+        const own = items.length >= list.length ? (i === list.length - 1 ? items.slice(i) : [items[i]]) : items[i] ? [items[i]] : [];
+        return {
+          code: n.code,
+          title: nodeTitle(n),
+          text: n === control ? n.text ?? n.textAr : [n.text ?? n.textAr, subs.length && !n.text && !n.textAr ? nodeTitle(control) : ""].filter(Boolean).join("\n") || undefined,
+          evidence: own.length ? own : fallbackEvidence(n, control),
+          controlCode: control.code,
+          domainCode: control.parent ?? control.code,
+          dimensionCode: dim.code,
+          dimensionName: nodeTitle(dim),
+        };
+      });
+    });
+}
+
+/** NCA ECC publishes no evidence list; ask for what an assessor checks on every control. */
+const eccEvidence = (n: FrameworkRequirement, control: FrameworkRequirement) => [
+  `Approved policy, procedure or standard that covers control ${control.code}`,
+  `Records from this cycle showing ${n === control ? "the control" : `subcontrol ${n.code}`} is implemented (logs, reports or screenshots)`,
+];
+
+/** Demo progress on every requirement of a standard: last result, stage, owner, due date and evidence received. */
+export function buildRequirements(frameworkId: string, units: StandardUnit[], seed: number): WsRequirement[] {
+  const rand = mulberry32(seed);
+  const areaOf = (u: StandardUnit) => AREA[u.dimensionCode] ?? "Strategy & governance";
+  // Each control has one owner: controls take turns among their area's people.
+  const turn = new Map<string, number>();
+  const count: Record<string, number> = {};
+  for (const u of units) if (!turn.has(u.controlCode)) turn.set(u.controlCode, (count[areaOf(u)] = (count[areaOf(u)] ?? -1) + 1));
+  return units.map((u) => {
+    const area = areaOf(u);
+    const dept = DEPARTMENTS[area];
+    const status = pickStatus(rand());
+    const work = pickWork(status, rand());
     const done = work === "closed" || work === "ready";
     const due = addDays(TODAY, done ? -Math.floor(rand() * 40) - 5 : Math.floor(rand() * 34) - 12);
-    const expected = s.weight === "high" ? 3 : 2;
-    const valid = s.status === "comp" ? expected : s.status === "part" ? 1 : s.status === "non" ? Math.floor(rand() * 2) : 0;
+    const expected = Math.max(1, u.evidence.length);
+    const valid = status === "comp" ? expected : status === "part" ? Math.max(1, expected - 1) : status === "non" ? Math.floor(rand() * 2) : 0;
     const invalid = !done && rand() < 0.04 ? 1 : 0;
     // A handful of open requirements have no owner yet.
-    const owner = !done && rand() < 0.03 ? "" : dept.people[n % dept.people.length];
+    const owner = !done && rand() < 0.03 ? "" : dept.people[turn.get(u.controlCode)! % dept.people.length];
+    const weight: SampleRequirement["weight"] = rand() < 0.3 ? "high" : rand() < 0.7 ? "med" : "low";
     return {
-      ...s,
-      title: `${topics[Math.floor(n / 4) % topics.length]}: ${ASPECTS[n % 4]}`,
+      code: u.code,
+      domain: u.dimensionName,
+      weight,
+      status,
+      mandatoryFail: status === "part" && rand() < 0.33,
+      title: u.title,
       department: dept.name,
       owner,
       work,
       due,
-      review: pickReview(s.status, rand()),
-      evidence: { expected, valid, invalid },
+      review: pickReview(status, rand()),
+      evidence: { expected, valid: Math.min(valid, expected), invalid },
+      frameworkId,
+      controlCode: u.controlCode,
+      domainCode: u.domainCode,
+      dimensionCode: u.dimensionCode,
+      text: u.text,
+      evidenceText: u.evidence.join("\n"),
     };
   });
 }
 
-export const WS_REQUIREMENTS = buildRequirements();
+/** Demo records per library framework. */
+export const QIYAS_RECORDS = buildRequirements("fw-qiyas", standardUnits(QIYAS_V5_REQUIREMENTS), 4317);
+export const ECC_RECORDS = buildRequirements("fw-nca", standardUnits(ECC_REQUIREMENTS, eccEvidence), 5120);
+
+export const WS_REQUIREMENTS = [...QIYAS_RECORDS, ...ECC_RECORDS];
 
 /** One open remediation action per open, applicable requirement that is not compliant. */
 export function buildActions(reqs: WsRequirement[]): WsAction[] {
@@ -163,7 +274,8 @@ export const CLARIFICATIONS: Clarification[] = [
   {
     id: "CL-014",
     title: "Implementation evidence must come from the current cycle",
-    affects: WS_REQUIREMENTS.filter((r) => r.domain === "Technology & integration" && r.weight === "high").slice(0, 6).map((r) => r.code),
+    // The information technology perspective (P5) of Qiyas V5.0.
+    affects: QIYAS_RECORDS.filter((r) => r.dimensionCode === "P5" && r.weight === "high").slice(0, 6).map((r) => r.code),
   },
 ];
 

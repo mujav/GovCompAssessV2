@@ -115,8 +115,8 @@ describe("AI extraction: merge into a reviewable tree", () => {
 
     const draft = toFrameworkDraft(ex);
     expect(draft.requirements.find((r) => r.code === "5.1.1-1")).toMatchObject({ parent: "5.1.1", level: "lv-4", text: "إعداد إستراتيجية", evidence: "إرفاق الخطة" });
-    // Only the missing weights at the accepted level are flagged; codes and parents are clean.
-    expect(checkExtraction(ex).map((w) => w.kind)).toEqual(["missing_weight", "missing_weight"]);
+    // Codes and parents are clean, and weights are never asked for.
+    expect(checkExtraction(ex).map((w) => w.kind)).toEqual([]);
   });
 
   it("keeps the AI's parent when a node is deleted or added, and breaks cycles", () => {

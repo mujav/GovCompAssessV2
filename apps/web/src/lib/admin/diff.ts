@@ -45,7 +45,7 @@ export interface RequirementDiff {
   removed: FrameworkRequirement[];
 }
 
-const REQ_FIELDS = ["title", "text", "weight", "evidence", "parent"] as const;
+const REQ_FIELDS = ["title", "text", "evidence", "parent"] as const;
 
 /** Requirement-level comparison by code. */
 export function diffRequirements(before: FrameworkRequirement[] = [], after: FrameworkRequirement[] = []): RequirementDiff {
@@ -66,9 +66,8 @@ export function requirementSummary(d: RequirementDiff) {
   return parts.length ? parts.join(" · ") : "no requirement changes";
 }
 
-function describeRequirement(r: FrameworkRequirement, fields: readonly string[] = ["title", "weight"]) {
+function describeRequirement(r: FrameworkRequirement, fields: readonly string[] = ["title"]) {
   const parts = [r.title || "(untitled)"];
-  if (r.weight) parts.push(`weight ${r.weight}`);
   for (const f of fields) {
     if (f === "text" && r.text) parts.push(`text: ${r.text}`);
     if (f === "evidence" && r.evidence) parts.push(`evidence: ${r.evidence}`);

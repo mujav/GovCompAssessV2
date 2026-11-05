@@ -181,7 +181,7 @@ export function Chips<T extends string>({ label, value, options, onChange }: { l
             )}
           >
             {o.label}
-            {o.n != null && <span className="ml-1 opacity-70">{o.n}</span>}
+            {o.n != null && <span className="ms-1 opacity-70">{o.n}</span>}
           </button>
         );
       })}

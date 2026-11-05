@@ -9,13 +9,15 @@ import { clientHref } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 import { NO_SUBMISSION, submissionKey, type SubmissionState } from "@/lib/journey/submission";
 import { useClientWork } from "@/lib/journey/use-work";
+import { initials } from "@/lib/journey/work";
 
 // 14 · Submitted. Portal receipt, what went in, the sign-off trail and what comes next.
 
 export default function SubmittedPage() {
-  const { client, ws } = useClientWork();
-  const { clients, log } = useJourney();
-  const [s] = useScreenState<SubmissionState>(submissionKey(client.id), NO_SUBMISSION);
+  const { client, ws, framework } = useClientWork();
+  const fwName = framework?.name ?? client.frameworks[0];
+  const { log } = useJourney();
+  const [s] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
   const [sent, setSent] = useScreenState<boolean>(`submitted.${client.id}.report`, false);
   const c = (p: string) => clientHref(client.id, p);
 
@@ -25,7 +27,6 @@ export default function SubmittedPage() {
         <JMain>
           <Panel className="flex flex-col items-start gap-3 p-[26px]">
             <h1 className="m-0 text-2xl">Not submitted yet</h1>
-            <p className="m-0 text-sm text-j-ink-3">The receipt appears here once the pack is signed off and the upload is recorded.</p>
             <JLink href={c("/submission")} variant="primary">
               Open submission pack
             </JLink>
@@ -37,24 +38,24 @@ export default function SubmittedPage() {
 
   const f = s.frozen ?? { total: ws.ctx.reqs.length, accepted: 0, files: 0 };
   const early = daysBetween(ws.ctx.today, SUBMISSION_DEADLINE);
-  const uploader = s.uploader ? "Sami R. (delegated)" : "Huda S.";
+  const signer = s.signedBy ?? "Index Owner";
+  const uploader = s.uploader ? `${signer} (delegated)` : signer;
   const trail: [string, string, string, string][] = [
-    ["SR", "me", "Pack sent for client sign-off", "Sami R."],
-    ["NA", "cl", "Signed off by index owner", "Noura A."],
-    ["HS", "cl", "Final approval and cover letter signed", "Huda S."],
-    [s.uploader ? "SR" : "HS", s.uploader ? "me" : "cl", "Uploaded 12 of 12 batches to DGA portal", uploader],
+    [initials(signer), "me", "Reviews completed", signer],
+    [initials(signer), "me", "Pack and cover letter signed off", signer],
+    [initials(signer), "me", "Uploaded 12 of 12 batches to DGA portal", uploader],
     ["DGA", "sys", `Receipt ${s.receipt} issued`, "DGA portal"],
   ];
   const TONE: Record<string, [string, string]> = { me: ["#E0ECF8", "#1E4E8C"], cl: ["#E7F3ED", "#0E5A45"], sys: ["#F5F7F6", "#47534D"] };
   const next: { t: string; sub: string; icon: IconName; bg: string; fg: string; href: string }[] = [
     { t: "Prepare for verification", sub: "Open evidence register in read-only mode", icon: "rev", bg: "#EAF1FA", fg: "#1E4E8C", href: c("/evidence") },
-    { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/clarifications") },
-    { t: "Client report", sub: "Submission summary and score outlook", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: c("/engagement") },
-    { t: "Back to all entities", sub: `${clients.length - 1} more in your portfolio`, icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/portfolio" },
+    { t: "Watch for DGA queries", sub: "Clarifications during verification", icon: "cla", bg: "#EEEDFD", fg: "#4F46E5", href: c("/requirements?view=cla") },
+    { t: "Workspace report", sub: "Submission summary and requirements accepted", icon: "file", bg: "#E7F3ED", fg: "#0E5A45", href: `/dashboards/${client.id}` },
+    { t: "Back to workspaces", sub: "Every workspace you run", icon: "grid", bg: "#F5F7F6", fg: "#33413B", href: "/workplaces" },
   ];
 
   const downloadReceipt = () => {
-    const text = [`DGA portal receipt ${s.receipt}`, `${client.name} · ${client.frameworks[0]}`, `Submitted ${s.submittedAt} by ${uploader}`, `Requirements: ${f.total}`, `Evidence files: ${f.files}`].join("\n");
+    const text = [`DGA portal receipt ${s.receipt}`, `${client.name} · ${fwName}`, `Submitted ${s.submittedAt} by ${uploader}`, `Requirements: ${f.total}`, `Evidence files: ${f.files}`].join("\n");
     const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
     const a = document.createElement("a");
     a.href = url;
@@ -74,7 +75,7 @@ export default function SubmittedPage() {
             <span className="text-[11px] font-semibold tracking-[0.08em] text-cx-line">SUBMITTED TO DGA</span>
             <br />
             <b className="text-2xl">
-              {client.name} · {client.frameworks[0]}
+              {client.name} · {fwName}
             </b>
             <br />
             <span className="text-sm text-cx-line">
@@ -92,10 +93,10 @@ export default function SubmittedPage() {
               disabled={sent}
               onClick={() => {
                 setSent(() => true);
-                log(`Client report sent to Noura A. · ${client.name}`);
+                log(`Submission report sent to management · ${client.name}`);
               }}
             >
-              {sent ? "Report sent" : "Send client report"}
+              {sent ? "Report sent" : "Send report to management"}
             </JButton>
           </span>
         </section>
@@ -104,7 +105,7 @@ export default function SubmittedPage() {
           {[
             ["Requirements submitted", String(f.total), "Across all axes", "text-j-muted"],
             ["Evidence files", f.files.toLocaleString("en-US"), "12 batches · 3.2 GB", "text-j-muted"],
-            ["Completion", `${Math.round((f.accepted / f.total) * 100)}%`, f.accepted === f.total ? "All accepted by client" : `${f.accepted} accepted by client`, f.accepted === f.total ? "text-brand" : "text-[#8A4B00]"],
+            ["Completion", `${Math.round((f.accepted / f.total) * 100)}%`, f.accepted === f.total ? "All accepted" : `${f.accepted} accepted`, f.accepted === f.total ? "text-brand" : "text-[#8A4B00]"],
             ["Verification opens", "1 Dec", "In 13 days", "text-[#8A4B00]"],
           ].map(([l, v, sub, ink]) => (
             <Panel key={l} className="p-[18px]">

@@ -4,19 +4,38 @@
 // Screens keep their own slices here so work done on one screen shows on the others.
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from "react";
-import { CLIENTS, ENGAGEMENTS, type Client, type Engagement } from "./portfolio";
+import { shortName } from "./frameworks";
+import { CLIENTS, ENGAGEMENTS, asActive, type Client, type Engagement } from "./portfolio";
+import { PROFILE_KEY, applyProfile, engagementsFor, type EntityProfile } from "./profile";
+import { mergeWorkplaces, workplacesFromEngagements, type Workplace, type WorkplaceRequest } from "./workplaces";
 
 const STORAGE_KEY = "ci-journey-v1";
 
 export interface JourneyState {
-  /** Clients onboarded in this demo, waiting for activation. */
-  added: { client: Client; engagement: Engagement }[];
+  /** Clients onboarded in this demo, one engagement per framework they are enrolled in. */
+  added: { client: Client; engagement: Engagement; more?: Engagement[] }[];
+  /** Workplaces the platform admin added or changed, by id; the rest come from the engagements. */
+  workplaces?: Record<string, Workplace>;
+  /** New workplaces index owners asked the platform admin for. */
+  workplaceRequests?: WorkplaceRequest[];
   /** Free-form per-screen state, keyed by screen. */
   screens: Record<string, unknown>;
   log: { at: string; text: string }[];
+  /** Version of the demo records the saved work was made on. */
+  records?: number;
 }
 
-const initial = (): JourneyState => ({ added: [], screens: {}, log: [] });
+/** 2: demo records come from the published Qiyas V5.0 and NCA ECC-2:2024 standards. */
+const RECORDS = 2;
+
+const initial = (): JourneyState => ({ added: [], screens: {}, log: [], records: RECORDS });
+
+/** Work saved on earlier demo records points at requirements that no longer exist; it starts again on the new ones. */
+function migrate(s: JourneyState): JourneyState {
+  if ((s.records ?? 1) >= RECORDS) return s;
+  const screens = Object.fromEntries(Object.entries(s.screens).filter(([k]) => !/^(cycle|work|evidence|work-screen|req|clar)\./.test(k)));
+  return { ...s, screens, records: RECORDS };
+}
 
 type Action = { type: "replace"; state: JourneyState } | { type: "mutate"; fn: (s: JourneyState) => void };
 
@@ -35,6 +54,9 @@ interface JourneyApi {
   state: JourneyState;
   clients: Client[];
   engagements: Engagement[];
+  /** Every workplace on the platform (one entity, one index, one review year). */
+  workplaces: Workplace[];
+  saveWorkplace: (w: Workplace) => void;
   update: (fn: (s: JourneyState) => void) => void;
   log: (text: string) => void;
   reset: () => void;
@@ -50,7 +72,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) dispatch({ type: "replace", state: { ...initial(), ...(JSON.parse(raw) as JourneyState) } });
+      if (raw) dispatch({ type: "replace", state: migrate({ ...initial(), records: 1, ...(JSON.parse(raw) as JourneyState) }) });
     } catch {
       // Corrupt or blocked storage: keep the defaults.
     }
@@ -68,11 +90,25 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
 
   const update = useCallback((fn: (s: JourneyState) => void) => dispatch({ type: "mutate", fn }), []);
 
-  const api = useMemo<JourneyApi>(
-    () => ({
+  const api = useMemo<JourneyApi>(() => {
+    // Profile edits made after onboarding apply to every screen that shows the entity.
+    const profile = (id: string) => state.screens[PROFILE_KEY(id)] as EntityProfile | undefined;
+    const base = [...CLIENTS, ...state.added.map((a) => asActive(a).client)];
+    const allEngagements = [...ENGAGEMENTS, ...state.added.flatMap((a) => [asActive(a).engagement, ...(a.more ?? [])])];
+    const engagements = base.flatMap((c) =>
+        engagementsFor(
+          c,
+          allEngagements.filter((e) => e.clientId === c.id),
+          profile(c.id),
+          shortName,
+        ),
+      );
+    return {
       state,
-      clients: [...CLIENTS, ...state.added.map((a) => a.client)],
-      engagements: [...ENGAGEMENTS, ...state.added.map((a) => a.engagement)],
+      clients: base.map((c) => applyProfile(c, profile(c.id))),
+      engagements,
+      workplaces: mergeWorkplaces(workplacesFromEngagements(engagements), state.workplaces),
+      saveWorkplace: (w) => update((s) => void ((s.workplaces ??= {})[w.id] = structuredClone(w))),
       update,
       log: (text) => update((s) => void s.log.unshift({ at: stamp(), text })),
       reset: () => {
@@ -81,9 +117,8 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
         } catch {}
         dispatch({ type: "replace", state: initial() });
       },
-    }),
-    [state, update],
-  );
+    };
+  }, [state, update]);
 
   return <JourneyContext.Provider value={api}>{children}</JourneyContext.Provider>;
 }

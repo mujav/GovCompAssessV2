@@ -1,94 +1,164 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Icon } from "@/components/journey/icon";
 import { cx } from "@/components/ui";
+import { DEMO_PASSWORD, ROLES, SEED_USERS, homeFor, type Role } from "@/lib/auth/accounts";
+import { useAuth } from "@/lib/auth/store";
+import { readLocale, setLocale } from "@/lib/i18n/locale";
+import { useScreenState } from "@/lib/journey/store";
+import { DEFAULT_PLATFORM, PLATFORM_KEY, type PlatformState } from "@/lib/cycle/platform";
 
-// 01 · Sign in. Demo Advisory consultants use company SSO and land on the entity chooser.
+// S00 · Sign in with email and password. People without an account request access; the
+// platform admin approves or rejects the request and decides the role.
 
 type Lang = "en" | "ar";
 
 const T = {
   en: {
-    brand: "Compliance Intelligence",
-    brandSub: "by Demo Advisory Co.",
-    hero: "Every framework, standard and index. One workspace.",
-    trust: ["Hosted in Saudi Arabia", "NCA CCC aligned", "PDPL ready"],
+    brand: "ComplAI",
     signIn: "Sign in",
-    lead: "Demo Advisory consultants sign in with company SSO. Your entities load after sign-in.",
-    ssoBtn: "Sign in with Demo Advisory SSO",
-    noLic: "No access yet?",
-    reqLic: "Ask your engagement lead",
-    cancel: "← Cancel",
-    redir: "Opening company sign-in",
-    hs: ["Demo Advisory recognised", "Signing in with company SSO", "Loading your entities"],
-    simulate: "Continue (simulate return)",
-    notOpen: "Nothing opened?",
-    retry: "Try again",
+    forgot: "Forgot password?",
+    remember: "Keep me signed in on this device",
+    forgotTitle: "Reset your password",
+    forgotSend: "Ask for a reset link",
+    forgotSent: "If an account exists for this email, the platform administrator has been asked to reset it. You will get a link by email.",
+    email: "Work email",
+    password: "Password",
+    submit: "Sign in",
+    busy: "Signing in…",
+    noAccess: "Don't have access?",
+    request: "Request access",
+    reqTitle: "Request access",
+    name: "Full name",
+    org: "Organisation",
+    jobTitle: "Job title",
+    reason: "Why you need access",
+    choose: "Choose a password",
+    confirm: "Confirm password",
+    hint: "At least 8 characters, with letters and a number.",
+    send: "Send request",
+    sending: "Sending…",
+    mismatch: "The passwords do not match.",
+    sent: "Request sent",
+    sentLead: "The Platform Admin will review it. You will be able to sign in with this email once it is approved.",
+    back: "← Back to sign in",
+    haveAccess: "Already have access?",
+    demo: "Demo accounts",
+    demoLead: "Every demo account uses the password",
     help: "Help",
     privacy: "Privacy",
     a11y: "Accessibility",
   },
   ar: {
-    brand: "ذكاء الامتثال",
-    brandSub: "من شركة الاستشارات التجريبية",
-    hero: "كل إطار ومعيار ومؤشر. في مساحة عمل واحدة.",
-    trust: ["مستضافة في المملكة", "متوافقة مع ضوابط الحوسبة السحابية", "جاهزة لنظام حماية البيانات"],
+    brand: "ComplAI",
     signIn: "تسجيل الدخول",
-    lead: "يسجّل مستشارو الشركة الدخول عبر الدخول الموحد. تظهر الجهات بعد تسجيل الدخول.",
-    ssoBtn: "الدخول الموحد للشركة",
-    noLic: "لا تملك وصولًا بعد؟",
-    reqLic: "اطلب من قائد الارتباط",
-    cancel: "إلغاء →",
-    redir: "جارٍ فتح تسجيل الدخول للشركة",
-    hs: ["تم التعرف على الشركة", "تسجيل الدخول الموحد", "تحميل الجهات"],
-    simulate: "متابعة (محاكاة العودة)",
-    notOpen: "لم يُفتح شيء؟",
-    retry: "حاول مجددًا",
+    forgot: "نسيت كلمة المرور؟",
+    remember: "تذكرني على هذا الجهاز",
+    forgotTitle: "إعادة تعيين كلمة المرور",
+    forgotSend: "اطلب رابط إعادة التعيين",
+    forgotSent: "إذا كان هناك حساب بهذا البريد فقد طُلب من مسؤول المنصة إعادة تعيينه، وسيصلك رابط بالبريد.",
+    email: "البريد الإلكتروني للعمل",
+    password: "كلمة المرور",
+    submit: "دخول",
+    busy: "جارٍ تسجيل الدخول…",
+    noAccess: "لا تملك وصولًا؟",
+    request: "اطلب الوصول",
+    reqTitle: "طلب الوصول",
+    name: "الاسم الكامل",
+    org: "الجهة",
+    jobTitle: "المسمى الوظيفي",
+    reason: "سبب الحاجة إلى الوصول",
+    choose: "اختر كلمة مرور",
+    confirm: "تأكيد كلمة المرور",
+    hint: "ثمانية أحرف على الأقل، تتضمن حروفًا ورقمًا.",
+    send: "إرسال الطلب",
+    sending: "جارٍ الإرسال…",
+    mismatch: "كلمتا المرور غير متطابقتين.",
+    sent: "تم إرسال الطلب",
+    sentLead: "سيراجعه مسؤول المنصة. يمكنك تسجيل الدخول بهذا البريد بعد الموافقة.",
+    back: "العودة إلى تسجيل الدخول →",
+    haveAccess: "لديك وصول بالفعل؟",
+    demo: "حسابات تجريبية",
+    demoLead: "كل الحسابات التجريبية تستخدم كلمة المرور",
     help: "المساعدة",
     privacy: "الخصوصية",
     a11y: "إمكانية الوصول",
   },
 };
 
+const ROLE_AR: Record<Role, string> = { admin: "مسؤول المنصة", owner: "مالك المؤشر", control: "مالك المعيار", viewer: "مستعرض الإدارة" };
+
+/** One demo account per role, so each view can be tried. */
+const DEMO = ROLES.map((r) => SEED_USERS.find((u) => u.role === r.key)!).filter(Boolean);
+
+const field = "h-12 w-full rounded-xl border border-j-line bg-white px-3.5 text-[15px] text-j-ink outline-none focus:border-cx";
+
+function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-j-ink-2">
+      {label}
+      {children}
+      {hint && <span className="text-xs font-normal text-j-muted">{hint}</span>}
+    </label>
+  );
+}
+
 export default function LoginPage() {
+  // The page carries its own wording in both languages and follows the app-wide setting.
   const [lang, setLang] = useState<Lang>("en");
-  const [step, setStep] = useState<"identify" | "redirect">("identify");
+  useEffect(() => setLang(readLocale()), []);
   const t = T[lang];
   const en = lang === "en";
+  const router = useRouter();
+  const { ready, user, signIn, requestAccess } = useAuth();
+  const [mode, setMode] = useState<"signin" | "request" | "sent" | "forgot" | "forgotSent">("signin");
+  const [remember, setRemember] = useState(true);
+  const [, setPlatform] = useScreenState<PlatformState>(PLATFORM_KEY, DEFAULT_PLATFORM);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [req, setReq] = useState({ name: "", email: "", organisation: "", title: "", reason: "", password: "", confirm: "" });
 
+  // Someone already signed in goes straight to their home.
+  useEffect(() => {
+    if (ready && user) router.replace(homeFor(user.role));
+  }, [ready, user, router]);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    const res = await signIn(email, password, remember);
+    setBusy(false);
+    if (res.ok) router.push(res.home);
+    else setError(res.error);
+  };
+
+  const sendRequest = async (e: FormEvent) => {
+    e.preventDefault();
+    if (req.password !== req.confirm) return setError(t.mismatch);
+    setBusy(true);
+    setError("");
+    const problem = await requestAccess(req);
+    setBusy(false);
+    if (problem) setError(problem);
+    else {
+      setEmail(req.email);
+      setMode("sent");
+    }
+  };
+
+  const switchTo = (m: typeof mode) => {
+    setMode(m);
+    setError("");
+  };
 
   return (
-    <div dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen flex-wrap bg-white text-j-ink", !en && "font-arabic")}>
-      <section
-        aria-label={t.brand}
-        className="relative box-border flex min-h-[360px] flex-[1_1_560px] flex-col gap-8 overflow-hidden bg-cx-deep px-14 py-11 text-[#E3EAF4]"
-      >
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-[300px] -end-[260px] h-[720px] w-[720px] rounded-full border-[90px] border-[#1B3354] opacity-55" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-[120px] -end-20 h-[380px] w-[380px] rounded-full border-[50px] border-[#1B3354] opacity-80" />
-        <div className="relative flex items-center gap-3">
-          <span className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-mark text-white">
-            <Icon name="shield" size={20} />
-          </span>
-          <span className="leading-5">
-            <b className="text-base text-white">{t.brand}</b>
-            <br />
-            <span className="text-[13px] text-[#B9CCE6]">{t.brandSub}</span>
-          </span>
-        </div>
-        <h1 className="relative m-0 mt-auto max-w-[540px] text-[46px] leading-[56px] font-bold tracking-[-0.02em] text-white">{t.hero}</h1>
-        <div className="relative flex flex-wrap gap-2">
-          {t.trust.map((b) => (
-            <span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#2A4468] px-3 py-1.5 text-xs font-semibold">
-              <Icon name="check" size={13} />
-              {b}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="box-border flex flex-[1_1_520px] flex-col px-10 py-7">
+    <div data-no-translate dir={en ? "ltr" : "rtl"} lang={lang} className={cx("flex min-h-screen bg-white text-j-ink", !en && "font-arabic")}>
+      <section className="box-border flex flex-1 flex-col px-6 py-7 sm:px-10">
         <div className="flex justify-end">
           <div role="group" aria-label="Language" className="flex rounded-[10px] bg-[#F2F5F3] p-[3px]">
             {(["en", "ar"] as Lang[]).map((l) => (
@@ -97,7 +167,7 @@ export default function LoginPage() {
                 type="button"
                 lang={l}
                 aria-pressed={lang === l}
-                onClick={() => setLang(l)}
+                onClick={() => l !== lang && setLocale(l)}
                 className={cx("h-[34px] cursor-pointer rounded-lg border-0 px-3.5 text-[13px] font-semibold text-j-ink", lang === l ? "bg-white" : "bg-transparent", l === "ar" ? "font-arabic" : "font-sans")}
               >
                 {l === "en" ? "English" : "العربية"}
@@ -107,61 +177,169 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-auto items-center justify-center py-7">
-          <div className="w-full max-w-[400px]">
-            {step === "identify" ? (
-              <div className="flex flex-col gap-5">
-                <h2 className="m-0 mb-1.5 text-[32px] leading-10 font-bold tracking-[-0.01em]">{t.signIn}</h2>
-                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.lead}</p>
-                <button
-                  type="button"
-                  onClick={() => setStep("redirect")}
-                  className="flex h-14 w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-cx text-base font-semibold text-white hover:bg-cx-strong"
-                >
+          <div className="w-full max-w-[420px]">
+            <div className="mb-8 flex items-center justify-center gap-3">
+              <span className="flex h-[42px] w-[42px] items-center justify-center rounded-xl bg-mark text-white">
+                <Icon name="shield" size={20} />
+              </span>
+              <b className="text-lg">{t.brand}</b>
+            </div>
+            {mode === "signin" && (
+              <form onSubmit={submit} className="flex flex-col gap-4">
+                <h2 className="m-0 text-[32px] leading-10 font-bold tracking-[-0.01em]">{t.signIn}</h2>
+                <Field label={t.email}>
+                  <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
+                </Field>
+                <Field label={t.password}>
+                  <input type="password" required autoComplete="current-password" dir="ltr" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
+                </Field>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+                  <label className="flex items-center gap-2 text-j-ink-2">
+                    <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                    {t.remember}
+                  </label>
+                  <button type="button" onClick={() => switchTo("forgot")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                    {t.forgot}
+                  </button>
+                </div>
+                {error && (
+                  <p role="alert" className="m-0 rounded-xl bg-j-bad-soft px-3.5 py-2.5 text-[13px] font-semibold text-j-bad">
+                    {error}
+                  </p>
+                )}
+                <button type="submit" disabled={busy} className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-xl border-0 bg-cx text-base font-semibold text-white hover:bg-cx-strong disabled:opacity-60">
                   <Icon name="key" size={18} />
-                  {t.ssoBtn}
+                  {busy ? t.busy : t.submit}
                 </button>
                 <div className="flex justify-center gap-2 text-[13px] text-j-muted">
-                  {t.noLic}{" "}
-                  <a href="#" className="font-semibold text-cx">
-                    {t.reqLic}
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-[22px]">
-                <button
-                  type="button"
-                  onClick={() => setStep("identify")}
-                  className="h-9 cursor-pointer self-start rounded-lg border-0 bg-[#F2F5F3] px-3 text-[13px] font-semibold text-j-ink-2"
-                >
-                  {t.cancel}
-                </button>
-                <div className="flex items-center gap-3.5">
-                  <span className="relative flex h-14 w-14 flex-none items-center justify-center">
-                    <span aria-hidden="true" className="absolute inset-0 animate-spin rounded-full border-[3px] border-cx-soft border-t-cx" />
-                    <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-cx font-sans text-xs font-bold text-white">DA</span>
-                  </span>
-                  <h2 className="m-0 text-[26px] leading-[34px] font-bold">{t.redir}</h2>
-                </div>
-                <ol className="m-0 flex list-none flex-col overflow-hidden rounded-[14px] border border-j-line p-0">
-                  {t.hs.map((l, i) => (
-                    <li key={l} className="flex min-h-[52px] items-center gap-3 border-b border-j-line-soft px-4 text-sm last:border-0">
-                      <span className={cx("flex h-6 w-6 flex-none items-center justify-center rounded-full text-white", i < 2 ? "bg-cx" : "bg-j-field")}>
-                        <Icon name={i === 0 ? "check" : i === 1 ? "clock" : "more"} size={13} strokeWidth={2.4} />
-                      </span>
-                      <span className={cx("flex-auto", i < 2 ? "font-semibold text-j-ink" : "text-j-muted")}>{l}</span>
-                    </li>
-                  ))}
-                </ol>
-                <Link href="/entities" className="flex h-[52px] items-center justify-center rounded-xl bg-cx text-[15px] font-semibold text-white no-underline hover:bg-cx-strong hover:text-white">
-                  {t.simulate}
-                </Link>
-                <span className="text-center text-[13px] text-j-muted">
-                  {t.notOpen}{" "}
-                  <button type="button" onClick={() => setStep("identify")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx underline">
-                    {t.retry}
+                  {t.noAccess}
+                  <button type="button" onClick={() => switchTo("request")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                    {t.request}
                   </button>
+                </div>
+                <details className="rounded-xl border border-j-line px-4 py-3 text-[13px]">
+                  <summary className="cursor-pointer font-semibold text-j-ink-2">{t.demo}</summary>
+                  <p className="m-0 mt-2 text-j-muted">
+                    {t.demoLead} <code dir="ltr" className="font-mono text-j-ink">{DEMO_PASSWORD}</code>
+                  </p>
+                  <ul className="m-0 mt-2 flex list-none flex-col gap-1 p-0">
+                    {DEMO.map((u) => (
+                      <li key={u.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEmail(u.email);
+                            setPassword(DEMO_PASSWORD);
+                            setError("");
+                          }}
+                          className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border-0 bg-j-canvas px-3 py-2 text-start text-[13px] text-j-ink hover:bg-cx-tint"
+                        >
+                          <b>{en ? ROLES.find((r) => r.key === u.role)!.label : ROLE_AR[u.role]}</b>
+                          <span dir="ltr" className="font-mono text-xs text-j-muted">
+                            {u.email}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              </form>
+            )}
+
+            {mode === "request" && (
+              <form onSubmit={sendRequest} className="flex flex-col gap-3.5">
+                <button type="button" onClick={() => switchTo("signin")} className="h-9 cursor-pointer self-start rounded-lg border-0 bg-[#F2F5F3] px-3 text-[13px] font-semibold text-j-ink-2">
+                  {t.back}
+                </button>
+                <h2 className="m-0 text-[28px] leading-9 font-bold tracking-[-0.01em]">{t.reqTitle}</h2>
+                <Field label={t.name}>
+                  <input required autoComplete="name" value={req.name} onChange={(e) => setReq({ ...req, name: e.target.value })} className={field} />
+                </Field>
+                <Field label={t.email}>
+                  <input type="email" required autoComplete="email" dir="ltr" value={req.email} onChange={(e) => setReq({ ...req, email: e.target.value })} className={field} />
+                </Field>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5">
+                  <Field label={t.org}>
+                    <input required autoComplete="organization" value={req.organisation} onChange={(e) => setReq({ ...req, organisation: e.target.value })} className={field} />
+                  </Field>
+                  <Field label={t.jobTitle}>
+                    <input autoComplete="organization-title" value={req.title} onChange={(e) => setReq({ ...req, title: e.target.value })} className={field} />
+                  </Field>
+                </div>
+                <Field label={t.reason}>
+                  <textarea rows={2} value={req.reason} onChange={(e) => setReq({ ...req, reason: e.target.value })} className={cx(field, "h-auto py-2.5")} />
+                </Field>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3.5">
+                  <Field label={t.choose}>
+                    <input type="password" required autoComplete="new-password" dir="ltr" value={req.password} onChange={(e) => setReq({ ...req, password: e.target.value })} className={field} />
+                  </Field>
+                  <Field label={t.confirm}>
+                    <input type="password" required autoComplete="new-password" dir="ltr" value={req.confirm} onChange={(e) => setReq({ ...req, confirm: e.target.value })} className={field} />
+                  </Field>
+                </div>
+                <span className="text-xs text-j-muted">{t.hint}</span>
+                {error && (
+                  <p role="alert" className="m-0 rounded-xl bg-j-bad-soft px-3.5 py-2.5 text-[13px] font-semibold text-j-bad">
+                    {error}
+                  </p>
+                )}
+                <button type="submit" disabled={busy} className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-cx text-base font-semibold text-white hover:bg-cx-strong disabled:opacity-60">
+                  <Icon name="send" size={17} />
+                  {busy ? t.sending : t.send}
+                </button>
+                <div className="flex justify-center gap-2 text-[13px] text-j-muted">
+                  {t.haveAccess}
+                  <button type="button" onClick={() => switchTo("signin")} className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                    {t.signIn}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {mode === "forgot" && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const at = new Date().toISOString();
+                  // The request reaches the Platform Admin under Users; nothing tells whether the email has an account.
+                  setPlatform((d) => void (d.resets = [...(d.resets ?? []).filter((r) => r.email !== email.trim().toLowerCase()), { email: email.trim().toLowerCase(), at }]));
+                  switchTo("forgotSent");
+                }}
+                className="flex flex-col gap-4"
+              >
+                <h2 className="m-0 text-[28px] leading-9 font-bold">{t.forgotTitle}</h2>
+                <Field label={t.email}>
+                  <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
+                </Field>
+                <button type="submit" className="h-[52px] w-full cursor-pointer rounded-xl border-0 bg-cx text-base font-semibold text-white hover:bg-cx-strong">
+                  {t.forgotSend}
+                </button>
+                <button type="button" onClick={() => switchTo("signin")} className="cursor-pointer self-center border-0 bg-transparent p-0 text-[13px] font-semibold text-cx">
+                  {t.back}
+                </button>
+              </form>
+            )}
+
+            {mode === "forgotSent" && (
+              <div role="status" className="flex flex-col items-start gap-4">
+                <h2 className="m-0 text-[28px] leading-9 font-bold">{t.forgotTitle}</h2>
+                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.forgotSent}</p>
+                <button type="button" onClick={() => switchTo("signin")} className="h-11 cursor-pointer rounded-xl border-0 bg-cx px-5 text-sm font-semibold text-white hover:bg-cx-strong">
+                  {t.back}
+                </button>
+              </div>
+            )}
+
+            {mode === "sent" && (
+              <div role="status" className="flex flex-col items-start gap-4">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E7F3ED] text-brand">
+                  <Icon name="check" size={26} strokeWidth={2.4} />
                 </span>
+                <h2 className="m-0 text-[28px] leading-9 font-bold">{t.sent}</h2>
+                <p className="m-0 text-[15px] leading-6 text-j-ink-3">{t.sentLead}</p>
+                <button type="button" onClick={() => switchTo("signin")} className="h-11 cursor-pointer rounded-xl border-0 bg-cx px-5 text-sm font-semibold text-white hover:bg-cx-strong">
+                  {t.back}
+                </button>
               </div>
             )}
           </div>

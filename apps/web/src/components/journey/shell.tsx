@@ -1,72 +1,101 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "@/components/ui";
-import { CONSULTANT, LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
+import { canManage, homeFor, ROLE_OF, type Role } from "@/lib/auth/accounts";
+import { useAuth, useGuard } from "@/lib/auth/store";
+import { LOGO, DEMO_CLIENT_ID, clientHref } from "@/lib/journey/portfolio";
 import { useAdmin } from "@/lib/admin/store";
+import { LanguageToggle } from "@/lib/i18n/locale";
+import { initialsOf } from "@/lib/journey/people";
 import { useJourney } from "@/lib/journey/store";
-import { useWorkspace } from "@/lib/workspace/store";
+import { useWorkplaces } from "@/lib/journey/use-workplaces";
+import { CURRENT_YEAR, workplaceLabel, type WorkplaceClient } from "@/lib/journey/workplaces";
 import { Icon, type IconName } from "./icon";
 
 type NavItem = { label: string; icon: IconName; href: string; badge?: string; badgeBg?: string; exact?: boolean };
 
-const STUDIO: NavItem[] = [
-  { label: "Framework builder", icon: "layers", href: "/studio/frameworks" },
-  { label: "Scoring", icon: "trend", href: "/studio/scoring" },
-  { label: "Review & acceptance", icon: "rev", href: "/studio/acceptance" },
+/** Standard library sections; the side nav shows one entry and the library pages show these as a sub-menu. */
+export const STUDIO: NavItem[] = [
+  { label: "Editions", icon: "layers", href: "/studio/frameworks" },
   { label: "Automation", icon: "refresh", href: "/studio/automation" },
   { label: "Change log", icon: "history", href: "/studio/history" },
 ];
 
-function portfolioNav(studioBadge?: string): [string, NavItem[]][] {
-  return [
-    [
-      "WORK",
-      [
-        { label: "Portfolio", icon: "home", href: "/portfolio", exact: true },
-        { label: "Entities", icon: "ent", href: "/entities", exact: true },
-        { label: "Engagements", icon: "eng", href: clientHref(DEMO_CLIENT_ID, "/engagement"), badge: "2" },
-        { label: "Onboard client", icon: "plus", href: "/portfolio/onboard" },
-      ],
-    ],
-    ["STUDIO", STUDIO.map((n) => (n.href === "/studio/history" ? { ...n, badge: studioBadge, badgeBg: "#C2410C" } : n))],
-  ];
+type Groups = [string, NavItem[]][];
+
+interface Badges {
+  review?: string;
+  messages?: string;
+  workspaces?: string;
+  studio?: string;
+  users?: string;
 }
 
-function clientNav(id: string, name: string, workBadge?: string, outboxBadge?: string, studioBadge?: string): [string, NavItem[]][] {
-  const c = (path: string) => clientHref(id, path);
+/**
+ * Side nav for a role, in the design's groups. Each role sees only its own modules: Platform
+ * Admins the administration, Index Owners the workspace and index management, Control Owners
+ * their own work, Management Viewers the workspace's dashboard, analytics and reports.
+ */
+function navFor(role: Role, wp: { id: string } | undefined, badges: Badges): Groups {
+  const c = (path: string) => clientHref(wp!.id, path);
+  const workspace: Groups = wp
+    ? [
+        [
+          "WORKSPACE",
+          [
+            { label: "Dashboard", icon: "home", href: c(""), exact: true },
+            { label: "Analytics", icon: "trend", href: c("/analytics") },
+            { label: "Reports", icon: "file", href: `/dashboards/${wp.id}` },
+          ],
+        ],
+      ]
+    : [];
+  const management: Groups = wp
+    ? [
+        [
+          "INDEX MANAGEMENT",
+          [
+            { label: "Review hub", icon: "rev", href: c("/review"), badge: badges.review },
+            { label: "Standard", icon: "layers", href: c("/standard") },
+            { label: "Plan", icon: "calendar", href: c("/plan") },
+            { label: "People and access", icon: "dep", href: c("/people") },
+            { label: "Cycle closure", icon: "flag", href: c("/closure") },
+          ],
+        ],
+      ]
+    : [];
+  if (role === "control")
+    return [
+      [
+        "MY WORK",
+        [
+          { label: "Home", icon: "home", href: "/my-requirements" },
+          { label: "My controls", icon: "req", href: "/my-controls" },
+          { label: "Evidence library", icon: "ev", href: "/my-evidence" },
+          { label: "Messages", icon: "cla", href: "/messages", badge: badges.messages },
+        ],
+      ],
+    ];
+  if (role === "viewer") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/dashboards", exact: true }]], ...workspace];
+  if (role === "owner") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/workplaces", exact: true }]], ...workspace, ...management];
   return [
     [
-      "PORTFOLIO",
+      "ADMINISTRATION",
       [
-        { label: "All entities", icon: "grid", href: "/portfolio", exact: true },
-        { label: "Add entity", icon: "plus", href: "/portfolio/onboard" },
+        { label: "Workspaces and access", icon: "key", href: "/admin/workspaces", badge: badges.workspaces, badgeBg: "#C2410C" },
+        { label: "Entities", icon: "ent", href: "/admin/entities" },
+        { label: "Users", icon: "user", href: "/admin/users", badge: badges.users, badgeBg: "#C2410C" },
+        { label: "Standard library", icon: "layers", href: "/studio", badge: badges.studio, badgeBg: "#C2410C" },
+        { label: "AI settings", icon: "ai", href: "/admin/ai" },
+        { label: "Audit trail", icon: "history", href: "/admin/audit" },
       ],
     ],
-    [
-      name.toUpperCase(),
-      [
-        { label: "Overview", icon: "home", href: c(""), exact: true },
-        { label: "Requirements", icon: "req", href: c("/requirements") },
-        { label: "My work", icon: "act", href: c("/work"), badge: workBadge },
-        { label: "Outbox", icon: "send", href: c("/outbox"), badge: outboxBadge, badgeBg: "#4F46E5" },
-        { label: "Evidence library", icon: "ev", href: c("/evidence") },
-        { label: "Clarifications", icon: "cla", href: c("/clarifications") },
-        { label: "Submission", icon: "sub", href: c("/submission") },
-      ],
-    ],
-    [
-      "INSIGHTS",
-      [
-        { label: "Departments", icon: "dep", href: c("/departments") },
-        { label: "Comparisons", icon: "cmp", href: c("/comparisons") },
-        { label: "Entity 360", icon: "ent", href: c("/360") },
-        { label: "Engagement", icon: "eng", href: c("/engagement") },
-      ],
-    ],
-    ["STUDIO", STUDIO.map((n) => (n.href === "/studio/history" ? { ...n, badge: studioBadge, badgeBg: "#C2410C" } : n))],
+    // A Platform Admin who opens a workspace (Manage) works in it like its Index Owner.
+    ...workspace,
+    ...management,
   ];
 }
 
@@ -77,64 +106,84 @@ function isActive(pathname: string, item: NavItem) {
 }
 
 /**
- * Consultant portal frame: white side nav (portfolio or client mode) and a top bar.
- * `clientId` switches the nav to the client workspace for that entity.
+ * Platform frame: white side nav for the signed-in user's role and a top bar. `clientId`
+ * (a workplace id) adds that workplace's pages to the nav. Only signed-in users allowed on
+ * the page see it; everyone else is sent to sign in or to their own home.
  */
-export function ConsultantShell({
+export function AppShell({
   clientId,
   workBadge,
-  outboxBadge,
   search,
   headerExtra,
   children,
 }: {
   clientId?: string;
   workBadge?: string;
-  outboxBadge?: string;
   search: string;
   headerExtra?: ReactNode;
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const { clients } = useJourney();
-  const current = clients.find((c) => c.id === (clientId ?? DEMO_CLIENT_ID)) ?? clients[0];
+  const router = useRouter();
+  const { ready, user } = useGuard();
+  const { signOut, requests } = useAuth();
+  const views = useWorkplaces();
+  const current = clientId ? views.find((v) => v.client.id === clientId) : undefined;
   const { state: admin } = useAdmin();
-  const pending = admin.changeRequests.filter((cr) => cr.status === "awaiting").length;
-  const studioBadge = pending ? String(pending) : undefined;
-  const groups = clientId ? clientNav(clientId, current.name, workBadge, outboxBadge, studioBadge) : portfolioNav(studioBadge);
+  const pendingCr = admin.changeRequests.filter((cr) => cr.status === "awaiting").length;
+  const pendingAccess = requests.filter((r) => r.status === "pending").length;
+  const { state: journey } = useJourney();
+  const pendingWp = (journey.workplaceRequests ?? []).filter((r) => r.status === "pending").length;
+  if (!ready || !user) return <div className="min-h-screen bg-j-canvas" aria-busy="true" />;
+
+  const groups = navFor(user.role, current && user.role !== "control" ? { id: current.client.id } : undefined, {
+    review: workBadge,
+    messages: workBadge,
+    workspaces: pendingWp ? String(pendingWp) : undefined,
+    studio: pendingCr ? String(pendingCr) : undefined,
+    users: pendingAccess ? String(pendingAccess) : undefined,
+  });
   // Several items share a destination; highlight only the first match.
   let matched = false;
-  const [lbg, lfg] = LOGO[current.logo];
+  // Index owners open only the workplaces they run; control owners only their entity's.
+  const outside =
+    !!current && ((user.role === "owner" && !current.workplace.ownerIds.includes(user.id)) ||
+      (user.role === "control" && !!user.entityId && current.workplace.entityId !== user.entityId) ||
+      (user.role === "viewer" && !(user.workspaceIds ?? []).includes(current.client.id)));
 
   return (
     <div className="flex min-h-screen flex-wrap bg-j-canvas text-j-ink">
-      <nav
-        aria-label="Consultant portal"
-        className="box-border flex flex-[1_1_232px] flex-col gap-[18px] border-r border-[#E3E8EF] bg-white px-3 py-5 lg:max-w-[260px]"
-      >
+      <nav aria-label="Main" className="box-border flex flex-[1_1_232px] flex-col gap-[18px] border-e border-[#E3E8EF] bg-white px-3 py-5 lg:max-w-[260px]">
         <div className="flex items-center gap-2.5 px-2">
-          <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-cx text-[13px] font-bold text-white">DA</span>
+          <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-mark text-white">
+            <Icon name="shield" size={17} />
+          </span>
           <span className="leading-[17px]">
-            <b className="text-sm">Consultant portal</b>
+            <b className="text-sm">ComplAI</b>
             <br />
-            <span className="text-xs text-j-muted">{CONSULTANT.firm}</span>
+            <span className="text-xs text-j-muted">{ROLE_OF[user.role].label}</span>
           </span>
         </div>
-        <Link
-          href="/entities"
-          className="flex min-h-[52px] items-center gap-2.5 rounded-xl border border-cx-line bg-cx-tint px-3 text-j-ink no-underline hover:text-j-ink"
-        >
-          <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-lg text-[11px] font-bold" style={{ background: lbg, color: lfg }}>
-            {current.ini}
-          </span>
-          <span className="min-w-0 flex-auto leading-4">
-            <b className="text-[13px]">{current.name}</b>
-            <br />
-            <span className="text-xs text-j-muted">{current.frameworks[0]}</span>
-          </span>
-          <Icon name="switch" size={16} />
-          <span className="sr-only">Switch entity</span>
-        </Link>
+        {!current && user.role === "admin" && (
+          <div className="rounded-xl border border-cx-line bg-cx-tint px-3 py-2 text-[13px] leading-[17px]">
+            <span className="block text-xs text-j-muted">Scope</span>
+            <b>All entities and workspaces</b>
+          </div>
+        )}
+        {current && user.role !== "control" && (
+          <Link href={user.role === "viewer" ? "/dashboards" : user.role === "admin" ? "/admin/workspaces" : "/workplaces"} className="flex min-h-[52px] items-center gap-2.5 rounded-xl border border-cx-line bg-cx-tint px-3 text-j-ink no-underline hover:text-j-ink">
+            <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-lg text-[11px] font-bold" style={{ background: LOGO[current.entity.logo][0], color: LOGO[current.entity.logo][1] }}>
+              {current.entity.ini}
+            </span>
+            <span className="min-w-0 flex-auto leading-4">
+              <b className="text-[13px]">{current.entity.name}</b>
+              <br />
+              <span className="text-xs text-j-muted">{workplaceLabel(current.framework?.name ?? current.client.frameworks[0], current.workplace.year)}</span>
+            </span>
+            <Icon name="switch" size={16} />
+            <span className="sr-only">Switch workspace</span>
+          </Link>
+        )}
         {groups.map(([title, items]) => (
           <div key={title} className="flex flex-col gap-0.5">
             <div className="px-3 pb-1 text-[11px] font-semibold tracking-[0.06em] text-j-muted">{title}</div>
@@ -164,15 +213,21 @@ export function ConsultantShell({
           </div>
         ))}
         <div className="mt-auto flex items-center gap-2.5 border-t border-[#E3E8EF] px-2 pt-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0ECF8] text-xs font-bold text-cx">{CONSULTANT.initials}</span>
-          <span className="flex-auto text-[13px] leading-[17px]">
-            <b>{CONSULTANT.name}</b>
-            <br />
-            <span className="text-j-muted">{CONSULTANT.role}</span>
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[#E0ECF8] text-xs font-bold text-cx">{initialsOf(user.name)}</span>
+          <span className="min-w-0 flex-auto text-[13px] leading-[17px]">
+            <b className="block truncate">{user.name}</b>
+            <span className="block truncate text-j-muted">{user.email}</span>
           </span>
-          <Link href="/login" className="text-xs text-j-muted no-underline hover:text-j-ink">
+          <button
+            type="button"
+            onClick={() => {
+              signOut();
+              router.push("/login");
+            }}
+            className="cursor-pointer border-0 bg-transparent p-0 text-xs text-j-muted hover:text-j-ink"
+          >
             Sign out
-          </Link>
+          </button>
         </div>
       </nav>
       <div className="flex min-w-0 flex-[999_1_560px] flex-col">
@@ -183,30 +238,49 @@ export function ConsultantShell({
             <input type="search" placeholder={search} className="min-w-0 flex-auto border-0 bg-transparent text-sm text-j-ink outline-none" />
           </label>
           <span className="flex-auto" />
-          {headerExtra}
+          {current && user.role === "admin" && (
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#FFF4E5] px-3 text-xs font-semibold text-[#8A4B00]">
+              <Icon name="key" size={14} />
+              Index Owner view · as Platform Admin
+            </span>
+          )}
+          {!outside && headerExtra}
+          <LanguageToggle />
         </header>
-        {children}
+        {outside ? (
+          <main className="box-border flex w-full max-w-[720px] flex-col items-start gap-3 px-8 pt-10">
+            <h1 className="m-0 text-2xl">This workspace is not granted to you</h1>
+            <p className="m-0 text-sm text-j-ink-3">You see only the workspaces you were granted. Ask your Index Owner or the Platform Admin for access to {current!.entity.name}.</p>
+            <Link href={homeFor(user.role)} className="font-semibold text-cx">
+              Back to your home
+            </Link>
+          </main>
+        ) : (
+          children
+        )}
       </div>
     </div>
   );
 }
 
-/** The client whose workspace the current route shows (falls back to Demo Entity). */
-export function useCurrentClient() {
+/** The workplace whose pages the current route shows, as its entity (falls back to Demo Entity's first workplace). */
+export function useCurrentClient(): WorkplaceClient {
   const { id } = useParams<{ id?: string }>();
+  const views = useWorkplaces();
   const { clients } = useJourney();
-  return clients.find((c) => c.id === id) ?? clients.find((c) => c.id === DEMO_CLIENT_ID)!;
+  const view = views.find((v) => v.client.id === id) ?? views.find((v) => v.client.id === DEMO_CLIENT_ID) ?? views[0];
+  if (view) return view.client;
+  const demo = clients.find((c) => c.id === DEMO_CLIENT_ID) ?? clients[0];
+  return { ...demo, entityId: demo.id, workplaceId: demo.id, year: CURRENT_YEAR, frameworkId: demo.frameworkIds?.[0] ?? "" };
 }
 
-/** Consultant shell in client-workspace mode for the client in the URL. */
+/** App shell with the workplace in the URL open. */
 export function ClientShell({ children, workBadge, search }: { children: ReactNode; workBadge?: string; search?: string }) {
   const client = useCurrentClient();
-  const ws = useWorkspace();
-  const drafts = ws.state.drafts.filter((d) => d.status === "draft").length;
   return (
-    <ConsultantShell clientId={client.id} workBadge={workBadge} outboxBadge={drafts ? String(drafts) : undefined} search={search ?? `Search ${client.name}`} headerExtra={<ClientHeaderExtra />}>
+    <AppShell clientId={client.id} workBadge={workBadge} search={search ?? `Search ${client.name}`} headerExtra={<ClientHeaderExtra />}>
       {children}
-    </ConsultantShell>
+    </AppShell>
   );
 }
 
@@ -219,18 +293,21 @@ export function JMain({ children, className, max = 1360 }: { children: ReactNode
   );
 }
 
-/** Header extras for a client workspace: service model, engagement term, switch entity. */
+/** Header extras for a workplace: its index and review year, and a way back to the other workplaces. */
 export function ClientHeaderExtra() {
+  const client = useCurrentClient();
+  const { user } = useAuth();
   return (
     <>
-      <span className="inline-flex h-[30px] items-center rounded-full bg-cx-soft px-3 text-xs font-bold text-cx">Managed service</span>
-      <span className="inline-flex h-[30px] items-center rounded-full bg-j-canvas px-3 text-xs font-semibold text-j-ink-2">ENG-0142 · 214 d left</span>
-      <Link
-        href="/entities"
-        className="inline-flex h-9 items-center rounded-[10px] border border-j-line px-3 text-[13px] font-semibold text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink"
-      >
-        Switch entity
-      </Link>
+      <span className="inline-flex h-[30px] items-center rounded-full bg-cx-soft px-3 text-xs font-bold text-cx">{workplaceLabel(client.frameworks[0] ?? "", client.year)}</span>
+      {canManage(user?.role) && (
+        <Link
+          href="/workplaces"
+          className="inline-flex h-9 items-center rounded-[10px] border border-j-line px-3 text-[13px] font-semibold text-j-ink no-underline hover:bg-j-canvas hover:text-j-ink"
+        >
+          Switch workspace
+        </Link>
+      )}
     </>
   );
 }
