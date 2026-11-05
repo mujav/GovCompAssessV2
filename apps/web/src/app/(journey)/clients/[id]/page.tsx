@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Drawer } from "@/components/overlay";
 import { ClientShell, JMain } from "@/components/journey/shell";
-import { JButton, JLink, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
+import { JButton, JLink, Panel, PanelHead, Pill, Ring, Segmented } from "@/components/journey/ui";
 import { AiBox, ClosedBanner, Kpi } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
 import { canManage } from "@/lib/auth/accounts";
 import { useAuth } from "@/lib/auth/store";
-import { clientHref } from "@/lib/journey/portfolio";
+import { clientHref, completionColor } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
 import { attention, CYCLE_STAGES, findingsOf, phaseProgress, PHASES, type CycleStage } from "@/lib/cycle/model";
 import { useCycle } from "@/lib/cycle/use-cycle";
@@ -38,11 +38,14 @@ export default function DashboardPage() {
   const openRisks = cycle.risks.filter((r) => r.status !== "Closed").length;
 
   const byDim = useMemo(() => {
-    const m = new Map<string, { name: string; met: number; total: number }>();
+    const m = new Map<string, { name: string; met: number; total: number; controls: number; accepted: number; counts: Record<CycleStage, number> }>();
     for (const x of live) {
-      const e = m.get(x.dimension) ?? { name: x.dimensionName, met: 0, total: 0 };
+      const e = m.get(x.dimension) ?? { name: x.dimensionName, met: 0, total: 0, controls: 0, accepted: 0, counts: { not: 0, draft: 0, submitted: 0, review: 0, returned: 0, accepted: 0 } };
       e.met += x.met;
       e.total += x.total;
+      e.controls++;
+      if (x.stage === "accepted") e.accepted++;
+      for (const r of x.reqs) if (r.status !== "na") e.counts[r.stage]++;
       m.set(x.dimension, e);
     }
     return [...m.entries()];
@@ -163,28 +166,44 @@ export default function DashboardPage() {
               ))}
             </div>
           </Panel>
-          <Panel className="flex min-w-0 flex-[1_1_340px] flex-col gap-2.5 p-[22px]">
-            <PanelHead title="By dimension · requirements met" />
+        </div>
+
+        <Panel className="flex flex-col gap-3 p-[22px]">
+          <PanelHead title="By dimension · requirements met" aside={<span className="text-xs text-j-muted">{byDim.length} dimensions</span>} />
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3">
             {byDim.map(([k, d]) => {
               const p = d.total ? Math.round((d.met / d.total) * 100) : 0;
               return (
-                <div key={k} className="flex flex-col gap-1 text-[13px]">
-                  <span className="flex justify-between gap-2">
-                    <span className="truncate">
-                      {k} {d.name}
+                <div key={k} className="flex flex-col gap-3 rounded-2xl border border-j-line bg-white p-4">
+                  <div className="flex items-start gap-3">
+                    <Ring pct={p} color={completionColor(p)} size={56} thickness={7} label={`${p} percent met`}>
+                      <b className="text-[13px]">{p}%</b>
+                    </Ring>
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <b className="font-mono text-xs text-j-muted">{k}</b>
+                      <b className="line-clamp-2 text-sm leading-5" dir="auto">
+                        {d.name}
+                      </b>
                     </span>
-                    <b>
-                      {d.met}/{d.total} · {p}%
-                    </b>
+                  </div>
+                  <span role="img" aria-label={CYCLE_STAGES.map((x) => `${x.label} ${d.counts[x.key]}`).join(", ")} className="flex h-2 gap-[2px] overflow-hidden rounded-full bg-j-line-soft">
+                    {CYCLE_STAGES.filter((x) => d.counts[x.key]).map((x) => (
+                      <span key={x.key} style={{ flex: d.counts[x.key], background: x.color }} />
+                    ))}
                   </span>
-                  <span className="block h-1.5 overflow-hidden rounded-full bg-j-line-soft">
-                    <span className="block h-full rounded-full bg-[#1F9D6E]" style={{ width: `${p}%` }} />
+                  <span className="flex justify-between gap-2 text-xs text-j-ink-3">
+                    <span>
+                      <b className="text-j-ink">{d.met}</b> / {d.total} requirements met
+                    </span>
+                    <span>
+                      <b className="text-j-ink">{d.accepted}</b> / {d.controls} controls
+                    </span>
                   </span>
                 </div>
               );
             })}
-          </Panel>
-        </div>
+          </div>
+        </Panel>
 
         <Panel className="flex flex-col gap-2 py-[18px]">
           <PanelHead
