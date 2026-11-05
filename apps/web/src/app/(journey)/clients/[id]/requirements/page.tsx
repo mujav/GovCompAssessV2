@@ -274,7 +274,7 @@ function RequirementsView() {
                 {levels.labels.map((l, i) =>
                   i === levels.rowLevel ? (
                     <span key={l} role="columnheader" aria-sort={sort === "num" ? (dir === 1 ? "ascending" : "descending") : "none"}>
-                      <button type="button" onClick={() => headSort("num")} className={cx("cursor-pointer border-0 bg-transparent p-0 text-xs", sort === "num" ? "font-bold text-j-ink" : "font-semibold text-j-muted")}>
+                      <button type="button" onClick={() => headSort("num")} className={cx("cursor-pointer border-0 bg-transparent p-0 text-start text-xs", sort === "num" ? "font-bold text-j-ink" : "font-semibold text-j-muted")}>
                         {l} <span aria-hidden="true">{sort === "num" ? (dir === 1 ? "↑" : "↓") : ""}</span>
                       </button>
                     </span>
@@ -293,7 +293,7 @@ function RequirementsView() {
                   ] as [SortKey, string][]
                 ).map(([k, l]) => (
                   <span key={k} role="columnheader" aria-sort={sort === k ? (dir === 1 ? "ascending" : "descending") : "none"}>
-                    <button type="button" onClick={() => headSort(k)} className={cx("cursor-pointer border-0 bg-transparent p-0 text-xs", sort === k ? "font-bold text-j-ink" : "font-semibold text-j-muted")}>
+                    <button type="button" onClick={() => headSort(k)} className={cx("cursor-pointer border-0 bg-transparent p-0 text-start text-xs", sort === k ? "font-bold text-j-ink" : "font-semibold text-j-muted")}>
                       {l} <span aria-hidden="true">{sort === k ? (dir === 1 ? "↑" : "↓") : ""}</span>
                     </button>
                   </span>
@@ -319,7 +319,9 @@ function RequirementsView() {
                       <Link href={clientHref(client.id, `/requirements/${r.code}`)} className="font-mono text-[13px] font-semibold text-cx">
                         {r.code}
                       </Link>
-                      <span className="truncate">{r.title}</span>
+                      <span className="line-clamp-2" dir="auto">
+                        {r.title}
+                      </span>
                       {claByCode.get(r.code)?.map((x) => (
                         <span key={x.id} className="truncate text-xs text-j-ai">
                           {x.id} · {x.status === "ans" ? "answered, not applied" : x.status === "sub" ? "awaiting answer" : "draft question"}
