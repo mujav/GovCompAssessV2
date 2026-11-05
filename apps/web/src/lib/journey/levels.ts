@@ -1,5 +1,5 @@
 import type { FrameworkRequirement, HierarchyLevel } from "@/lib/admin/types";
-import { controlOf, dimensionOf, domainOf, namesFrom, type CycleRequirement } from "@/lib/cycle/model";
+import { applyRenames, controlOf, dimensionOf, domainOf, namesFrom, type CycleRequirement } from "@/lib/cycle/model";
 import type { EntityFramework } from "./frameworks";
 
 // The four levels of an index for one requirement row, so every requirement table can show
@@ -82,7 +82,7 @@ export function otherLevels(l: IndexLevels, code: string, title: string) {
  * requirement wording, then the Index Owner's renames. Workspace records read the path off the code.
  */
 export function workspaceLevels(framework: EntityFramework | undefined, workspace: boolean, reqs: CycleRequirement[], renames?: Record<string, string>) {
-  const names = namesFrom(framework?.live.requirements, reqs);
-  for (const [k, v] of Object.entries(renames ?? {})) names.set(k, v);
-  return indexLevels({ levels: framework?.live.levels, nodes: workspace ? undefined : framework?.live.requirements, names });
+  const nodes = workspace ? undefined : framework?.live.requirements;
+  const names = applyRenames(namesFrom(nodes, reqs), renames, nodes);
+  return indexLevels({ levels: framework?.live.levels, nodes, names });
 }

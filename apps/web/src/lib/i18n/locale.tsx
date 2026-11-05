@@ -57,6 +57,13 @@ export function LocaleRoot() {
   return null;
 }
 
+/** The interface language, for showing data in one language only. English until the page has loaded. */
+export function useLocale(): Locale {
+  const [locale, set] = useState<Locale>("en");
+  useEffect(() => set(readLocale()), []);
+  return locale;
+}
+
 /** English / العربية switch. */
 export function LanguageToggle({ className }: { className?: string }) {
   const [locale, set] = useState<Locale>("en");

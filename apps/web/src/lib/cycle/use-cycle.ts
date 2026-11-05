@@ -24,6 +24,7 @@ import {
   defaultDates,
   hashUnit,
   namesFrom,
+  applyRenames,
   PHASES,
   reqLabel,
   sortByCode,
@@ -234,7 +235,7 @@ export function evidenceRuns(screens: Record<string, unknown>, clientId: string,
 /** Controls of a workspace from its requirements, overlay and cycle state. */
 export function controlsOf(reqs: StagedRequirement[], overlay: WorkOverlay, cycle: CycleState, nodes?: FrameworkRequirement[], annex?: AnnexList) {
   const names = namesFrom(nodes, reqs as CycleRequirement[]);
-  for (const [k, v] of Object.entries(cycle.standard.names ?? {})) names.set(k, v);
+  applyRenames(names, cycle.standard.names, nodes);
   const plan = { ...cycle.plan };
   // Controls the standard limits to other annex lists stay applicable until the Index Owner confirms N/A in the plan.
   const controls = buildControls(reqs as CycleRequirement[], {
@@ -322,8 +323,8 @@ export function useCycle() {
   const fwId = framework?.id ?? "fw-qiyas";
 
   const controls = useMemo(
-    () => controlsOf(reqs, overlay, cycle, framework?.live.requirements, meta.annex) as CycleControl[],
-    [reqs, overlay, cycle, framework, meta.annex],
+    () => controlsOf(reqs, overlay, cycle, work.workspace ? undefined : framework?.live.requirements, meta.annex) as CycleControl[],
+    [reqs, overlay, cycle, framework, meta.annex, work.workspace],
   );
   const runs = useMemo(() => evidenceRuns(state.screens, client.id, fwId, reqs.map((r) => r.code)), [state.screens, client.id, fwId, reqs]);
   const summary = useMemo(() => cycleSummary(controls, cycle), [controls, cycle]);
@@ -340,6 +341,8 @@ export function useCycle() {
 
   return {
     ...work,
+    /** True when the workspace runs on its own records rather than the standard's nodes. */
+    records: work.workspace,
     cycle,
     setCycle,
     controls,

@@ -36,7 +36,7 @@ export function useMyControls() {
       const cycle = (state.screens[cycleKey(w.client.id)] as CycleState | undefined) ?? seededCycle();
       const annex = entityMeta(platform, { id: w.entity.id, sub: w.entity.sub }).annex;
       const levels = workspaceLevels(w.framework, w.workspace, w.reqs, cycle.standard.names);
-      return (controlsOf(w.reqs, w.overlay, cycle, w.framework?.live.requirements, annex) as CycleControl[])
+      return (controlsOf(w.reqs, w.overlay, cycle, w.workspace ? undefined : w.framework?.live.requirements, annex) as CycleControl[])
         .filter((c) => c.applicable && c.owner === user.name)
         .map((c) => ({
           c,

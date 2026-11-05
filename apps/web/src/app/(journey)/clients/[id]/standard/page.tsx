@@ -6,10 +6,20 @@ import { Field, inputClass, JButton, JLink, Panel, PanelHead, Pill } from "@/com
 import { ClosedBanner, Modal, useToast } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
 import { useAuth } from "@/lib/auth/store";
+import { useLocale } from "@/lib/i18n/locale";
 import { useAdmin } from "@/lib/admin/store";
 import { controlOf, reqLabel, sortByCode } from "@/lib/cycle/model";
 import { defaultSpecs, useCycle, type ControlTailoring, type CycleControl, type DocType, type EvidenceSpec, type StandardState } from "@/lib/cycle/use-cycle";
 const DOC_TYPES: DocType[] = ["Approved document", "Report", "Samples", "Screenshot", "Link"];
+
+/** Text from the published standard, as written there: read-only, and kept out of the interface translation. */
+function StdText({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={className} dir="auto" data-no-translate>
+      {text}
+    </span>
+  );
+}
 
 export default function StandardPage() {
   const cy = useCycle();
@@ -24,6 +34,19 @@ export default function StandardPage() {
   const [adding, setAdding] = useState<null | { kind: "domain" | "control" | "requirement"; parent: string }>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const st = cycle.standard;
+  const locale = useLocale();
+  // The standard's own wording, in the interface language; the other language only when the standard has no text in this one.
+  const nodes = useMemo(() => new Map((cy.records ? [] : (framework?.live.requirements ?? [])).map((n) => [n.code, n])), [framework, cy.records]);
+  const inLang = (en?: string, ar?: string) => (locale === "ar" ? ar || en : en || ar) ?? "";
+  const titleOf = (code: string) => {
+    const n = nodes.get(code);
+    return n ? inLang(n.title, n.titleAr) : "";
+  };
+  const textOf = (code: string) => {
+    const n = nodes.get(code);
+    return n ? inLang(n.text, n.textAr) : "";
+  };
+  const levels = framework?.live.levels.map((l) => inLang(l.en, l.ar)) ?? [];
 
   const tailor = (code: string) => st.controls[code] ?? {};
   const specsOf = (c: CycleControl) => tailor(c.code).specs ?? defaultSpecs(c);
@@ -107,12 +130,10 @@ export default function StandardPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm text-j-muted">Standard</span>
-            <h1 className="m-0 text-[26px] leading-8 font-bold" dir="auto">
-              {framework?.name ?? cy.workspace}
+            <h1 className="m-0 text-[26px] leading-8 font-bold" dir="auto" data-no-translate>
+              {framework ? inLang(framework.name, framework.live.nameAr) : cy.workspace}
             </h1>
-            <span className="text-sm text-j-ink-3" dir="rtl">
-              {framework?.live.levels.map((l) => l.ar).filter(Boolean).join(" · ")}
-            </span>
+            {levels.length > 0 && <StdText text={levels.join(" › ")} className="text-sm text-j-ink-3" />}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {st.draftChanges > 0 && <Pill tone="warn">{st.draftChanges} unpublished changes</Pill>}
@@ -161,18 +182,15 @@ export default function StandardPage() {
 
         <section className="flex flex-wrap gap-2.5">
           {[
-            ["Dimensions", counts.dims, "منظور"],
-            ["Domains", counts.domains, "محور"],
-            ["Controls", counts.controls, "معيار"],
-            ["Requirements", counts.reqs, "متطلب"],
-            ["Required evidence", counts.ev, "مستند إثبات"],
-          ].map(([l, n, ar]) => (
+            ["Dimensions", counts.dims],
+            ["Domains", counts.domains],
+            ["Controls", counts.controls],
+            ["Requirements", counts.reqs],
+            ["Required evidence", counts.ev],
+          ].map(([l, n]) => (
             <span key={l as string} className="flex min-w-[130px] flex-[1_1_130px] flex-col rounded-[14px] border border-j-line bg-white px-3.5 py-2.5">
               <span className="text-xs text-j-muted">{l}</span>
               <b className="text-xl">{n}</b>
-              <span className="text-xs text-j-muted" dir="rtl" data-no-translate>
-                {ar}
-              </span>
             </span>
           ))}
           <span className={cx("flex min-w-[220px] flex-[2_1_220px] flex-col rounded-[14px] px-3.5 py-2.5", counts.noEv ? "bg-j-warn-soft" : "bg-[#E7F3ED]")}>
@@ -194,7 +212,7 @@ export default function StandardPage() {
                     <button type="button" onClick={() => setOpen(open.includes(dk) ? open.filter((x) => x !== dk) : [...open, dk])} className="flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 py-2 text-start font-semibold hover:bg-j-canvas">
                       <span className="w-3">{dOpen ? "▾" : "▸"}</span>
                       <span className="flex-auto">
-                        {dk} {d.name}
+                        {dk} {titleOf(dk) ? <StdText text={titleOf(dk)} /> : d.name}
                       </span>
                       <span className="text-xs font-normal text-j-muted">{d.domains.size} domains</span>
                     </button>
@@ -207,7 +225,7 @@ export default function StandardPage() {
                           <div key={mk} className="flex flex-col ps-4">
                             <button type="button" onClick={() => setOpen(open.includes(mk) ? open.filter((x) => x !== mk) : [...open, mk])} className="flex cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 py-1.5 text-start hover:bg-j-canvas">
                               <span className="w-3">{mOpen ? "▾" : "▸"}</span>
-                              <span className="flex-auto font-semibold">{m.name.startsWith("Domain") ? m.name : `${mk} ${m.name}`}</span>
+                              <span className="flex-auto font-semibold">{titleOf(mk) ? <>{mk} <StdText text={titleOf(mk)} /></> : m.name.startsWith("Domain") ? m.name : `${mk} ${m.name}`}</span>
                               <span className="text-xs text-j-muted">{m.controls.length} controls</span>
                             </button>
                             {mOpen &&
@@ -221,7 +239,7 @@ export default function StandardPage() {
                                     className={cx("ms-5 flex cursor-pointer items-center gap-2 rounded-lg border-0 px-2 py-1.5 text-start", x.code === c?.code ? "bg-cx-soft text-cx" : "bg-transparent hover:bg-j-canvas", !x.applicable && "text-j-muted")}
                                   >
                                     <span className="flex-auto">
-                                      <span className="font-mono text-xs">{x.code}</span> {x.title}
+                                      <span className="font-mono text-xs">{x.code}</span> {titleOf(x.code) ? <StdText text={titleOf(x.code)} /> : x.title}
                                     </span>
                                     <span className="text-xs text-j-muted">
                                       {x.reqs.length} req{gaps ? ` · ${gaps} gap` : ""}
@@ -253,44 +271,18 @@ export default function StandardPage() {
             <div className="flex min-w-0 flex-[2.2_1_560px] flex-col gap-3.5">
               <Panel className="flex flex-col gap-3 p-[22px]">
                 <span className="text-xs text-j-muted">
-                  Dimension {c.dimension} › Domain {c.domain} › Control
+                  {c.dimension} › {c.domain} › {c.code}
                 </span>
-                <input
-                  aria-label="Control title"
-                  disabled={closed}
-                  defaultValue={c.title}
-                  key={`t-${c.code}`}
-                  onBlur={(e) => e.target.value.trim() && e.target.value !== c.title && edit((s) => void ((s.names ??= {})[c.code] = e.target.value.trim()))}
-                  className="rounded-lg border border-transparent px-1 text-xl font-bold hover:border-j-line"
-                />
-                <input
-                  aria-label="Arabic title"
-                  dir="rtl"
-                  data-no-translate
-                  disabled={closed}
-                  defaultValue={tailor(c.code).titleAr ?? ""}
-                  key={`ar-${c.code}`}
-                  placeholder="العنوان بالعربية"
-                  onBlur={(e) => e.target.value !== (tailor(c.code).titleAr ?? "") && editControl(c.code, (t) => void (t.titleAr = e.target.value))}
-                  className="rounded-lg border border-transparent px-1 text-base text-j-ink-2 hover:border-j-line"
-                />
+                <h2 className="m-0 text-xl font-bold">
+                  <span className="font-mono">{c.code}</span> {titleOf(c.code) ? <StdText text={titleOf(c.code)} /> : c.title}
+                </h2>
                 <span className="flex flex-wrap gap-1.5">
                   <Pill tone={c.applicable ? "ok" : "gray"}>{c.applicable ? "Applicable" : "Not applicable"}</Pill>
                   <Pill>
                     {c.reqs.length} requirements · {specsOf(c).length} evidence
                   </Pill>
                 </span>
-                <Field label="Objective">
-                  <textarea
-                    rows={2}
-                    disabled={closed}
-                    key={`o-${c.code}`}
-                    defaultValue={tailor(c.code).objective ?? ""}
-                    placeholder="What the control establishes, e.g. the components and governance of the system, roles and responsibilities."
-                    onBlur={(e) => e.target.value !== (tailor(c.code).objective ?? "") && editControl(c.code, (t) => void (t.objective = e.target.value))}
-                    className="rounded-xl border border-j-line p-3 font-sans text-sm font-normal"
-                  />
-                </Field>
+                {textOf(c.code) && <StdText text={textOf(c.code)} className="text-sm leading-6 whitespace-pre-line text-j-ink-2" />}
               </Panel>
 
               <Panel className="flex flex-col gap-1 p-[22px]">
@@ -310,9 +302,10 @@ export default function StandardPage() {
                     <div key={r.code} className="flex flex-col gap-1.5 border-b border-j-line-soft py-3 last:border-0">
                       <span className="flex flex-wrap items-center gap-2 text-sm">
                         <b className="font-mono text-xs">{reqLabel(r.code)}</b>
-                        <span className="flex-auto">{r.title}</span>
+                        <span className="flex-auto">{titleOf(r.code) ? <StdText text={titleOf(r.code)} /> : r.title}</span>
                         {!list.length && <Pill tone="warn">No evidence</Pill>}
                       </span>
+                      {textOf(r.code) && <StdText text={textOf(r.code)} className="ms-6 text-[13px] leading-5 whitespace-pre-line text-j-ink-3" />}
                       {list.map((s) => (
                         <button key={s.id} type="button" disabled={closed} onClick={() => setSpec({ control: c.code, spec: s, isNew: false })} className="ms-6 flex cursor-pointer flex-wrap items-center gap-2 rounded-lg border-0 bg-j-canvas px-2.5 py-1.5 text-start text-[13px] hover:bg-cx-tint">
                           <b className="font-mono text-xs">{s.id}</b>
@@ -346,33 +339,16 @@ export default function StandardPage() {
                 </Panel>
               </div>
 
-              <Panel className="flex flex-col gap-2 p-[22px]">
-                <PanelHead title="References" />
-                {(tailor(c.code).references ?? []).map((r, i) => (
-                  <span key={i} className="flex items-center gap-2 text-sm">
-                    <span className="flex-auto">{r}</span>
-                    {!closed && (
-                      <JButton size="sm" variant="ghost" aria-label={`Remove ${r}`} onClick={() => editControl(c.code, (t) => void (t.references = (t.references ?? []).filter((_, j) => j !== i)))}>
-                        ✕
-                      </JButton>
-                    )}
-                  </span>
-                ))}
-                {!closed && (
-                  <input
-                    aria-label="Add reference"
-                    placeholder="Add a reference, e.g. DGA circular 2044 (1443/12/28) – press Enter"
-                    onKeyDown={(e) => {
-                      const v = (e.target as HTMLInputElement).value.trim();
-                      if (e.key === "Enter" && v) {
-                        editControl(c.code, (t) => void (t.references = [...(t.references ?? []), v]));
-                        (e.target as HTMLInputElement).value = "";
-                      }
-                    }}
-                    className={cx(inputClass, "h-10")}
-                  />
-                )}
-              </Panel>
+              {(tailor(c.code).references ?? []).length > 0 && (
+                <Panel className="flex flex-col gap-2 p-[22px]">
+                  <PanelHead title="References" />
+                  {tailor(c.code).references!.map((r, i) => (
+                    <span key={i} className="text-sm" dir="auto">
+                      {r}
+                    </span>
+                  ))}
+                </Panel>
+              )}
             </div>
           )}
         </div>

@@ -107,13 +107,23 @@ const titleCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 /** Names for dimension, domain and control codes: the standard's own nodes, else the requirement wording. */
 export function namesFrom(nodes: FrameworkRequirement[] | undefined, reqs: CycleRequirement[]) {
   const names = new Map<string, string>();
-  for (const n of nodes ?? []) names.set(n.code, n.title);
+  for (const n of nodes ?? []) names.set(n.code, n.title || n.titleAr || n.code);
   for (const r of reqs) {
     const dim = dimensionOf(r.code);
     if (!names.has(dim) && r.domain) names.set(dim, titleCase(r.domain));
     const ctl = controlOf(r.code);
     if (!names.has(ctl)) names.set(ctl, r.title.split(":")[0]);
   }
+  return names;
+}
+
+/**
+ * The Index Owner's names apply only to what they added. Anything the published standard holds
+ * keeps the standard's own wording.
+ */
+export function applyRenames(names: Map<string, string>, renames: Record<string, string> | undefined, nodes: FrameworkRequirement[] | undefined) {
+  const fixed = new Set((nodes ?? []).map((n) => n.code));
+  for (const [k, v] of Object.entries(renames ?? {})) if (!fixed.has(k)) names.set(k, v);
   return names;
 }
 
