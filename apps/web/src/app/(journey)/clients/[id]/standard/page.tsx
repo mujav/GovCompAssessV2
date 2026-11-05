@@ -32,6 +32,7 @@ export default function StandardPage() {
   const [selected, setSelected] = useState<string>(controls[0]?.code ?? "");
   const [spec, setSpec] = useState<{ control: string; spec: EvidenceSpec; isNew: boolean } | null>(null);
   const [adding, setAdding] = useState<null | { kind: "domain" | "control" | "requirement"; parent: string }>(null);
+  const [naFor, setNaFor] = useState<null | { code: string; label: string; control: boolean }>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const st = cycle.standard;
   const locale = useLocale();
@@ -47,6 +48,13 @@ export default function StandardPage() {
     return n ? inLang(n.text, n.textAr) : "";
   };
   const levels = framework?.live.levels.map((l) => inLang(l.en, l.ar)) ?? [];
+  /** Not applicable in this workspace, for a whole control or one requirement; null makes it applicable again. */
+  const setApplicable = (code: string, control: boolean, na: string | null) => {
+    // Making a control applicable again brings back the requirements marked not applicable in it too.
+    const marked = control && !na ? (controls.find((x) => x.code === code)?.reqs ?? []).filter((r) => r.code !== code && cycle.plan[r.code]?.na).map((r) => r.code) : [];
+    cy.updatePlan([code, ...marked], { na }, na ? "Not applicable in this workspace" : "Applicable again", 0);
+    say(`${control ? "Control" : "Requirement"} ${code} is ${na ? "not applicable" : "applicable again"} in this workspace`);
+  };
 
   const tailor = (code: string) => st.controls[code] ?? {};
   const specsOf = (c: CycleControl) => tailor(c.code).specs ?? defaultSpecs(c);
@@ -273,13 +281,20 @@ export default function StandardPage() {
                 <span className="text-xs text-j-muted">
                   {c.dimension} › {c.domain} › {c.code}
                 </span>
-                <h2 className="m-0 text-xl font-bold">
-                  <span className="font-mono">{c.code}</span> {titleOf(c.code) ? <StdText text={titleOf(c.code)} /> : c.title}
-                </h2>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <h2 className="m-0 min-w-0 flex-[1_1_320px] text-xl font-bold">
+                    <span className="font-mono">{c.code}</span> {titleOf(c.code) ? <StdText text={titleOf(c.code)} /> : c.title}
+                  </h2>
+                  <ApplicableSwitch label={`Applicability of control ${c.code}`} applicable={c.applicable} disabled={closed} onChange={(on) => (on ? setApplicable(c.code, true, null) : setNaFor({ code: c.code, label: `control ${c.code}`, control: true }))} />
+                </div>
+                {cycle.plan[c.code]?.na && (
+                  <span className="rounded-xl bg-j-canvas px-3 py-2 text-[13px] text-j-ink-2">
+                    <b>Not applicable in this workspace:</b> {cycle.plan[c.code]!.na!.reason} · {cycle.plan[c.code]!.na!.by}, {cycle.plan[c.code]!.na!.at}
+                  </span>
+                )}
                 <span className="flex flex-wrap gap-1.5">
-                  <Pill tone={c.applicable ? "ok" : "gray"}>{c.applicable ? "Applicable" : "Not applicable"}</Pill>
                   <Pill>
-                    {c.reqs.length} requirements · {specsOf(c).length} evidence
+                    {c.reqs.filter((r) => r.status !== "na").length} of {c.reqs.length} requirements applicable · {specsOf(c).length} evidence
                   </Pill>
                 </span>
                 {textOf(c.code) && <StdText text={textOf(c.code)} className="text-sm leading-6 whitespace-pre-line text-j-ink-2" />}
@@ -298,13 +313,32 @@ export default function StandardPage() {
                 />
                 {c.reqs.map((r) => {
                   const list = specsOf(c).filter((s) => s.req === r.code);
+                  // The control's own switch covers a control assessed as its single requirement.
+                  const own = r.code !== c.code;
+                  const marked = cycle.plan[r.code]?.na;
+                  const na = !cycle.plan[c.code]?.na && r.status === "na";
                   return (
-                    <div key={r.code} className="flex flex-col gap-1.5 border-b border-j-line-soft py-3 last:border-0">
+                    <div key={r.code} className={cx("flex flex-col gap-1.5 border-b border-j-line-soft py-3 last:border-0", (na || cycle.plan[c.code]?.na) && "opacity-60")}>
                       <span className="flex flex-wrap items-center gap-2 text-sm">
                         <b className="font-mono text-xs">{reqLabel(r.code)}</b>
-                        <span className="flex-auto">{titleOf(r.code) ? <StdText text={titleOf(r.code)} /> : r.title}</span>
-                        {!list.length && <Pill tone="warn">No evidence</Pill>}
+                        <span className="min-w-0 flex-auto">{titleOf(r.code) ? <StdText text={titleOf(r.code)} /> : r.title}</span>
+                        {!list.length && !na && <Pill tone="warn">No evidence</Pill>}
+                        {own && (
+                          <ApplicableSwitch
+                            size="sm"
+                            label={`Applicability of ${r.code}`}
+                            applicable={!na}
+                            // Records the last cycle already ruled not applicable stay so.
+                            disabled={closed || !!cycle.plan[c.code]?.na || (na && !marked)}
+                            onChange={(on) => (on ? setApplicable(r.code, false, null) : setNaFor({ code: r.code, label: `requirement ${r.code}`, control: false }))}
+                          />
+                        )}
                       </span>
+                      {marked && (
+                        <span className="ms-6 text-xs text-j-ink-3">
+                          Not applicable: {marked.reason} · {marked.by}, {marked.at}
+                        </span>
+                      )}
                       {textOf(r.code) && <StdText text={textOf(r.code)} className="ms-6 text-[13px] leading-5 whitespace-pre-line text-j-ink-3" />}
                       {list.map((s) => (
                         <button key={s.id} type="button" disabled={closed} onClick={() => setSpec({ control: c.code, spec: s, isNew: false })} className="ms-6 flex cursor-pointer flex-wrap items-center gap-2 rounded-lg border-0 bg-j-canvas px-2.5 py-1.5 text-start text-[13px] hover:bg-cx-tint">
@@ -331,13 +365,6 @@ export default function StandardPage() {
                   );
                 })}
               </Panel>
-
-              <div className="flex flex-wrap items-start gap-3.5">
-                <Panel className="flex min-w-0 flex-[1_1_300px] flex-col gap-2 p-[22px]">
-                  <PanelHead title="Applicability of this control" />
-                  <Applicability key={c.code} control={c} reason={cycle.plan[c.code]?.na?.reason} closed={closed} onChange={(na) => (cy.updatePlan([c.code], { na }, na ? "Not applicable in this workspace" : "Applicable again", 0), say(na ? `${c.code} is not applicable in this workspace` : `${c.code} is applicable again`))} />
-                </Panel>
-              </div>
 
               {(tailor(c.code).references ?? []).length > 0 && (
                 <Panel className="flex flex-col gap-2 p-[22px]">
@@ -396,31 +423,68 @@ export default function StandardPage() {
           }}
         />
       )}
+      {naFor && (
+        <NaDialog
+          label={naFor.label}
+          onClose={() => setNaFor(null)}
+          onSave={(why) => {
+            setApplicable(naFor.code, naFor.control, why);
+            setNaFor(null);
+          }}
+        />
+      )}
       {toast}
     </ClientShell>
   );
 }
 
-function Applicability({ control, reason, closed, onChange }: { control: CycleControl; reason?: string; closed: boolean; onChange: (na: string | null) => void }) {
-  const [na, setNa] = useState(!control.applicable);
-  const [why, setWhy] = useState(reason ?? "");
+/** Applicable / Not applicable, as a small two-way switch. */
+function ApplicableSwitch({ applicable, onChange, disabled, label, size = "md" }: { applicable: boolean; onChange: (on: boolean) => void; disabled?: boolean; label: string; size?: "sm" | "md" }) {
   return (
-    <>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="radio" name={`app-${control.code}`} disabled={closed} checked={!na} onChange={() => (setNa(false), !control.applicable && onChange(null))} /> Applicable
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="radio" name={`app-${control.code}`} disabled={closed} checked={na} onChange={() => setNa(true)} /> Not applicable
-      </label>
-      {na && (
-        <span className="flex flex-col gap-1.5 ps-6">
-          <input aria-label="Reason" disabled={closed} value={why} onChange={(e) => setWhy(e.target.value)} placeholder="Reason, e.g. the entity does not run this service" className={cx(inputClass, "h-10")} />
-          <JButton size="sm" variant="primary" className="self-start" disabled={closed || !why.trim() || (!control.applicable && why.trim() === (reason ?? ""))} onClick={() => onChange(why.trim())}>
-            {control.applicable ? "Mark not applicable" : "Update reason"}
+    <span role="radiogroup" aria-label={label} className="inline-flex shrink-0 rounded-[10px] bg-j-canvas p-[3px]">
+      {([true, false] as const).map((on) => (
+        <button
+          key={String(on)}
+          type="button"
+          role="radio"
+          aria-checked={applicable === on}
+          disabled={disabled}
+          onClick={() => applicable !== on && onChange(on)}
+          className={cx(
+            "cursor-pointer rounded-lg border-0 px-2.5 font-semibold disabled:cursor-not-allowed",
+            size === "sm" ? "h-[26px] text-[11px]" : "h-[32px] text-[13px]",
+            applicable === on ? (on ? "bg-white text-[#0E5A45] shadow-[0_1px_2px_rgba(16,28,23,0.08)]" : "bg-white text-j-ink shadow-[0_1px_2px_rgba(16,28,23,0.08)]") : "bg-transparent text-j-ink-3",
+          )}
+        >
+          {on ? "Applicable" : "Not applicable"}
+        </button>
+      ))}
+    </span>
+  );
+}
+
+/** Asks why something is not applicable; the reason goes on the plan and the audit. */
+function NaDialog({ label, onClose, onSave }: { label: string; onClose: () => void; onSave: (why: string) => void }) {
+  const [why, setWhy] = useState("");
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={`Mark ${label} not applicable`}
+      sub="It leaves this workspace's assessment: nobody is asked for evidence on it and it is not counted in progress."
+      footer={
+        <>
+          <JButton onClick={onClose}>Cancel</JButton>
+          <JButton variant="primary" disabled={!why.trim()} onClick={() => onSave(why.trim())}>
+            Mark not applicable
           </JButton>
-        </span>
-      )}
-    </>
+        </>
+      }
+    >
+      <Field label="Reason">
+        <input autoFocus value={why} onChange={(e) => setWhy(e.target.value)} placeholder="e.g. the entity does not run this service" className={inputClass} />
+      </Field>
+    </Modal>
   );
 }
 

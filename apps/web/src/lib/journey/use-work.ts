@@ -100,10 +100,18 @@ function withControlOwners<R extends WorkRequirement>(reqs: R[], cycle: unknown)
   return oneOwnerPerControl(reqs, (cycle as { plan?: Record<string, { owner?: string; department?: string }> } | undefined)?.plan);
 }
 
+/** Drops requirements the Index Owner marked not applicable in this workspace, on their own or with their whole control. */
 function withoutNa<R extends { code: string }>(reqs: R[], cycle: unknown): R[] {
   const plan = (cycle as { plan?: Record<string, { na?: unknown }> } | undefined)?.plan;
   if (!plan) return reqs;
-  return reqs.filter((r) => !plan[controlKey(r)]?.na);
+  return reqs.filter((r) => !plan[controlKey(r)]?.na && !plan[r.code]?.na);
+}
+
+/** Requirements the Index Owner marked not applicable on their own read as N/A on every screen; their control stays. */
+function withReqNa<R extends { code: string; status: string }>(reqs: R[], cycle: unknown): R[] {
+  const plan = (cycle as { plan?: Record<string, { na?: unknown }> } | undefined)?.plan;
+  if (!plan) return reqs;
+  return reqs.map((r) => (r.code !== controlKey(r) && plan[r.code]?.na ? { ...r, status: "na" } : r));
 }
 
 /** Files uploaded on each requirement count as received evidence everywhere the requirement is shown, and move its stage on. */
@@ -150,7 +158,7 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
   const scope = assignScope(client, fwId);
   const reqs = useMemo(
-    () => withControlOwners(withUploads(withTailoring(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), state.screens[`cycle.${client.id}`], ws.state.assignments, scope, workspace), client.id, fwId, state.screens), state.screens[`cycle.${client.id}`]),
+    () => withReqNa(withControlOwners(withUploads(withTailoring(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), state.screens[`cycle.${client.id}`], ws.state.assignments, scope, workspace), client.id, fwId, state.screens), state.screens[`cycle.${client.id}`]), state.screens[`cycle.${client.id}`]),
     [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope, client.id, fwId, state.screens],
   );
 
