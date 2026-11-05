@@ -7,6 +7,7 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Field, inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { AiBox, ClosedBanner, fmtWhen, LevelPill, Modal, TierPill, useToast } from "@/components/cycle/ui";
 import { Comments } from "@/components/cycle/comments";
+import { EvidenceViewer } from "@/components/cycle/evidence-viewer";
 import { ShareFeedback } from "@/components/cycle/ai-feedback";
 import { cx } from "@/components/ui";
 import { clientHref } from "@/lib/journey/portfolio";
@@ -31,8 +32,6 @@ export default function ReviewConsolePage() {
   const [returning, setReturning] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [dismissed, setDismissed] = useState<string[]>([]);
-  const [fileSel, setFileSel] = useState<string>("");
-  const [page, setPage] = useState(1);
 
   const specs = useMemo(() => (c ? (cycle.standard.controls[c.code]?.specs ?? defaultSpecs(c)) : []), [c, cycle.standard.controls]);
   if (!c)
@@ -63,7 +62,6 @@ export default function ReviewConsolePage() {
   const findings = ai.agents.review ? findingsOf(c, runs).filter((f) => !dismissed.includes(`f:${f.req}`)) : [];
   // Decisions open once the owner submits and close when the control is accepted or back with its owner.
   const decidable = !closed && (c.stage === "submitted" || c.stage === "review");
-  const viewing = files.find((f) => f.id === fileSel) ?? files[0];
   // The AI assessor runs on demand, per requirement, once the owner has submitted the evidence.
   const assessable = !closed && (c.stage === "submitted" || c.stage === "review" || c.stage === "accepted");
   const aiFor = (code: string) => (
@@ -250,54 +248,7 @@ export default function ReviewConsolePage() {
                 )}
               </>
             ) : (
-              <Panel className="flex flex-col gap-2.5 p-[22px]">
-                {files.length ? (
-                  <>
-                    <select aria-label="Evidence file" value={viewing?.id} onChange={(e) => (setFileSel(e.target.value), setPage(1))} className={cx(inputClass, "h-10")}>
-                      {files.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {reqLabel(f.req)} · {f.spec ?? f.id} {f.name}
-                        </option>
-                      ))}
-                    </select>
-                    {viewing && (
-                      <>
-                        <span className="flex items-center justify-between text-xs text-j-muted">
-                          <span>
-                            {viewing.name} · page {Math.min(page, viewing.pages.length)} of {viewing.pages.length}
-                          </span>
-                          <span className="flex gap-1">
-                            <JButton size="sm" variant="ghost" aria-label="Previous page" onClick={() => setPage(Math.max(1, page - 1))}>
-                              ‹
-                            </JButton>
-                            <JButton size="sm" variant="ghost" aria-label="Next page" onClick={() => setPage(Math.min(viewing.pages.length, page + 1))}>
-                              ›
-                            </JButton>
-                          </span>
-                        </span>
-                        <pre className="m-0 max-h-[360px] overflow-auto rounded-xl bg-j-canvas p-3 font-sans text-[13px] leading-6 whitespace-pre-wrap" dir="auto" data-no-translate>
-                          {viewing.pages[Math.min(page, viewing.pages.length) - 1]?.text}
-                        </pre>
-                        {(() => {
-                          const run = ev.stateOf(viewing.req).run;
-                          const cites = run?.criteria.flatMap((x) => x.citations.filter((q) => q.evidence_id === viewing.id).map((q) => ({ ...q, gap: x.gap, verdict: x.verdict }))) ?? [];
-                          return cites.length ? (
-                            <div className="flex flex-col gap-1 text-[13px]">
-                              {cites.map((q, i) => (
-                                <button key={i} type="button" onClick={() => setPage(q.page)} className="cursor-pointer border-0 bg-transparent p-0 text-start text-j-ai">
-                                  AI: page {q.page} – {q.verdict.replace("_", " ")} · “{q.quote.slice(0, 120)}”
-                                </button>
-                              ))}
-                            </div>
-                          ) : null;
-                        })()}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <p className="m-0 text-sm text-j-muted">No evidence files were uploaded on this control yet; the register shows {c.evidence.uploaded} of {c.evidence.expected} items.</p>
-                )}
-              </Panel>
+              <EvidenceViewer files={files} stateOf={ev.stateOf} empty={`No evidence files were uploaded on this control yet; the register shows ${c.evidence.uploaded} of ${c.evidence.expected} items.`} />
             )}
 
             {ai.agents.review && (
