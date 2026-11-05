@@ -232,7 +232,7 @@ export function useWorkplacesWork(views: WorkplaceView[]) {
         const cycle = state.screens[`cycle.${v.client.id}`];
         const reqs = withoutNa(withUploads(withTailoring(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), cycle, ws.state.assignments, scope, workspace), v.client.id, fwId, state.screens), cycle);
         const overlay = (state.screens[overlayKey(v.client.id, fwId)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY;
-        return { ...v, reqs, overlay, counts: stageCounts(reqs, overlay) };
+        return { ...v, workspace, reqs, overlay, counts: stageCounts(reqs, overlay) };
       }),
     [views, ws.ctx.reqs, ws.state.assignments, users, state.added, state.screens],
   );

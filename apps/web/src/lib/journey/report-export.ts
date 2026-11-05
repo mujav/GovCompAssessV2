@@ -1,6 +1,7 @@
 "use client";
 
 import { STAGES } from "./work";
+import { levelText } from "./levels";
 import { UNASSIGNED, reportFileName, type OwnerReport, type ReportRow, type WorkspaceReport } from "./report";
 
 // Downloads of the workspace report. Excel and PowerPoint are built from the report data, so
@@ -16,9 +17,14 @@ const pct = (n: number) => `${n}%`;
 
 // ---------- Excel ----------
 
-const ROW_HEAD = ["Code", "Requirement", "Domain", "Control Owner", "Stage", "Due", "Overdue", "Returned", "Evidence files", "Evidence expected"];
-const rowCells = (r: ReportRow) => [r.code, r.title, r.domain, r.owner, r.stageLabel, r.due, r.overdue ? "Yes" : "", r.returned ? "Yes" : "", r.files, r.expected];
-const ROW_COLS = [12, 60, 30, 22, 14, 12, 9, 9, 13, 16].map((wch) => ({ wch }));
+// The index's four levels in order; the row's own level takes two columns, its code and its wording.
+const levelHead = (r: WorkspaceReport) => r.levels.flatMap((l, i) => (i === r.rowLevel ? [`${l} code`, l] : [l]));
+const levelCells = (r: WorkspaceReport, x: ReportRow) => x.path.flatMap((c, i) => (i === r.rowLevel ? [x.code, x.title] : [levelText(c)]));
+const levelWidths = <T,>(r: WorkspaceReport, other: T, code: T, title: T) => r.levels.flatMap((_, i) => (i === r.rowLevel ? [code, title] : [other]));
+
+const rowHead = (r: WorkspaceReport) => [...levelHead(r), "Control Owner", "Stage", "Due", "Overdue", "Returned", "Evidence files", "Evidence expected"];
+const rowCells = (r: WorkspaceReport) => (x: ReportRow) => [...levelCells(r, x), x.owner, x.stageLabel, x.due, x.overdue ? "Yes" : "", x.returned ? "Yes" : "", x.files, x.expected];
+const rowCols = (r: WorkspaceReport) => [...levelWidths(r, 34, 12, 60), 22, 14, 12, 9, 9, 13, 16].map((wch) => ({ wch }));
 const OWNER_HEAD = ["Control Owner", "Department", "Email", "Assigned", ...STAGES.map((s) => s.label), "Accepted %", "Overdue", "Returned"];
 const ownerCells = (o: OwnerReport) => [o.name, o.department ?? "", o.email ?? "", o.total, ...STAGE_KEYS.map((k) => o.counts[k]), o.pct, o.overdue, o.returned];
 
@@ -63,7 +69,7 @@ async function exportExcel(r: WorkspaceReport, kind: ReportKind) {
   if (kind === "executive") {
     add("By domain", [["Domain", "Requirements", ...STAGES.map((s) => s.label), "Accepted %"], ...r.domains.map((d) => [d.name, d.total, ...STAGE_KEYS.map((k) => d.counts[k]), d.pct])], [{ wch: 40 }, ...Array(6).fill({ wch: 13 })]);
     add("Control Owners", [OWNER_HEAD, ...r.owners.map(ownerCells)], [{ wch: 24 }, { wch: 24 }, { wch: 26 }, ...Array(8).fill({ wch: 12 })]);
-    add("Overdue", [ROW_HEAD, ...r.late.map(rowCells)], ROW_COLS);
+    add("Overdue", [rowHead(r), ...r.late.map(rowCells(r))], rowCols(r));
   } else {
     add("Control Owners", [OWNER_HEAD, ...r.owners.map(ownerCells)], [{ wch: 24 }, { wch: 24 }, { wch: 26 }, ...Array(8).fill({ wch: 12 })]);
     for (const o of r.owners) {
@@ -74,13 +80,13 @@ async function exportExcel(r: WorkspaceReport, kind: ReportKind) {
           [[o.department, o.email].filter(Boolean).join(" · ")],
           [`${o.total} assigned · ${o.pct}% accepted · ${o.overdue} overdue · ${o.returned} returned`],
           [],
-          ROW_HEAD,
-          ...o.rows.map(rowCells),
+          rowHead(r),
+          ...o.rows.map(rowCells(r)),
         ],
-        ROW_COLS,
+        rowCols(r),
       );
     }
-    add("All requirements", [ROW_HEAD, ...r.rows.map(rowCells)], ROW_COLS);
+    add("All requirements", [rowHead(r), ...r.rows.map(rowCells(r))], rowCols(r));
   }
   XLSX.writeFile(wb, `${reportFileName(r, kind)}.xlsx`);
 }
@@ -125,16 +131,20 @@ function kpis(s: Slide, items: [string, string | number, boolean?][], y: number)
   });
 }
 
-function table(s: Slide, rows: Cell[][], y: number, colW: number[]) {
-  s.addTable(rows as never, { x: 0.5, y, w: W - 1, colW, fontSize: 10, fontFace: FONT, color: INK, border: { type: "solid", pt: 0.5, color: LINE }, valign: "middle", rowH: 0.3 });
+function table(s: Slide, rows: Cell[][], y: number, colW: number[], fontSize = 10) {
+  s.addTable(rows as never, { x: 0.5, y, w: W - 1, colW, fontSize, fontFace: FONT, color: INK, border: { type: "solid", pt: 0.5, color: LINE }, valign: "middle", rowH: 0.3 });
 }
 
 const chunk = <T,>(list: T[], n: number) => Array.from({ length: Math.max(1, Math.ceil(list.length / n)) }, (_, i) => list.slice(i * n, i * n + n));
 
-const reqRow = (x: ReportRow, withOwner: boolean) => [
-  cell(x.code),
-  cell(x.title),
-  ...(withOwner ? [cell(x.owner)] : [cell(x.domain)]),
+const clip = (t: string, n: number) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+
+/** Requirement rows on slides: the four index levels, then the owner when asked, stage, due, evidence and flags. */
+const reqHead = (r: WorkspaceReport, withOwner: boolean) => headRow([...levelHead(r).map((h) => (h.endsWith(" code") ? "Code" : h)), ...(withOwner ? ["Control Owner"] : []), "Stage", "Due", "Evidence", "Flags"]);
+const reqWidths = (r: WorkspaceReport, withOwner: boolean) => (withOwner ? [...levelWidths(r, 1.45, 0.95, 2.35), 1.4, 1, 0.9, 0.65, 0.73] : [...levelWidths(r, 1.6, 0.95, 3.1), 1.05, 0.95, 0.75, 0.73]);
+const reqRow = (r: WorkspaceReport, x: ReportRow, withOwner: boolean) => [
+  ...x.path.flatMap((c, i) => (i === r.rowLevel ? [cell(x.code), cell(clip(x.title, 110))] : [cell(clip(levelText(c), 60), { color: MUTED })])),
+  ...(withOwner ? [cell(x.owner)] : []),
   cell(x.stageLabel),
   cell(x.due, x.overdue ? { color: BAD, bold: true } : {}),
   cell(`${x.files} / ${x.expected}`),
@@ -182,11 +192,11 @@ async function exportPptx(r: WorkspaceReport, kind: ReportKind) {
       frame(s, r, `Control Owners${i ? " (continued)" : ""}`, "Most overdue first");
       table(s, [headRow(["Control Owner", "Department", "Assigned", "Open", "Accepted", "Overdue", "Returned"]), ...part.map((o) => [cell(o.name), cell(o.department ?? ""), cell(o.total), cell(o.open), cell(pct(o.pct)), cell(o.overdue, o.overdue ? { color: BAD, bold: true } : {}), cell(o.returned)])], 1.6, [3, 3.33, 1.2, 1.2, 1.2, 1.2, 1.2]);
     }
-    for (const [i, part] of chunk(r.late, 14).entries()) {
+    for (const [i, part] of chunk(r.late, 10).entries()) {
       const s = pptx.addSlide();
       frame(s, r, `Overdue · ${r.late.length}${i ? " (continued)" : ""}`);
       if (!part.length) s.addText("Nothing overdue.", { x: 0.5, y: 1.7, w: 8, h: 0.4, fontSize: 14, color: MUTED, fontFace: FONT });
-      else table(s, [headRow(["Code", "Requirement", "Control Owner", "Stage", "Due", "Evidence", "Flags"]), ...part.map((x) => reqRow(x, true))], 1.6, [1.1, 5.1, 2, 1.2, 1.1, 0.9, 0.93]);
+      else table(s, [reqHead(r, true), ...part.map((x) => reqRow(r, x, true))], 1.6, reqWidths(r, true), 8);
     }
   } else {
     for (const [i, part] of chunk(r.owners, 14).entries()) {
@@ -195,11 +205,11 @@ async function exportPptx(r: WorkspaceReport, kind: ReportKind) {
       table(s, [headRow(["Control Owner", "Department", "Assigned", ...STAGES.map((x) => x.label), "Overdue", "Returned"]), ...part.map((o) => [cell(o.name), cell(o.department ?? ""), cell(o.total), ...STAGE_KEYS.map((k) => cell(o.counts[k])), cell(o.overdue, o.overdue ? { color: BAD, bold: true } : {}), cell(o.returned)])], 1.6, [2.4, 2.53, 0.9, 1, 1, 1, 1, 0.75, 0.75]);
     }
     for (const o of r.owners) {
-      for (const [i, part] of chunk(o.rows, 11).entries()) {
+      for (const [i, part] of chunk(o.rows, 8).entries()) {
         const s = pptx.addSlide();
         frame(s, r, `${o.name}${i ? " (continued)" : ""}`, [o.name === UNASSIGNED ? "Requirements nobody owns yet" : o.department, o.email].filter(Boolean).join(" · "));
         kpis(s, [["Assigned", o.total], ["Accepted", pct(o.pct)], ["In review", o.counts.rev], ["In progress", o.counts.prog], ["Not started", o.counts.start], ["Overdue", o.overdue, o.overdue > 0], ["Returned", o.returned, o.returned > 0]], 1.6);
-        table(s, [headRow(["Code", "Requirement", "Domain", "Stage", "Due", "Evidence", "Flags"]), ...part.map((x) => reqRow(x, false))], 2.85, [1.1, 5, 2.4, 1.1, 1, 0.9, 0.83]);
+        table(s, [reqHead(r, false), ...part.map((x) => reqRow(r, x, false))], 2.85, reqWidths(r, false), 8);
       }
     }
   }

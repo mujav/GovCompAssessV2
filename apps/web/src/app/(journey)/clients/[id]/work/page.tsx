@@ -5,11 +5,13 @@ import { useMemo, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
+import { LevelCellView } from "@/components/journey/levels";
 import { Avatar, JButton, JLink, Panel, PanelHead, Pill, type PillTone } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { daysBetween } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
+import { useIndexLevels } from "@/lib/journey/use-levels";
 import { useClientWork } from "@/lib/journey/use-work";
 import { codeKey, initials, stageOf } from "@/lib/journey/work";
 
@@ -45,7 +47,8 @@ interface WorkScreen {
 const ago = (d: number) => (d <= 0 ? "Today" : d === 1 ? "Yesterday" : `${d} d ago`);
 
 export default function MyWorkPage() {
-  const { client, ws, reqs, overlay, move, log } = useClientWork();
+  const { client, ws, reqs, overlay, move, log, framework, workspace } = useClientWork();
+  const levels = useIndexLevels(framework, workspace, reqs, client.id);
   const { send, drawer } = useDraftSender();
   const [tab, setTab] = useState(0);
   const [s, set] = useScreenState<WorkScreen>(`work-screen.${client.id}`, { rules: [true, true, false], reminded: {}, escalated: [] });
@@ -192,22 +195,30 @@ export default function MyWorkPage() {
         <div className="flex flex-wrap items-start gap-3.5">
           <Panel className="min-w-0 flex-[3_1_640px] overflow-hidden">
             <div className="overflow-x-auto">
-              <div role="table" aria-label={TABS[tab]} className="min-w-[760px] text-sm">
-                <div role="row" className="grid grid-cols-[2.2fr_1.5fr_0.8fr_1fr_1.4fr] gap-3 border-b border-j-line px-[18px] py-2.5 text-xs font-semibold text-j-muted">
-                  {["Requirement", "With", "Since", "Status", ""].map((h, i) => (
+              <div role="table" aria-label={TABS[tab]} className="min-w-[1180px] text-sm">
+                <div role="row" className="grid grid-cols-[1fr_1fr_1.3fr_2fr_1.5fr_0.8fr_1fr_1.4fr] gap-3 border-b border-j-line px-[18px] py-2.5 text-xs font-semibold text-j-muted">
+                  {[...levels.labels, "With", "Since", "Status", ""].map((h, i) => (
                     <span key={i} role="columnheader">
                       {h}
                     </span>
                   ))}
                 </div>
                 {rows.slice(0, 40).map((r) => (
-                  <div key={r.key} role="row" className="grid grid-cols-[2.2fr_1.5fr_0.8fr_1fr_1.4fr] items-center gap-3 border-b border-j-line-soft px-[18px] py-3">
-                    <span role="cell" className="min-w-0">
-                      <Link href={r.href} className="block truncate font-semibold text-j-ink hover:text-cx">
-                        {r.t}
-                      </Link>
-                      <span className="font-mono text-xs text-j-muted">{r.code}</span>
-                    </span>
+                  <div key={r.key} role="row" className="grid grid-cols-[1fr_1fr_1.3fr_2fr_1.5fr_0.8fr_1fr_1.4fr] items-center gap-3 border-b border-j-line-soft px-[18px] py-3">
+                    {(reqs.some((x) => x.code === r.code) ? levels.pathOf(r.code, r.t) : levels.labels.map(() => ({ code: "", name: "" }))).map((cell, i) =>
+                      i === levels.rowLevel ? (
+                        <span key={i} role="cell" className="min-w-0">
+                          <Link href={r.href} className="block truncate font-semibold text-j-ink hover:text-cx">
+                            {r.t}
+                          </Link>
+                          <span className="font-mono text-xs text-j-muted">{r.code}</span>
+                        </span>
+                      ) : (
+                        <span key={i} role="cell" className="min-w-0">
+                          <LevelCellView cell={cell} />
+                        </span>
+                      ),
+                    )}
                     <span role="cell" className="flex min-w-0 items-center gap-2">
                       <Avatar initials={r.av} size={30} bg={r.av === "AI" ? "#EEEDFD" : undefined} fg={r.av === "AI" ? "#4F46E5" : undefined} />
                       <span className="min-w-0 leading-[17px]">

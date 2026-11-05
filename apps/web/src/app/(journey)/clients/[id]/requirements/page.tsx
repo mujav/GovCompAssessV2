@@ -7,11 +7,14 @@ import { FrameworkSwitcher } from "@/components/journey/framework-switcher";
 import { Icon } from "@/components/journey/icon";
 import { useDraftSender } from "@/components/journey/draft-drawer";
 import { ClientShell, JMain } from "@/components/journey/shell";
+import { LevelCellView } from "@/components/journey/levels";
 import { Avatar, JButton, Panel, inputClass } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { SUBMISSION_DEADLINE, addDays, daysBetween, shortDate } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
 import { nextClarificationId, useClarifications, type Clarification } from "@/lib/journey/use-clarifications";
+import { levelText, otherLevels } from "@/lib/journey/levels";
+import { useIndexLevels } from "@/lib/journey/use-levels";
 import { useClientWork, useEntityFrameworks } from "@/lib/journey/use-work";
 import { RESULT, STAGES, STAGE_OF, codeKey, initials, isReturned, stageOf, type Stage } from "@/lib/journey/work";
 
@@ -22,7 +25,7 @@ type SortKey = "num" | "owner" | "result" | "status" | "updated";
 const RESULT_ORDER = { non: 0, part: 1, comp: 2, na: 3, nas: 4 };
 const STAGE_ORDER: Record<Stage, number> = { start: 0, prog: 1, rev: 2, acc: 3 };
 const PAGE = 12;
-const COLS = "grid-cols-[36px_2.6fr_1.4fr_1.2fr_1.1fr_0.8fr]";
+const COLS = "grid-cols-[36px_1.1fr_1.1fr_1.6fr_1.6fr_1.4fr_1.2fr_1.1fr_0.8fr]";
 
 
 function updatedLabel(days: number) {
@@ -65,6 +68,7 @@ function RequirementsView() {
   const [sel, setSel] = useState<string[]>([]);
   const [assignTo, setAssignTo] = useState<string | null>(null);
   const [toast, setToast] = useState("");
+  const levels = useIndexLevels(framework, workspace, reqs, client.id);
   const today = ws.ctx.today;
   const domains = useMemo(() => [...new Set(reqs.map((r) => r.domain))], [reqs]);
   // The top hierarchy level carries the framework's own name: Axis for Qiyas, Domain for NCA ECC.
@@ -129,8 +133,9 @@ function RequirementsView() {
   };
 
   const exportCsv = () => {
-    const lines = [["Code", "Title", "Department", "Owner", "Last result", "Stage", "Due"].join(",")];
-    for (const { r, s } of rows) lines.push([r.code, `"${r.title}"`, r.department, r.owner, RESULT[r.status][0], STAGE_OF[s].label, r.due].join(","));
+    const q = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const lines = [[...levels.labels.filter((_, i) => i !== levels.rowLevel), `${levels.labels[levels.rowLevel]} code`, "Title", "Department", "Owner", "Last result", "Stage", "Due"].map(q).join(",")];
+    for (const { r, s } of rows) lines.push([...otherLevels(levels, r.code, r.title).map((x) => levelText(x.cell)), r.code, r.title, r.department, r.owner, RESULT[r.status][0], STAGE_OF[s].label, r.due].map(q).join(","));
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
@@ -255,7 +260,7 @@ function RequirementsView() {
 
         <Panel className="overflow-hidden">
           <div className="overflow-x-auto">
-            <div role="table" aria-label="Requirements" className="min-w-[960px] text-sm">
+            <div role="table" aria-label="Requirements" className="min-w-[1280px] text-sm">
               <div role="row" className={cx("grid items-center gap-3 border-b border-j-line px-[18px] py-2.5 text-xs font-semibold text-j-muted", COLS)}>
                 <span role="columnheader">
                   <input
@@ -266,9 +271,21 @@ function RequirementsView() {
                     className="h-4 w-4 accent-[#1E4E8C]"
                   />
                 </span>
+                {levels.labels.map((l, i) =>
+                  i === levels.rowLevel ? (
+                    <span key={l} role="columnheader" aria-sort={sort === "num" ? (dir === 1 ? "ascending" : "descending") : "none"}>
+                      <button type="button" onClick={() => headSort("num")} className={cx("cursor-pointer border-0 bg-transparent p-0 text-xs", sort === "num" ? "font-bold text-j-ink" : "font-semibold text-j-muted")}>
+                        {l} <span aria-hidden="true">{sort === "num" ? (dir === 1 ? "↑" : "↓") : ""}</span>
+                      </button>
+                    </span>
+                  ) : (
+                    <span key={l} role="columnheader">
+                      {l}
+                    </span>
+                  ),
+                )}
                 {(
                   [
-                    ["num", "Requirement"],
                     ["owner", "Owner"],
                     ["result", "Last result · DGA 2025"],
                     ["status", "Status"],
@@ -296,7 +313,9 @@ function RequirementsView() {
                         className="h-4 w-4 accent-[#1E4E8C]"
                       />
                     </span>
-                    <span role="cell" className="flex min-w-0 flex-col">
+                    {levels.pathOf(r.code, r.title).map((cell, i) =>
+                      i === levels.rowLevel ? (
+                    <span key={i} role="cell" className="flex min-w-0 flex-col">
                       <Link href={clientHref(client.id, `/requirements/${r.code}`)} className="font-mono text-[13px] font-semibold text-cx">
                         {r.code}
                       </Link>
@@ -307,6 +326,12 @@ function RequirementsView() {
                         </span>
                       ))}
                     </span>
+                      ) : (
+                        <span key={i} role="cell" className="min-w-0">
+                          <LevelCellView cell={cell} />
+                        </span>
+                      ),
+                    )}
                     <span role="cell" className="flex min-w-0 items-center gap-2">
                       <Avatar initials={initials(r.owner)} size={28} bg={r.owner ? "#E0ECF8" : "#FDECEA"} fg={r.owner ? "#1E4E8C" : "#B42318"} />
                       <span className="flex min-w-0 flex-col">

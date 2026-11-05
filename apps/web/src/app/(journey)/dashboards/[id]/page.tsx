@@ -3,13 +3,16 @@
 import { useParams } from "next/navigation";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/journey/icon";
+import { LevelCellView } from "@/components/journey/levels";
 import { AppShell, JMain } from "@/components/journey/shell";
 import { Bar, JButton, JLink, Panel, PanelHead, Pill, Ring, Segmented } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { shortName } from "@/lib/journey/frameworks";
 import { completionColor } from "@/lib/journey/portfolio";
-import { UNASSIGNED, buildReport, type OwnerReport, type ReportRow, type StageCounts, type WorkspaceReport } from "@/lib/journey/report";
+import { levelText } from "@/lib/journey/levels";
+import { UNASSIGNED, buildReport, contextLevels, type OwnerReport, type ReportRow, type StageCounts, type WorkspaceReport } from "@/lib/journey/report";
 import { exportReport, type ExportFormat, type ReportKind } from "@/lib/journey/report-export";
+import { useIndexLevels } from "@/lib/journey/use-levels";
 import { useControlOwners, useMyWorkplaces } from "@/lib/journey/use-workplaces";
 import { useWorkplacesWork } from "@/lib/journey/use-work";
 import { STAGES } from "@/lib/journey/work";
@@ -19,6 +22,8 @@ import { useWorkspace } from "@/lib/workspace/store";
 // One workplace's reports. The executive report shows where the workspace stands; the detailed
 // report gives every Control Owner a page of their own. Both download as PDF, PowerPoint or Excel.
 // Every [data-report-page] block becomes its own page in the PDF.
+
+const NO_REQS: never[] = [];
 
 const FORMATS: { value: ExportFormat; label: string }[] = [
   { value: "pdf", label: "PDF" },
@@ -33,6 +38,7 @@ export default function WorkplaceReportPage() {
   const mine = useMemo(() => views.filter((v) => v.client.id === id), [views, id]);
   const [w] = useWorkplacesWork(mine);
   const people = useControlOwners(w?.workplace.entityId);
+  const levels = useIndexLevels(w?.framework, w?.workspace ?? true, w?.reqs ?? NO_REQS, id);
   const today = ws.ctx.today;
   const [kind, setKind] = useState<ReportKind>("executive");
   const [busy, setBusy] = useState<ExportFormat | null>(null);
@@ -51,8 +57,9 @@ export default function WorkplaceReportPage() {
         reqs: w.reqs,
         overlay: w.overlay,
         people,
+        levels,
       }),
-    [w, today, people],
+    [w, today, people, levels],
   );
 
   if (!w || !report) {
@@ -234,8 +241,13 @@ function Executive({ r }: { r: WorkspaceReport }) {
           {r.late.slice(0, 15).map((x) => (
             <div key={x.code} className="flex flex-wrap items-center gap-3 border-t border-j-line-soft py-2.5 text-sm">
               <span className="w-24 font-mono text-xs text-j-muted">{x.code}</span>
-              <span className="min-w-[220px] flex-auto" dir="auto">
-                {x.title}
+              <span className="flex min-w-[220px] flex-auto flex-col">
+                <span dir="auto">{x.title}</span>
+                <span className="text-xs text-j-muted" dir="auto">
+                  {contextLevels(r, x)
+                    .map((l) => `${l.label} ${levelText(l.cell)}`)
+                    .join(" › ")}
+                </span>
               </span>
               <span className="text-j-ink-3">{x.owner}</span>
               <span className="font-semibold text-j-bad">due {shortDate(x.due)}</span>
@@ -314,7 +326,7 @@ function Detailed({ r }: { r: WorkspaceReport }) {
   );
 }
 
-const ROW_COLS = "grid-cols-[92px_minmax(0,2.6fr)_minmax(0,1.3fr)_110px_84px_76px_minmax(0,0.9fr)]";
+const ROW_COLS = "grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,2fr)_110px_76px_70px_minmax(0,0.9fr)]";
 
 function OwnerPage({ r, o }: { r: WorkspaceReport; o: OwnerReport }) {
   return (
@@ -331,16 +343,16 @@ function OwnerPage({ r, o }: { r: WorkspaceReport; o: OwnerReport }) {
       </section>
       <StageStrip counts={o.counts} total={o.total} />
       <div className="overflow-x-auto">
-        <div role="table" aria-label={`Requirements of ${o.name}`} className="min-w-[820px] text-sm">
+        <div role="table" aria-label={`Requirements of ${o.name}`} className="min-w-[1060px] text-sm">
           <div role="row" className={cx("grid gap-3 border-b border-j-line py-2 text-xs font-semibold text-j-muted", ROW_COLS)}>
-            {["Code", "Requirement", "Domain", "Stage", "Due", "Evidence", "Flags"].map((h) => (
+            {[...r.levels, "Stage", "Due", "Evidence", "Flags"].map((h) => (
               <span key={h} role="columnheader">
                 {h}
               </span>
             ))}
           </div>
           {o.rows.map((x) => (
-            <OwnerRow key={x.code} x={x} />
+            <OwnerRow key={x.code} x={x} rowLevel={r.rowLevel} />
           ))}
         </div>
       </div>
@@ -348,19 +360,22 @@ function OwnerPage({ r, o }: { r: WorkspaceReport; o: OwnerReport }) {
   );
 }
 
-function OwnerRow({ x }: { x: ReportRow }) {
+function OwnerRow({ x, rowLevel }: { x: ReportRow; rowLevel: number }) {
   const stage = STAGES.find((s) => s.key === x.stage)!;
   return (
     <div role="row" className={cx("grid items-center gap-3 border-b border-j-line-soft py-2", ROW_COLS)}>
-      <span role="cell" className="font-mono text-xs text-j-muted">
-        {x.code}
-      </span>
-      <span role="cell" className="min-w-0" dir="auto">
-        {x.title}
-      </span>
-      <span role="cell" className="min-w-0 truncate text-j-ink-3" dir="auto">
-        {x.domain}
-      </span>
+      {x.path.map((cell, i) =>
+        i === rowLevel ? (
+          <span key={i} role="cell" className="flex min-w-0 flex-col">
+            <b className="font-mono text-xs">{x.code}</b>
+            <span dir="auto">{x.title}</span>
+          </span>
+        ) : (
+          <span key={i} role="cell" className="min-w-0">
+            <LevelCellView cell={cell} />
+          </span>
+        ),
+      )}
       <span role="cell" className="inline-flex items-center gap-1.5">
         <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: stage.color }} />
         {stage.label}

@@ -1,3 +1,4 @@
+import { indexLevels, type IndexLevels, type LevelCell } from "./levels";
 import { STAGES, codeKey, isReturned, stageOf, type Stage, type StagedRequirement, type WorkOverlay } from "./work";
 
 // The workspace report, worked out once and shared by the screen and every export (PDF,
@@ -18,6 +19,8 @@ export interface ReportRow {
   returned: boolean;
   files: number;
   expected: number;
+  /** The index's four levels for this row, top first. */
+  path: LevelCell[];
 }
 
 export type StageCounts = Record<Stage, number>;
@@ -58,6 +61,9 @@ export interface WorkspaceReport {
   owners: OwnerReport[];
   late: ReportRow[];
   rows: ReportRow[];
+  /** Names of the index's four levels, and the one rows sit at. */
+  levels: string[];
+  rowLevel: number;
 }
 
 export interface ReportInput {
@@ -70,6 +76,8 @@ export interface ReportInput {
   overlay: WorkOverlay;
   /** Known Control Owners, matched to requirements by name. */
   people?: { name: string; email?: string; department?: string }[];
+  /** The index's levels; without them each row's path is read off its code. */
+  levels?: IndexLevels;
 }
 
 const pctOf = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
@@ -84,6 +92,7 @@ const byCode = (a: ReportRow, b: ReportRow) => codeKey(a.code).localeCompare(cod
 
 export function buildReport(input: ReportInput): WorkspaceReport {
   const { reqs, overlay, today } = input;
+  const levels = input.levels ?? indexLevels({});
   const rows: ReportRow[] = reqs
     .map((r) => {
       const stage = stageOf(r, overlay);
@@ -99,6 +108,7 @@ export function buildReport(input: ReportInput): WorkspaceReport {
         returned: isReturned(r, overlay),
         files: r.upload?.files ?? 0,
         expected: r.evidence.expected,
+        path: levels.pathOf(r.code, r.title),
       };
     })
     .sort(byCode);
@@ -148,6 +158,8 @@ export function buildReport(input: ReportInput): WorkspaceReport {
     owners,
     late,
     rows,
+    levels: levels.labels,
+    rowLevel: levels.rowLevel,
   };
 }
 
@@ -162,3 +174,6 @@ export function reportFileName(r: WorkspaceReport, kind: "executive" | "detailed
   const base = `${r.entity} - ${r.index} ${r.year} - ${kind === "executive" ? "Executive" : "Detailed"} report`;
   return base.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
 }
+
+/** The row's three context levels with their labels: every level but the one the row sits at. */
+export const contextLevels = (r: WorkspaceReport, row: ReportRow) => row.path.map((cell, i) => ({ label: r.levels[i], cell, i })).filter((x) => x.i !== r.rowLevel);

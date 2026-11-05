@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AppShell, JMain } from "@/components/journey/shell";
+import { LevelCellView } from "@/components/journey/levels";
 import { inputClass, Panel, Pill } from "@/components/journey/ui";
 import { Row, Table } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
 import { useJourney } from "@/lib/journey/store";
 import { evidenceKey, type EvidenceState } from "@/lib/journey/evidence";
-import { reqLabel } from "@/lib/cycle/model";
 import { useMyControls } from "@/lib/cycle/use-my-controls";
 
 // Control Owner's evidence library: every file they attached to their controls, with the
@@ -25,7 +25,9 @@ export default function MyEvidencePage() {
     }),
   );
   const shown = rows.filter((x) => !q || `${x.f.name} ${x.m.c.code} ${x.m.c.title}`.toLowerCase().includes(q.toLowerCase()));
-  const cols = "2fr 1.6fr 0.7fr 0.8fr 1fr";
+  const cols = "1.6fr 1fr 1fr 1.2fr 1.6fr 0.7fr 0.8fr 0.9fr";
+  // Every workspace of one entity shares an index in practice; label the columns by the first.
+  const labels = mine[0]?.levels.labels ?? ["Dimension", "Domain", "Control", "Requirement"];
   return (
     <AppShell search="Search my evidence">
       <JMain max={1240}>
@@ -36,16 +38,23 @@ export default function MyEvidencePage() {
           <input aria-label="Search evidence" placeholder="Search evidence" value={q} onChange={(e) => setQ(e.target.value)} className={cx(inputClass, "h-10 w-[260px]")} />
         </div>
         <Panel className="py-2">
-          <Table label="My evidence" cols={cols} head={["File", "Control · requirement", "Required evidence", "Uploaded", "Status"]}>
+          <Table label="My evidence" cols={cols} min={1180} head={["File", ...labels, "Required evidence", "Uploaded", "Status"]}>
             {shown.map(({ f, m, r, run, replaced }) => (
               <Row key={f.id} cols={cols} className={cx(replaced && "opacity-60")}>
                 <span className="min-w-0">
                   <b className="block truncate">{f.name}</b>
                   <span className="text-xs text-j-muted">{f.error ?? `${f.pages.length} pages`}</span>
                 </span>
-                <Link href={m.href} className="text-[13px]">
-                  <b className="font-mono text-xs">{m.c.code}</b> · {reqLabel(r.code)} {m.c.title}
-                </Link>
+                {m.levels.pathOf(r.code, r.title).map((cell, i) =>
+                  i === m.levels.rowLevel ? (
+                    <Link key={i} href={m.href} className="flex min-w-0 flex-col text-[13px]">
+                      <b className="font-mono text-xs">{r.code}</b>
+                      <span className="line-clamp-2">{r.title}</span>
+                    </Link>
+                  ) : (
+                    <LevelCellView key={i} cell={cell} />
+                  ),
+                )}
                 <span className="font-mono text-xs">{m.cycle.fileSpec[f.id] ?? "–"}</span>
                 <span className="text-[13px]">{f.uploadedAt}</span>
                 <span>{replaced ? <Pill>Replaced</Pill> : f.error ? <Pill tone="bad">Unreadable</Pill> : r.stage === "accepted" ? <Pill tone="ok">Accepted</Pill> : run ? <Pill tone="ai">Checked</Pill> : <Pill tone="cx">Uploaded</Pill>}</span>
