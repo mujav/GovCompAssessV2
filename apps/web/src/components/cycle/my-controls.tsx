@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Icon } from "@/components/journey/icon";
+import { LevelCellView } from "@/components/journey/levels";
 import { JLink } from "@/components/journey/ui";
 import { cx } from "@/components/ui";
 import { useAuth } from "@/lib/auth/store";
@@ -13,18 +14,29 @@ import type { MyControl } from "@/lib/cycle/use-my-controls";
 import { TODAY } from "@/lib/workspace/data";
 import { Row, StageBadge, Table } from "./ui";
 
+/** Controls sit at the index's third level: Control in the workspace records, Standard in Qiyas, Control in NCA ECC. */
+const CONTROL_LEVEL = 2;
+
 /** What the Control Owner does next on a control. */
 export const nextAction = (m: MyControl) =>
   m.c.stage === "accepted" ? "View" : m.c.stage === "submitted" || m.c.stage === "review" ? "View" : m.c.stage === "returned" ? "Fix and resubmit" : m.c.stage === "not" ? "Start" : "Continue";
 
 /** `onAttached` turns on the paperclip on each row, for attaching evidence without opening the control. */
 export function ControlsTable({ list, showWorkspace, onAttached }: { list: MyControl[]; showWorkspace?: boolean; onAttached?: (text: string) => void }) {
-  const cols = showWorkspace ? "2.4fr 1.4fr 0.9fr 1fr 0.7fr 0.7fr 1.2fr" : "3fr 0.9fr 1fr 0.7fr 0.7fr 1.2fr";
+  const cols = showWorkspace ? "1.1fr 1.1fr 2fr 1.3fr 0.9fr 1fr 0.7fr 0.7fr 1.2fr" : "1.2fr 1.2fr 2.4fr 0.9fr 1fr 0.7fr 0.7fr 1.2fr";
+  // Controls sit at the index's third level; the two above give their place. Label by the first workspace's index.
+  const labels = (list[0]?.levels.labels ?? ["Dimension", "Domain", "Control"]).slice(0, CONTROL_LEVEL + 1);
   return (
-    <Table label="My controls" cols={cols} head={["Control", ...(showWorkspace ? ["Workspace"] : []), "Due", "Status", "Req. met", "Evidence", "Action"]}>
+    <Table label="My controls" cols={cols} min={showWorkspace ? 1180 : 1080} head={[...labels, ...(showWorkspace ? ["Workspace"] : []), "Due", "Status", "Req. met", "Evidence", "Action"]}>
       {list.map((m) => (
         <Row key={m.workspaceId + m.c.code} cols={cols}>
-          <span>
+          {m.levels
+            .pathOf(m.c.code, m.c.title)
+            .slice(0, CONTROL_LEVEL)
+            .map((cell, i) => (
+              <LevelCellView key={i} cell={cell} />
+            ))}
+          <span className="min-w-0">
             <b className="font-mono text-xs">{m.c.code}</b> {m.c.title}
             {!m.owned && <span className="ms-1.5 text-xs text-j-muted">· contributing</span>}
           </span>

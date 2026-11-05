@@ -16,6 +16,13 @@ describe("index levels", () => {
     ]);
   });
 
+  it("names workspace records' levels after the standard", () => {
+    const l = indexLevels({ levels: QIYAS_V5_LEVELS });
+    expect(l.labels).toEqual(["Perspective", "Axis", "Standard", "Implementation requirement"]);
+    expect(l.rowLevel).toBe(3);
+    expect(l.pathOf("1.1.2-1", "x").map((c) => c.code)).toEqual(["1", "1.1", "1.1.2", "1.1.2-1"]);
+  });
+
   it("follows Qiyas V5 parents: perspective › axis › standard, with the implementation requirements below", () => {
     const l = indexLevels({ levels: QIYAS_V5_LEVELS, nodes: QIYAS_V5_REQUIREMENTS });
     expect(l.labels).toEqual(["Perspective", "Axis", "Standard", "Implementation requirement"]);

@@ -4,8 +4,9 @@ import type { EntityFramework } from "./frameworks";
 
 // The four levels of an index for one requirement row, so every requirement table can show
 // where a row sits: Perspective › Axis › Standard › Implementation requirement for Qiyas,
-// Main domain › Subdomain › Control › Subcontrol for NCA ECC, and Dimension › Domain ›
-// Control › Requirement for the workspace's own records, whose codes carry the path.
+// Main domain › Subdomain › Control › Subcontrol for NCA ECC. The workspace's own records carry
+// the path in their codes and take the standard's level names; without a standard they read
+// Dimension › Domain › Control › Requirement.
 
 export const DEFAULT_LEVELS = ["Dimension", "Domain", "Control", "Requirement"];
 
@@ -31,8 +32,10 @@ const nodeName = (n: FrameworkRequirement) => n.title || n.titleAr || (n.text ??
  * with names from `names`.
  */
 export function indexLevels({ levels, nodes, names }: { levels?: HierarchyLevel[]; nodes?: FrameworkRequirement[]; names?: Map<string, string> }): IndexLevels {
-  const tree = nodes?.length && levels?.length === 4 ? levels : undefined;
-  const labels = tree ? tree.map((l) => l.en) : DEFAULT_LEVELS;
+  const named = levels?.length === 4 ? levels : undefined;
+  const tree = nodes?.length ? named : undefined;
+  // The standard names the levels even when the rows are the workspace's own records.
+  const labels = named ? named.map((l) => l.en) : DEFAULT_LEVELS;
   const byCode = new Map((tree ? nodes! : []).map((n) => [n.code, n]));
   const depth = (n: FrameworkRequirement) => tree!.findIndex((l) => l.id === n.level);
   const name = (code: string) => names?.get(code) ?? "";
