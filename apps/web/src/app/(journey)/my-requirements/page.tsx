@@ -10,14 +10,13 @@ import { defaultDates } from "@/lib/cycle/model";
 import { messagesFor, useMyControls } from "@/lib/cycle/use-my-controls";
 import { SUBMISSION_DEADLINE, TODAY, daysBetween } from "@/lib/workspace/data";
 
-// S07 · Control Owner home: the controls they own or contribute to and what is late or returned.
+// S07 · Control Owner home: the controls they own and what is late or returned.
 // Each control row has a paperclip to attach evidence without opening the control.
 
 export default function HomePage() {
   const { user } = useAuth();
   const mine = useMyControls();
   const { say, toast } = useToast();
-  const owned = mine.filter((m) => m.owned);
   const closing = mine[0]?.cycle.dates?.internalClosing ?? defaultDates(SUBMISSION_DEADLINE).internalClosing;
   const reqs = mine.reduce((a, m) => a + m.c.total, 0);
   const met = mine.reduce((a, m) => a + m.c.met, 0);
@@ -37,7 +36,7 @@ export default function HomePage() {
             </Pill>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Welcome back, {user?.name}</h1>
             <p className="m-0 text-sm text-j-ink-3">
-              You own {owned.length} controls and contribute to {mine.length - owned.length}.
+              You own {mine.length} control{mine.length === 1 ? "" : "s"}.
             </p>
           </div>
           {last && (
@@ -48,7 +47,7 @@ export default function HomePage() {
         </div>
 
         <section className="flex flex-wrap gap-3">
-          <Kpi label="Controls" value={mine.length} sub={`${owned.length} owned · ${mine.length - owned.length} contributing`} />
+          <Kpi label="Controls" value={mine.length} sub={`${mine.filter((m) => m.c.stage === "accepted").length} accepted`} />
           <Kpi label="Requirements met" value={`${met} / ${reqs}`} />
           <Kpi label="Evidence uploaded" value={`${ev.u} / ${ev.e}`} />
           <Kpi label="Returned to you" value={returned.length} sub={`${returned.reduce((a, m) => a + m.c.reqs.filter((r) => r.stage === "returned").length, 0)} requirements to fix`} tone={returned.length ? "warn" : undefined} />

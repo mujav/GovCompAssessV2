@@ -40,7 +40,7 @@ export default function AnalyticsPage() {
   const dims = [...new Map(live.map((c) => [c.dimension, c.dimensionName])).entries()];
   const depts = [...new Set(live.map((c) => c.department).filter(Boolean))].sort();
   const owners = [...new Set(live.map((c) => c.owner).filter(Boolean))].sort();
-  const rows = live.filter((c) => (dim === ALL || c.dimension === dim) && (dept === ALL || c.department === dept) && (owner === ALL || c.owner === owner || c.contributors.includes(owner)));
+  const rows = live.filter((c) => (dim === ALL || c.dimension === dim) && (dept === ALL || c.department === dept) && (owner === ALL || c.owner === owner));
 
   // Requirements count towards the department that owns them.
   const cell = (d: string, k: string) => {
@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
                                   <TierPill tier={c.previous} />
                                 </span>
                                 <span className="truncate">{c.department}</span>
-                                <span className="truncate">{[c.owner, ...c.contributors].filter(Boolean).join(", ")}</span>
+                                <span className="truncate">{c.owner || "Unassigned"}</span>
                               </Row>
                             ))}
                         </Fragment>

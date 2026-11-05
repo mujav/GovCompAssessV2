@@ -13,6 +13,7 @@ import { useControlOwners, type WorkplaceView } from "./use-workplaces";
 import { useAuth } from "@/lib/auth/store";
 import type { Workplace, WorkplaceClient } from "./workplaces";
 import type { StoredUser } from "@/lib/auth/accounts";
+import { controlOf, oneOwnerPerControl } from "@/lib/cycle/model";
 import { EMPTY_OVERLAY, stageCounts, stageOf, isReturned, type EvidenceSignal, type Stage, type WorkOverlay } from "./work";
 
 export const ALL = "all";
@@ -94,6 +95,11 @@ function withTailoring(reqs: ClientRequirement[], cycle: unknown, assignments: R
 }
 
 /** Drops requirements of controls the Index Owner marked not applicable in this workspace. */
+/** Every requirement belongs to its control's one Control Owner. */
+function withControlOwners<R extends WorkRequirement>(reqs: R[], cycle: unknown): R[] {
+  return oneOwnerPerControl(reqs, (cycle as { plan?: Record<string, { owner?: string; department?: string }> } | undefined)?.plan);
+}
+
 function withoutNa<R extends { code: string }>(reqs: R[], cycle: unknown): R[] {
   const plan = (cycle as { plan?: Record<string, { na?: unknown }> } | undefined)?.plan;
   if (!plan) return reqs;
@@ -127,7 +133,7 @@ export function useAllFrameworkWork() {
     () =>
       frameworks.map((f) => {
         const workspace = usesWorkspaceRecords(f.id, fresh);
-        return { framework: f, workspace, reqs: withUploads(frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people, assignScope(client, f.id)), client.id, f.id, state.screens), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
+        return { framework: f, workspace, reqs: withControlOwners(withUploads(frameworkRequirements(f, workspace, ws.ctx.reqs, ws.state.assignments, people, assignScope(client, f.id)), client.id, f.id, state.screens), state.screens[`cycle.${client.id}`]), overlay: (state.screens[overlayKey(client.id, f.id)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY };
       }),
     [frameworks, fresh, ws.ctx.reqs, ws.state.assignments, people, state.screens, client],
   );
@@ -137,24 +143,35 @@ export function useAllFrameworkWork() {
 export function useFrameworkWork(framework: EntityFramework | undefined) {
   const client = useCurrentClient();
   const ws = useWorkspace();
-  const { state, log, workplaces } = useJourney();
+  const { state, log, workplaces, update } = useJourney();
   const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
   const workspace = usesWorkspaceRecords(fwId, startsFresh(client, workplaces.find((w) => w.id === client.id), state.added));
   const people = useAssignees();
   const [overlay, setOverlay] = useScreenState<WorkOverlay>(overlayKey(client.id, fwId), EMPTY_OVERLAY);
   const scope = assignScope(client, fwId);
   const reqs = useMemo(
-    () => withUploads(withTailoring(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), state.screens[`cycle.${client.id}`], ws.state.assignments, scope, workspace), client.id, fwId, state.screens),
+    () => withControlOwners(withUploads(withTailoring(frameworkRequirements(framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), state.screens[`cycle.${client.id}`], ws.state.assignments, scope, workspace), client.id, fwId, state.screens), state.screens[`cycle.${client.id}`]),
     [framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope, client.id, fwId, state.screens],
   );
 
   // A closed cycle is read-only: nothing moves, nothing is reassigned.
   const closed = !!(state.screens[`cycle.${client.id}`] as { closure?: { closedAt?: string } } | undefined)?.closure?.closedAt;
 
-  /** Assigns requirements to a control owner (their department follows), due on the given date. */
+  /** Assigns requirements to a Control Owner (their department follows), due on the given date. A control has one owner, so its other requirements go with them. */
   const assign = (codes: string[], person: string, due: string) => {
     if (closed) return;
-    for (const c of codes) ws.assign(workspace ? c : assignmentKey(scope, c), person, due);
+    const controls = new Set(codes.map(controlOf));
+    const all = [...new Set([...codes, ...reqs.filter((r) => controls.has(controlOf(r.code))).map((r) => r.code)])];
+    for (const c of all) ws.assign(workspace ? c : assignmentKey(scope, c), person, due);
+    // An owner set in the plan would override the assignment, so it follows too.
+    update((s) => {
+      const plan = (s.screens[`cycle.${client.id}`] as { plan?: Record<string, { owner?: string; department?: string }> } | undefined)?.plan;
+      for (const k of controls) {
+        if (!plan?.[k]?.owner) continue;
+        delete plan[k].owner;
+        delete plan[k].department;
+      }
+    });
   };
 
   // A move holds against the evidence as it stands now; only evidence that changes afterwards moves it on.
@@ -230,7 +247,7 @@ export function useWorkplacesWork(views: WorkplaceView[]) {
         const people = users.filter((u) => u.role === "control" && (!u.entityId || u.entityId === v.workplace.entityId)).map(asPerson);
         const scope = assignScope(v.client, fwId);
         const cycle = state.screens[`cycle.${v.client.id}`];
-        const reqs = withoutNa(withUploads(withTailoring(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), cycle, ws.state.assignments, scope, workspace), v.client.id, fwId, state.screens), cycle);
+        const reqs = withControlOwners(withoutNa(withUploads(withTailoring(frameworkRequirements(v.framework, workspace, ws.ctx.reqs, ws.state.assignments, people, scope), cycle, ws.state.assignments, scope, workspace), v.client.id, fwId, state.screens), cycle), cycle);
         const overlay = (state.screens[overlayKey(v.client.id, fwId)] as WorkOverlay | undefined) ?? EMPTY_OVERLAY;
         return { ...v, workspace, reqs, overlay, counts: stageCounts(reqs, overlay) };
       }),

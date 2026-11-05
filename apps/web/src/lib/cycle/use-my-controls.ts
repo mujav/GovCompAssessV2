@@ -19,7 +19,6 @@ export interface MyControl {
   workspaceId: string;
   workspace: string;
   frameworkId: string;
-  owned: boolean;
   href: string;
   /** The index's four levels for this workspace's requirements. */
   levels: IndexLevels;
@@ -38,14 +37,13 @@ export function useMyControls() {
       const annex = entityMeta(platform, { id: w.entity.id, sub: w.entity.sub }).annex;
       const levels = workspaceLevels(w.framework, w.workspace, w.reqs, cycle.standard.names);
       return (controlsOf(w.reqs, w.overlay, cycle, w.framework?.live.requirements, annex) as CycleControl[])
-        .filter((c) => c.applicable && (c.owner === user.name || c.contributors.includes(user.name)))
+        .filter((c) => c.applicable && c.owner === user.name)
         .map((c) => ({
           c,
           cycle,
           workspaceId: w.client.id,
           workspace: `${w.entity.name} · ${workplaceLabel(w.framework?.name ?? w.client.frameworks[0] ?? "", w.workplace.year)}`,
           frameworkId: w.framework?.id ?? w.workplace.frameworkId,
-          owned: c.owner === user.name,
           href: clientHref(w.client.id, `/controls/${encodeURIComponent(c.code)}`),
           levels,
         }));

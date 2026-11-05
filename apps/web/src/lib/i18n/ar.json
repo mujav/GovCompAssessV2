@@ -41,7 +41,6 @@
  "· as generated": "· كما وُلّدت",
  "· Assigned to {0}": "· مُسند إلى {0}",
  "· by": "· بواسطة",
- "· contributing": "· مساهم",
  "· Control Owner": "· مالك المعيار",
  "· Control Owner · sent": "· مالك المعيار · أُرسل",
  "· Dimension": "· المنظور",
@@ -222,7 +221,6 @@
  "{0} open": "مفتوحة: {0}",
  "{0} other item{1} look{2} complete.": "البنود الأخرى مكتملة: {0}{1}{2}",
  "{0} overdue": "متأخر: {0}",
- "{0} owned · {1} contributing": "المملوكة: {0} · المساهمة: {1}",
  "{0} owns {1} {2}": "{0} مالك {1} {2}",
  "{0} owns this requirement.": "{0} مسؤولة عن هذا المتطلب.",
  "{0} pages": "عدد الصفحات: {0}",
@@ -1211,7 +1209,6 @@
  "controls": "معايير",
  "Controls": "المعايير",
  "controls ·": "معايير ·",
- "controls and contribute to": "من المعايير وتساهم في",
  "controls overdue": "معايير متأخرة",
  "controls selected": "معايير محددة",
  "controls submitted or resubmitted": "معايير مقدّمة أو معاد تقديمها",
@@ -3927,7 +3924,6 @@
  "You cannot change your own role": "لا يمكنك تغيير دورك",
  "You now own control {0} ({1}), due {2}. {3}": "أصبحت مالك المعيار {0} ({1})، والاستحقاق {2}. {3}",
  "You own": "أنت مالك",
- "You own {0}controls and contribute to {1}. Write one response per control and attach the evidence each requirement asks for.": "أنت مالك {0} من المعايير وتساهم في {1}. اكتب ردًا واحدًا لكل معيار وأرفق الشواهد المطلوبة لكل متطلب.",
  "You see only the workspaces the Platform Admin granted you. Each one is a single entity, index and cycle year.": "تظهر لك فقط مساحات العمل التي منحك إياها مسؤول المنصة. كل منها جهة ومؤشر وسنة دورة واحدة.",
  "You see only the workspaces you were granted. Ask your Index Owner or the Platform Admin for access to": "تظهر لك فقط مساحات العمل الممنوحة لك. اطلب من مالك المؤشر أو مسؤول المنصة الوصول إلى",
  "You see only the workspaces you were granted. Ask your Index Owner or the Platform Admin for access to {0}.": "تظهر لك فقط مساحات العمل الممنوحة لك. اطلب من مالك المؤشر أو مسؤول المنصة الوصول إلى {0}.",
@@ -3941,5 +3937,7 @@
  "Your workspaces": "مساحات عملك",
  "Yousef T.": "Yousef T.",
  "Δ ≥ {0} pts": "Δ ≥ {0} نقاط",
- "Σ points × weight ÷ Σ applicable weight ({0} ÷ {1}), scheme {2} v{3}. Official counts accepted results only.": "Σ النقاط × الوزن ÷ Σ الوزن المنطبق ({0} ÷ {1})، النظام {2} الإصدار {3}. يحتسب الرسمي النتائج المقبولة فقط."
+ "Σ points × weight ÷ Σ applicable weight ({0} ÷ {1}), scheme {2} v{3}. Official counts accepted results only.": "Σ النقاط × الوزن ÷ Σ الوزن المنطبق ({0} ÷ {1})، النظام {2} الإصدار {3}. يحتسب الرسمي النتائج المقبولة فقط.",
+ "You own {0} controls.": "أنت مالك {0} من المعايير.",
+ "You own {0} control.": "أنت مالك {0} معيار."
 }

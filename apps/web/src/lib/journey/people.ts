@@ -36,7 +36,7 @@ export function initialsOf(name: string) {
 
 /** The demo directory the seeded clients start from (they have no onboarding record). */
 export const DEMO_DIRECTORY: EntityPerson[] = Object.values(DEPARTMENTS).flatMap((d) =>
-  d.people.map((name, i) => ({ id: `demo-${name}`, name, email: "", department: d.name, title: i === 0 ? "Department SPOC" : "Contributor", roles: i === 0 ? ["SPOC"] : [], access: "user" as const })),
+  d.people.map((name, i) => ({ id: `demo-${name}`, name, email: "", department: d.name, title: i === 0 ? "Department SPOC" : "Control Owner", roles: i === 0 ? ["SPOC"] : [], access: "user" as const })),
 );
 
 /** People shaped like the onboarding wizard stored them before details and departments existed. */

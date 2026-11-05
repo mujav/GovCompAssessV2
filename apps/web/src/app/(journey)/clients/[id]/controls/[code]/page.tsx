@@ -43,7 +43,7 @@ export default function ControlResponsePage() {
   const uploadFor = useRef<{ req: string; spec: string; replaces?: string } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const mine = !!c && !!user && (user.role !== "control" || c.owner === user.name || c.contributors.includes(user.name));
+  const mine = !!c && !!user && (user.role !== "control" || c.owner === user.name);
   if (!c || !mine)
     return (
       <ClientShell>

@@ -108,7 +108,7 @@ export const SEED_USERS: StoredUser[] = [
       role: "control" as const,
       entityId: "demo-entity",
       department: d.name,
-      title: i === 0 ? "Department lead" : "Contributor",
+      title: i === 0 ? "Department lead" : "Control Owner",
       active: true,
       since: "Apr 2026",
     })),

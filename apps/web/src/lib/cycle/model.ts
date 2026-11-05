@@ -74,8 +74,6 @@ export interface Control {
   domainName: string;
   department: string;
   owner: string;
-  /** Other owners of the control's requirements. */
-  contributors: string[];
   due: string;
   reqs: (CycleRequirement & { stage: CycleStage })[];
   stage: CycleStage;
@@ -89,7 +87,7 @@ export interface Control {
 }
 
 /** Most common value, first seen on a tie. */
-function majority(values: string[]) {
+export function majority(values: string[]) {
   const n = new Map<string, number>();
   for (const v of values) if (v) n.set(v, (n.get(v) ?? 0) + 1);
   let best = "";
@@ -139,6 +137,30 @@ export interface ReviewRecord {
   reviewer?: string;
 }
 
+/**
+ * A control has one Control Owner and every requirement in it is theirs: the owner set in the
+ * plan, else the one holding most of its requirements. Their department follows.
+ */
+export function oneOwnerPerControl<R extends { code: string; owner: string; department: string }>(reqs: R[], plan?: Record<string, { owner?: string; department?: string }>): R[] {
+  const groups = new Map<string, R[]>();
+  for (const r of reqs) {
+    const k = controlOf(r.code);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(r);
+  }
+  const owners = new Map(
+    [...groups.entries()].map(([code, list]) => {
+      const owner = plan?.[code]?.owner ?? majority(list.map((r) => r.owner));
+      const department = plan?.[code]?.department ?? (majority(list.filter((r) => r.owner === owner).map((r) => r.department)) || majority(list.map((r) => r.department)));
+      return [code, { owner, department }];
+    }),
+  );
+  return reqs.map((r) => {
+    const o = owners.get(controlOf(r.code))!;
+    return r.owner === o.owner && r.department === o.department ? r : { ...r, owner: o.owner, department: o.department || r.department };
+  });
+}
+
 export function buildControls(
   reqs: CycleRequirement[],
   opts: {
@@ -174,7 +196,6 @@ export function buildControls(
       domainName: opts.names.get(dom) ?? `Domain ${dom}`,
       department: plan?.department ?? majority(list.map((r) => r.department)),
       owner,
-      contributors: [...new Set(list.map((r) => r.owner).filter((o) => o && o !== owner))],
       due: plan?.due ?? list.map((r) => r.due).sort().at(-1) ?? "",
       reqs: staged,
       stage: controlStage(live.map((r) => r.stage)),

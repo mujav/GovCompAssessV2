@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attention, buildControls, controlOf, controlStage, currentPhase, DEFAULT_THRESHOLDS, dimensionOf, domainOf, findingsOf, previousTier, reqLabel, responseGaps, selfCheck, suggestRisks, tierOf, type CycleRequirement } from "./model";
+import { attention, buildControls, controlOf, oneOwnerPerControl, controlStage, currentPhase, DEFAULT_THRESHOLDS, dimensionOf, domainOf, findingsOf, previousTier, reqLabel, responseGaps, selfCheck, suggestRisks, tierOf, type CycleRequirement } from "./model";
 import { maskPersonal } from "./platform";
 import type { Stage } from "@/lib/journey/work";
 
@@ -32,10 +32,22 @@ describe("cycle model", () => {
     expect(c.title).toBe("Policy and governance");
     expect(c.dimensionName).toBe("Risk and continuity");
     expect(c.owner).toBe("H. Al-Dosari");
-    expect(c.contributors).toEqual(["A. Al-Shehri"]);
     expect(c.stage).toBe("submitted");
     expect(c.met).toBe(2);
     expect(c.total).toBe(3);
+  });
+
+  it("gives every requirement of a control its one Control Owner", () => {
+    const rows = [
+      { code: "1.1.2-1", owner: "Faisal R.", department: "Strategy" },
+      { code: "1.1.2-2", owner: "Lama S.", department: "Planning" },
+      { code: "1.1.2-3", owner: "Faisal R.", department: "Strategy" },
+      { code: "1.2.1-1", owner: "Lama S.", department: "Planning" },
+    ];
+    expect(oneOwnerPerControl(rows).map((r) => r.owner)).toEqual(["Faisal R.", "Faisal R.", "Faisal R.", "Lama S."]);
+    expect(oneOwnerPerControl(rows)[1].department).toBe("Strategy");
+    // The owner set in the plan wins.
+    expect(oneOwnerPerControl(rows, { "1.1.2": { owner: "Huda B.", department: "HR" } }).slice(0, 3).every((r) => r.owner === "Huda B." && r.department === "HR")).toBe(true);
   });
 
   it("puts a control with any returned requirement back with its owner", () => {

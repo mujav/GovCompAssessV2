@@ -38,7 +38,6 @@ export function ControlsTable({ list, showWorkspace, onAttached }: { list: MyCon
             ))}
           <span className="min-w-0">
             <b className="font-mono text-xs">{m.c.code}</b> {m.c.title}
-            {!m.owned && <span className="ms-1.5 text-xs text-j-muted">· contributing</span>}
           </span>
           {showWorkspace && <span className="text-[13px] text-j-ink-3">{m.workspace}</span>}
           <span className={cx(m.c.due < TODAY && m.c.stage !== "accepted" && "font-semibold text-[#B2461F]")}>{m.c.due}</span>
