@@ -21,9 +21,21 @@ export interface JourneyState {
   /** Free-form per-screen state, keyed by screen. */
   screens: Record<string, unknown>;
   log: { at: string; text: string }[];
+  /** Version of the demo records the saved work was made on. */
+  records?: number;
 }
 
-const initial = (): JourneyState => ({ added: [], screens: {}, log: [] });
+/** 2: demo records come from the published Qiyas V5.0 and NCA ECC-2:2024 standards. */
+const RECORDS = 2;
+
+const initial = (): JourneyState => ({ added: [], screens: {}, log: [], records: RECORDS });
+
+/** Work saved on earlier demo records points at requirements that no longer exist; it starts again on the new ones. */
+function migrate(s: JourneyState): JourneyState {
+  if ((s.records ?? 1) >= RECORDS) return s;
+  const screens = Object.fromEntries(Object.entries(s.screens).filter(([k]) => !/^(cycle|work|evidence|work-screen|req|clar)\./.test(k)));
+  return { ...s, screens, records: RECORDS };
+}
 
 type Action = { type: "replace"; state: JourneyState } | { type: "mutate"; fn: (s: JourneyState) => void };
 
@@ -60,7 +72,7 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) dispatch({ type: "replace", state: { ...initial(), ...(JSON.parse(raw) as JourneyState) } });
+      if (raw) dispatch({ type: "replace", state: migrate({ ...initial(), records: 1, ...(JSON.parse(raw) as JourneyState) }) });
     } catch {
       // Corrupt or blocked storage: keep the defaults.
     }

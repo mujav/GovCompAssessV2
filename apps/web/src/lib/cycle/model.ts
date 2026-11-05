@@ -1,8 +1,9 @@
 // The cycle as the design describes it: a workspace's standard is read as Dimension › Domain ›
 // Control › Requirement › Required evidence, the Control Owner answers one control at a time,
 // and the Index Owner plans, reviews and closes the cycle per control. Controls are not stored
-// on their own: they group the workspace's requirements by code (5.9.1-3 belongs to control
-// 5.9.1, domain 5.9, dimension 5), so every requirement-level screen stays in step.
+// on their own: they group the workspace's requirements by where each sits in its standard
+// (Qiyas 5.9.1-3 belongs to standard 5.9.1, axis 5.9, perspective P4; NCA 1-5-3-1 to control
+// 1-5-3), so every requirement-level screen stays in step.
 //
 // Pure data and rules; ./use-cycle.ts keeps the per-workspace state in the journey store.
 
@@ -15,8 +16,16 @@ import type { Stage, WorkOverlay } from "@/lib/journey/work";
 export const controlOf = (code: string) => code.split("-")[0];
 export const domainOf = (code: string) => controlOf(code).split(".").slice(0, 2).join(".");
 export const dimensionOf = (code: string) => controlOf(code).split(".")[0];
-/** "5.9.1-3" → "R3"; codes without a requirement suffix keep their last segment. */
-export const reqLabel = (code: string) => `R${code.includes("-") ? code.slice(code.indexOf("-") + 1) : code.split(".").pop()}`;
+/** "5.9.1-3" → "R3"; NCA subcontrol "2-3-1-4" → "R4"; an NCA control assessed on its own keeps its code. */
+export const reqLabel = (code: string) => {
+  if (!code.includes(".")) return code.split("-").length >= 4 ? `R${code.split("-").pop()}` : code;
+  return `R${code.includes("-") ? code.slice(code.indexOf("-") + 1) : code.split(".").pop()}`;
+};
+
+/** Where a requirement sits: the standard's own codes when the record carries them, else read off a Qiyas-style code. */
+export const controlKey = (r: { code: string; controlCode?: string }) => r.controlCode ?? controlOf(r.code);
+export const domainKey = (r: { code: string; domainCode?: string }) => r.domainCode ?? domainOf(r.code);
+export const dimensionKey = (r: { code: string; dimensionCode?: string }) => r.dimensionCode ?? dimensionOf(r.code);
 
 /** Requirement as the cycle sees it: what the requirement-level hooks already provide. */
 export interface CycleRequirement {
@@ -36,6 +45,9 @@ export interface CycleRequirement {
   work?: string;
   review?: string;
   upload?: { files: number; assessed: boolean };
+  controlCode?: string;
+  domainCode?: string;
+  dimensionCode?: string;
 }
 
 /* ---------- Stages ---------- */
@@ -109,9 +121,9 @@ export function namesFrom(nodes: FrameworkRequirement[] | undefined, reqs: Cycle
   const names = new Map<string, string>();
   for (const n of nodes ?? []) names.set(n.code, n.title || n.titleAr || n.code);
   for (const r of reqs) {
-    const dim = dimensionOf(r.code);
+    const dim = dimensionKey(r);
     if (!names.has(dim) && r.domain) names.set(dim, titleCase(r.domain));
-    const ctl = controlOf(r.code);
+    const ctl = controlKey(r);
     if (!names.has(ctl)) names.set(ctl, r.title.split(":")[0]);
   }
   return names;
@@ -151,10 +163,10 @@ export interface ReviewRecord {
  * A control has one Control Owner and every requirement in it is theirs: the owner set in the
  * plan, else the one holding most of its requirements. Their department follows.
  */
-export function oneOwnerPerControl<R extends { code: string; owner: string; department: string }>(reqs: R[], plan?: Record<string, { owner?: string; department?: string }>): R[] {
+export function oneOwnerPerControl<R extends { code: string; owner: string; department: string; controlCode?: string }>(reqs: R[], plan?: Record<string, { owner?: string; department?: string }>): R[] {
   const groups = new Map<string, R[]>();
   for (const r of reqs) {
-    const k = controlOf(r.code);
+    const k = controlKey(r);
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(r);
   }
@@ -166,7 +178,7 @@ export function oneOwnerPerControl<R extends { code: string; owner: string; depa
     }),
   );
   return reqs.map((r) => {
-    const o = owners.get(controlOf(r.code))!;
+    const o = owners.get(controlKey(r))!;
     return r.owner === o.owner && r.department === o.department ? r : { ...r, owner: o.owner, department: o.department || r.department };
   });
 }
@@ -183,7 +195,7 @@ export function buildControls(
 ): Control[] {
   const groups = new Map<string, CycleRequirement[]>();
   for (const r of reqs) {
-    const k = controlOf(r.code);
+    const k = controlKey(r);
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(r);
   }
@@ -195,8 +207,8 @@ export function buildControls(
     const live = staged.filter((r) => r.status !== "na");
     const owner = plan?.owner ?? majority(list.map((r) => r.owner));
     const met = live.filter((r) => r.stage === "accepted" && review?.decisions[r.code] !== "not").length;
-    const dim = dimensionOf(code);
-    const dom = domainOf(code);
+    const dim = dimensionKey({ code, dimensionCode: list[0].dimensionCode });
+    const dom = domainKey({ code, domainCode: list[0].domainCode });
     return {
       code,
       title: opts.names.get(code) ?? code,

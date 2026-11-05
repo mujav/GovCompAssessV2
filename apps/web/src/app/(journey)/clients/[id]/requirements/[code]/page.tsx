@@ -198,7 +198,7 @@ export default function RequirementWorkspacePage() {
                   {r.code}
                 </Pill>
                 <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: rbg, color: rfg }}>
-                  Last result · DGA 2025: {res}
+                  Last result · {framework?.authority ?? "DGA"} 2025: {res}
                 </span>
                 {r.weight === "high" && <Pill tone="bad">Mandatory</Pill>}
                 {returned && stage !== "acc" && <Pill tone="bad">Returned</Pill>}

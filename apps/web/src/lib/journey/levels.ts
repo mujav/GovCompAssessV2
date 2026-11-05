@@ -4,9 +4,9 @@ import type { EntityFramework } from "./frameworks";
 
 // The four levels of an index for one requirement row, so every requirement table can show
 // where a row sits: Perspective › Axis › Standard › Implementation requirement for Qiyas,
-// Main domain › Subdomain › Control › Subcontrol for NCA ECC. The workspace's own records carry
-// the path in their codes and take the standard's level names; without a standard they read
-// Dimension › Domain › Control › Requirement.
+// Main domain › Subdomain › Control › Subcontrol for NCA ECC. The path follows each node's
+// parents in the standard; rows that are not in it read the path off a Qiyas-style code, and
+// without a standard the levels are Dimension › Domain › Control › Requirement.
 
 export const DEFAULT_LEVELS = ["Dimension", "Domain", "Control", "Requirement"];
 
@@ -31,7 +31,7 @@ const nodeName = (n: FrameworkRequirement) => n.title || n.titleAr || (n.text ??
  * follows each node's parent; otherwise it is read off the code (4.1.2-1 → 4 › 4.1 › 4.1.2 › 4.1.2-1)
  * with names from `names`.
  */
-export function indexLevels({ levels, nodes, names }: { levels?: HierarchyLevel[]; nodes?: FrameworkRequirement[]; names?: Map<string, string> }): IndexLevels {
+export function indexLevels({ levels, nodes, names, rowLevel }: { levels?: HierarchyLevel[]; nodes?: FrameworkRequirement[]; names?: Map<string, string>; rowLevel?: number }): IndexLevels {
   const named = levels?.length === 4 ? levels : undefined;
   const tree = nodes?.length ? named : undefined;
   // The standard names the levels even when the rows are the workspace's own records.
@@ -66,7 +66,7 @@ export function indexLevels({ levels, nodes, names }: { levels?: HierarchyLevel[
     ];
   };
   const assessed = tree?.findIndex((l) => l.assessed === "accepted") ?? -1;
-  return { labels, rowLevel: assessed >= 0 ? assessed : 3, pathOf };
+  return { labels, rowLevel: rowLevel ?? (assessed >= 0 ? assessed : 3), pathOf };
 }
 
 /** "P1 · Strategy" style text, for CSV and spreadsheet cells. */
@@ -79,10 +79,11 @@ export function otherLevels(l: IndexLevels, code: string, title: string) {
 
 /**
  * The levels for one workspace. Names follow the control screens: the standard's nodes, then the
- * requirement wording, then the Index Owner's renames. Workspace records read the path off the code.
+ * requirement wording, then names the Index Owner gave what they added.
  */
 export function workspaceLevels(framework: EntityFramework | undefined, workspace: boolean, reqs: CycleRequirement[], renames?: Record<string, string>) {
-  const nodes = workspace ? undefined : framework?.live.requirements;
+  const nodes = framework?.live.requirements;
   const names = applyRenames(namesFrom(nodes, reqs), renames, nodes);
-  return indexLevels({ levels: framework?.live.levels, nodes, names });
+  // Demo records are the standard's requirements (its last level); library rows sit at the level it is assessed at.
+  return indexLevels({ levels: framework?.live.levels, nodes, names, rowLevel: workspace ? 3 : undefined });
 }

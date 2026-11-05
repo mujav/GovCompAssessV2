@@ -287,7 +287,7 @@ function RequirementsView() {
                 {(
                   [
                     ["owner", "Owner"],
-                    ["result", "Last result · DGA 2025"],
+                    ["result", `Last result · ${framework?.authority ?? "DGA"} 2025`],
                     ["status", "Status"],
                     ["updated", "Updated"],
                   ] as [SortKey, string][]

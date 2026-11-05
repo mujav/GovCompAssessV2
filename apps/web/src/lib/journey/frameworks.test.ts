@@ -35,10 +35,11 @@ describe("entity frameworks from the library", () => {
     expect(reqs.find((r) => r.code === "1-9-3")?.text).toContain("1-9-3-1");
   });
 
-  it("uses the shared workspace records only for seeded clients' Qiyas", () => {
+  it("uses the shared demo records only for seeded clients' Qiyas and NCA ECC", () => {
     expect(usesWorkspaceRecords("fw-qiyas", false)).toBe(true);
     expect(usesWorkspaceRecords("fw-qiyas", true)).toBe(false);
-    expect(usesWorkspaceRecords("fw-nca", false)).toBe(false);
+    expect(usesWorkspaceRecords("fw-nca", false)).toBe(true);
+    expect(usesWorkspaceRecords("fw-ndmo", false)).toBe(false);
   });
 
   it("shortens names for tabs", () => {

@@ -17,7 +17,7 @@ const req = (p: Partial<WsRequirement>): WsRequirement => ({
 describe("command center metrics", () => {
   it("counts every requirement once in the status mix", () => {
     const mix = statusMix(ctx);
-    expect(Object.values(mix).reduce((n, c) => n + c.length, 0)).toBe(350);
+    expect(Object.values(mix).reduce((n, c) => n + c.length, 0)).toBe(ctx.reqs.length);
   });
 
   it("official readiness only counts accepted results", () => {

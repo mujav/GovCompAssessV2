@@ -36,7 +36,7 @@ export default function StandardPage() {
   const st = cycle.standard;
   const locale = useLocale();
   // The standard's own wording, in the interface language; the other language only when the standard has no text in this one.
-  const nodes = useMemo(() => new Map((cy.records ? [] : (framework?.live.requirements ?? [])).map((n) => [n.code, n])), [framework, cy.records]);
+  const nodes = useMemo(() => new Map((framework?.live.requirements ?? []).map((n) => [n.code, n])), [framework]);
   const inLang = (en?: string, ar?: string) => (locale === "ar" ? ar || en : en || ar) ?? "";
   const titleOf = (code: string) => {
     const n = nodes.get(code);
@@ -456,7 +456,7 @@ function SpecDialog({ value, isNew, onClose, onSave, onRemove }: { value: Eviden
           <input value={v.id} onChange={(e) => setV({ ...v, id: e.target.value })} className={inputClass} />
         </Field>
         <Field label="Required evidence">
-          <input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Approved committee charter" className={inputClass} />
+          <input value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Approved digital transformation strategy" className={inputClass} />
         </Field>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3">

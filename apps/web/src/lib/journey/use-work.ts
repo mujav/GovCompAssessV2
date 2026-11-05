@@ -13,7 +13,7 @@ import { useControlOwners, type WorkplaceView } from "./use-workplaces";
 import { useAuth } from "@/lib/auth/store";
 import type { Workplace, WorkplaceClient } from "./workplaces";
 import type { StoredUser } from "@/lib/auth/accounts";
-import { controlOf, oneOwnerPerControl } from "@/lib/cycle/model";
+import { controlKey, oneOwnerPerControl } from "@/lib/cycle/model";
 import { EMPTY_OVERLAY, stageCounts, stageOf, isReturned, type EvidenceSignal, type Stage, type WorkOverlay } from "./work";
 
 export const ALL = "all";
@@ -74,9 +74,9 @@ export function frameworkRequirements(
 ): ClientRequirement[] {
   const library = framework ? libraryRequirements(framework.live) : [];
   if (!workspace) return framework ? withAssignments(scope, library, assignments, people) : library;
-  // Workspace records carry the work state; the library adds the official wording where codes match.
-  const wording = new Map(library.map((r) => [r.code, r]));
-  return wsReqs.map((r) => ({ ...r, text: wording.get(r.code)?.text, evidenceText: wording.get(r.code)?.evidenceText }));
+  // Workspace records carry the work state and the standard's own wording.
+  const fwId = framework?.id ?? WORKSPACE_FRAMEWORK_ID;
+  return wsReqs.filter((r) => (r.frameworkId ?? WORKSPACE_FRAMEWORK_ID) === fwId);
 }
 
 export type WorkRequirement = ClientRequirement & { upload?: EvidenceSignal };
@@ -103,7 +103,7 @@ function withControlOwners<R extends WorkRequirement>(reqs: R[], cycle: unknown)
 function withoutNa<R extends { code: string }>(reqs: R[], cycle: unknown): R[] {
   const plan = (cycle as { plan?: Record<string, { na?: unknown }> } | undefined)?.plan;
   if (!plan) return reqs;
-  return reqs.filter((r) => !plan[r.code.split("-")[0]]?.na);
+  return reqs.filter((r) => !plan[controlKey(r)]?.na);
 }
 
 /** Files uploaded on each requirement count as received evidence everywhere the requirement is shown, and move its stage on. */
@@ -160,8 +160,8 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   /** Assigns requirements to a Control Owner (their department follows), due on the given date. A control has one owner, so its other requirements go with them. */
   const assign = (codes: string[], person: string, due: string) => {
     if (closed) return;
-    const controls = new Set(codes.map(controlOf));
-    const all = [...new Set([...codes, ...reqs.filter((r) => controls.has(controlOf(r.code))).map((r) => r.code)])];
+    const controls = new Set(codes.map((c) => controlKey(reqs.find((r) => r.code === c) ?? { code: c })));
+    const all = [...new Set([...codes, ...reqs.filter((r) => controls.has(controlKey(r))).map((r) => r.code)])];
     for (const c of all) ws.assign(workspace ? c : assignmentKey(scope, c), person, due);
     // An owner set in the plan would override the assignment, so it follows too.
     update((s) => {

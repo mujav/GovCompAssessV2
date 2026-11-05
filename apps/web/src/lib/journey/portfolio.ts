@@ -53,7 +53,7 @@ export const CONSULTANT = { initials: "SR", name: "Sami R.", role: "Engagement L
 export const DEMO_CLIENT_ID = "demo-entity";
 
 export const CLIENTS: Client[] = [
-  { id: "demo-entity", ini: "DE", name: "Demo Entity", nameAr: "الجهة التجريبية", sub: "Authority", logo: 0, frameworks: ["Qiyas 2026"], frameworkIds: ["fw-qiyas"], pct: 72, next: "Verification · 9 d", nextTone: "ok", flag: "active" },
+  { id: "demo-entity", ini: "DE", name: "Demo Entity", nameAr: "الجهة التجريبية", sub: "Authority", logo: 0, frameworks: ["Qiyas 2026", "NCA ECC"], frameworkIds: ["fw-qiyas", "fw-nca"], pct: 72, next: "Verification · 9 d", nextTone: "ok", flag: "active" },
   { id: "demo-ministry", ini: "DM", name: "Demo Ministry of Services", sub: "Ministry", logo: 1, frameworks: ["Qiyas 2026", "NCA ECC"], frameworkIds: ["fw-qiyas", "fw-nca"], pct: 81, next: "Self-assess · 21 d", nextTone: "ok", flag: "active" },
   { id: "demo-commission", ini: "DC", name: "Demo Commission", sub: "Commission", logo: 2, frameworks: ["Qiyas 2026"], frameworkIds: ["fw-qiyas"], pct: 58, next: "Evidence due · 3 d", nextTone: "late", flag: "attn" },
   { id: "demo-health", ini: "DH", name: "Demo Health Cluster", sub: "Cluster", logo: 4, frameworks: ["NDMO Data Management Standards"], frameworkIds: ["fw-ndmo"], pct: 52, next: "Gap report · 5 d", nextTone: "warn", flag: "attn" },
@@ -65,6 +65,7 @@ export const CLIENTS: Client[] = [
 
 export const ENGAGEMENTS: Engagement[] = [
   { clientId: "demo-entity", index: "Qiyas", frameworkId: "fw-qiyas", model: "managed", ready: 72, delta: "+6.8", milestone: "Verification · 9 d", milestoneLate: false, term: "214 d left", termState: "ok", lead: "SR" },
+  { clientId: "demo-entity", index: "NCA ECC", frameworkId: "fw-nca", model: "managed", ready: 61, delta: "new", milestone: "Self-assess · 21 d", milestoneLate: false, term: "214 d left", termState: "ok", lead: "SR" },
   { clientId: "demo-ministry", index: "Qiyas", frameworkId: "fw-qiyas", model: "co", ready: 81, delta: "+3.1", milestone: "Verification · 9 d", milestoneLate: false, term: "41 d left", termState: "soon", lead: "LA" },
   { clientId: "demo-ministry", index: "NCA ECC", frameworkId: "fw-nca", model: "managed", ready: 64, delta: "new", milestone: "Self-assess · 21 d", milestoneLate: false, term: "41 d left", termState: "soon", lead: "LA" },
   { clientId: "demo-commission", index: "Qiyas", frameworkId: "fw-qiyas", model: "managed", ready: 58, delta: "−1.4", milestone: "Evidence due · 3 d", milestoneLate: true, term: "160 d left", termState: "ok", lead: "MK" },

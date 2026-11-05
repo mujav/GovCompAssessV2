@@ -16,10 +16,13 @@ import { workplaceLabel } from "@/lib/journey/workplaces";
 import { ROLE_OF } from "@/lib/auth/accounts";
 import { SUBMISSION_DEADLINE, TODAY } from "@/lib/workspace/data";
 import type { FrameworkRequirement } from "@/lib/admin/types";
+import { ECC_REQUIREMENTS } from "@/lib/admin/ecc-2024";
+import { QIYAS_V5_REQUIREMENTS } from "@/lib/admin/qiyas-v5";
+import { demoSeed, type DemoSeed } from "./demo-seed";
 import {
   buildControls,
   CYCLE_STAGES,
-  controlOf,
+  controlKey,
   currentPhase,
   defaultDates,
   hashUnit,
@@ -166,14 +169,30 @@ export const EMPTY_CYCLE: CycleState = {
 };
 
 /** Seeded register and history so a demo workspace opens with the design's examples. */
+let seed: DemoSeed | undefined;
+/** Built once: the review content that goes with the demo records. */
+function demo() {
+  if (!seed) {
+    const names = new Map([...QIYAS_V5_REQUIREMENTS, ...ECC_REQUIREMENTS].map((n) => [n.code, n.titleAr || n.title]));
+    seed = demoSeed((ctl) => names.get(ctl) ?? ctl);
+  }
+  return seed;
+}
+
 export function seededCycle(): CycleState {
+  const d = demo();
   return {
     ...structuredClone(EMPTY_CYCLE),
+    notes: { ...d.notes },
+    responses: structuredClone(d.responses),
+    comments: structuredClone(d.comments),
+    followUps: structuredClone(d.followUps),
+    reviews: Object.fromEntries(Object.entries(d.returns).map(([k, n]) => [k, { decisions: {}, returns: n }])),
     risks: [
       { id: "rk-1", title: "Department capacity during the closing month", type: "Risk", controls: [], impact: "High", owner: "", due: "2026-11-10", status: "Mitigating" },
-      { id: "rk-2", title: "Signed test reports not yet issued", type: "Issue", controls: [], impact: "High", owner: "", due: "2026-11-14", status: "Open" },
+      { id: "rk-2", title: "Updated plans still waiting for the head of entity's approval", type: "Issue", controls: [], impact: "High", owner: "", due: "2026-11-14", status: "Open" },
     ],
-    standard: { ...EMPTY_CYCLE.standard, edition: "1.2", published: { version: 1, at: "2026-10-01", by: "Sami R." } },
+    standard: { ...EMPTY_CYCLE.standard, published: { version: 1, at: "2026-10-01", by: "Sami R." } },
   };
 }
 
@@ -181,18 +200,21 @@ export function seededCycle(): CycleState {
 export function defaultSpecs(c: { code: string; reqs: CycleRequirement[] }): EvidenceSpec[] {
   let n = 0;
   return c.reqs.flatMap((r) => {
-    const named = (r.evidenceText ?? "").split(/[;؛]/).map((s) => s.trim()).filter(Boolean);
+    const named = (r.evidenceText ?? "").split(/[\n;؛]/).map((s) => s.trim()).filter(Boolean);
     const titles = named.length ? named : Array.from({ length: Math.max(1, r.evidence.expected) }, (_, i) => (i === 0 ? `Approved ${r.title.split(":")[0].toLowerCase()} document` : i === 1 ? "Records showing it in use this cycle" : "Samples"));
     return titles.map((title, i) => {
       n++;
-      const samples = /sample/i.test(title);
+      const samples = /sample|عين/i.test(title);
+      // The standard often says how many samples ("(3) عينات") and how recent ("(36) شهرًا").
+      const count = Number((title.match(/\((\d+)\)\s*عين/) ?? title.match(/(\d+)\s*samples/i))?.[1] ?? 0);
+      const months = Number((title.match(/\((\d+)\)\s*شهر/) ?? title.match(/(\d+)\s*months/i))?.[1] ?? 0);
       return {
         id: `E${n}`,
         req: r.code,
         title,
         docType: samples ? "Samples" : i === 0 ? "Approved document" : "Report",
-        freshness: 12,
-        minSamples: samples ? 3 : 0,
+        freshness: months || 12,
+        minSamples: samples ? count || 3 : 0,
         format: "Any",
         approval: i === 0,
         pageRef: i === 0,
@@ -323,8 +345,8 @@ export function useCycle() {
   const fwId = framework?.id ?? "fw-qiyas";
 
   const controls = useMemo(
-    () => controlsOf(reqs, overlay, cycle, work.workspace ? undefined : framework?.live.requirements, meta.annex) as CycleControl[],
-    [reqs, overlay, cycle, framework, meta.annex, work.workspace],
+    () => controlsOf(reqs, overlay, cycle, framework?.live.requirements, meta.annex) as CycleControl[],
+    [reqs, overlay, cycle, framework, meta.annex],
   );
   const runs = useMemo(() => evidenceRuns(state.screens, client.id, fwId, reqs.map((r) => r.code)), [state.screens, client.id, fwId, reqs]);
   const summary = useMemo(() => cycleSummary(controls, cycle), [controls, cycle]);
@@ -336,13 +358,11 @@ export function useCycle() {
   const workplace = workplaces.find((w) => w.id === client.id);
 
   const audit = (type: AuditType, action: string, extra: { before?: string; after?: string } = {}) => recordAudit({ user: me, role, type, action, workspace: label, ...extra });
-  const touch = (codes: string[]) => setCycle((d) => void codes.forEach((c) => (d.activity[controlOf(c)] = nowIso())));
+  const touch = (codes: string[]) => setCycle((d) => void codes.forEach((c) => (d.activity[controlKey(reqs.find((r) => r.code === c) ?? { code: c })] = nowIso())));
   const control = (code: string) => controls.find((c) => c.code === code);
 
   return {
     ...work,
-    /** True when the workspace runs on its own records rather than the standard's nodes. */
-    records: work.workspace,
     cycle,
     setCycle,
     controls,

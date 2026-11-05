@@ -135,7 +135,7 @@ export default function ControlResponsePage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <span className="text-sm text-j-muted">
-              Dimension {c.dimension} › {c.domainName.startsWith("Domain") ? c.domainName : `Domain ${c.domain} ${c.domainName}`}
+              {c.dimension} {c.dimensionName} › {c.domain} {c.domainName.startsWith("Domain") ? "" : c.domainName}
             </span>
             <h1 className="m-0 text-[26px] leading-8 font-bold">
               <span className="font-mono">{c.code}</span> {c.title}
@@ -176,7 +176,7 @@ export default function ControlResponsePage() {
         {(c.stage === "submitted" || c.stage === "review") && <p className="m-0 rounded-xl bg-cx-tint px-4 py-3 text-sm">Submitted. Your Index Owner reviews it next; editing opens again if they return it.</p>}
         {c.stage === "returned" && (
           <p className="m-0 rounded-xl bg-[#FFF1E8] px-4 py-3 text-sm">
-            <b>Returned by {lastReturn?.by ?? "your Index Owner"}.</b> {lastReturn?.text ?? "Fix the requirements marked below, then submit again."}
+            <b>Returned by {lastReturn?.by ?? "your Index Owner"}:</b> <span dir="auto">{lastReturn?.text ?? "Fix the requirements marked below, then submit again."}</span>
           </p>
         )}
         {(c.stage === "not" || c.stage === "draft") && !closed && <p className="m-0 rounded-xl bg-j-canvas px-4 py-3 text-sm">Upload the required evidence, mark each requirement and write the control response, then submit it to your Index Owner.</p>}
@@ -280,11 +280,6 @@ export default function ControlResponsePage() {
                   {r.text && r.text !== r.title && (
                     <span className="text-[13px] leading-5 whitespace-pre-line text-j-ink-2" dir="auto">
                       {r.text}
-                    </span>
-                  )}
-                  {r.evidenceText && (
-                    <span className="text-xs leading-5 text-j-ink-3" dir="auto">
-                      <b>Evidence asked:</b> {r.evidenceText}
                     </span>
                   )}
                   {note && (

@@ -270,7 +270,7 @@ export default function ReviewConsolePage() {
                   <span className="text-sm">No findings – every requirement has supporting evidence.</span>
                 )}
                 <Field label="Re-assess with instruction">
-                  <textarea rows={2} value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="For R11, the approval memo is on page 2. Re-check the date against the accepted period." className="rounded-xl border border-[#DAD7FB] bg-white p-3 font-sans text-sm font-normal" />
+                  <textarea rows={2} value={instruction} onChange={(e) => setInstruction(e.target.value)} placeholder="For R1, the approval date is on page 2 of the plan. Re-check it falls within the period the standard allows." className="rounded-xl border border-[#DAD7FB] bg-white p-3 font-sans text-sm font-normal" />
                 </Field>
                 <span className="flex flex-wrap items-center gap-2">
                   <JButton size="sm" variant="primary" disabled={closed || !!ev.busy} onClick={() => void reassess()}>
@@ -361,7 +361,7 @@ function ReturnDialog({ open, onClose, reqs, owner, onSend }: { open: boolean; o
       ))}
       {!reqs.length && <p className="m-0 text-sm">Every requirement is marked met. Mark the ones that need work as not met first.</p>}
       <Field label="Message to the owner">
-        <textarea rows={2} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Two items left. The signed charter is the blocker – can you get it by Monday?" className="rounded-xl border border-j-line p-3 font-sans text-sm font-normal" />
+        <textarea rows={2} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="One item left: the plan must be the approved, signed version. Can you get it by Monday?" className="rounded-xl border border-j-line p-3 font-sans text-sm font-normal" />
       </Field>
     </Modal>
   );

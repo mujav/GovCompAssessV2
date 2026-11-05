@@ -52,9 +52,12 @@ export function withAssignments(frameworkId: string, reqs: ClientRequirement[], 
   });
 }
 
-/** Seeded clients share the demo workspace records for Qiyas; a newly onboarded entity and every other framework start from the library. */
+/** Frameworks the seeded demo records cover: Qiyas V5.0 and NCA ECC-2:2024. */
+export const RECORD_FRAMEWORKS = [WORKSPACE_FRAMEWORK_ID, "fw-nca"];
+
+/** Seeded clients share the demo records for Qiyas and NCA ECC; a newly onboarded entity and every other framework start from the library. */
 export function usesWorkspaceRecords(frameworkId: string, onboarded: boolean) {
-  return frameworkId === WORKSPACE_FRAMEWORK_ID && !onboarded;
+  return RECORD_FRAMEWORKS.includes(frameworkId) && !onboarded;
 }
 
 /** Requirements at the level a framework is assessed at, as fresh work items (nothing started yet). */
@@ -76,6 +79,10 @@ export function libraryRequirements(v: FrameworkVersion): ClientRequirement[] {
       const weight = r.weight === "high" || r.weight === "low" ? r.weight : "med";
       return {
         code: r.code,
+        // Rows are assessed at the control level: each is its own control.
+        controlCode: r.code,
+        domainCode: r.parent ?? r.code,
+        dimensionCode: top(r).code,
         domain: top(r).title || top(r).titleAr || top(r).code,
         weight,
         status: "nas" as const,
