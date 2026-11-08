@@ -128,6 +128,8 @@ function withSeedLibrary(saved: AdminState): AdminState {
       if (mine.live.version === f.live.version) Object.assign(mine.live, { requirements: f.live.requirements, levels: f.live.levels, nameAr: f.live.nameAr });
       else Object.assign(mine, { live: f.live, history: f.history, draft: mine.pendingCr ? mine.draft : undefined });
     }
+    // Saved before standards said how many cycles they run: take the seeded count.
+    if (mine?.live && !mine.live.cycles && f.live?.cycles && mine.live.version === f.live.version) mine.live.cycles = f.live.cycles;
   }
   return saved;
 }

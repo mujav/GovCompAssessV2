@@ -47,6 +47,12 @@ export interface ImportJob {
 }
 
 /** One node of the framework tree (any level), as published with the version. */
+/** How a standard runs within a year: how many assessment cycles, optionally named (e.g. "الدورة الأولى"). */
+export interface CycleSpec {
+  count: number;
+  names?: { en: string; ar?: string }[];
+}
+
 export interface FrameworkRequirement {
   code: string;
   /** HierarchyLevel.id this node sits at. */
@@ -74,6 +80,8 @@ export interface FrameworkVersion {
   authority: string;
   effective: string;
   scoringNote: string;
+  /** Assessment cycles the standard runs in a review year; one when absent. */
+  cycles?: CycleSpec;
   levels: HierarchyLevel[];
   importJob?: ImportJob;
   requirements?: FrameworkRequirement[];

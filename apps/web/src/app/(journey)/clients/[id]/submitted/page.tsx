@@ -8,6 +8,7 @@ import { SUBMISSION_DEADLINE, daysBetween } from "@/lib/workspace/data";
 import { clientHref } from "@/lib/journey/portfolio";
 import { useJourney, useScreenState } from "@/lib/journey/store";
 import { NO_SUBMISSION, submissionKey, type SubmissionState } from "@/lib/journey/submission";
+import { useCycle } from "@/lib/cycle/use-cycle";
 import { useClientWork } from "@/lib/journey/use-work";
 import { initials } from "@/lib/journey/work";
 
@@ -17,7 +18,8 @@ export default function SubmittedPage() {
   const { client, ws, framework } = useClientWork();
   const fwName = framework?.name ?? client.frameworks[0];
   const { log } = useJourney();
-  const [s] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
+  const { period } = useCycle();
+  const [s] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id, period.n), NO_SUBMISSION);
   const [sent, setSent] = useScreenState<boolean>(`submitted.${client.id}.report`, false);
   const c = (p: string) => clientHref(client.id, p);
 

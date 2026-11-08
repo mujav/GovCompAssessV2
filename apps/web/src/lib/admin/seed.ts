@@ -22,6 +22,8 @@ const qiyasLive: FrameworkVersion = {
   authority: "DGA",
   effective: "Apr 2026",
   scoringNote: "Full / partial / non-compliance per standard",
+  // DGA measures Qiyas twice a year.
+  cycles: { count: 2, names: [{ en: "Cycle 1", ar: "الدورة الأولى" }, { en: "Cycle 2", ar: "الدورة الثانية" }] },
   weighting: "none",
   levels: QIYAS_V5_LEVELS,
   requirements: QIYAS_V5_REQUIREMENTS,
@@ -176,6 +178,7 @@ export function createSeed(): AdminState {
           createdAt: "02 Feb 2024",
           publishedAt: "20 Feb 2024",
           scoringNote: "Maturity 0–5 · minimum by domain",
+          cycles: { count: 1 },
           weighting: "none",
           levels: ECC_LEVELS,
           requirements: ECC_REQUIREMENTS,

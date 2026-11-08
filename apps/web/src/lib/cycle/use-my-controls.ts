@@ -12,6 +12,7 @@ import { useMyWorkplaces } from "@/lib/journey/use-workplaces";
 import { workplaceLabel } from "@/lib/journey/workplaces";
 import { workspaceLevels, type IndexLevels } from "@/lib/journey/levels";
 import { controlsOf, cycleKey, entityMeta, seededCycle, usePlatform, type CycleControl, type CycleState } from "./use-cycle";
+import { workspaceCycle, type CyclePeriod } from "./periods";
 
 export interface MyControl {
   c: CycleControl;
@@ -22,6 +23,9 @@ export interface MyControl {
   href: string;
   /** The index's four levels for this workspace's requirements. */
   levels: IndexLevels;
+  /** The workspace's cycle in progress, and "Cycle 1 of 2" when the standard runs more than one. */
+  period: CyclePeriod;
+  cycleText: string;
 }
 
 export function useMyControls() {
@@ -36,6 +40,7 @@ export function useMyControls() {
       const cycle = (state.screens[cycleKey(w.client.id)] as CycleState | undefined) ?? seededCycle();
       const annex = entityMeta(platform, { id: w.entity.id, sub: w.entity.sub }).annex;
       const levels = workspaceLevels(w.framework, w.workspace, w.reqs, cycle.standard.names);
+      const cy = workspaceCycle(state.screens[cycleKey(w.client.id)], w.framework?.live.cycles);
       return (controlsOf(w.reqs, w.overlay, cycle, w.framework?.live.requirements, annex) as CycleControl[])
         .filter((c) => c.applicable && c.owner === user.name)
         .map((c) => ({
@@ -46,6 +51,8 @@ export function useMyControls() {
           frameworkId: w.framework?.id ?? w.workplace.frameworkId,
           href: clientHref(w.client.id, `/controls/${encodeURIComponent(c.code)}`),
           levels,
+          period: cy.period,
+          cycleText: cy.label,
         }));
     });
   }, [user, work, state.screens, platform]);

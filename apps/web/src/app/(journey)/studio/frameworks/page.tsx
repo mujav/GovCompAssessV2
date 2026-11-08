@@ -5,7 +5,7 @@ import { Checks, DraftBar, LockNote, type CheckItem } from "@/components/admin-u
 import { PageHeader } from "@/components/journey/studio";
 import { EditionUse } from "@/components/cycle/edition-use";
 import { Button, TabBar } from "@/components/ui";
-import { requirementCounts } from "@/lib/admin/diff";
+import { cyclesText, requirementCounts } from "@/lib/admin/diff";
 import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from "@/lib/admin/library";
 import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
 import { useJourney } from "@/lib/journey/store";
@@ -75,6 +75,7 @@ export default function FrameworkBuilderPage() {
           effective: "—",
           createdAt: dateStamp(),
           scoringNote: "Not configured",
+          cycles: { count: 1 },
           levels: [
             { id: "lv-1", en: "Domain", ar: "المجال", pattern: "#", assessed: "rollup" },
             { id: "lv-2", en: "Control", ar: "الضابط", pattern: "#.#", assessed: "accepted" },
@@ -237,6 +238,7 @@ export default function FrameworkBuilderPage() {
               <LockNote kind="framework" id={pkg.id} />
               {tab <= 0 && (
                 <>
+                  <CyclesEditor value={fw} locked={locked} onChange={(cycles) => edit((d) => void (d.cycles = cycles))} />
                   <div className="text-[13px] text-muted">
                     Hierarchy levels are names, not code. Another standard can use pillar / objective / control / sub-control with the same engine.
                   </div>
@@ -559,7 +561,7 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
                       {cur.name}
                     </b>
                     <span className="truncate text-xs text-muted" dir="auto">
-                      {cur.authority} · {cur.levels.map((l) => l.en).join(" › ")}
+                      {cur.authority} · {cur.levels.map((l) => l.en).join(" › ")} · {(cur.cycles?.count ?? 1) === 1 ? "1 cycle" : `${cur.cycles!.count} cycles`} a year
                       {f.usedByCycles ? ` · used by ${f.usedByCycles} cycle` : ""}
                     </span>
                   </span>
@@ -646,6 +648,47 @@ function Library({ onOpen }: { onOpen: (id: string) => void }) {
           {rows.length === 0 && <div className="px-5 py-6 text-muted">No standard matches the search.</div>}
         </div>
       </div>
+    </section>
+  );
+}
+
+/** How many assessment cycles the standard runs in a year, and what each is called. */
+function CyclesEditor({ value, locked, onChange }: { value: FrameworkVersion; locked: boolean; onChange: (c: NonNullable<FrameworkVersion["cycles"]>) => void }) {
+  const count = value.cycles?.count ?? 1;
+  const names = value.cycles?.names ?? [];
+  const nameAt = (i: number) => names[i] ?? { en: `Cycle ${i + 1}` };
+  const setCount = (n: number) => onChange({ count: n, names: Array.from({ length: n }, (_, i) => nameAt(i)) });
+  const setName = (i: number, patch: Partial<{ en: string; ar: string }>) => onChange({ count, names: Array.from({ length: count }, (_, j) => (j === i ? { ...nameAt(j), ...patch } : nameAt(j))) });
+  return (
+    <section aria-label="Assessment cycles" className="flex flex-col gap-2 rounded-xl border border-line-soft p-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <b className="text-[13px]">Assessment cycles per year</b>
+        {locked ? (
+          <span className="text-[13px]">{cyclesText(value)}</span>
+        ) : (
+          <span className="w-20">
+            <select aria-label="Assessment cycles per year" value={count} onChange={(e) => setCount(Number(e.target.value))} className={`${inputCls} bg-white text-[13px]`}>
+              {[1, 2, 3, 4].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </span>
+        )}
+        <span className="text-xs text-muted">Each workspace on this standard runs these cycles in order, with its own deadlines and official results.</span>
+      </div>
+      {!locked && count > 1 && (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2">
+          {Array.from({ length: count }, (_, i) => (
+            <span key={i} className="flex items-center gap-2 text-[13px]">
+              <b className="w-5 font-mono">{i + 1}</b>
+              <input aria-label={`Cycle ${i + 1} name`} value={nameAt(i).en} onChange={(e) => setName(i, { en: e.target.value })} className={`${inputCls} text-[13px]`} />
+              <input aria-label={`Cycle ${i + 1} Arabic name`} value={nameAt(i).ar ?? ""} placeholder="الاسم بالعربية" dir="rtl" lang="ar" onChange={(e) => setName(i, { ar: e.target.value || undefined })} className={`${inputCls} text-sm`} />
+            </span>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

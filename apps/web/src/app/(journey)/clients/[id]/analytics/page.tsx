@@ -97,7 +97,8 @@ export default function AnalyticsPage() {
     })
     .filter((x) => x.reqs);
 
-  const prior = client.id === client.entityId && client.frameworkId === "fw-qiyas" ? PRIOR_CYCLE.at(-1)! : null;
+  // The last official score: the cycle before this one, else last year's.
+  const prior = cy.periods[cy.periods.indexOf(cy.period) - 1]?.closure?.score ?? (client.id === client.entityId && client.frameworkId === "fw-qiyas" ? PRIOR_CYCLE.at(-1)! : null);
   const lastNon = live.filter((c) => c.previous === "Non");
   const nowFull = lastNon.filter((c) => c.stage === "accepted" && c.met === c.total);
   const toggle = (k: string) => setOpen(open.includes(k) ? open.filter((x) => x !== k) : [...open, k]);

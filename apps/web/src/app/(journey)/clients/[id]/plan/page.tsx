@@ -5,7 +5,7 @@ import { ClientShell, JMain } from "@/components/journey/shell";
 import { Field, inputClass, JButton, PageHead, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { ClosedBanner, fmtDate, Row, StageBadge, Table, useToast } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
-import { PHASES } from "@/lib/cycle/model";
+import { isClosed, phaseDue, planProblems } from "@/lib/cycle/periods";
 import { useCycle, type CycleControl } from "@/lib/cycle/use-cycle";
 import { addDays, daysBetween, TODAY } from "@/lib/workspace/data";
 
@@ -22,7 +22,7 @@ export default function PlanPage() {
   return (
     <ClientShell search="Search controls">
       <JMain>
-        <PageHead eyebrow={`Submission plan · active since ${summary.dates.opening}`} title="Plan">
+        <PageHead eyebrow={`Submission plan${cy.cycleText ? ` · ${cy.cycleText}` : ""} · active since ${summary.dates.opening}`} title="Plan">
           <JButton variant="primary" disabled={closed} onClick={() => setTab("update")}>
             Update plan
           </JButton>
@@ -305,56 +305,111 @@ function impactOf(chosen: CycleControl[], all: CycleControl[], due: string, owne
 }
 
 function SetUp({ cy, say }: { cy: Cy; say: (t: string) => void }) {
-  const { summary, cycle, setCycle, controls, closed, entityMeta } = cy;
-  const d = summary.dates;
-  const phases = cycle.phases ?? [...PHASES];
+  const { summary, cycle, controls, closed, entityMeta, periods, period, setPeriods } = cy;
+  const active = periods.indexOf(period);
+  // Follows the cycle in progress until someone picks another (saved work loads after the first render).
+  const [picked, setView] = useState<number | null>(null);
+  const view = picked ?? active;
+  const p = periods[view] ?? period;
+  // A closed cycle stays as it ran; the current and later ones can be planned.
+  const locked = closed || isClosed(p);
+  const problems = planProblems(periods);
+  const internal = phaseDue(period, "internal");
+  const late = controls.filter((c) => c.applicable && c.stage !== "accepted" && c.due > internal);
   const flagged = controls.filter((c) => c.flaggedNa);
   const confirmed = controls.filter((c) => !c.applicable && cycle.plan[c.code]?.na);
   const [proof, setProof] = useState<Record<string, string>>({});
-  const setDate = (k: keyof typeof d, v: string | number) => setCycle((s) => void (s.dates = { ...d, [k]: v }));
+  const edit = (fn: (x: (typeof periods)[number]) => void) => setPeriods((ps) => void fn(ps[view]));
 
   return (
     <div className="flex flex-col gap-3.5">
       <Panel className="flex flex-col gap-3.5 p-[22px]">
-        <PanelHead title="Cycle dates and phases" />
+        <PanelHead
+          title={periods.length > 1 ? "Cycles, deadlines and phases" : "Cycle deadlines and phases"}
+          aside={
+            periods.length > 1 && (
+              <Segmented size="sm" label="Cycle" value={String(view)} onChange={(v) => setView(Number(v))} options={periods.map((x, i) => ({ value: String(i), label: `${x.name}${isClosed(x) ? " · closed" : i === active ? " · now" : ""}` }))} />
+            )
+          }
+        />
+        {periods.length > 1 && <p className="m-0 -mt-1 text-[13px] text-j-ink-3">{`The standard runs ${periods.length} cycles a year. Each has its own deadlines; closing one in Cycle closure opens the next.`}</p>}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
-          <Field label="Opening">
-            <input type="date" disabled={closed} value={d.opening} onChange={(e) => setDate("opening", e.target.value)} className={inputClass} />
+          <Field label="Opens">
+            <input type="date" disabled={locked} value={p.opens} onChange={(e) => edit((x) => void (x.opens = e.target.value))} className={inputClass} />
           </Field>
-          <Field label="Internal closing">
-            <input type="date" disabled={closed} value={d.internalClosing} onChange={(e) => setDate("internalClosing", e.target.value)} className={inputClass} />
-          </Field>
-          <Field label="Submission to regulator">
-            <input type="date" disabled={closed} value={d.submission} onChange={(e) => setDate("submission", e.target.value)} className={inputClass} />
-          </Field>
-          <Field label="Target compliance rate">
-            <input type="number" min={0} max={100} disabled={closed} value={d.target} onChange={(e) => setDate("target", Number(e.target.value))} className={inputClass} />
+          <Field label="Target compliance rate (%)">
+            <input type="number" min={0} max={100} disabled={locked} value={p.target} onChange={(e) => edit((x) => void (x.target = Number(e.target.value)))} className={inputClass} />
           </Field>
         </div>
-        <div className="flex flex-col gap-2">
+
+        <div className="flex flex-col gap-1.5">
           <span className="text-[13px] font-semibold">
-            Phases <span className="font-normal text-j-muted">· generic template, rename or remove per index</span>
+            Phases <span className="font-normal text-j-muted">· the deadline is each phase&apos;s last day; rename them to the index&apos;s own terms</span>
           </span>
-          <div className="flex flex-wrap gap-2">
-            {phases.map((p, i) => (
-              <span key={i} className={cx("flex items-center gap-1 rounded-xl border px-2 py-1", i === summary.phase ? "border-cx bg-cx-tint" : "border-j-line")}>
-                <span className="text-xs text-j-muted">{i + 1}</span>
-                <input
-                  aria-label={`Phase ${i + 1}`}
-                  disabled={closed}
-                  value={p}
-                  onChange={(e) => setCycle((s) => void (s.phases = phases.map((x, j) => (j === i ? e.target.value : x))))}
-                  className="w-[150px] border-0 bg-transparent text-sm outline-none"
-                />
-                {phases.length > 3 && !closed && (
-                  <button type="button" aria-label={`Remove ${p}`} onClick={() => setCycle((s) => void (s.phases = phases.filter((_, j) => j !== i)))} className="cursor-pointer border-0 bg-transparent text-j-muted">
-                    ✕
-                  </button>
-                )}
-              </span>
-            ))}
-          </div>
+          {p.phases.map((ph, i) => (
+            <div key={ph.key} className={cx("grid grid-cols-[28px_minmax(0,1fr)_170px_110px] items-center gap-2 rounded-xl px-2 py-1.5", view === active && i === summary.phase && "bg-cx-tint")}>
+              <span className="text-xs text-j-muted">{i + 1}</span>
+              <input aria-label={`Phase ${i + 1} name`} disabled={locked} value={ph.name} onChange={(e) => edit((x) => void (x.phases[i].name = e.target.value))} className={cx(inputClass, "h-9")} />
+              <input type="date" aria-label={`${ph.name} deadline`} disabled={locked} value={ph.due} onChange={(e) => edit((x) => void (x.phases[i].due = e.target.value))} className={cx(inputClass, "h-9")} />
+              <span className="text-xs text-j-muted">{view === active && i === summary.phase ? "now" : ph.due < TODAY ? "passed" : `in ${daysBetween(TODAY, ph.due)} days`}</span>
+            </div>
+          ))}
         </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="flex items-center justify-between gap-2 text-[13px] font-semibold">
+            <span>
+              Other deadlines <span className="font-normal text-j-muted">· e.g. a steering committee review or a draft to the regulator</span>
+            </span>
+            {!locked && (
+              <JButton size="sm" variant="outline" onClick={() => edit((x) => void x.deadlines.push({ id: `dl-${Date.now()}`, name: "", due: TODAY > x.opens ? TODAY : x.opens }))}>
+                + Add deadline
+              </JButton>
+            )}
+          </span>
+          {p.deadlines.map((d, i) => (
+            <div key={d.id} className="grid grid-cols-[28px_minmax(0,1fr)_170px_110px] items-center gap-2 px-2">
+              <span className="text-xs text-j-muted">•</span>
+              <input aria-label="Deadline name" disabled={locked} value={d.name} placeholder="What is due" onChange={(e) => edit((x) => void (x.deadlines[i].name = e.target.value))} className={cx(inputClass, "h-9")} />
+              <input type="date" aria-label={`${d.name || "Deadline"} date`} disabled={locked} value={d.due} onChange={(e) => edit((x) => void (x.deadlines[i].due = e.target.value))} className={cx(inputClass, "h-9")} />
+              {!locked ? (
+                <JButton size="sm" variant="ghost" aria-label={`Remove ${d.name || "deadline"}`} onClick={() => edit((x) => void x.deadlines.splice(i, 1))}>
+                  Remove
+                </JButton>
+              ) : (
+                <span />
+              )}
+            </div>
+          ))}
+          {!p.deadlines.length && <p className="m-0 px-2 text-[13px] text-j-muted">None yet. They show on the dashboard and the Control Owners&apos; home with the phase deadlines.</p>}
+        </div>
+
+        {problems.length > 0 && (
+          <ul className="m-0 flex flex-col gap-1 rounded-xl bg-j-warn-soft px-4 py-2.5 ps-8 text-[13px] text-[#8A4B00]">
+            {problems.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+        )}
+        {view === active && late.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-[#FFF1E8] px-4 py-2.5 text-[13px]">
+            <span className="flex-auto">
+              <b>{late.length} open control{late.length === 1 ? " is" : "s are"} due after the internal review deadline</b> ({internal}): {late.slice(0, 6).map((c) => c.code).join(", ")}
+              {late.length > 6 ? "…" : ""}
+            </span>
+            <JButton
+              size="sm"
+              variant="primary"
+              disabled={closed}
+              onClick={() => {
+                cy.updatePlan(late.map((c) => c.code), { due: internal }, `Aligned with ${period.name}'s internal review deadline`, new Set(late.map((c) => c.owner).filter(Boolean)).size);
+                say(`${late.length} control${late.length === 1 ? "" : "s"} now due ${internal}; owners notified`);
+              }}
+            >
+              Move them to {internal}
+            </JButton>
+          </div>
+        )}
       </Panel>
 
       <Panel className="flex flex-col gap-2 p-[22px]">

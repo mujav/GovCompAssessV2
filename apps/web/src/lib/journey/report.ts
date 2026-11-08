@@ -49,6 +49,10 @@ export interface WorkspaceReport {
   entity: string;
   index: string;
   year: number;
+  /** "Cycle 1 of 2" when the standard runs more than one cycle a year. */
+  cycle?: string;
+  /** Submission deadline of the cycle the report covers. */
+  submissionDue?: string;
   indexOwners: string[];
   today: string;
   total: number;
@@ -70,6 +74,8 @@ export interface ReportInput {
   entity: string;
   index: string;
   year: number;
+  cycle?: string;
+  submissionDue?: string;
   indexOwners: string[];
   today: string;
   reqs: StagedRequirement[];
@@ -147,6 +153,8 @@ export function buildReport(input: ReportInput): WorkspaceReport {
     entity: input.entity,
     index: input.index,
     year: input.year,
+    cycle: input.cycle || undefined,
+    submissionDue: input.submissionDue,
     indexOwners: input.indexOwners,
     today,
     total: rows.length,
@@ -169,9 +177,12 @@ function mostCommon(list: string[]) {
   return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
 }
 
+/** "Qiyas 2026 · Cycle 1 of 2": the index, year and cycle a report covers. */
+export const scopeOf = (r: Pick<WorkspaceReport, "index" | "year" | "cycle">) => `${r.index} ${r.year}${r.cycle ? ` · ${r.cycle.split(" · ")[0]}` : ""}`;
+
 /** File name for an export: "Entity – Index 2026 – Detailed report". */
 export function reportFileName(r: WorkspaceReport, kind: "executive" | "detailed") {
-  const base = `${r.entity} - ${r.index} ${r.year} - ${kind === "executive" ? "Executive" : "Detailed"} report`;
+  const base = `${r.entity} - ${scopeOf(r).replace(" · ", " ")} - ${kind === "executive" ? "Executive" : "Detailed"} report`;
   return base.replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
 }
 

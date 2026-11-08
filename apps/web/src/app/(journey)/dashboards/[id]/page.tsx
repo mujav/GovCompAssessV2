@@ -10,9 +10,12 @@ import { cx } from "@/components/ui";
 import { shortName } from "@/lib/journey/frameworks";
 import { completionColor } from "@/lib/journey/portfolio";
 import { levelText } from "@/lib/journey/levels";
-import { UNASSIGNED, buildReport, contextLevels, type OwnerReport, type ReportRow, type StageCounts, type WorkspaceReport } from "@/lib/journey/report";
+import { UNASSIGNED, buildReport, contextLevels, scopeOf, type OwnerReport, type ReportRow, type StageCounts, type WorkspaceReport } from "@/lib/journey/report";
 import { exportReport, type ExportFormat, type ReportKind } from "@/lib/journey/report-export";
 import { useIndexLevels } from "@/lib/journey/use-levels";
+import { useJourney } from "@/lib/journey/store";
+import { cycleKey } from "@/lib/cycle/use-cycle";
+import { phaseDue, workspaceCycle } from "@/lib/cycle/periods";
 import { useControlOwners, useMyWorkplaces } from "@/lib/journey/use-workplaces";
 import { useWorkplacesWork } from "@/lib/journey/use-work";
 import { STAGES } from "@/lib/journey/work";
@@ -38,6 +41,8 @@ export default function WorkplaceReportPage() {
   const mine = useMemo(() => views.filter((v) => v.client.id === id), [views, id]);
   const [w] = useWorkplacesWork(mine);
   const people = useControlOwners(w?.workplace.entityId);
+  const { state } = useJourney();
+  const cy = useMemo(() => workspaceCycle(state.screens[cycleKey(id)], w?.framework?.live.cycles), [state.screens, id, w?.framework]);
   const levels = useIndexLevels(w?.framework, w?.workspace ?? true, w?.reqs ?? NO_REQS, id);
   const today = ws.ctx.today;
   const [kind, setKind] = useState<ReportKind>("executive");
@@ -52,6 +57,8 @@ export default function WorkplaceReportPage() {
         entity: w.entity.name,
         index: w.framework ? shortName(w.framework.name) : w.workplace.frameworkId,
         year: w.workplace.year,
+        cycle: cy.label,
+        submissionDue: phaseDue(cy.period, "submission"),
         indexOwners: w.owners.map((o) => o.name),
         today,
         reqs: w.reqs,
@@ -59,7 +66,7 @@ export default function WorkplaceReportPage() {
         people,
         levels,
       }),
-    [w, today, people, levels],
+    [w, today, people, levels, cy],
   );
 
   if (!w || !report) {
@@ -95,7 +102,7 @@ export default function WorkplaceReportPage() {
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">{report.entity}</h1>
             <span className="flex flex-wrap gap-1.5">
               <Pill tone="cx">
-                {report.index} · {report.year}
+                {scopeOf(report)}
               </Pill>
               <Pill>Index Owners: {report.indexOwners.join(", ") || "none"}</Pill>
             </span>
@@ -142,7 +149,7 @@ function PageTitle({ r, title, sub }: { r: WorkspaceReport; title: ReactNode; su
     <div className="flex flex-wrap items-end justify-between gap-3 border-b border-j-line-soft pb-3">
       <span className="flex flex-col gap-0.5">
         <span className="text-xs text-j-muted">
-          {r.entity} · {r.index} {r.year}
+          {r.entity} · {scopeOf(r)}
         </span>
         <b className="text-xl leading-7" dir="auto">
           {title}
@@ -172,7 +179,8 @@ function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: 
 }
 
 function Executive({ r }: { r: WorkspaceReport }) {
-  const closes = r.year === new Date(SUBMISSION_DEADLINE).getFullYear();
+  const due = r.submissionDue ?? SUBMISSION_DEADLINE;
+  const closes = r.year === new Date(due).getFullYear() && due >= r.today;
   return (
     <>
       <Panel data-report-page className="flex flex-col gap-4 p-[22px]">
@@ -187,7 +195,7 @@ function Executive({ r }: { r: WorkspaceReport }) {
               <span className="text-j-ink-3">
                 {r.counts.acc} of {r.total} requirements
               </span>
-              {closes && <span className="text-j-ink-3">Portal closes in {daysBetween(r.today, SUBMISSION_DEADLINE)} days</span>}
+              {closes && <span className="text-j-ink-3">Submission due in {daysBetween(r.today, due)} days</span>}
             </span>
           </div>
           <section aria-label="By stage" className="grid flex-[2_1_480px] grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-3">

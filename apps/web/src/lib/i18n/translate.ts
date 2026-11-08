@@ -41,6 +41,8 @@ const RULES: [RegExp, (...m: string[]) => string][] = [
   [/^(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec),? (\d{1,2}:\d{2})$/, (_, d, m, t) => `${d} ${MONTHS[m]}، ${t}`],
   [/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec) (\d{4})$/, (_, m, y) => `${MONTHS[m]} ${y}`],
   [/^v(\d[\w.]*)$/, (_, v) => `الإصدار ${v}`],
+  [/^by (\d\d-\d\d)$/, (_, d) => `بحلول ${d}`],
+  [/^(\d+) d late$/, (_, n) => `متأخر ${n} يوم`],
 ];
 
 interface Pattern {

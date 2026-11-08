@@ -6,9 +6,9 @@ import { JLink, Panel, PanelHead, Pill } from "@/components/journey/ui";
 import { Kpi, useToast } from "@/components/cycle/ui";
 import { ControlsTable } from "@/components/cycle/my-controls";
 import { useAuth } from "@/lib/auth/store";
-import { defaultDates } from "@/lib/cycle/model";
+import { nextDeadline, phaseDue } from "@/lib/cycle/periods";
 import { messagesFor, useMyControls } from "@/lib/cycle/use-my-controls";
-import { SUBMISSION_DEADLINE, TODAY, daysBetween } from "@/lib/workspace/data";
+import { TODAY, daysBetween } from "@/lib/workspace/data";
 
 // S07 · Control Owner home: the controls they own and what is late or returned.
 // Each control row has a paperclip to attach evidence without opening the control.
@@ -17,7 +17,8 @@ export default function HomePage() {
   const { user } = useAuth();
   const mine = useMyControls();
   const { say, toast } = useToast();
-  const closing = mine[0]?.cycle.dates?.internalClosing ?? defaultDates(SUBMISSION_DEADLINE).internalClosing;
+  // One line per workspace: its cycle, its internal review deadline and the next date coming up.
+  const spaces = [...new Map(mine.map((m) => [m.workspaceId, m])).values()];
   const reqs = mine.reduce((a, m) => a + m.c.total, 0);
   const met = mine.reduce((a, m) => a + m.c.met, 0);
   const ev = mine.reduce((a, m) => ({ e: a.e + m.c.evidence.expected, u: a.u + m.c.evidence.uploaded }), { e: 0, u: 0 });
@@ -31,9 +32,19 @@ export default function HomePage() {
       <JMain max={1600}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <Pill tone="warn" className="self-start">
-              Internal closing {closing} · {Math.max(0, daysBetween(TODAY, closing))} days
-            </Pill>
+            <span className="flex flex-wrap gap-1.5">
+              {spaces.map((m) => {
+                const closing = phaseDue(m.period, "internal");
+                const next = nextDeadline(m.period, TODAY);
+                return (
+                  <Pill key={m.workspaceId} tone={daysBetween(TODAY, closing) <= 7 ? "bad" : "warn"}>
+                    {m.workspace.split(" · ")[1] ?? m.workspace}
+                    {m.cycleText && ` · ${m.cycleText.split(" · ")[0]}`} · internal closing {closing} ({Math.max(0, daysBetween(TODAY, closing))} days)
+                    {next && next.due !== closing && ` · next: ${next.name} ${next.due}`}
+                  </Pill>
+                );
+              })}
+            </span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Welcome back, {user?.name}</h1>
             <p className="m-0 text-sm text-j-ink-3">
               You own {mine.length} control{mine.length === 1 ? "" : "s"}.

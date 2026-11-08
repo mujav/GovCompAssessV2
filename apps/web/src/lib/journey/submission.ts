@@ -15,5 +15,6 @@ export interface SubmissionState {
 
 export const NO_SUBMISSION: SubmissionState = { requested: false, signed: false, uploader: 0 };
 
-/** The workspace framework (Qiyas) keeps the original per-client key; other frameworks get their own. */
-export const submissionKey = (clientId: string, frameworkId?: string) => (!frameworkId || frameworkId === "fw-qiyas" ? `submission.${clientId}` : `submission.${clientId}.${frameworkId}`);
+/** The workspace framework (Qiyas) keeps the original per-client key; other frameworks get their own, and cycles after the first theirs. */
+export const submissionKey = (clientId: string, frameworkId?: string, cycle = 1) =>
+  `${!frameworkId || frameworkId === "fw-qiyas" ? `submission.${clientId}` : `submission.${clientId}.${frameworkId}`}${cycle > 1 ? `.c${cycle}` : ""}`;

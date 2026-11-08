@@ -23,12 +23,20 @@ export function describeFramework(v?: FrameworkVersion) {
   return {
     Name: v?.name ?? "—",
     Effective: v?.effective ?? "—",
+    "Cycles per year": v ? cyclesText(v) : "—",
     "Hierarchy levels": v ? v.levels.map((l) => l.en).join(" › ") : "—",
     "Arabic labels": v ? v.levels.map((l) => l.ar).join(" › ") : "—",
     "Code patterns": v ? v.levels.map((l) => l.pattern).join(" · ") : "—",
     "Requirements import": v?.importJob ? `${v.importJob.file} · ${v.importJob.valid} valid · ${v.importJob.warnings.length} warnings` : "—",
     Requirements: v?.requirements?.length ? requirementCounts(v) : "—",
   };
+}
+
+/** "2 · Cycle 1, Cycle 2" for a version's assessment cycles. */
+export function cyclesText(v: FrameworkVersion) {
+  const n = v.cycles?.count ?? 1;
+  const names = v.cycles?.names?.slice(0, n).map((x) => x.en).filter(Boolean) ?? [];
+  return names.length ? `${n} · ${names.join(", ")}` : String(n);
 }
 
 /** "3 Axis · 9 Standard · 17 Requirement" for a version's requirement tree. */

@@ -11,7 +11,8 @@ import { clientHref } from "@/lib/journey/portfolio";
 import { useJourney } from "@/lib/journey/store";
 import { useWorkplacesWork } from "@/lib/journey/use-work";
 import { useWorkplaces } from "@/lib/journey/use-workplaces";
-import { cycleKey, type CycleState } from "@/lib/cycle/use-cycle";
+import { cycleKey } from "@/lib/cycle/use-cycle";
+import { workspaceCycle } from "@/lib/cycle/periods";
 
 const ALL = "all";
 
@@ -29,10 +30,11 @@ export default function AdminWorkspacesPage() {
     () =>
       work
         .map((w) => {
-          const cycle = state.screens[cycleKey(w.client.id)] as CycleState | undefined;
+          const cy = workspaceCycle(state.screens[cycleKey(w.client.id)], w.framework?.live.cycles);
           const total = Object.values(w.counts).reduce((a, b) => a + b, 0);
-          const closed = cycle?.closure?.closedAt;
-          const status = closed ? `Closed · ${cycle?.closure?.score ?? "–"}%` : !total || w.counts.start === total ? "Set-up" : "Active";
+          const status = cy.closed
+            ? `Closed · ${cy.period.closure?.score ?? "–"}%`
+            : `${!total || w.counts.start === total ? "Set-up" : "Active"}${cy.label ? ` · ${cy.label}` : ""}${cy.previous != null ? ` · last score ${cy.previous}%` : ""}`;
           return { w, status, index: shortName(w.framework?.name ?? w.client.frameworks[0] ?? "") };
         })
         .sort((a, b) => a.w.entity.name.localeCompare(b.w.entity.name) || b.w.workplace.year - a.w.workplace.year),

@@ -19,6 +19,7 @@ import type { FrameworkRequirement } from "@/lib/admin/types";
 import { ECC_REQUIREMENTS } from "@/lib/admin/ecc-2024";
 import { QIYAS_V5_REQUIREMENTS } from "@/lib/admin/qiyas-v5";
 import { demoSeed, type DemoSeed } from "./demo-seed";
+import { activeIndex, cycleCount, cycleLabel, datesOf, isClosed, periodsOf, type Closure, type CyclePeriod } from "./periods";
 import {
   buildControls,
   CYCLE_STAGES,
@@ -113,14 +114,12 @@ export interface FollowUp {
   kind: "Follow-up" | "Call" | "Deadline" | "Instruction" | "Return";
 }
 
-export interface Closure {
-  score?: number;
-  controls: { code: string; status: "Partial" | "Non"; notMet: string; feedback: string }[];
-  closedAt?: string;
-  by?: string;
-}
+export type { Closure, CyclePeriod } from "./periods";
 
 export interface CycleState {
+  /** The year's assessment cycles as the Index Owner planned them; the default plan until then. */
+  cycles?: CyclePeriod[];
+  /** Before cycles: the one set of dates, phase names, closure and submission, read as the first cycle. */
   dates?: CycleDates;
   phases?: string[];
   plan: Record<string, PlanEntry>;
@@ -292,15 +291,16 @@ export function stageTotals(controls: Control[], by: "req" | "control" = "req") 
   return out;
 }
 
-/** Headline numbers the dashboard, workspaces list and analytics share. */
-export function cycleSummary(controls: Control[], cycle: CycleState, closing = SUBMISSION_DEADLINE) {
+/** Headline numbers the dashboard, workspaces list and analytics share, for the cycle in progress. */
+export function cycleSummary(controls: Control[], cycle: CycleState, period?: CyclePeriod) {
   const live = controls.filter((c) => c.applicable);
   const reqs = live.reduce((a, c) => a + c.total, 0);
   const met = live.reduce((a, c) => a + c.met, 0);
   const submitted = live.reduce((a, c) => a + c.submitted, 0);
   const counts = stageTotals(controls);
-  const dates = cycle.dates ?? defaultDates(closing);
-  const phase = currentPhase(counts, !!cycle.submittedAt, !!cycle.closure?.closedAt);
+  const dates = period ? datesOf(period) : (cycle.dates ?? defaultDates(SUBMISSION_DEADLINE));
+  // A cycle that has not opened yet is still being planned, whatever carried over from the last one.
+  const phase = period && TODAY < period.opens ? 0 : currentPhase(counts, !!period?.submittedAt, !!period?.closure?.closedAt);
   const ev = live.reduce((a, c) => ({ expected: a.expected + c.evidence.expected, uploaded: a.uploaded + c.evidence.uploaded, accepted: a.accepted + c.evidence.accepted }), { expected: 0, uploaded: 0, accepted: 0 });
   // The plan expects controls accepted in step with the days elapsed since opening.
   const span = Math.max(1, Date.parse(dates.internalClosing) - Date.parse(dates.opening));
@@ -321,7 +321,7 @@ export function cycleSummary(controls: Control[], cycle: CycleState, closing = S
     counts,
     dates,
     phase,
-    phaseName: (cycle.phases ?? [...PHASES])[phase] ?? PHASES[phase],
+    phaseName: period?.phases[phase]?.name ?? PHASES[phase],
     evidence: ev,
     overdue: live.filter((c) => c.stage !== "accepted" && c.due < TODAY).length,
     returned: counts.returned,
@@ -349,13 +349,24 @@ export function useCycle() {
     [reqs, overlay, cycle, framework, meta.annex],
   );
   const runs = useMemo(() => evidenceRuns(state.screens, client.id, fwId, reqs.map((r) => r.code)), [state.screens, client.id, fwId, reqs]);
-  const summary = useMemo(() => cycleSummary(controls, cycle), [controls, cycle]);
+  // The year's cycles, as the standard sets their number; the first one not closed is in progress.
+  const spec = framework?.live.cycles;
+  const periods = useMemo(() => periodsOf(cycle.cycles, spec, SUBMISSION_DEADLINE, cycle), [cycle, spec]);
+  const period = periods[activeIndex(periods)];
+  const summary = useMemo(() => cycleSummary(controls, cycle, period), [controls, cycle, period]);
   const workspace = workplaceLabel(client.frameworks[0] ?? "", client.year);
   const label = `${client.name} · ${workspace}`;
   const me = user?.name ?? "Someone";
   const role = user ? ROLE_OF[user.role].label : "";
-  const closed = !!cycle.closure?.closedAt;
+  // The workspace closes with its last cycle.
+  const closed = periods.every(isClosed);
   const workplace = workplaces.find((w) => w.id === client.id);
+  /** Changes the plan of the year's cycles; the first change writes the default plan down. */
+  const setPeriods = (fn: (p: CyclePeriod[]) => void) =>
+    setCycle((d) => {
+      d.cycles = structuredClone(periodsOf(d.cycles, spec, SUBMISSION_DEADLINE, d));
+      fn(d.cycles);
+    });
 
   const audit = (type: AuditType, action: string, extra: { before?: string; after?: string } = {}) => recordAudit({ user: me, role, type, action, workspace: label, ...extra });
   const touch = (codes: string[]) => setCycle((d) => void codes.forEach((c) => (d.activity[controlKey(reqs.find((r) => r.code === c) ?? { code: c })] = nowIso())));
@@ -373,6 +384,12 @@ export function useCycle() {
     workspace,
     entityMeta: meta,
     closed,
+    periods,
+    period,
+    /** "Cycle 1 of 2", or empty for a standard with one cycle. */
+    cycleText: cycleLabel(period, periods.length),
+    cycleCount: cycleCount(spec),
+    setPeriods,
     workplace,
     me,
     role,

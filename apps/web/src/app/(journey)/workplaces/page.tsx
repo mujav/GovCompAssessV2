@@ -17,7 +17,9 @@ import { useMyWorkplaces } from "@/lib/journey/use-workplaces";
 import { useWorkplacesWork } from "@/lib/journey/use-work";
 import { initials, stageOf } from "@/lib/journey/work";
 import { CURRENT_YEAR, phaseOf, type WorkplaceRequest } from "@/lib/journey/workplaces";
-import { PRIOR_CYCLE, SUBMISSION_DEADLINE, daysBetween } from "@/lib/workspace/data";
+import { PRIOR_CYCLE, daysBetween } from "@/lib/workspace/data";
+import { cycleKey } from "@/lib/cycle/use-cycle";
+import { phaseDue, workspaceCycle } from "@/lib/cycle/periods";
 import { useWorkspace } from "@/lib/workspace/store";
 
 // S01 · Workplaces. The index owner's landing page: only the workplaces the platform admin
@@ -48,7 +50,6 @@ export default function WorkplacesPage() {
   const [index, setIndex] = useState("all");
   const admin = user?.role === "admin";
   const today = ws.ctx.today;
-  const closing = daysBetween(today, SUBMISSION_DEADLINE);
 
   const indices = [...new Map(views.map((v) => [v.workplace.frameworkId, v.framework ? shortName(v.framework.name) : v.workplace.frameworkId])).entries()];
   const toneOf = (fwId: string) => INDEX_TONE[Math.max(0, indices.findIndex(([id]) => id === fwId)) % INDEX_TONE.length];
@@ -62,17 +63,20 @@ export default function WorkplacesPage() {
         .map((w) => {
           const total = w.reqs.length;
           const assigned = w.reqs.filter((r) => r.owner).length;
-          const submitted = !!((state.screens[submissionKey(w.client.id, w.framework?.id)] as SubmissionState | undefined) ?? NO_SUBMISSION).submittedAt;
+          const cy = workspaceCycle(state.screens[cycleKey(w.client.id)], w.framework?.live.cycles);
+          const submitted = !!cy.period.submittedAt || (cy.period.n === 1 && !!((state.screens[submissionKey(w.client.id, w.framework?.id)] as SubmissionState | undefined) ?? NO_SUBMISSION).submittedAt);
           const overdue = w.reqs.filter((r) => r.due < today && stageOf(r, w.overlay) !== "acc").length;
           return {
             w,
             total,
             pct: total ? Math.round((w.counts.acc / total) * 100) : 0,
             plan: total ? Math.round((assigned / total) * 100) : 0,
-            phase: phaseOf(w.counts, submitted),
+            phase: cy.closed ? "Closed" : today < cy.period.opens ? "Planning" : phaseOf(w.counts, submitted),
+            cycle: cy.label,
+            closing: daysBetween(today, phaseDue(cy.period, "internal")),
             overdue,
             // Seeded Qiyas workplaces carry the 2025 result; new ones have none yet.
-            prior: w.client.id === w.client.entityId && w.workplace.frameworkId === "fw-qiyas" ? `${PRIOR_CYCLE.at(-1)}%` : "–",
+            prior: cy.previous != null ? `${cy.previous}% (${cy.periods[cy.periods.indexOf(cy.period) - 1].name})` : w.client.id === w.client.entityId && w.workplace.frameworkId === "fw-qiyas" ? `${PRIOR_CYCLE.at(-1)}%` : "–",
           };
         }),
     [work, index, q, state.screens, today],
@@ -118,7 +122,7 @@ export default function WorkplacesPage() {
           </Panel>
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] items-stretch gap-5">
-            {cards.map(({ w, total, pct, plan, phase, overdue, prior }) => {
+            {cards.map(({ w, total, pct, plan, phase, cycle, closing, overdue, prior }) => {
               const [tbg, tfg] = toneOf(w.workplace.frameworkId);
               return (
                 <Link
@@ -138,7 +142,7 @@ export default function WorkplacesPage() {
                       </span>
                       <b className="mt-3 block text-[19px] leading-6 font-semibold">{w.entity.name}</b>
                       <span className="mt-0.5 block text-sm text-j-ink-3">
-                        Phase: {phase.toLowerCase()} · plan {plan}% ready
+                        {cycle && `${cycle} · `}Phase: {phase.toLowerCase()} · plan {plan}% ready
                       </span>
                     </span>
                     <Ring pct={pct} color={tfg} size={76} label={`Accepted ${pct} percent`}>
@@ -158,7 +162,7 @@ export default function WorkplacesPage() {
                     </span>
                     <span>
                       <span className="block text-j-ink-3">{w.workplace.year < CURRENT_YEAR ? "Closed" : "Closing in"}</span>
-                      <b className="mt-0.5 block text-base font-semibold">{w.workplace.year === CURRENT_YEAR ? `${closing} days` : w.workplace.year < CURRENT_YEAR ? "Archive" : "Next year"}</b>
+                      <b className="mt-0.5 block text-base font-semibold">{w.workplace.year === CURRENT_YEAR ? `${Math.max(0, closing)} days` : w.workplace.year < CURRENT_YEAR ? "Archive" : "Next year"}</b>
                     </span>
                   </span>
                   <span className="mt-auto flex items-center justify-between gap-2 border-t border-j-line-soft pt-3 text-[13px] text-j-ink-3">

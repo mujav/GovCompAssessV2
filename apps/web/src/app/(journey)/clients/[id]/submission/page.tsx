@@ -14,6 +14,7 @@ import { NO_SUBMISSION, submissionKey, type SubmissionState } from "@/lib/journe
 import { useClientWork } from "@/lib/journey/use-work";
 import { initials, stageCounts, stageOf } from "@/lib/journey/work";
 import { useAuth } from "@/lib/auth/store";
+import { useCycle } from "@/lib/cycle/use-cycle";
 
 // 13 · Submission pack. Gates, blockers and contents of the pack; the index owner signs it off
 // and records the portal upload. Nothing is submitted without that sign-off.
@@ -23,7 +24,8 @@ export default function SubmissionPage() {
   const { client, ws, framework, workspace, reqs, overlay, log } = useClientWork();
   const { user } = useAuth();
   const me = user?.name ?? "Index Owner";
-  const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id), NO_SUBMISSION);
+  const cy = useCycle();
+  const [s, set] = useScreenState<SubmissionState>(submissionKey(client.id, framework?.id, cy.period.n), NO_SUBMISSION);
   const [confirm, setConfirm] = useState(false);
   const c = (p: string) => clientHref(client.id, p);
   const today = ws.ctx.today;
@@ -84,6 +86,8 @@ export default function SubmissionPage() {
       d.receipt = `QY26-${client.ini}-${String(4800 + (now.getMinutes() * 7 + now.getSeconds()) % 200).padStart(6, "0")}`;
       d.frozen = { total: m.total, accepted: m.n.acc, files: m.files };
     });
+    // The cycle moves on to the regulator's assessment.
+    cy.setPeriods((ps) => void (ps[cy.period.n - 1].submittedAt = now.toISOString().slice(0, 10)));
     log(`Submission recorded for ${client.name}`);
     router.push(c("/submitted"));
   };

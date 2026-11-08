@@ -2,7 +2,7 @@
 
 import { STAGES } from "./work";
 import { levelText } from "./levels";
-import { UNASSIGNED, reportFileName, type OwnerReport, type ReportRow, type WorkspaceReport } from "./report";
+import { UNASSIGNED, reportFileName, scopeOf, type OwnerReport, type ReportRow, type WorkspaceReport } from "./report";
 
 // Downloads of the workspace report. Excel and PowerPoint are built from the report data, so
 // they stay editable; the PDF is a picture of the pages on screen, one page per report page.
@@ -47,7 +47,7 @@ async function exportExcel(r: WorkspaceReport, kind: ReportKind) {
     XLSX.utils.book_append_sheet(wb, ws, sheetName(name, taken));
   };
   const head = [
-    [`${r.entity} · ${r.index} ${r.year}`],
+    [`${r.entity} · ${scopeOf(r)}`],
     [kind === "executive" ? "Executive report" : "Detailed report", `As of ${r.today}`],
     ["Index Owners", r.indexOwners.join(", ") || "none"],
     [],
@@ -115,7 +115,7 @@ const headRow = (labels: string[]) => labels.map((l) => cell(l, { bold: true, co
 function frame(s: Slide, r: WorkspaceReport, title: string, sub?: string) {
   s.background = { color: "FFFFFF" };
   s.addShape("rect", { x: 0, y: 0, w: W, h: 0.12, fill: { color: CX }, line: { color: CX } });
-  s.addText(`${r.entity} · ${r.index} ${r.year}`, { x: 0.5, y: 0.3, w: 9, h: 0.3, fontSize: 11, color: MUTED, fontFace: FONT });
+  s.addText(`${r.entity} · ${scopeOf(r)}`, { x: 0.5, y: 0.3, w: 9, h: 0.3, fontSize: 11, color: MUTED, fontFace: FONT });
   s.addText(title, { x: 0.5, y: 0.6, w: 12.3, h: 0.6, fontSize: 24, bold: true, color: INK, fontFace: FONT, rtlMode: hasArabic(title) });
   if (sub) s.addText(sub, { x: 0.5, y: 1.15, w: 12.3, h: 0.35, fontSize: 12, color: MUTED, fontFace: FONT });
   s.addText(`As of ${r.today}`, { x: 9.8, y: 0.3, w: 3, h: 0.3, fontSize: 10, color: MUTED, align: "right", fontFace: FONT });
@@ -163,7 +163,7 @@ async function exportPptx(r: WorkspaceReport, kind: ReportKind) {
   cover.background = { color: CX };
   cover.addText(kind === "executive" ? "Executive report" : "Detailed report", { x: 0.8, y: 2.2, w: 11.7, h: 0.5, fontSize: 18, color: "C9D8EC", fontFace: FONT });
   cover.addText(r.entity, { x: 0.8, y: 2.8, w: 11.7, h: 1, fontSize: 40, bold: true, color: "FFFFFF", fontFace: FONT, rtlMode: hasArabic(r.entity) });
-  cover.addText(`${r.index} · ${r.year}`, { x: 0.8, y: 3.8, w: 11.7, h: 0.5, fontSize: 20, color: "FFFFFF", fontFace: FONT });
+  cover.addText(scopeOf(r), { x: 0.8, y: 3.8, w: 11.7, h: 0.5, fontSize: 20, color: "FFFFFF", fontFace: FONT });
   cover.addText(`Index Owners: ${r.indexOwners.join(", ") || "none"} · As of ${r.today}`, { x: 0.8, y: 6.4, w: 11.7, h: 0.4, fontSize: 12, color: "C9D8EC", fontFace: FONT });
 
   // Summary: the same on both reports.

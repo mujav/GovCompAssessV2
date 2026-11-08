@@ -11,8 +11,9 @@ import { canManage } from "@/lib/auth/accounts";
 import { useAuth } from "@/lib/auth/store";
 import { clientHref, completionColor } from "@/lib/journey/portfolio";
 import { useScreenState } from "@/lib/journey/store";
-import { attention, CYCLE_STAGES, findingsOf, phaseProgress, PHASES, type CycleStage } from "@/lib/cycle/model";
+import { attention, CYCLE_STAGES, findingsOf, phaseProgress, type CycleStage } from "@/lib/cycle/model";
 import { useCycle } from "@/lib/cycle/use-cycle";
+import { isClosed, nextDeadline, timeline, type CyclePeriod } from "@/lib/cycle/periods";
 import { executiveUpdate } from "@/lib/workspace/drafts";
 import { PRIOR_CYCLE, TODAY, daysBetween } from "@/lib/workspace/data";
 
@@ -29,9 +30,15 @@ export default function DashboardPage() {
   const [reminded, setReminded] = useScreenState<string[]>(`overview.${client.id}.reminded`, []);
   const c = (p: string) => clientHref(client.id, p);
   const s = summary;
-  const prior = client.id === client.entityId && client.frameworkId === "fw-qiyas" ? PRIOR_CYCLE.at(-1)! : null;
-  const phases = cycle.phases ?? [...PHASES];
+  const { periods, period } = cy;
+  const activeAt = periods.indexOf(period);
+  // Follows the cycle in progress until someone picks another (saved work loads after the first render).
+  const [picked, setShown] = useState<number | null>(null);
+  const shown = picked ?? activeAt;
+  // The last official score: the cycle before this one, else last year's.
+  const prior = periods[activeAt - 1]?.closure?.score ?? (client.id === client.entityId && client.frameworkId === "fw-qiyas" ? PRIOR_CYCLE.at(-1)! : null);
   const progress = phaseProgress(s.phase, s.counts);
+  const upcoming = nextDeadline(period, TODAY);
   const totalReqs = Object.values(s.counts).reduce((a, b) => a + b, 0) || 1;
   const live = controls.filter((x) => x.applicable);
   const returns = Object.fromEntries(Object.entries(cycle.reviews).map(([k, v]) => [k, v.returns]));
@@ -93,9 +100,15 @@ export default function DashboardPage() {
             </span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Compliance at a glance</h1>
             <span className="flex flex-wrap gap-1.5">
+              {cy.cycleText && <Pill tone="dark">{cy.cycleText}</Pill>}
+              {upcoming && (
+                <Pill tone={daysBetween(TODAY, upcoming.due) <= 7 ? "bad" : "warn"}>
+                  Next: {upcoming.name} · {upcoming.due === TODAY ? "today" : `${daysBetween(TODAY, upcoming.due)} days`}
+                </Pill>
+              )}
               <Pill tone={daysBetween(TODAY, s.dates.internalClosing) <= 7 ? "bad" : "warn"}>Internal closing · {Math.max(0, daysBetween(TODAY, s.dates.internalClosing))} days</Pill>
               <Pill tone="cx">Submission to regulator · {Math.max(0, daysBetween(TODAY, s.dates.submission))} days</Pill>
-              <Pill>Previous official score · {prior == null ? "–" : `${prior}%`}</Pill>
+              <Pill>{activeAt > 0 ? `${periods[activeAt - 1].name} official score` : "Previous official score"} · {prior == null ? "–" : `${prior}%`}</Pill>
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -112,20 +125,7 @@ export default function DashboardPage() {
         </div>
         <ClosedBanner show={closed} />
 
-        <Panel className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2 p-[18px]" aria-label="Phases">
-          {phases.map((p, i) => (
-            <div key={p} className={cx("flex flex-col gap-1.5 rounded-xl px-2.5 py-2", i === s.phase && "bg-cx-tint")}>
-              <span className="text-xs font-semibold text-j-ink-2">
-                {p}
-                {i === s.phase && " · now"}
-              </span>
-              <span className="block h-1.5 overflow-hidden rounded-full bg-j-line-soft">
-                <span className="block h-full rounded-full" style={{ width: `${progress[i] ?? 0}%`, background: i < s.phase ? "#1F9D6E" : "#1E4E8C" }} />
-              </span>
-              <b className="text-sm">{progress[i] ?? 0}%</b>
-            </div>
-          ))}
-        </Panel>
+        <CycleStrip periods={periods} active={activeAt} shown={shown} onShow={setShown} phase={s.phase} progress={progress} index={cy.workspace} />
 
         <section className="flex flex-wrap gap-3">
           <Kpi label="Plan progress" value={`${s.planPct}%`} sub={`${s.accepted} of ${s.controls} controls accepted${s.behind > 0 ? ` · ${s.behind} pts behind plan` : " · on plan"}`} tone={s.behind > 5 ? "warn" : undefined} />
@@ -327,5 +327,69 @@ export default function DashboardPage() {
         </pre>
       </Drawer>
     </ClientShell>
+  );
+}
+
+/** Where the year stands: the cycle's phases with their deadlines, and the other cycles of the year. */
+function CycleStrip({ periods, active, shown, onShow, phase, progress, index }: { periods: CyclePeriod[]; active: number; shown: number; onShow: (i: number) => void; phase: number; progress: number[]; index: string }) {
+  const p = periods[shown] ?? periods[active];
+  const now = shown === active && !isClosed(p);
+  const extra = timeline(p).filter((d) => !d.phase);
+  return (
+    <Panel className="flex flex-col gap-3 p-[18px]" aria-label="Phases">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-sm">
+          <b>{index}</b>
+          {periods.length > 1 && (
+            <>
+              {" · "}
+              <b>
+                {p.name} of {periods.length}
+              </b>
+            </>
+          )}
+          <span className="text-j-muted">
+            {" · "}
+            {isClosed(p) ? `closed ${p.closure?.closedAt?.slice(0, 10)} · official score ${p.closure?.score ?? "–"}%` : TODAY < p.opens ? `opens ${p.opens}` : `opened ${p.opens}${p.submittedAt ? ` · submitted ${p.submittedAt}` : ""}`}
+          </span>
+        </span>
+        {periods.length > 1 && (
+          <Segmented size="sm" label="Cycle" value={String(shown)} onChange={(v) => onShow(Number(v))} options={periods.map((x, i) => ({ value: String(i), label: `${x.name}${isClosed(x) ? " · closed" : i === active ? " · now" : ""}` }))} />
+        )}
+      </div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2">
+        {p.phases.map((ph, i) => {
+          const pct = isClosed(p) ? 100 : now ? (progress[i] ?? 0) : 0;
+          const here = now && i === phase;
+          const left = daysBetween(TODAY, ph.due);
+          return (
+            <div key={ph.key} className={cx("flex flex-col gap-1.5 rounded-xl px-2.5 py-2", here && "bg-cx-tint")}>
+              <span className="text-xs font-semibold text-j-ink-2">
+                {ph.name}
+                {here && " · now"}
+              </span>
+              <span className="block h-1.5 overflow-hidden rounded-full bg-j-line-soft">
+                <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: isClosed(p) || (now && i < phase) ? "#1F9D6E" : "#1E4E8C" }} />
+              </span>
+              <span className="flex items-baseline justify-between gap-1">
+                <b className="text-sm">{pct}%</b>
+                <span className={cx("text-[11px]", here && left < 0 ? "font-semibold text-j-bad" : "text-j-muted")}>
+                  {here ? (left < 0 ? `${-left} d late` : left === 0 ? "due today" : `${left} d left`) : `by ${ph.due.slice(5)}`}
+                </span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {extra.length > 0 && (
+        <span className="flex flex-wrap gap-1.5 text-xs">
+          {extra.map((d) => (
+            <Pill key={d.id} tone={d.due < TODAY ? "gray" : "cx"}>
+              {d.name || "Deadline"} · {d.due}
+            </Pill>
+          ))}
+        </span>
+      )}
+    </Panel>
   );
 }

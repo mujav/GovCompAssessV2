@@ -163,7 +163,9 @@ export function useFrameworkWork(framework: EntityFramework | undefined) {
   );
 
   // A closed cycle is read-only: nothing moves, nothing is reassigned.
-  const closed = !!(state.screens[`cycle.${client.id}`] as { closure?: { closedAt?: string } } | undefined)?.closure?.closedAt;
+  // A year closes with its last cycle (one closure only, before workspaces had cycles).
+  const saved = state.screens[`cycle.${client.id}`] as { closure?: { closedAt?: string }; cycles?: { closure?: { closedAt?: string } }[] } | undefined;
+  const closed = saved?.cycles?.length ? saved.cycles.every((p) => !!p.closure?.closedAt) : !!saved?.closure?.closedAt;
 
   /** Assigns requirements to a Control Owner (their department follows), due on the given date. A control has one owner, so its other requirements go with them. */
   const assign = (codes: string[], person: string, due: string) => {
