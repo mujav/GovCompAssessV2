@@ -147,7 +147,7 @@ export default function DashboardPage() {
           </Link>
         </section>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[1.3_1_420px] flex-col gap-3 p-[22px]">
             <PanelHead title={`Where the ${totalReqs} requirements are`} aside={<span className="text-xs text-j-muted">Share of all requirements under each stage</span>} />
             <div role="img" aria-label={CYCLE_STAGES.map((x) => `${x.label} ${s.counts[x.key]}`).join(", ")} className="flex h-4 gap-[3px] overflow-hidden rounded-lg">

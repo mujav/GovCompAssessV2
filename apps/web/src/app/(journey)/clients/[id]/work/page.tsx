@@ -192,7 +192,7 @@ export default function MyWorkPage() {
           </p>
         )}
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="min-w-0 flex-[3_1_640px] overflow-hidden">
             <div className="overflow-x-auto">
               <div role="table" aria-label={TABS[tab]} className="min-w-[1180px] text-sm">
@@ -252,7 +252,7 @@ export default function MyWorkPage() {
               </div>
             </div>
           </Panel>
-          <aside className="flex min-w-0 flex-[1_1_280px] flex-col gap-3.5">
+          <aside className="flex min-w-0 flex-[1_1_280px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <Panel className="flex flex-col gap-3 p-[22px]">
               <PanelHead title="Reminders" />
               {RULES.map((label, i) => {

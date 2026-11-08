@@ -266,7 +266,7 @@ export default function Entity360Page() {
                 </span>
               </button>
             </section>
-            <div className="flex flex-wrap items-start gap-3.5">
+            <div className="flex flex-wrap gap-3.5">
               {profile}
               {systems}
             </div>

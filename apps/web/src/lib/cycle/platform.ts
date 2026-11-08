@@ -26,7 +26,7 @@ export const AGENTS: { key: AgentKey; name: string; does: string; who: string; m
   { key: "advisor", name: "Response Advisor", does: "Suggests missing coverage and page references in the response", who: "Index Owner", model: "Standard", when: "In the review console", runs: "rules" },
   { key: "remediation", name: "Remediation Planner", does: "Ranked correction actions by criticality", who: "Index Owner", model: "Standard", when: "After review", runs: "rules" },
   { key: "monitor", name: "Delay and Attention Monitor", does: "Overdue, at-risk and stale items with drafted follow-ups", who: "Index Owner", model: "Fast", when: "Daily 07:00", runs: "rules" },
-  { key: "parser", name: "Standard Parser", does: "Drafts a standard tree from a PDF for human review", who: "Platform Admin", model: "Standard", when: "On upload", runs: "model" },
+  { key: "parser", name: "Standard Parser", does: "Drafts a standard tree from an uploaded file for human review", who: "Platform Admin", model: "Standard", when: "On upload", runs: "model" },
 ];
 
 export interface Guardrail {

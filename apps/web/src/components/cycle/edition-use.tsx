@@ -9,14 +9,8 @@ import { cycleKey, type CycleState } from "@/lib/cycle/use-cycle";
 import { JButton, Panel, PanelHead, Pill } from "@/components/journey/ui";
 import { Row, Table } from "./ui";
 
-// S21 · Standard library: how an edition reaches a workspace, and which workspaces use each
-// edition. Sits above the editions list of the library.
-
-const STEPS: [string, string, string][] = [
-  ["1 · Platform Admin · here", "Maintain and publish the edition", "Levels, controls, requirements, required evidence and applicability rules (all entities or annex lists A/B/C)."],
-  ["2 · On workspace creation", "Copied into the workspace", "Applicability rules run against the entity's sector and annex list, pre-flagging not-applicable controls and requirements."],
-  ["3 · Index Owner · Standard", "Tailor for the entity", "Confirm or add exemptions with proof, add special instructions. Library changes reach workspaces only as a new edition the Index Owner accepts."],
-];
+// S21 · Standard library: which workspaces use each edition. Sits above the editions list of
+// the library.
 
 export function EditionUse() {
   const { state } = useAdmin();
@@ -38,16 +32,6 @@ export function EditionUse() {
   };
 
   return (
-    <>
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
-        {STEPS.map(([eyebrow, title, text]) => (
-          <div key={eyebrow} className="flex flex-col gap-1 rounded-[16px] border border-j-line bg-white px-4 py-3.5">
-            <span className="text-xs font-semibold text-j-muted">{eyebrow}</span>
-            <b className="text-sm">{title}</b>
-            <span className="text-[13px] text-j-ink-3">{text}</span>
-          </div>
-        ))}
-      </section>
       <Panel className="flex flex-col py-[18px]">
         <PanelHead className="px-[22px] pb-2" title="Editions" />
         <Table label="Editions" min={900} cols={cols} head={["Index · edition", "Structure", "Used by", "Status", ""]}>
@@ -86,6 +70,5 @@ export function EditionUse() {
         </Table>
         <p className="m-0 px-[22px] pt-2 text-xs text-j-muted">Published editions are locked. To correct one, create a new edition: workspaces see it as an update with a change log, and their Index Owner decides whether to adopt it.</p>
       </Panel>
-    </>
   );
 }

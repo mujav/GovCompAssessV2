@@ -173,8 +173,8 @@ export default function SubmissionPage() {
           ))}
         </section>
 
-        <div className="flex flex-wrap items-start gap-3.5">
-          <div className="flex min-w-0 flex-[2_1_560px] flex-col gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
+          <div className="flex min-w-0 flex-[2_1_560px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <Panel className="flex flex-col gap-1 p-[22px]">
               <PanelHead title="Blockers" aside={<Pill tone={m.blockers.length ? "bad" : "ok"}>{m.blockers.length}</Pill>} className="mb-2" />
               {m.blockers.map((b) => (
@@ -210,7 +210,7 @@ export default function SubmissionPage() {
             </Panel>
           </div>
 
-          <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
+          <aside className="flex min-w-0 flex-[1_1_300px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <Panel className="flex flex-col gap-3 p-[22px]">
               <PanelHead title="Sign-off" aside={<Pill tone={s.signed ? "ok" : "gray"}>{s.signed ? "Signed" : "Not signed"}</Pill>} />
               <div className="flex items-center gap-2.5 text-sm">

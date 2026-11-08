@@ -209,7 +209,7 @@ export default function StandardPage() {
           </span>
         </section>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[1_1_320px] flex-col gap-2 p-[18px] lg:max-w-[420px]">
             <input aria-label="Search the standard" placeholder="Search the standard" value={q} onChange={(e) => setQ(e.target.value)} className={cx(inputClass, "h-10")} />
             <div className="flex max-h-[720px] flex-col overflow-y-auto text-sm">
@@ -276,7 +276,7 @@ export default function StandardPage() {
           </Panel>
 
           {c && (
-            <div className="flex min-w-0 flex-[2.2_1_560px] flex-col gap-3.5">
+            <div className="flex min-w-0 flex-[2.2_1_560px] flex-col [&>:last-child]:flex-auto gap-3.5">
               <Panel className="flex flex-col gap-3 p-[22px]">
                 <span className="text-xs text-j-muted">
                   {c.dimension} › {c.domain} › {c.code}

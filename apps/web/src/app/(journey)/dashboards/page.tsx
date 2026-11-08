@@ -96,7 +96,7 @@ export default function DashboardsPage() {
           </section>
         </div>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="min-w-0 flex-[3_1_640px] overflow-hidden">
             <PanelHead title="Workplaces" aside={<span className="text-xs text-j-muted">Lowest acceptance first</span>} className="px-[22px] pt-[18px] pb-3" />
             <div className="overflow-x-auto">

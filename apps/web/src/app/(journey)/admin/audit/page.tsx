@@ -83,7 +83,7 @@ export default function AuditPage() {
           </Field>
         </Panel>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="min-w-0 flex-[2_1_640px] py-[18px]">
             <PanelHead className="px-[22px] pb-2" title={`Showing ${shown.length} of ${list.length} events in the period`} />
             <Table label="Audit trail" cols={cols} head={["When", "User", "Type", "Action", "Workspace"]}>

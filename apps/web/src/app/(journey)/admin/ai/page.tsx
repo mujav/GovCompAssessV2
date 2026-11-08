@@ -78,7 +78,7 @@ export default function AiSettingsPage() {
           </span>
         </div>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[1.4_1_480px] flex-col gap-3 p-[22px]">
             <PanelHead title="Model connection" />
             <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
@@ -211,7 +211,7 @@ export default function AiSettingsPage() {
           </Table>
         </Panel>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[1.2_1_420px] flex-col gap-3 p-[22px]">
             <PanelHead title="Review thresholds" />
             <Field label="Show findings above confidence">

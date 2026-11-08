@@ -4060,5 +4060,12 @@
  "Deadline close and under half of the evidence uploaded": "الموعد قريب ورُفع أقل من نصف الشواهد",
  "Stale controls": "المعايير الخاملة",
  "No activity for the days set under Review thresholds": "لا نشاط خلال الأيام المحددة في حدود المراجعة",
- "The Standard Parser agent is off in AI settings. Turn it on there, or use the rule-based engine for documents with clear requirement codes.": "وكيل محلل المعايير متوقف في إعدادات الذكاء الاصطناعي. فعّله هناك أو استخدم المحرك القائم على القواعد للمستندات ذات الرموز الواضحة."
+ "The Standard Parser agent is off in AI settings. Turn it on there, or use the rule-based engine for documents with clear requirement codes.": "وكيل محلل المعايير متوقف في إعدادات الذكاء الاصطناعي. فعّله هناك أو استخدم المحرك القائم على القواعد للمستندات ذات الرموز الواضحة.",
+ "Any file type, in Arabic or English. Several files are combined into one standard.": "أي نوع من الملفات، بالعربية أو الإنجليزية. تُدمج الملفات المتعددة في معيار واحد.",
+ "Drop the document, in any file type": "أفلت الوثيقة هنا، بأي نوع ملف",
+ "Platform Admin / Standard library / Draft from a document": "مسؤول المنصة / مكتبة المعايير / مسودة من وثيقة",
+ "Drafts a standard tree from an uploaded file for human review": "يُعد مسودة لشجرة المعايير من ملف مرفوع للمراجعة البشرية",
+ "The Standard Parser agent is off in AI settings. Turn it on there to create a standard from a file.": "وكيل تحليل المعايير متوقف في إعدادات الذكاء الاصطناعي. فعّله هناك لإنشاء معيار من ملف.",
+ "This file is a scan or a picture. Turn on the Standard Parser agent in AI settings to read it.": "هذا الملف صورة أو نسخة ممسوحة ضوئيًا. فعّل وكيل تحليل المعايير في إعدادات الذكاء الاصطناعي لقراءته.",
+ "No text could be found in this file.": "تعذر العثور على نص في هذا الملف."
 }

@@ -120,7 +120,7 @@ export default function SubmittedPage() {
           ))}
         </section>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[3_1_480px] flex-col p-[22px]">
             <h2 className="m-0 mb-4 text-base">Trail</h2>
             {trail.map(([av, k, what, who], i) => (

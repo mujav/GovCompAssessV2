@@ -27,9 +27,9 @@ export class AiUnavailable extends Error {}
 
 const CONCURRENCY = 16;
 
-async function call<T>(body: object, signal?: AbortSignal): Promise<T & { model: string; ms: number; usage: { input: number; output: number } }> {
+async function call<T>(body: object, signal?: AbortSignal, url = "/api/frameworks/extract"): Promise<T & { model: string; ms: number; usage: { input: number; output: number } }> {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch("/api/frameworks/extract", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
+    const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
     const json = await res.json().catch(() => ({ error: `The server answered ${res.status}.` }));
     if (res.ok) return json;
     if (json.code === "no_key") throw new AiUnavailable(json.error);
@@ -40,6 +40,11 @@ async function call<T>(body: object, signal?: AbortSignal): Promise<T & { model:
     }
     throw new Error(json.error ?? `Extraction failed (${res.status}).`);
   }
+}
+
+/** Claude's transcription of one scanned page or picture, a JPEG in base64. */
+export async function transcribeImage(image: string, tier: "Standard" | "Fast") {
+  return (await call<{ text: string }>({ image, tier }, undefined, "/api/frameworks/transcribe")).text;
 }
 
 export async function runAiExtraction(

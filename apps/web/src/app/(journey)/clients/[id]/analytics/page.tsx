@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
           </Table>
         </Panel>
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="min-w-0 flex-[1.6_1_520px] py-[18px]">
             <PanelHead className="px-[22px] pb-2" title="Requirements by owner" />
             <Table label="Requirements by owner" min={600} cols="1.8fr 0.6fr 0.8fr 0.6fr 0.7fr 0.9fr" head={["Owner", "Req.", "Submitted", "Met", "Not met", "First-time right"]}>

@@ -10,8 +10,10 @@ import { dateStamp, findDuplicate, findVersionClash, nameKey, versionsOf } from 
 import { stamp, useAdmin, working, type ImportTarget } from "@/lib/admin/store";
 import { useJourney } from "@/lib/journey/store";
 import type { FrameworkPackage, FrameworkVersion, HierarchyLevel, LevelAssessment } from "@/lib/admin/types";
+import { agentPolicy } from "@/lib/cycle/platform";
+import { usePlatform } from "@/lib/cycle/use-cycle";
 import { readFiles } from "@/lib/import/read-files";
-import { ASSESSED, ImportFlow, RequirementTree, UploadZone, inputCls, type ExtractMethod, type ImportSession } from "./import-flow";
+import { ASSESSED, ImportFlow, RequirementTree, UploadZone, inputCls, type ImportSession } from "./import-flow";
 
 const TABS = [{ label: "Hierarchy" }, { label: "Requirements" }, { label: "Custom fields" }, { label: "Terminology" }];
 const LV_COLS = "44px 1.3fr 1.3fr 1fr 1.1fr 92px";
@@ -47,6 +49,7 @@ function frameworkChecks(v: FrameworkVersion, others: FrameworkPackage[]): Check
 
 export default function FrameworkBuilderPage() {
   const { state, update, editDraft, user, removeFramework } = useAdmin();
+  const { platform } = usePlatform();
   const { workplaces } = useJourney();
   const [deleting, setDeleting] = useState(false);
   // No framework selected = the start screen: upload a document first, then edit what was extracted.
@@ -54,7 +57,6 @@ export default function FrameworkBuilderPage() {
   const [tab, setTab] = useState(0);
   const [session, setSession] = useState<ImportSession | null>(null);
   const [reading, setReading] = useState(false);
-  const [method, setMethod] = useState<ExtractMethod>("ai");
   const [notice, setNotice] = useState<Notice | null>(null);
 
   const pkg = state.frameworks.find((f) => f.id === sel);
@@ -92,7 +94,7 @@ export default function FrameworkBuilderPage() {
     setReading(true);
     setNotice(null);
     try {
-      const read = await readFiles(files);
+      const read = await readFiles(files, { tier: platform.ai.agents.parser ? (agentPolicy(platform.ai, "parser").tier ?? "Standard") : undefined });
       if (!read.docs.length) {
         setNotice({ ok: false, text: read.files.map((f) => `${f.name}: ${f.error ?? "no readable content"}`).join(" · ") });
         return;
@@ -107,7 +109,7 @@ export default function FrameworkBuilderPage() {
         setNotice({ ok: false, text: dup.message, open: target_?.id === dup.pkgId ? undefined : { id: dup.pkgId, label: `Open ${dup.name}` } });
         return;
       }
-      setSession({ ...read, target, method });
+      setSession({ ...read, target });
     } catch (e) {
       setNotice({ ok: false, text: e instanceof Error ? e.message : "The files could not be read." });
     } finally {
@@ -118,7 +120,7 @@ export default function FrameworkBuilderPage() {
   if (session)
     return (
       <>
-        <PageHeader crumb="Platform Admin / Standard library / Draft from PDF with AI" title="Draft a standard from a document" />
+        <PageHeader crumb="Platform Admin / Standard library / Draft from a document" title="Draft a standard from a document" />
         <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
           <ImportFlow
             session={session}
@@ -134,7 +136,7 @@ export default function FrameworkBuilderPage() {
       </>
     );
 
-  if (!pkg) return <StartScreen method={method} setMethod={setMethod} reading={reading} notice={notice} onFiles={(files) => startImport(files, { kind: "new", name: "", authority: "", version: "" })} onOpen={(id) => { setSel(id); setTab(0); setNotice(null); }} onBlank={() => newFramework()} />;
+  if (!pkg) return <StartScreen reading={reading} notice={notice} onFiles={(files) => startImport(files, { kind: "new", name: "", authority: "", version: "" })} onOpen={(id) => { setSel(id); setTab(0); setNotice(null); }} onBlank={() => newFramework()} />;
 
   const { value: fw, locked } = working(pkg);
   if (!fw) return null;
@@ -194,7 +196,7 @@ export default function FrameworkBuilderPage() {
       />
       <main className="box-border flex w-full max-w-[1360px] flex-col gap-4 px-8 pb-12 pt-6">
         {notice && <NoticeBar notice={notice} onOpen={(id) => { setSel(id); setTab(0); setNotice(null); }} />}
-        <div className="flex flex-wrap items-start gap-4">
+        <div className="flex flex-wrap gap-4">
           <section className="min-w-0 flex-[999_1_560px] overflow-hidden rounded-[14px] border border-line bg-white">
             <div className="flex flex-col gap-3 border-b border-line-soft px-5 py-4">
               <div className="flex flex-wrap items-center justify-between gap-2.5">
@@ -407,16 +409,12 @@ function ResultRow({ label, value, bg, fg }: { label: string; value: string; bg:
 }
 
 function StartScreen({
-  method,
-  setMethod,
   reading,
   notice,
   onFiles,
   onOpen,
   onBlank,
 }: {
-  method: ExtractMethod;
-  setMethod: (m: ExtractMethod) => void;
   reading: boolean;
   notice: Notice | null;
   onFiles: (files: File[]) => void;
@@ -441,8 +439,8 @@ function StartScreen({
           </div>
           <ol className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2 p-0 text-[13px]">
             {[
-              ["Upload", "Drop the document (PDF, Word, Excel…)"],
-              ["Extract", method === "ai" ? "Claude reads it and proposes the tree" : "Codes and numbering build the tree"],
+              ["Upload", "Drop the document, in any file type"],
+              ["Extract", "Claude reads it and proposes the tree"],
               ["Review and edit", "Fix titles, text, evidence, levels"],
               ["Create", "Published right away, no approval needed"],
             ].map(([t, d], i) => (
@@ -455,25 +453,10 @@ function StartScreen({
               </li>
             ))}
           </ol>
-          <fieldset className="m-0 flex flex-wrap items-center gap-2 border-0 p-0 text-[13px]">
-            <legend className="sr-only">Extraction method</legend>
-            <span className="me-1 text-xs font-semibold text-muted">Extract with</span>
-            {(
-              [
-                ["ai", "Claude (AI) · recommended for PDFs and Word"],
-                ["rules", "Rule-based · for coded spreadsheets"],
-              ] as const
-            ).map(([k, label]) => (
-              <label key={k} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 ${method === k ? "border-brand bg-brand-tint font-semibold" : "border-field"}`}>
-                <input type="radio" name="method" checked={method === k} onChange={() => setMethod(k)} className="sr-only" />
-                {label}
-              </label>
-            ))}
-          </fieldset>
-          {method === "ai" && ai && !ai.available && (
+          {ai && !ai.available && (
             <div role="alert" className="rounded-lg bg-warn-soft px-3 py-2 text-[13px] text-warn">
               AI extraction is not configured on this server (ANTHROPIC_API_KEY is missing in apps/web/.env), so Claude cannot read documents yet. Set the key and
-              restart, or use the rule-based engine for documents with clear requirement codes.
+              restart.
             </div>
           )}
           <UploadZone busy={reading} onFiles={onFiles} />

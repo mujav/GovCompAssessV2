@@ -143,7 +143,7 @@ export default function ReviewConsolePage() {
         {(c.stage === "not" || c.stage === "draft") && <p className="m-0 rounded-xl bg-j-canvas px-4 py-3 text-sm">The Control Owner has not submitted this control yet. You can read it, but decisions open once it is submitted.</p>}
         {c.stage === "returned" && <p className="m-0 rounded-xl bg-[#FFF1E8] px-4 py-3 text-sm">Returned to {c.owner}. Decisions open again when they resubmit.</p>}
 
-        <div className="flex flex-wrap items-start gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
           <Panel className="flex min-w-0 flex-[1_1_380px] flex-col gap-1 p-[22px]">
             <PanelHead title="Requirements · your decision" />
             {open.map((r) => {
@@ -199,7 +199,7 @@ export default function ReviewConsolePage() {
             )}
           </Panel>
 
-          <div className="flex min-w-0 flex-[1.4_1_460px] flex-col gap-3.5">
+          <div className="flex min-w-0 flex-[1.4_1_460px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <Segmented label="Response or evidence" value={tab} onChange={setTab} options={[{ value: "response", label: "Response" }, { value: "viewer", label: "Evidence viewer" }]} />
             {tab === "response" ? (
               <>

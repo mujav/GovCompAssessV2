@@ -244,7 +244,7 @@ function RequestCard({ r, views, onDone }: { r: AccessRequest; views: WorkplaceV
 
   return (
     <Panel className="flex flex-col gap-4 p-[22px]">
-      <div className="flex flex-wrap items-start gap-3">
+      <div className="flex flex-wrap gap-3">
         <Avatar initials={initials(r.name)} size={40} />
         <span className="min-w-[220px] flex-auto text-sm leading-5">
           <b className="text-base">{r.name}</b>

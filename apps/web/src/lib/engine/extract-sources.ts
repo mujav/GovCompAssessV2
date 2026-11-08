@@ -303,4 +303,79 @@ export function formatOf(name: string): SourceFormat | null {
   return null;
 }
 
-export const ACCEPTED_EXTENSIONS = ".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.pdf,.docx,.txt,.md,.markdown,.json";
+/* ---------- Any other file ---------- */
+
+/** Readable text of HTML or XML, including the XML inside PowerPoint and OpenDocument files. */
+export function markupToText(markup: string) {
+  return markup
+    .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<br\s*\/?>|<\/(p|div|li|tr|h[1-6]|a:p|w:p|text:p|text:h|table:table-row)>/gi, "\n")
+    .replace(/<\/(td|th|w:tc|table:table-cell)>/gi, "\t")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (all, e: string) => {
+      if (e[0] !== "#") return ENTITIES[e.toLowerCase()] ?? all;
+      const code = e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : all;
+    })
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Readable text of an RTF file; \\uN and \\'hh carry the Arabic. */
+export function rtfToText(rtf: string) {
+  return rtf
+    .replace(/\{\\\*?\\?(fonttbl|colortbl|stylesheet|info|pict|themedata|colorschememapping|datastore|latentstyles)\b(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}/g, "")
+    .replace(/\\u(-?\d+) ?(?:\\'[0-9a-f]{2}|\?)?/gi, (_, n: string) => String.fromCharCode((Number(n) + 65536) % 65536))
+    .replace(/\\'([0-9a-f]{2})/gi, (_, h: string) => new TextDecoder("windows-1256").decode(new Uint8Array([parseInt(h, 16)])))
+    .replace(/\\(par|line|row|sect|page)\b ?/g, "\n")
+    .replace(/\\cell\b ?/g, "\t")
+    .replace(/\\[a-z]+-?\d* ?/gi, "")
+    .replace(/[{}\\]/g, "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** The file as text when it is text in any encoding that says so. */
+export function decodeIfText(bytes: Uint8Array): string | null {
+  const bom = bytes[0] === 0xff && bytes[1] === 0xfe ? "utf-16le" : bytes[0] === 0xfe && bytes[1] === 0xff ? "utf-16be" : null;
+  if (bom) return new TextDecoder(bom).decode(bytes);
+  if (bytes.subarray(0, 8192).includes(0)) return null;
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
+const READABLE = /^[\t\x20-\x7E\u00A0-\u024F\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF\u2010-\u2027]$/;
+const WORDS = /[A-Za-z\u0621-\u064A]{3}/;
+
+/**
+ * Stretches of English or Arabic inside a binary file: the last resort for formats with no parser
+ * here, such as Word 97 documents. Claude ignores the leftovers and the admin reviews the result.
+ */
+export function readableRuns(bytes: Uint8Array, min = 8) {
+  const runs: string[] = [];
+  const collect = (start: number, step: 1 | 2) => {
+    let run = "";
+    const flush = () => {
+      if (run.trim().length >= min && WORDS.test(run)) runs.push(run.trim());
+      run = "";
+    };
+    for (let i = start; i + step <= bytes.length; i += step) {
+      const ch = String.fromCharCode(step === 2 ? bytes[i] | (bytes[i + 1] << 8) : bytes[i]);
+      if (READABLE.test(ch) && (step === 2 || bytes[i] < 0x7f)) run += ch;
+      else flush();
+    }
+    flush();
+  };
+  collect(0, 2);
+  collect(1, 2);
+  collect(0, 1);
+  return runs.join("\n");
+}

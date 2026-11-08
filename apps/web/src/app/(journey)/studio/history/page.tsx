@@ -54,7 +54,7 @@ function ConfigHistory() {
           </div>
         }
       />
-      <main className="box-border flex w-full max-w-[1360px] flex-wrap items-start gap-4 px-8 pb-12 pt-6">
+      <main className="box-border flex w-full max-w-[1360px] flex-wrap gap-4 px-8 pb-12 pt-6">
         <section aria-label="Change requests" className="flex min-w-0 flex-[1_1_300px] flex-col gap-2">
           <div role="group" aria-label="Filter change requests" className="flex flex-wrap gap-1.5">
             {(["all", "awaiting", "published", "rejected"] as const).map((f) => (
@@ -177,7 +177,7 @@ function CrDetail({ cr, authorName }: { cr: ChangeRequest; authorName: string })
         </div>
       </div>
 
-      <div className="flex flex-wrap items-start gap-3.5">
+      <div className="flex flex-wrap gap-3.5">
         <div className="flex min-w-0 flex-[1_1_300px] flex-col gap-2 rounded-[14px] border border-line bg-white p-[18px] text-[13px] leading-5">
           <h3 className="m-0 text-[15px] font-semibold">Impact analysis</h3>
           {cr.impact.map((i) => (

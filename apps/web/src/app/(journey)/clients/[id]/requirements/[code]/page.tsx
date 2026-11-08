@@ -273,10 +273,10 @@ export default function RequirementWorkspacePage() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-start gap-3.5">
-          <div className="flex min-w-0 flex-[3_1_620px] flex-col gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
+          <div className="flex min-w-0 flex-[3_1_620px] flex-col [&>:last-child]:flex-auto gap-3.5">
         {tab === "req" && (
-          <div className="flex flex-wrap items-start gap-3.5">
+          <div className="flex flex-wrap gap-3.5">
             <Panel className="flex min-w-0 flex-[2_1_520px] flex-col gap-3 p-[22px]">
               <PanelHead title="Official requirement" aside={<span className="text-xs text-j-muted" dir="auto">{framework ? `${framework.name} · v${framework.version}` : client.frameworks[0]}</span>} />
               {r.text || r.evidenceText ? (
@@ -763,7 +763,7 @@ export default function RequirementWorkspacePage() {
         )}
           </div>
           {/* The review decision stays in view on every tab. */}
-          <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
+          <aside className="flex min-w-0 flex-[1_1_300px] flex-col [&>:last-child]:flex-auto gap-3.5">
               <Panel className="flex flex-col gap-3 p-[22px]">
                 <h2 className="m-0 text-base">{manages ? "Your review" : "Review"}</h2>
                 {stage === "rev" && manages ? (

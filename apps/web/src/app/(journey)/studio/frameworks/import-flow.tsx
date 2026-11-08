@@ -1,6 +1,6 @@
 "use client";
 
-// Framework Builder file import: upload → extract (Claude, or the rule-based engine) →
+// Framework Builder file import: upload any file → Claude extracts the standard →
 // review and edit the result → create the framework. Claude only proposes the tree; merging
 // and checks are deterministic (src/lib/engine), and the admin edits everything before it is
 // created. A new framework is published at once; a new version of an existing one becomes a
@@ -19,7 +19,6 @@ import {
   checkExtraction,
   deleteNode,
   dismissOrphan,
-  extractFramework,
   formatLoc,
   levelCounts,
   mergeDuplicates,
@@ -29,14 +28,12 @@ import {
   treeOrder,
   updateLevel,
   updateNode,
-  validateCodeRegex,
   type ExtractWarning,
   type ExtractedNode,
   type Extraction,
   type SourceDoc,
   type WarningKind,
 } from "@/lib/engine/extract";
-import { ACCEPTED_EXTENSIONS } from "@/lib/engine/extract-sources";
 import { AiUnavailable, runAiExtraction, type AiProgress, type AiRun } from "@/lib/import/ai-import";
 import { agentPolicy } from "@/lib/cycle/platform";
 import { usePlatform } from "@/lib/cycle/use-cycle";
@@ -55,33 +52,11 @@ export const weightLabel = (w?: string) => (w ? (WEIGHT_LABEL[w] ?? w) : "—");
 
 const FORMAT_LABEL: Record<string, string> = { spreadsheet: "Excel", csv: "CSV", pdf: "PDF", docx: "Word", text: "Text", json: "JSON" };
 
-const SAMPLES = [
-  ["qiyas-2026-v1.3.xlsx", "Qiyas v1.3 (Excel)"],
-  ["nca-ecc-controls.csv", "Cyber controls (CSV)"],
-  ["cloud-security-standard.pdf", "Cloud standard (PDF)"],
-  ["privacy-controls.docx", "Privacy controls (Word)"],
-  ["national-data-index.md", "Data index (Markdown)"],
-  ["digital-services-index.txt", "Services index (text)"],
-  ["ai-ethics-index.json", "AI ethics index (JSON)"],
-];
-
 /* ---------- Upload ---------- */
 
 export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files: File[]) => void; busy?: boolean; disabled?: string; note?: string }) {
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
-  const [loading, setLoading] = useState<string | null>(null);
-
-  const loadSample = async (name: string) => {
-    setLoading(name);
-    try {
-      const res = await fetch(`/samples/${name}`);
-      const blob = await res.blob();
-      onFiles([new File([blob], name, { type: blob.type })]);
-    } finally {
-      setLoading(null);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -103,12 +78,11 @@ export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files:
         )}
       >
         <b className="text-sm">{busy ? "Reading files…" : "Drop the standard document here"}</b>
-        <span className="text-muted">PDF, Word (.docx), Excel or CSV, text or Markdown, JSON, in Arabic or English. Several files are combined into one standard.</span>
+        <span className="text-muted">Any file type, in Arabic or English. Several files are combined into one standard.</span>
         <input
           ref={input}
           type="file"
           multiple
-          accept={ACCEPTED_EXTENSIONS}
           className="sr-only"
           aria-label="Choose requirement files"
           onChange={(e) => {
@@ -121,14 +95,6 @@ export function UploadZone({ onFiles, busy, disabled, note }: { onFiles: (files:
         </Button>
         {disabled && <span className="text-xs text-warn">{disabled}</span>}
         {note && !disabled && <span className="text-xs text-muted">{note}</span>}
-      </div>
-      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
-        Try a sample:
-        {SAMPLES.map(([file, label]) => (
-          <Button key={file} size="sm" variant="chip" className="h-8 text-xs" disabled={!!disabled || busy || !!loading} onClick={() => loadSample(file)}>
-            {loading === file ? "Loading…" : label}
-          </Button>
-        ))}
       </div>
     </div>
   );
@@ -150,13 +116,10 @@ function prettyName(file: string) {
   return base ? base[0].toUpperCase() + base.slice(1) : "Imported standard";
 }
 
-export type ExtractMethod = "ai" | "rules";
-
 export interface ImportSession {
   files: ReadFile[];
   docs: SourceDoc[];
   target: ImportTarget;
-  method: ExtractMethod;
 }
 
 const STEPS = ["Upload", "Extract", "Review and edit", "Create"];
@@ -182,7 +145,7 @@ function FileChips({ files }: { files: ReadFile[] }) {
     <ul className="m-0 flex list-none flex-wrap gap-2 p-0 text-xs">
       {files.map((f) => (
         <li key={f.name + f.hash} className={cx("rounded-lg border px-2.5 py-1.5", f.error ? "border-bad-line bg-bad-soft text-bad" : "border-line bg-surface-2")}>
-          <b>{f.name}</b> · {FORMAT_LABEL[f.format ?? ""] ?? "unknown"} · {f.size > 1024 * 1024 ? `${(f.size / 1024 / 1024).toFixed(1)} MB` : `${(f.size / 1024).toFixed(1)} KB`}
+          <b>{f.name}</b> · {FORMAT_LABEL[f.format ?? ""] ?? (f.name.includes(".") ? f.name.split(".").pop()!.toUpperCase() : "File")} · {f.size > 1024 * 1024 ? `${(f.size / 1024 / 1024).toFixed(1)} MB` : `${(f.size / 1024).toFixed(1)} KB`}
           {f.error ? ` · ${f.error}` : ` · SHA-256 ${shortHash(f.hash)}`}
         </li>
       ))}
@@ -192,18 +155,12 @@ function FileChips({ files }: { files: ReadFile[] }) {
 
 interface Extracted {
   ex: Extraction;
-  method: ExtractMethod;
-  run?: AiRun;
-  note?: string;
-}
-
-function rulesResult(session: ImportSession, note?: string): Extracted {
-  return { ex: extractFramework(session.docs), method: "rules", note };
+  run: AiRun;
 }
 
 /** Runs the extraction for a session, shows progress, then hands the result to the review. */
 export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportSession; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
-  const [result, setResult] = useState<Extracted | null>(() => (session.method === "rules" ? rulesResult(session) : null));
+  const [result, setResult] = useState<Extracted | null>(null);
   const { platform } = usePlatform();
   const [progress, setProgress] = useState<AiProgress | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
@@ -220,17 +177,15 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
     const records = session.docs.reduce((a, d) => a + (d.kind === "text" ? d.lines.length : d.kind === "table" ? d.rows.length : d.items.length), 0);
     const sheets = session.docs.flatMap((d) => (d.kind === "table" && d.sheet ? [d.sheet] : []));
     if (!platform.ai.agents.parser) {
-      setFailed("The Standard Parser agent is off in AI settings. Turn it on there, or use the rule-based engine for documents with clear requirement codes.");
+      setFailed("The Standard Parser agent is off in AI settings. Turn it on there to create a standard from a file.");
       clearInterval(timer);
       return;
     }
     runAiExtraction(session.docs, { files, sheets, records }, setProgress, ctrl.signal, agentPolicy(platform.ai, "parser"))
-      .then(({ ex, run }) => setResult({ ex, method: "ai", run }))
+      .then(({ ex, run }) => setResult({ ex, run }))
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
-        // No silent fallback: on a long document the rule-based engine also picks up contents
-        // pages, annexes and glossaries, so the admin chooses it knowingly.
-        if (e instanceof AiUnavailable) setFailed(`${e.message} Ask the platform administrator to set the Claude API key, or use the rule-based engine for documents with clear requirement codes.`);
+        if (e instanceof AiUnavailable) setFailed(`${e.message} Ask the platform administrator to set the Claude API key.`);
         else setFailed(e instanceof Error ? e.message : "The extraction failed.");
       })
       .finally(() => clearInterval(timer));
@@ -270,9 +225,6 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
             >
               Try again
             </Button>
-            <Button size="md" onClick={() => setResult(rulesResult(session, "Extracted with the rule-based engine: check for contents, annex or glossary entries and delete them."))}>
-              Use the rule-based engine
-            </Button>
           </div>
         </div>
       ) : (
@@ -311,7 +263,6 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
 
 function ImportReview({ session, extracted, onAccepted, onCancel }: { session: ImportSession; extracted: Extracted; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
   const { state, user, importFramework } = useAdmin();
-  const [regex, setRegex] = useState("");
   const [ex, setEx] = useState<Extraction>(extracted.ex);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<string | null>(null);
@@ -355,16 +306,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
   const apply = (next: Extraction) => {
     setEx(next);
     setError(null);
-  };
-
-  const rerun = () => {
-    const err = validateCodeRegex(regex);
-    if (err) return setError(`Code pattern: ${err}`);
-    const next = extractFramework(session.docs, { codeRegex: regex });
-    if (!next.nodes.length) return setError("No requirement codes found with that pattern. The previous result is kept.");
-    setSelected(new Set());
-    setEditing(null);
-    apply(next);
   };
 
   const focus = (id: string) => {
@@ -480,15 +421,12 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
         </div>
         <FileChips files={session.files} />
         <div className="text-xs text-muted">
-          {extracted.method === "ai" && extracted.run
-            ? `Extracted by Claude (${extracted.run.model}) from ${extracted.run.pages} pages in ${extracted.run.chunks} parts · ${Math.round(extracted.run.ms / 1000)}s · ${ex.nodes.length} nodes. The tree, codes and parents are checked by the platform's rules; review the text against the document before creating.`
-            : `${ex.records} source rows or lines read${ex.sheets.length ? ` · sheets used: ${ex.sheets.join(", ")}` : ""} · ${ex.nodes.length} nodes found. Rule-based detection (codes, numbering, column headers): the same file always gives the same result.`}
+          {`Extracted by Claude (${extracted.run.model}) from ${extracted.run.pages} pages in ${extracted.run.chunks} parts · ${Math.round(extracted.run.ms / 1000)}s · ${ex.nodes.length} nodes. The tree, codes and parents are checked by the platform's rules; review the text against the document before creating.`}
         </div>
-        {extracted.note && <div className="rounded-lg bg-warn-soft px-3 py-2 text-[13px] text-warn">{extracted.note}</div>}
       </section>
 
-      <div className="flex flex-wrap items-start gap-4">
-        <div className="flex min-w-0 flex-[999_1_620px] flex-col gap-4">
+      <div className="flex flex-wrap gap-4">
+        <div className="flex min-w-0 flex-[999_1_620px] flex-col [&>:last-child]:flex-auto gap-4">
           <section aria-label="Detected levels" className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white px-5 py-4">
             <h2 className="m-0 text-base font-semibold">Hierarchy levels</h2>
             <div className="overflow-x-auto">
@@ -545,21 +483,6 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
               In a code pattern <span className="font-mono">#</span> stands for a number, e.g. <span className="font-mono">#.#.#-#</span> or <span className="font-mono">ECC #-#-#</span>. Codes that
               do not match their level&apos;s pattern are listed as warnings.
             </div>
-            {extracted.method === "rules" && (
-            <details className="text-[13px]">
-              <summary className="cursor-pointer font-semibold">Requirement codes look different? Set the code expression</summary>
-              <div className="mt-2 flex flex-wrap items-end gap-2">
-                <label className="flex min-w-[260px] flex-1 flex-col gap-1 text-xs font-semibold text-muted">
-                  Regular expression matched at the start of each cell or line
-                  <input value={regex} onChange={(e) => setRegex(e.target.value)} placeholder="e.g. REQ-\d{3} or §\s?\d+(\.\d+)*" className={cx(inputCls, "font-mono text-xs font-normal text-ink")} />
-                </label>
-                <Button size="md" onClick={rerun}>
-                  Re-run detection
-                </Button>
-              </div>
-              <div className="mt-1 text-xs text-muted">Leave empty for the built-in detector. Re-running starts the review again and discards edits.</div>
-            </details>
-            )}
           </section>
 
           <section aria-label="Requirement tree" className="flex flex-col overflow-hidden rounded-[14px] border border-line bg-white">
@@ -696,7 +619,7 @@ function ImportReview({ session, extracted, onAccepted, onCancel }: { session: I
           </section>
         </div>
 
-        <aside className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
+        <aside className="flex min-w-0 flex-[1_1_340px] flex-col [&>:last-child]:flex-auto gap-4">
           <section aria-label="Accept" className="flex flex-col gap-3 rounded-[14px] border-2 border-brand bg-white p-[18px] text-[13px]">
             <h2 className="m-0 text-base font-semibold">{target === "new" ? "Create the standard" : "Save as a new version"}</h2>
             <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">

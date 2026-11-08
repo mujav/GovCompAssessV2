@@ -145,8 +145,8 @@ export function EngagementBody() {
           })}
         </ol>
 
-        <div className="flex flex-wrap items-start gap-3.5">
-          <div className="flex min-w-0 flex-[2_1_560px] flex-col gap-3.5">
+        <div className="flex flex-wrap gap-3.5">
+          <div className="flex min-w-0 flex-[2_1_560px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <Panel className="flex flex-col gap-3 p-[22px]">
               <PanelHead
                 title="Deliverables"
@@ -198,7 +198,7 @@ export function EngagementBody() {
             </Panel>
           </div>
 
-          <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3.5">
+          <aside className="flex min-w-0 flex-[1_1_300px] flex-col [&>:last-child]:flex-auto gap-3.5">
             <section className="flex flex-col gap-3 rounded-[20px] bg-cx-deep p-[22px] text-white">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold tracking-[0.06em] text-cx-line">CLIENT ACCESS</span>

@@ -54,7 +54,7 @@ export default function AutomationStudioPage() {
   return (
     <>
       <PageHeader crumb="Studio / Rules & automation" title="Rule & automation studio" actions={<Button onClick={newRule}>New rule</Button>} />
-      <main className="box-border flex w-full max-w-[1360px] flex-wrap items-start gap-4 px-8 pb-12 pt-6">
+      <main className="box-border flex w-full max-w-[1360px] flex-wrap gap-4 px-8 pb-12 pt-6">
         <section aria-label="Rules" className="min-w-0 flex-[1_1_300px] overflow-hidden rounded-[14px] border border-line bg-white">
           {state.rules.map((r) => {
             const w = r.draft ?? r.live!;
