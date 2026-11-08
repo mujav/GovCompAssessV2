@@ -143,7 +143,7 @@ export function canOpen(role: Role, path: string) {
   if (role === "admin") return true;
   const area = path.split("/")[1] ?? "";
   if (area === "login" || area === "") return true;
-  if (role === "owner") return (area === "workplaces" && !path.startsWith("/workplaces/new")) || area === "clients" || area === "dashboards";
+  if (role === "owner") return (area === "workplaces" && !path.startsWith("/workplaces/new")) || area === "clients" || area === "dashboards" || area === "messages";
   if (role === "control") return CONTROL_AREAS.includes(area) || /^\/clients\/[^/]+\/(requirements|controls)\/[^/]+$/.test(path);
   // Management Viewers see the dashboard, analytics and reports of a workspace.
   return area === "dashboards" || /^\/clients\/[^/]+(\/analytics)?$/.test(path);

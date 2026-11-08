@@ -7,7 +7,7 @@ import { Kpi, useToast } from "@/components/cycle/ui";
 import { ControlsTable } from "@/components/cycle/my-controls";
 import { useAuth } from "@/lib/auth/store";
 import { nextDeadline, phaseDue } from "@/lib/cycle/periods";
-import { messagesFor, useMyControls } from "@/lib/cycle/use-my-controls";
+import { useMyControls } from "@/lib/cycle/use-my-controls";
 import { TODAY, daysBetween } from "@/lib/workspace/data";
 
 // S07 · Control Owner home: the controls they own and what is late or returned.
@@ -25,10 +25,9 @@ export default function HomePage() {
   const returned = mine.filter((m) => m.c.stage === "returned");
   const overdue = mine.filter((m) => m.c.stage !== "accepted" && m.c.due < TODAY);
   const last = [...mine].filter((m) => m.c.stage !== "accepted").sort((a, b) => (b.cycle.activity[b.c.code] ?? "").localeCompare(a.cycle.activity[a.c.code] ?? "") || a.c.due.localeCompare(b.c.due))[0];
-  const unread = user ? messagesFor(mine, user.name).length : 0;
 
   return (
-    <AppShell search="Search my controls" workBadge={unread ? String(unread) : undefined}>
+    <AppShell search="Search my controls">
       <JMain max={1600}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">

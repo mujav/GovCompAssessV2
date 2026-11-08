@@ -12,6 +12,7 @@ import { LanguageToggle } from "@/lib/i18n/locale";
 import { initialsOf } from "@/lib/journey/people";
 import { useJourney } from "@/lib/journey/store";
 import { useWorkplaces } from "@/lib/journey/use-workplaces";
+import { useConversations } from "@/lib/cycle/use-chat";
 import { CURRENT_YEAR, workplaceLabel, type WorkplaceClient } from "@/lib/journey/workplaces";
 import { Icon, type IconName } from "./icon";
 
@@ -80,7 +81,18 @@ function navFor(role: Role, wp: { id: string } | undefined, badges: Badges): Gro
       ],
     ];
   if (role === "viewer") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/dashboards", exact: true }]], ...workspace];
-  if (role === "owner") return [["WORKSPACES", [{ label: "Your workspaces", icon: "grid", href: "/workplaces", exact: true }]], ...workspace, ...management];
+  if (role === "owner")
+    return [
+      [
+        "WORKSPACES",
+        [
+          { label: "Your workspaces", icon: "grid", href: "/workplaces", exact: true },
+          { label: "Messages", icon: "cla", href: "/messages", badge: badges.messages },
+        ],
+      ],
+      ...workspace,
+      ...management,
+    ];
   return [
     [
       "ADMINISTRATION",
@@ -134,11 +146,12 @@ export function AppShell({
   const pendingAccess = requests.filter((r) => r.status === "pending").length;
   const { state: journey } = useJourney();
   const pendingWp = (journey.workplaceRequests ?? []).filter((r) => r.status === "pending").length;
+  const { unread } = useConversations();
   if (!ready || !user) return <div className="min-h-screen bg-j-canvas" aria-busy="true" />;
 
   const groups = navFor(user.role, current && user.role !== "control" ? { id: current.client.id } : undefined, {
     review: workBadge,
-    messages: workBadge,
+    messages: unread ? String(unread) : undefined,
     workspaces: pendingWp ? String(pendingWp) : undefined,
     studio: pendingCr ? String(pendingCr) : undefined,
     users: pendingAccess ? String(pendingAccess) : undefined,

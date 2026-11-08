@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { Icon } from "@/components/journey/icon";
 import { ClientShell, JMain } from "@/components/journey/shell";
-import { inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
+import { inputClass, JButton, JLink, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { AiBox, ClosedBanner, fmtWhen, StageBadge, useToast } from "@/components/cycle/ui";
 import { FeedbackNote } from "@/components/cycle/ai-feedback";
 import { cx } from "@/components/ui";
@@ -153,6 +153,7 @@ export default function ControlResponsePage() {
             </span>
           </div>
           <div className="flex gap-2">
+            <JLink href={`/messages?w=${encodeURIComponent(client.id)}&o=${encodeURIComponent(c.owner)}&c=${encodeURIComponent(c.code)}`}>Message</JLink>
             {ai.agents.selfCheck && (
               <JButton disabled={!editable} onClick={runCheck}>
                 {check ? "Check again" : "Check my evidence"}

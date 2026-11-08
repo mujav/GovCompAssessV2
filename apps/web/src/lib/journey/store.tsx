@@ -88,6 +88,20 @@ export function JourneyProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  // Another tab saved: take its state, so a message sent there appears here straight away.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      try {
+        dispatch({ type: "replace", state: { ...initial(), ...(JSON.parse(e.newValue) as JourneyState) } });
+      } catch {
+        // Unreadable update: keep what is on screen.
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const update = useCallback((fn: (s: JourneyState) => void) => dispatch({ type: "mutate", fn }), []);
 
   const api = useMemo<JourneyApi>(() => {

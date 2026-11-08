@@ -131,6 +131,8 @@ export interface CycleState {
   /** Correction notes per requirement code, from the Index Owner. */
   notes: Record<string, string>;
   comments: Record<string, Comment[]>;
+  /** General messages between the Index Owners and a Control Owner, by the Control Owner's name. */
+  chat?: Record<string, Comment[]>;
   risks: RiskItem[];
   dismissed: string[];
   followUps: FollowUp[];

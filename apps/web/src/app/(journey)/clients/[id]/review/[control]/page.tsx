@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ClientShell, JMain } from "@/components/journey/shell";
-import { Field, inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
+import { Field, inputClass, JButton, JLink, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
 import { AiBox, ClosedBanner, fmtWhen, LevelPill, Modal, TierPill, useToast } from "@/components/cycle/ui";
 import { Comments } from "@/components/cycle/comments";
 import { EvidenceViewer } from "@/components/cycle/evidence-viewer";
@@ -129,6 +129,7 @@ export default function ReviewConsolePage() {
             </span>
           </div>
           <div className="flex gap-2">
+            {c.owner && <JLink href={`/messages?w=${encodeURIComponent(client.id)}&o=${encodeURIComponent(c.owner)}&c=${encodeURIComponent(c.code)}`}>Message {c.owner}</JLink>}
             <JButton disabled={!decidable} onClick={() => setReturning(true)}>
               Return to owner
             </JButton>

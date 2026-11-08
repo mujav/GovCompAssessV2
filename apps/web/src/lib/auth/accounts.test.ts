@@ -36,6 +36,8 @@ describe("accounts", () => {
     expect(canOpen("control", "/clients/demo-entity/controls/1.1.2")).toBe(true);
     expect(canOpen("control", "/clients/demo-entity/review")).toBe(false);
     expect(canOpen("control", "/messages")).toBe(true);
+    expect(canOpen("owner", "/messages")).toBe(true);
+    expect(canOpen("viewer", "/messages")).toBe(false);
     expect(canOpen("owner", "/admin/entities")).toBe(false);
     expect(canOpen("viewer", "/clients/demo-entity")).toBe(true);
     expect(canOpen("viewer", "/clients/demo-entity/analytics")).toBe(true);

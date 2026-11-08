@@ -57,13 +57,3 @@ export function useMyControls() {
     });
   }, [user, work, state.screens, platform]);
 }
-
-/** Messages for a person: follow-ups sent to them and comments on their controls by others. */
-export function messagesFor(mine: MyControl[], name: string) {
-  return mine
-    .flatMap((m) => [
-      ...m.cycle.followUps.filter((f) => f.to === name && f.control === m.c.code).map((f) => ({ id: f.id, at: f.at, from: f.by, kind: f.kind as string, text: f.text, m })),
-      ...(m.cycle.comments[m.c.code] ?? []).filter((x) => x.by !== name).map((x) => ({ id: x.id, at: x.at, from: x.by, kind: "Comment", text: x.text, m })),
-    ])
-    .sort((a, b) => b.at.localeCompare(a.at));
-}
