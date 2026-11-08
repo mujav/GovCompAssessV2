@@ -32,8 +32,9 @@ function Messages() {
   const [picked, setPicked] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [space, setSpace] = useState("all");
-  const linked = params.get("w") && params.get("o") ? convKey(params.get("w")!, params.get("o")!) : null;
-  const key = picked ?? linked ?? list[0]?.key;
+  const within = params.get("w") ?? undefined;
+  const linked = within && params.get("o") ? convKey(within, params.get("o")!) : null;
+  const key = picked ?? linked ?? (list.find((c) => c.workspaceId === within) ?? list[0])?.key;
   const open = list.find((c) => c.key === key) ?? list[0];
   const isControl = user?.role === "control";
   const workspaces = useMemo(() => [...new Map(list.map((c) => [c.workspaceId, c.workspace])).entries()], [list]);
@@ -45,7 +46,7 @@ function Messages() {
   }, [open, last, markRead]);
 
   return (
-    <AppShell search="Search messages">
+    <AppShell clientId={within} search="Search messages">
       <JMain>
         <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">Messages</h1>
         <Panel className="grid min-h-[560px] grid-cols-1 overflow-hidden p-0 md:h-[calc(100vh-200px)] md:grid-cols-[340px_minmax(0,1fr)]">

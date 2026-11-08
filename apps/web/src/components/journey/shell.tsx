@@ -87,7 +87,8 @@ function navFor(role: Role, wp: { id: string } | undefined, badges: Badges): Gro
         "WORKSPACES",
         [
           { label: "Your workspaces", icon: "grid", href: "/workplaces", exact: true },
-          { label: "Messages", icon: "cla", href: "/messages", badge: badges.messages },
+          // Carries the open workspace, so its menu stays in place on Messages.
+          { label: "Messages", icon: "cla", href: wp ? `/messages?w=${encodeURIComponent(wp.id)}` : "/messages", badge: badges.messages },
         ],
       ],
       ...workspace,
@@ -112,7 +113,7 @@ function navFor(role: Role, wp: { id: string } | undefined, badges: Badges): Gro
 }
 
 function isActive(pathname: string, item: NavItem) {
-  const href = item.href.split("#")[0];
+  const href = item.href.split(/[#?]/)[0];
   if (item.href.includes("#")) return false;
   return item.exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 }
