@@ -232,16 +232,6 @@ export function AppShell({
             <b className="block truncate">{user.name}</b>
             <span className="block truncate text-j-muted">{user.email}</span>
           </span>
-          <button
-            type="button"
-            onClick={() => {
-              signOut();
-              router.push("/login");
-            }}
-            className="cursor-pointer border-0 bg-transparent p-0 text-xs text-j-muted hover:text-j-ink"
-          >
-            Sign out
-          </button>
         </div>
       </nav>
       <div className="flex min-w-0 flex-[999_1_560px] flex-col">
@@ -260,6 +250,17 @@ export function AppShell({
           )}
           {!outside && headerExtra}
           <LanguageToggle />
+          <button
+            type="button"
+            onClick={() => {
+              signOut();
+              router.push("/login");
+            }}
+            className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-[10px] border border-j-line bg-white px-3 text-[13px] font-semibold text-j-ink hover:bg-j-canvas"
+          >
+            <Icon name="signOut" size={15} />
+            Sign out
+          </button>
         </header>
         {outside ? (
           <main className="box-border flex w-full max-w-[720px] flex-col items-start gap-3 px-8 pt-10">

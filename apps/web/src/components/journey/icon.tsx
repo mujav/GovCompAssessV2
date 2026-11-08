@@ -16,6 +16,7 @@ export const ICONS = {
   eng: "M4 7h16v13H4zM9 7V4h6v3",
   adm: "M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6",
   draft: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",
+  signOut: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9",
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3",
   switch: "M7 15l5 5 5-5M7 9l5-5 5 5",
   chevR: "M9 18l6-6-6-6",
@@ -56,7 +57,7 @@ export const ICONS = {
 export type IconName = keyof typeof ICONS;
 
 /** Icons that point along the reading direction; they mirror in right-to-left layouts. */
-const DIRECTIONAL = new Set<string>(["chevR", "chevL", "arrowR", "arrowL"]);
+const DIRECTIONAL = new Set<string>(["signOut", "chevR", "chevL", "arrowR", "arrowL"]);
 
 export function Icon({ name, d, size = 18, strokeWidth = 2, className }: { name?: IconName; d?: string; size?: number; strokeWidth?: number; className?: string }) {
   const flip = name && DIRECTIONAL.has(name) ? "rtl:-scale-x-100" : "";
