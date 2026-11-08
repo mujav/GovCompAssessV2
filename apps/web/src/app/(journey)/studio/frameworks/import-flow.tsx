@@ -38,6 +38,8 @@ import {
 } from "@/lib/engine/extract";
 import { ACCEPTED_EXTENSIONS } from "@/lib/engine/extract-sources";
 import { AiUnavailable, runAiExtraction, type AiProgress, type AiRun } from "@/lib/import/ai-import";
+import { agentPolicy } from "@/lib/cycle/platform";
+import { usePlatform } from "@/lib/cycle/use-cycle";
 import { shortHash, type ReadFile } from "@/lib/import/read-files";
 
 export const ASSESSED: Record<LevelAssessment, string> = {
@@ -202,6 +204,7 @@ function rulesResult(session: ImportSession, note?: string): Extracted {
 /** Runs the extraction for a session, shows progress, then hands the result to the review. */
 export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportSession; onAccepted: (id: string, message: string) => void; onCancel: () => void }) {
   const [result, setResult] = useState<Extracted | null>(() => (session.method === "rules" ? rulesResult(session) : null));
+  const { platform } = usePlatform();
   const [progress, setProgress] = useState<AiProgress | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -216,7 +219,12 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
     const files = session.files.filter((f) => !f.error).map((f) => f.name);
     const records = session.docs.reduce((a, d) => a + (d.kind === "text" ? d.lines.length : d.kind === "table" ? d.rows.length : d.items.length), 0);
     const sheets = session.docs.flatMap((d) => (d.kind === "table" && d.sheet ? [d.sheet] : []));
-    runAiExtraction(session.docs, { files, sheets, records }, setProgress, ctrl.signal)
+    if (!platform.ai.agents.parser) {
+      setFailed("The Standard Parser agent is off in AI settings. Turn it on there, or use the rule-based engine for documents with clear requirement codes.");
+      clearInterval(timer);
+      return;
+    }
+    runAiExtraction(session.docs, { files, sheets, records }, setProgress, ctrl.signal, agentPolicy(platform.ai, "parser"))
       .then(({ ex, run }) => setResult({ ex, method: "ai", run }))
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
@@ -230,6 +238,8 @@ export function ImportFlow({ session, onAccepted, onCancel }: { session: ImportS
       ctrl.abort();
       clearInterval(timer);
     };
+    // The settings in force when this attempt started; a later save applies to the next one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, result, failed, attempt]);
 
   if (result) return <ImportReview session={session} extracted={result} onAccepted={onAccepted} onCancel={onCancel} />;

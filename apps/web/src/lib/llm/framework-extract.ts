@@ -1,7 +1,8 @@
 // Server-only half of AI framework extraction: one structured-output call to Claude per
 // outline or page chunk. Prompts, schemas and merging live in src/lib/engine/ai-extract.ts.
 import "server-only";
-import { CLAUDE_MODEL, getClaude } from "@/lib/llm/claude";
+import { policyBlock, type AgentPolicy } from "@/lib/assessor/policy";
+import { getClaude, tierParams } from "./claude";
 import {
   buildChunkPrompt,
   buildOutlinePrompt,
@@ -20,18 +21,16 @@ export interface CallStats {
   usage: { input: number; output: number };
 }
 
-async function structured<T>(system: string, prompt: string, schema: { [key: string]: unknown }, maxTokens: number): Promise<{ data: T } & CallStats> {
+async function structured<T>(system: string, prompt: string, schema: { [key: string]: unknown }, maxTokens: number, policy: AgentPolicy): Promise<{ data: T } & CallStats> {
   const started = Date.now();
   // Streamed because a large chunk can run past the SDK's non-streaming time limit.
   const response = await getClaude()
     .beta.messages.stream({
-      model: CLAUDE_MODEL,
+      ...tierParams(policy.tier),
       max_tokens: maxTokens,
-      system,
+      system: system + policyBlock(policy),
       // Transcription with light structuring: low effort keeps a 150-page document to minutes.
       output_config: { effort: "low", format: { type: "json_schema", schema } },
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
       messages: [{ role: "user", content: prompt }],
     })
     .finalMessage();
@@ -46,12 +45,12 @@ async function structured<T>(system: string, prompt: string, schema: { [key: str
   return { data: JSON.parse(text) as T, model: response.model, ms: Date.now() - started, usage: { input: response.usage.input_tokens, output: response.usage.output_tokens } };
 }
 
-export async function runOutline(pages: SourcePage[], total: { files: string[]; pages: number }) {
-  const r = await structured<AiOutline>(OUTLINE_SYSTEM, buildOutlinePrompt(pages, total), OUTLINE_SCHEMA, 16000);
+export async function runOutline(pages: SourcePage[], total: { files: string[]; pages: number }, policy: AgentPolicy = {}) {
+  const r = await structured<AiOutline>(OUTLINE_SYSTEM, buildOutlinePrompt(pages, total), OUTLINE_SCHEMA, 16000, policy);
   return { ...r, outline: r.data };
 }
 
-export async function runChunk(outline: AiOutline, pages: SourcePage[]) {
-  const r = await structured<{ nodes: AiNode[] }>(CHUNK_SYSTEM, buildChunkPrompt(outline, pages), CHUNK_SCHEMA, 48000);
+export async function runChunk(outline: AiOutline, pages: SourcePage[], policy: AgentPolicy = {}) {
+  const r = await structured<{ nodes: AiNode[] }>(CHUNK_SYSTEM, buildChunkPrompt(outline, pages), CHUNK_SCHEMA, 48000, policy);
   return { ...r, nodes: r.data.nodes };
 }

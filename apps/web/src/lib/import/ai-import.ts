@@ -3,6 +3,7 @@
 
 import { aiToExtraction, docsToPages, mergeAiNodes, outlinePages, planChunks, type AiNode, type AiOutline, type SourcePage } from "@/lib/engine/ai-extract";
 import type { Extraction, SourceDoc } from "@/lib/engine/extract";
+import type { AgentPolicy } from "@/lib/assessor/policy";
 
 export interface AiProgress {
   stage: "outline" | "chunks" | "merge";
@@ -46,6 +47,7 @@ export async function runAiExtraction(
   ctx: { files: string[]; sheets?: string[]; records: number },
   onProgress: (p: AiProgress) => void,
   signal?: AbortSignal,
+  policy?: AgentPolicy,
 ): Promise<{ ex: Extraction; run: AiRun; outline: AiOutline }> {
   const pages: SourcePage[] = docsToPages(docs);
   if (!pages.length) throw new Error("No readable text in the files. A scanned PDF needs OCR before it can be imported.");
@@ -60,7 +62,7 @@ export async function runAiExtraction(
   };
 
   onProgress({ stage: "outline", done: 0, total: 1, nodes: 0, recent: [] });
-  const o = await call<{ outline: AiOutline }>({ step: "outline", pages: outlinePages(pages), total: { files, pages: pages.length } }, signal);
+  const o = await call<{ outline: AiOutline }>({ step: "outline", pages: outlinePages(pages), total: { files, pages: pages.length }, policy }, signal);
   tally(o);
   const outline = o.outline;
 
@@ -76,7 +78,7 @@ export async function runAiExtraction(
   const worker = async () => {
     while (next < chunks.length) {
       const i = next++;
-      const r = await call<{ nodes: AiNode[] }>({ step: "chunk", pages: chunks[i], outline }, signal);
+      const r = await call<{ nodes: AiNode[] }>({ step: "chunk", pages: chunks[i], outline, policy }, signal);
       tally(r);
       results[i] = r.nodes;
       done += 1;

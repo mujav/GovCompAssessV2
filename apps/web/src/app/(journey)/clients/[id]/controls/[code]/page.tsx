@@ -109,7 +109,7 @@ export default function ControlResponsePage() {
   const runCheck = () => {
     const files = live.flatMap((r) => ev.filesOf(r.code).filter((f) => !f.error && !ev.replacedOf(r.code).has(f.id)).map((f) => ({ id: cycle.fileSpec[f.id] ?? f.id, name: f.name, pages: f.pages.length })));
     const missing = specs.filter((s) => !s.govVerified && !filesFor(s).length && live.some((r) => r.code === s.req && r.stage !== "accepted"));
-    setCheck([...missing.map((s) => ({ ok: false, ref: s.id, text: `No file uploaded for ${s.title.toLowerCase()}.` })), ...selfCheck(files, response?.text ?? "")]);
+    setCheck([...missing.map((s) => ({ ok: false, ref: s.id, text: `No file uploaded for ${s.title.toLowerCase()}.` })), ...selfCheck(files, response?.text ?? "", ai.behavior.selfCheck)]);
   };
 
   const owner = user?.role === "control";

@@ -58,7 +58,7 @@ export default function ReviewConsolePage() {
   const response = cycle.responses[c.code];
   const files = live.flatMap((r) => ev.filesOf(r.code).filter((f) => !f.error).map((f) => ({ ...f, req: r.code, spec: cycle.fileSpec[f.id] })));
   const fileIds = Object.fromEntries(live.map((r) => [r.code, specs.filter((s) => s.req === r.code).map((s) => s.id)]));
-  const gaps = ai.agents.advisor ? responseGaps(c, response?.text ?? "", fileIds).filter((g) => !dismissed.includes(g.req)) : [];
+  const gaps = ai.agents.advisor ? responseGaps(c, response?.text ?? "", fileIds, ai.behavior.advisor.skipAccepted).filter((g) => !dismissed.includes(g.req)) : [];
   const findings = ai.agents.review ? findingsOf(c, runs).filter((f) => !dismissed.includes(`f:${f.req}`)) : [];
   // Decisions open once the owner submits and close when the control is accepted or back with its owner.
   const decidable = !closed && (c.stage === "submitted" || c.stage === "review");

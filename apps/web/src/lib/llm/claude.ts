@@ -4,6 +4,11 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 
 export const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5-5";
+export const CLAUDE_FAST_MODEL = process.env.ANTHROPIC_FAST_MODEL ?? "claude-haiku-5-5";
+
+/** Request fields for a model tier. The refusal fallback is only available on the Standard model. */
+export const tierParams = (tier: "Standard" | "Fast" = "Standard") =>
+  tier === "Fast" ? { model: CLAUDE_FAST_MODEL } : { model: CLAUDE_MODEL, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const };
 
 let client: Anthropic | null = null;
 

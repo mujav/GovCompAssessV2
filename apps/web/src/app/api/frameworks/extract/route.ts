@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { AiOutline, SourcePage } from "@/lib/engine/ai-extract";
+import { readPolicy } from "@/lib/assessor/policy";
 import { runChunk, runOutline } from "@/lib/llm/framework-extract";
 
 export const maxDuration = 300;
@@ -7,8 +8,8 @@ export const maxDuration = 300;
 const MAX_CHARS = 60000;
 
 type Body =
-  | { step: "outline"; pages: SourcePage[]; total: { files: string[]; pages: number } }
-  | { step: "chunk"; pages: SourcePage[]; outline: AiOutline };
+  | { step: "outline"; pages: SourcePage[]; total: { files: string[]; pages: number }; policy?: unknown }
+  | { step: "chunk"; pages: SourcePage[]; outline: AiOutline; policy?: unknown };
 
 // GET /api/frameworks/extract  ->  { available, model }: whether AI extraction is configured on this server.
 export async function GET() {
@@ -26,12 +27,13 @@ export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) return Response.json({ error: "AI extraction is not configured (ANTHROPIC_API_KEY is missing).", code: "no_key" }, { status: 503 });
 
   try {
+    const policy = readPolicy(body.policy);
     if (body.step === "outline") {
-      const r = await runOutline(body.pages, body.total ?? { files: [], pages: body.pages.length });
+      const r = await runOutline(body.pages, body.total ?? { files: [], pages: body.pages.length }, policy);
       return Response.json({ outline: r.outline, model: r.model, ms: r.ms, usage: r.usage });
     }
     if (body.step === "chunk" && body.outline) {
-      const r = await runChunk(body.outline, body.pages);
+      const r = await runChunk(body.outline, body.pages, policy);
       return Response.json({ nodes: r.nodes, model: r.model, ms: r.ms, usage: r.usage });
     }
     return Response.json({ error: "step must be outline or chunk" }, { status: 400 });

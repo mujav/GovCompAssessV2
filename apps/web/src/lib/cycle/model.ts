@@ -320,7 +320,7 @@ export interface AttentionItem<C extends Control = Control> {
   when: string;
 }
 
-export function attention<C extends Control>(controls: C[], today: string, t: Thresholds, returns: Record<string, number>, activity: Record<string, string> = {}): AttentionItem<C>[] {
+export function attention<C extends Control>(controls: C[], today: string, t: Thresholds, returns: Record<string, number>, activity: Record<string, string> = {}, watch?: Record<AttentionKind, boolean>): AttentionItem<C>[] {
   const out: AttentionItem<C>[] = [];
   for (const c of controls) {
     if (!c.applicable || c.stage === "accepted") continue;
@@ -335,7 +335,7 @@ export function attention<C extends Control>(controls: C[], today: string, t: Th
     else if (left <= t.atRiskDays && evPct < 0.5) out.push({ kind: "atRisk", control: c, detail: `${c.evidence.uploaded} of ${c.evidence.expected} evidence uploaded`, when: `Due in ${left} days` });
     else if (idle >= t.staleDays) out.push({ kind: "stale", control: c, detail: `Last edit ${idle} days ago`, when: `Due in ${left} days` });
   }
-  return out;
+  return watch ? out.filter((a) => watch[a.kind]) : out;
 }
 
 /* ---------- AI findings ---------- */
@@ -375,13 +375,13 @@ export function findingsOf(c: Control, runs: Record<string, { recommendation: st
 }
 
 /** Self-check hints for the Control Owner: dates, approvals, samples and page references, no criticality. */
-export function selfCheck(files: { id: string; name: string; pages: number }[], response: string): { ok: boolean; ref: string; text: string }[] {
+export function selfCheck(files: { id: string; name: string; pages: number }[], response: string, rules: { pageRefOver: number; flagDrafts: boolean; flagOldYears: boolean } = { pageRefOver: 20, flagDrafts: true, flagOldYears: true }): { ok: boolean; ref: string; text: string }[] {
   const out: { ok: boolean; ref: string; text: string }[] = [];
   let fine = 0;
   for (const f of files) {
-    if (/draft|مسودة/i.test(f.name)) out.push({ ok: false, ref: f.id, text: "No signature or approval page found; the file looks like a draft." });
-    else if (/20(1\d|2[0-4])/.test(f.name)) out.push({ ok: false, ref: f.id, text: "The file name points to an earlier year; check it covers this cycle." });
-    else if (f.pages > 20 && !new RegExp(`${f.id}\\s*·\\s*p\\.`).test(response)) out.push({ ok: false, ref: f.id, text: `${f.pages} pages and no page reference in your response.` });
+    if (rules.flagDrafts && /draft|مسودة/i.test(f.name)) out.push({ ok: false, ref: f.id, text: "No signature or approval page found; the file looks like a draft." });
+    else if (rules.flagOldYears && /20(1\d|2[0-4])/.test(f.name)) out.push({ ok: false, ref: f.id, text: "The file name points to an earlier year; check it covers this cycle." });
+    else if (f.pages > rules.pageRefOver && !new RegExp(`${f.id}\\s*·\\s*p\\.`).test(response)) out.push({ ok: false, ref: f.id, text: `${f.pages} pages and no page reference in your response.` });
     else fine++;
   }
   if (fine) out.push({ ok: true, ref: "", text: `${fine} other item${fine === 1 ? "" : "s"} look${fine === 1 ? "s" : ""} complete.` });
@@ -389,9 +389,9 @@ export function selfCheck(files: { id: string; name: string; pages: number }[], 
 }
 
 /** Response Advisor: requirements whose evidence the response never cites. */
-export function responseGaps(c: Control, response: string, evidenceIds: Record<string, string[]>) {
+export function responseGaps(c: Control, response: string, evidenceIds: Record<string, string[]>, skipAccepted = false) {
   return c.reqs
-    .filter((r) => r.status !== "na")
+    .filter((r) => r.status !== "na" && !(skipAccepted && r.stage === "accepted"))
     .filter((r) => {
       const ids = evidenceIds[r.code] ?? [];
       return ids.length > 0 && !ids.some((id) => response.includes(id));

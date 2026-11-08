@@ -5,7 +5,7 @@ import { AssessorUnavailable, EMPTY_EVIDENCE, assessInput, evidenceKey, readEvid
 import type { ClientRequirement } from "./frameworks";
 import { useJourney, useScreenState } from "./store";
 import { usePlatform } from "@/lib/cycle/use-cycle";
-import { maskPersonal } from "@/lib/cycle/platform";
+import { agentPolicy, maskPersonal } from "@/lib/cycle/platform";
 
 /** Evidence uploaded on one requirement, read in the browser. The Index Owner runs the AI assessor on demand. */
 export function useRequirementEvidence(clientId: string, frameworkId: string, r: ClientRequirement | undefined) {
@@ -27,7 +27,7 @@ export function useRequirementEvidence(clientId: string, frameworkId: string, r:
     try {
       const input = assessInput(r, ok);
       if (platform.ai.data.mask) input.evidence = input.evidence.map((d) => ({ ...d, pages: d.pages.map((p) => ({ ...p, text: maskPersonal(p.text) })) }));
-      const run = await requestAssessment(input);
+      const run = await requestAssessment(input, agentPolicy(platform.ai, "review"));
       setEv((d) => {
         d.run = { ...run, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }), fileIds: ok.map((f) => f.id) };
         delete d.error;

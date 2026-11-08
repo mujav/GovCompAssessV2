@@ -85,10 +85,10 @@ export default function DashboardPage() {
       else if (f.length && left <= 7) items.push({ level: "CRITICAL", code: x.code, title: x.title, why: `due in ${left} days · ${notMet || f.length} of ${x.total} requirements not met`, rank: 80 - left });
       else if (x.previous === "Non") items.push({ level: "HIGH", code: x.code, title: x.title, why: "non-compliant last cycle", rank: 40 - left / 10 });
     }
-    return items.sort((a, b) => b.rank - a.rank).slice(0, 3);
-  }, [live, runs, ai.agents.remediation]);
+    return items.sort((a, b) => b.rank - a.rank).slice(0, ai.behavior.remediation.maxActions);
+  }, [live, runs, ai.agents.remediation, ai.behavior.remediation.maxActions]);
 
-  const att = attention(controls, TODAY, ai.thresholds, returns, cycle.activity);
+  const att = attention(controls, TODAY, ai.thresholds, returns, cycle.activity, ai.behavior.monitor);
 
   return (
     <ClientShell workBadge={String(att.length)}>

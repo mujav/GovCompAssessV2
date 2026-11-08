@@ -3,6 +3,7 @@
 // assessor judges each criterion against those pages, and its citations are checked
 // against the text before anyone sees them. The assessor only recommends; L1 decides.
 
+import type { AgentPolicy } from "@/lib/assessor/policy";
 import type { AssessCriterion, AssessInput, AssessResult, EvidenceDoc } from "@/lib/assessor/assessor";
 import { docsToPages } from "@/lib/engine/ai-extract";
 import { readBuffer } from "@/lib/import/read-files";
@@ -153,8 +154,8 @@ export async function readEvidenceFile(file: File): Promise<EvidenceFile> {
 
 export class AssessorUnavailable extends Error {}
 
-export async function requestAssessment(input: AssessInput, signal?: AbortSignal): Promise<AssessRun> {
-  const res = await fetch("/api/assessor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input }), signal });
+export async function requestAssessment(input: AssessInput, policy?: AgentPolicy, signal?: AbortSignal): Promise<AssessRun> {
+  const res = await fetch("/api/assessor", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ input, policy }), signal });
   const json = await res.json().catch(() => ({ error: `The server answered ${res.status}.` }));
   if (res.ok) return json as AssessRun;
   if (json.code === "no_key") throw new AssessorUnavailable(json.error);

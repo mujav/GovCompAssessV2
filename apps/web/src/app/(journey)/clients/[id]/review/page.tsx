@@ -34,7 +34,7 @@ export default function ReviewHubPage() {
   const returns = useMemo(() => Object.fromEntries(Object.entries(cycle.reviews).map(([k, v]) => [k, v.returns])), [cycle.reviews]);
   const queue = controls.filter((x) => x.applicable && (x.stage === "submitted" || x.stage === "review"));
   const findings = useMemo(() => Object.fromEntries(queue.map((x) => [x.code, ai.agents.review ? findingsOf(x, runs) : []])), [queue, runs, ai.agents.review]);
-  const att = useMemo(() => attention(controls, TODAY, ai.thresholds, returns, cycle.activity), [controls, ai.thresholds, returns, cycle.activity]);
+  const att = useMemo(() => attention(controls, TODAY, ai.thresholds, returns, cycle.activity, ai.behavior.monitor), [controls, ai.behavior.monitor, ai.thresholds, returns, cycle.activity]);
   const critical = new Set(queue.filter((x) => findings[x.code]?.some((f) => f.level === "Critical")).map((x) => x.code));
   const overdue = att.filter((a) => a.kind === "overdue");
   const aiRisks = ai.agents.monitor ? suggestRisks(controls, new Set([...critical, ...overdue.map((a) => a.control.code)]), TODAY).filter((r) => !cycle.dismissed.includes(r.id)) : [];

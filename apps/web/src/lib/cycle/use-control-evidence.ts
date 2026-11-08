@@ -9,7 +9,7 @@ import { AssessorUnavailable, assessInput, evidenceKey, readEvidenceFile, reques
 import type { ClientRequirement } from "@/lib/journey/frameworks";
 import { useJourney } from "@/lib/journey/store";
 import { usePlatform } from "./use-cycle";
-import { maskPersonal } from "./platform";
+import { agentPolicy, maskPersonal } from "./platform";
 
 type Run = NonNullable<EvidenceState["run"]>;
 
@@ -53,7 +53,7 @@ export function useControlEvidence(clientId: string, fwId: string, workspace: st
       const input = assessInput(r, files);
       if (instruction?.trim()) input.implementation = `${input.implementation}\nIndex Owner instruction: ${instruction.trim()}`;
       if (platform.ai.data.mask) input.evidence = input.evidence.map((d) => ({ ...d, pages: d.pages.map((p) => ({ ...p, text: maskPersonal(p.text) })) }));
-      const run = await requestAssessment(input);
+      const run = await requestAssessment(input, agentPolicy(platform.ai, "review"));
       update((s) => {
         const st = (s.screens[key(r.code)] as EvidenceState | undefined) ?? { files: [] };
         if (st.run) s.screens[`${key(r.code)}.previous`] = st.run;

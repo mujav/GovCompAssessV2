@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { AppShell, JMain } from "@/components/journey/shell";
-import { Field, inputClass, JButton, Panel, PanelHead, Pill } from "@/components/journey/ui";
-import { Row, Switch, Table, useToast } from "@/components/cycle/ui";
+import { Icon } from "@/components/journey/icon";
+import { Field, inputClass, JButton, Panel, PanelHead, Pill, Segmented } from "@/components/journey/ui";
+import { Modal, Row, Switch, Table, useToast } from "@/components/cycle/ui";
 import { cx } from "@/components/ui";
 import { useAuth } from "@/lib/auth/store";
 import { recordAudit } from "@/lib/audit";
 import { usePlatform } from "@/lib/cycle/use-cycle";
-import { AGENTS, GUARDRAILS, type AiSettings } from "@/lib/cycle/platform";
+import { MAX_INSTRUCTION_CHARS, policyBlock } from "@/lib/assessor/policy";
+import { AGENTS, agentPolicy, DEFAULT_BEHAVIOR, DEFAULT_GUARDRAILS, type AgentKey, type AiSettings, type Guardrail } from "@/lib/cycle/platform";
 
 type Status = { configured: boolean; model: string; fastModel: string; ok?: boolean; ms?: number; error?: string };
 
-// S16 · Platform Admin: model connection, the agents and what they may do, review
+// S16 · Platform Admin: model connection, guardrails, the agents and how they behave, review
 // thresholds and data handling. Every workspace follows these settings.
 
 export default function AiSettingsPage() {
@@ -22,6 +24,8 @@ export default function AiSettingsPage() {
   const [s, setS] = useState<AiSettings>(platform.ai);
   const [status, setStatus] = useState<Status | null>(null);
   const [testing, setTesting] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [configuring, setConfiguring] = useState<AgentKey | null>(null);
   const dirty = JSON.stringify(s) !== JSON.stringify(platform.ai);
 
   useEffect(() => setS(platform.ai), [platform.ai]);
@@ -41,11 +45,21 @@ export default function AiSettingsPage() {
 
   const save = () => {
     const changed = AGENTS.filter((a) => s.agents[a.key] !== platform.ai.agents[a.key]).map((a) => `${a.name} ${s.agents[a.key] ? "on" : "off"}`);
+    const behavior = AGENTS.filter((a) => JSON.stringify(s.behavior[a.key]) !== JSON.stringify(platform.ai.behavior[a.key])).map((a) => `${a.name} behaviour changed`);
+    const rails = JSON.stringify(s.guardrails) !== JSON.stringify(platform.ai.guardrails) ? [`guardrails: ${s.guardrails.filter((g) => g.on).length} of ${s.guardrails.length} on`] : [];
     setPlatform((d) => void (d.ai = s));
-    recordAudit({ user: user?.name ?? "", role: "Platform Admin", type: "Settings", action: "Saved AI settings", after: [...changed, `confidence ${s.thresholds.confidence}%`, `cap $${s.cap}`].join(" · ") });
+    recordAudit({ user: user?.name ?? "", role: "Platform Admin", type: "Settings", action: "Saved AI settings", after: [...changed, ...behavior, ...rails, `confidence ${s.thresholds.confidence}%`, `cap $${s.cap}`].join(" · ") });
+    setEditing(null);
     say("AI settings saved");
   };
   const t = s.thresholds;
+  const setRail = (id: string, patch: Partial<Guardrail>) => setS({ ...s, guardrails: s.guardrails.map((g) => (g.id === id ? { ...g, ...patch } : g)) });
+  const addRail = () => {
+    const id = `g-${Date.now()}`;
+    setS({ ...s, guardrails: [...s.guardrails, { id, title: "", detail: "", on: true, custom: true }] });
+    setEditing(id);
+  };
+  const open = AGENTS.find((a) => a.key === configuring);
   const spendPct = Math.min(100, Math.round((s.spend / s.cap) * 100));
 
   return (
@@ -56,9 +70,12 @@ export default function AiSettingsPage() {
             <span className="text-sm text-j-muted">Platform Admin</span>
             <h1 className="m-0 text-[30px] leading-9 font-bold tracking-[-0.02em]">AI settings</h1>
           </div>
-          <JButton variant="primary" disabled={!dirty} onClick={save}>
-            Save settings
-          </JButton>
+          <span className="flex items-center gap-2">
+            {dirty && <Pill tone="warn">Unsaved changes</Pill>}
+            <JButton variant="primary" disabled={!dirty} onClick={save}>
+              Save settings
+            </JButton>
+          </span>
         </div>
 
         <div className="flex flex-wrap items-start gap-3.5">
@@ -114,34 +131,80 @@ export default function AiSettingsPage() {
               </Field>
             </div>
           </Panel>
-          <Panel className="flex min-w-0 flex-[1_1_320px] flex-col gap-2 p-[22px]">
-            <PanelHead title="Guardrails" aside={<span className="text-xs text-j-muted">fixed for the MVP</span>} />
-            {GUARDRAILS.map(([g, d]) => (
-              <span key={g} className="flex gap-2 text-sm">
-                <b className="text-[#0E5A45]">✓</b>
-                <span>
-                  <b>{g}</b>
-                  <br />
-                  <span className="text-[13px] text-j-ink-3">{d}</span>
-                </span>
-              </span>
-            ))}
-          </Panel>
         </div>
+
+        <Panel className="flex flex-col gap-1 p-[22px]">
+          <PanelHead
+            title="Guardrails"
+            aside={
+              <span className="flex gap-2">
+                <JButton size="sm" variant="ghost" onClick={() => (setS({ ...s, guardrails: DEFAULT_GUARDRAILS }), setEditing(null))}>
+                  Restore defaults
+                </JButton>
+                <JButton size="sm" variant="outline" onClick={addRail}>
+                  + Add guardrail
+                </JButton>
+              </span>
+            }
+          />
+          <p className="m-0 pb-2 text-[13px] text-j-ink-3">Guardrails you can edit are sent to the Evidence Review and Standard Parser agents on every run. They can make an agent stricter, never looser. Locked ones are built into the platform.</p>
+          {s.guardrails.map((g) => (
+            <div key={g.id} className={cx("flex flex-wrap items-center gap-3 border-t border-j-line-soft py-2.5", !g.on && "opacity-60")}>
+              <span className="flex w-11 shrink-0 justify-center">{g.locked ? <span title="Built into the platform" className="text-j-muted"><Icon name="lock" size={16} /></span> : <Switch label={g.title || "New guardrail"} on={g.on} onChange={(v) => setRail(g.id, { on: v })} />}</span>
+              {editing === g.id ? (
+                <span className="flex min-w-[260px] flex-auto flex-col gap-1.5">
+                  <input aria-label="Guardrail name" maxLength={80} value={g.title} placeholder="Name, e.g. Check the signatory" onChange={(e) => setRail(g.id, { title: e.target.value })} className={cx(inputClass, "h-9")} />
+                  <textarea aria-label="What the guardrail requires" maxLength={500} rows={2} dir="auto" value={g.detail} placeholder="What the agent must do, e.g. Name who signed each approved document" onChange={(e) => setRail(g.id, { detail: e.target.value })} className="rounded-[10px] border border-j-line p-2.5 font-sans text-sm" />
+                </span>
+              ) : (
+                <span className="min-w-[260px] flex-auto text-sm">
+                  <b>{g.title || "Unnamed guardrail"}</b>
+                  {g.locked && <span className="ms-2 text-xs text-j-muted">Always on</span>}
+                  <br />
+                  <span className="text-[13px] text-j-ink-3" dir="auto">
+                    {g.detail || "No wording yet"}
+                  </span>
+                </span>
+              )}
+              {!g.locked && (
+                <span className="flex gap-1.5">
+                  <JButton size="sm" variant="ghost" onClick={() => setEditing(editing === g.id ? null : g.id)}>
+                    {editing === g.id ? "Done" : "Edit"}
+                  </JButton>
+                  {g.custom && (
+                    <JButton size="sm" variant="ghost" onClick={() => setS({ ...s, guardrails: s.guardrails.filter((x) => x.id !== g.id) })}>
+                      Remove
+                    </JButton>
+                  )}
+                </span>
+              )}
+            </div>
+          ))}
+        </Panel>
 
         <Panel className="flex flex-col py-[18px]">
           <PanelHead className="px-[22px] pb-1" title="Agents" />
-          <Table label="Agents" min={900} cols="1.3fr 2.4fr 1fr 0.9fr 1.2fr 60px" head={["Agent", "What it does", "Who sees the output", "Model", "Runs when", "On"]}>
+          <Table label="Agents" min={1020} cols="1.3fr 2.2fr 1fr 0.95fr 1.1fr 1fr 60px" head={["Agent", "What it does", "Who sees the output", "Runs on", "Runs when", "Behaviour", "On"]}>
             {AGENTS.map((a) => (
-              <Row key={a.key} cols="1.3fr 2.4fr 1fr 0.9fr 1.2fr 60px" className={cx(!s.agents[a.key] && "opacity-60")}>
+              <Row key={a.key} cols="1.3fr 2.2fr 1fr 0.95fr 1.1fr 1fr 60px" className={cx(!s.agents[a.key] && "opacity-60")}>
                 <b>{a.name}</b>
                 <span className="text-[13px] text-j-ink-3">{a.does}</span>
                 <span>{a.who}</span>
-                <select aria-label={`Model for ${a.name}`} value={s.models[a.key]} onChange={(e) => setS({ ...s, models: { ...s.models, [a.key]: e.target.value as "Standard" | "Fast" } })} className="h-8 rounded-lg border border-j-line px-1.5 text-[13px]">
-                  <option>Standard</option>
-                  <option>Fast</option>
-                </select>
+                {a.runs === "model" ? (
+                  <select aria-label={`Model for ${a.name}`} value={s.models[a.key]} onChange={(e) => setS({ ...s, models: { ...s.models, [a.key]: e.target.value as "Standard" | "Fast" } })} className="h-8 rounded-lg border border-j-line px-1.5 text-[13px]">
+                    <option>Standard</option>
+                    <option>Fast</option>
+                  </select>
+                ) : (
+                  <span className="text-[13px] text-j-ink-3">Built-in rules</span>
+                )}
                 <span className="text-[13px]">{a.when}</span>
+                <span className="flex flex-wrap items-center gap-1.5">
+                  <JButton size="sm" variant="outline" onClick={() => setConfiguring(a.key)}>
+                    Configure
+                  </JButton>
+                  {JSON.stringify(s.behavior[a.key]) !== JSON.stringify(DEFAULT_BEHAVIOR[a.key]) && <Pill tone="cx">Customised</Pill>}
+                </span>
                 <Switch label={a.name} on={s.agents[a.key]} onChange={(v) => setS({ ...s, agents: { ...s.agents, [a.key]: v } })} />
               </Row>
             ))}
@@ -205,11 +268,108 @@ export default function AiSettingsPage() {
             <Field label="Keep AI run logs for (days)">
               <input type="number" min={1} value={s.data.keepDays} onChange={(e) => setS({ ...s, data: { ...s.data, keepDays: Number(e.target.value) } })} className={inputClass} />
             </Field>
-            {dirty && <Pill tone="warn">Unsaved changes</Pill>}
           </Panel>
         </div>
       </JMain>
+      {open && <AgentDialog agent={open} s={s} onChange={setS} onClose={() => setConfiguring(null)} />}
       {toast}
     </AppShell>
+  );
+}
+
+function Toggle({ label, hint, on, onChange }: { label: string; hint?: string; on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <span className="flex items-center justify-between gap-3 text-sm">
+      <span>
+        <b>{label}</b>
+        {hint && (
+          <>
+            <br />
+            <span className="text-xs text-j-muted">{hint}</span>
+          </>
+        )}
+      </span>
+      <Switch label={label} on={on} onChange={onChange} />
+    </span>
+  );
+}
+
+/** How one agent behaves. The change joins the page's draft and takes effect on Save settings. */
+function AgentDialog({ agent, s, onChange, onClose }: { agent: (typeof AGENTS)[number]; s: AiSettings; onChange: (v: AiSettings) => void; onClose: () => void }) {
+  const b = s.behavior;
+  const set = <K extends AgentKey>(key: K, patch: Partial<AiSettings["behavior"][K]>) => onChange({ ...s, behavior: { ...b, [key]: { ...b[key], ...patch } } });
+  const instructions = (key: "review" | "parser", hint: string) => (
+    <Field label="Instructions for this agent">
+      <textarea rows={6} dir="auto" maxLength={MAX_INSTRUCTION_CHARS} value={b[key].instructions} placeholder={hint} onChange={(e) => set(key, { instructions: e.target.value } as never)} className="rounded-xl border border-j-line p-3 font-sans text-sm font-normal" />
+    </Field>
+  );
+  const added = agent.runs === "model" ? policyBlock(agentPolicy(s, agent.key as "review" | "parser")) : "";
+  return (
+    <Modal
+      open
+      wide
+      onClose={onClose}
+      title={agent.name}
+      sub={agent.runs === "model" ? "This agent uses the AI model. What you write here is added to its instructions on every run." : "This agent runs on built-in rules and does not call the AI model, so it has options rather than written instructions."}
+      footer={
+        <>
+          <JButton variant="ghost" onClick={() => onChange({ ...s, behavior: { ...b, [agent.key]: DEFAULT_BEHAVIOR[agent.key] } })}>
+            Restore defaults
+          </JButton>
+          <JButton variant="primary" onClick={onClose}>
+            Done
+          </JButton>
+        </>
+      }
+    >
+      {agent.key === "review" && (
+        <>
+          <Field label="How strictly to judge">
+            <Segmented size="sm" label="How strictly to judge" value={b.review.strictness} onChange={(v) => set("review", { strictness: v })} options={[{ value: "balanced", label: "Balanced" }, { value: "strict", label: "Strict" }]} />
+            <span className="text-xs font-normal text-j-muted">{b.review.strictness === "strict" ? "An expectation counts as met only when the evidence states it explicitly." : "Clearly equivalent wording in the evidence can meet an expectation."}</span>
+          </Field>
+          <Field label="Write its explanations in">
+            <select value={b.review.language} onChange={(e) => set("review", { language: e.target.value as typeof b.review.language })} className={inputClass}>
+              <option value="auto">Decided by the agent</option>
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </Field>
+          {instructions("review", "e.g. For approved documents, name who signed and check the signature date falls within the reporting period.")}
+        </>
+      )}
+      {agent.key === "parser" && instructions("parser", "e.g. Keep Arabic requirement text exactly as written. Treat annexes as references, not requirements.")}
+      {agent.key === "selfCheck" && (
+        <>
+          <Field label="Ask for a page reference on files longer than (pages)">
+            <input type="number" min={1} value={b.selfCheck.pageRefOver} onChange={(e) => set("selfCheck", { pageRefOver: Math.max(1, Number(e.target.value)) })} className={inputClass} />
+          </Field>
+          <Toggle label="Flag files that look like drafts" hint="The file name says draft or مسودة" on={b.selfCheck.flagDrafts} onChange={(v) => set("selfCheck", { flagDrafts: v })} />
+          <Toggle label="Flag files from earlier years" hint="The file name points to 2024 or before" on={b.selfCheck.flagOldYears} onChange={(v) => set("selfCheck", { flagOldYears: v })} />
+        </>
+      )}
+      {agent.key === "advisor" && <Toggle label="Skip requirements already accepted" hint="Suggest references only where the requirement is still open" on={b.advisor.skipAccepted} onChange={(v) => set("advisor", { skipAccepted: v })} />}
+      {agent.key === "remediation" && (
+        <Field label="Actions shown under Act today on the dashboard">
+          <input type="number" min={1} max={20} value={b.remediation.maxActions} onChange={(e) => set("remediation", { maxActions: Math.min(20, Math.max(1, Number(e.target.value))) })} className={inputClass} />
+        </Field>
+      )}
+      {agent.key === "monitor" && (
+        <>
+          <Toggle label="Overdue controls" on={b.monitor.overdue} onChange={(v) => set("monitor", { overdue: v })} />
+          <Toggle label="Controls returned twice or more" on={b.monitor.returnedTwice} onChange={(v) => set("monitor", { returnedTwice: v })} />
+          <Toggle label="At-risk controls" hint="Deadline close and under half of the evidence uploaded" on={b.monitor.atRisk} onChange={(v) => set("monitor", { atRisk: v })} />
+          <Toggle label="Stale controls" hint="No activity for the days set under Review thresholds" on={b.monitor.stale} onChange={(v) => set("monitor", { stale: v })} />
+        </>
+      )}
+      {added && (
+        <details className="text-[13px]">
+          <summary className="cursor-pointer font-semibold">What is added to the agent&apos;s instructions</summary>
+          <pre className="m-0 mt-1.5 max-h-[220px] overflow-auto rounded-xl bg-j-canvas p-3 font-sans text-xs leading-5 whitespace-pre-wrap" dir="auto" data-no-translate>
+            {added.trim()}
+          </pre>
+        </details>
+      )}
+    </Modal>
   );
 }

@@ -246,11 +246,12 @@ export function entityMeta(p: PlatformState, entity: { id: string; sub: string; 
 
 /* ---------- Controls for any workspace ---------- */
 
-export function evidenceRuns(screens: Record<string, unknown>, clientId: string, fwId: string, codes: string[]) {
+/** AI results on a workspace's requirements; ones below the confidence set in AI settings are left out. */
+export function evidenceRuns(screens: Record<string, unknown>, clientId: string, fwId: string, codes: string[], minConfidence = 0) {
   const runs: Record<string, { recommendation: string; summary?: string }> = {};
   for (const code of codes) {
     const st = screens[evidenceKey(clientId, fwId, code)] as EvidenceState | undefined;
-    if (st?.run) runs[code] = { recommendation: st.run.recommendation, summary: st.run.summary };
+    if (st?.run && st.run.confidence * 100 >= minConfidence) runs[code] = { recommendation: st.run.recommendation, summary: st.run.summary };
   }
   return runs;
 }
@@ -350,7 +351,7 @@ export function useCycle() {
     () => controlsOf(reqs, overlay, cycle, framework?.live.requirements, meta.annex) as CycleControl[],
     [reqs, overlay, cycle, framework, meta.annex],
   );
-  const runs = useMemo(() => evidenceRuns(state.screens, client.id, fwId, reqs.map((r) => r.code)), [state.screens, client.id, fwId, reqs]);
+  const runs = useMemo(() => evidenceRuns(state.screens, client.id, fwId, reqs.map((r) => r.code), platform.ai.thresholds.confidence), [state.screens, client.id, fwId, reqs, platform.ai.thresholds.confidence]);
   // The year's cycles, as the standard sets their number; the first one not closed is in progress.
   const spec = framework?.live.cycles;
   const periods = useMemo(() => periodsOf(cycle.cycles, spec, SUBMISSION_DEADLINE, cycle), [cycle, spec]);

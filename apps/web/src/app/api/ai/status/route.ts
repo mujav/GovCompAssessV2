@@ -1,9 +1,9 @@
-import { CLAUDE_MODEL, getClaude } from "@/lib/llm/claude";
+import { CLAUDE_FAST_MODEL, CLAUDE_MODEL, getClaude } from "@/lib/llm/claude";
 
 // GET /api/ai/status  ->  { configured, model, fastModel, ok?, ms?, error? }
 // "Test connection" in AI settings: looks the model up (no tokens are spent) and times it.
 export async function GET() {
-  const fastModel = process.env.ANTHROPIC_FAST_MODEL ?? "claude-haiku-5-5";
+  const fastModel = CLAUDE_FAST_MODEL;
   if (!process.env.ANTHROPIC_API_KEY) return Response.json({ configured: false, model: CLAUDE_MODEL, fastModel });
   const started = Date.now();
   try {
